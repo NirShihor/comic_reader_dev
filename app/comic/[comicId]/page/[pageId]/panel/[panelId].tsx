@@ -6,10 +6,12 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Text } from '@/components/Themed';
 import { comics } from '@/src/data/comics';
+import { getDictionaryEntry } from '@/src/data/dictionary';
 import { Word, Sentence } from '@/src/types/comic';
 import { useAudio } from '@/src/hooks/useAudio';
 import { useVocabulary } from '@/src/hooks/useVocabulary';
 import { getImageSource } from '@/src/utils/images';
+import { getWordAudioUrl } from '@/src/utils/audio';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -79,10 +81,18 @@ export default function PanelScreen() {
     }
   }, []);
 
-  const { isPlaying, isLoading, play, stop } = useAudio({
+  const { isPlaying, isLoading, play, stop, playbackRate, setPlaybackRate } = useAudio({
     words: playingSentence?.words,
     onWordHighlight: handleWordHighlight,
   });
+
+  const cyclePlaybackRate = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const rates = [0.5, 0.75, 1.0, 1.25, 1.5];
+    const currentIndex = rates.indexOf(playbackRate);
+    const nextIndex = (currentIndex + 1) % rates.length;
+    setPlaybackRate(rates[nextIndex]);
+  };
 
   if (!comic || !page || !panel) {
     return null;
@@ -92,7 +102,12 @@ export default function PanelScreen() {
     if (currentGlobalIndex < allPanels.length - 1) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       const next = allPanels[currentGlobalIndex + 1];
-      router.replace(`/comic/${comicId}/page/${next.pageId}/panel/${next.panelId}`);
+      // If crossing to a new page, go to page view first
+      if (next.pageId !== pageId) {
+        router.replace(`/comic/${comicId}/page/${next.pageId}`);
+      } else {
+        router.replace(`/comic/${comicId}/page/${next.pageId}/panel/${next.panelId}`);
+      }
     }
   };
 
@@ -100,7 +115,12 @@ export default function PanelScreen() {
     if (currentGlobalIndex > 0) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       const prev = allPanels[currentGlobalIndex - 1];
-      router.replace(`/comic/${comicId}/page/${prev.pageId}/panel/${prev.panelId}`);
+      // If crossing to a previous page, go to page view first
+      if (prev.pageId !== pageId) {
+        router.replace(`/comic/${comicId}/page/${prev.pageId}`);
+      } else {
+        router.replace(`/comic/${comicId}/page/${prev.pageId}/panel/${prev.panelId}`);
+      }
     }
   };
 
@@ -158,8 +178,28 @@ export default function PanelScreen() {
   };
 
   const handleListenWord = async () => {
-    if (selectedWord?.audioUrl) {
+    if (!selectedWord) return;
+
+    // First check if word has its own audio URL set
+    if (selectedWord.audioUrl) {
       await play(selectedWord.audioUrl);
+      return;
+    }
+
+    // Try to find audio for the actual word form (e.g., "emocionada")
+    const wordText = selectedWord.text;
+    const wordAudioUrl = getWordAudioUrl(wordText);
+    if (wordAudioUrl) {
+      await play(wordAudioUrl);
+      return;
+    }
+
+    // Fall back to dictionary base form (e.g., "emocionado")
+    if (selectedWord.baseForm) {
+      const dictEntry = getDictionaryEntry(selectedWord.baseForm);
+      if (dictEntry?.audioUrl) {
+        await play(dictEntry.audioUrl);
+      }
     }
   };
 
@@ -269,6 +309,17 @@ export default function PanelScreen() {
                             color={isPlaying && isCurrentSentence ? '#e74c3c' : '#666'}
                           />
                         )}
+                      </Pressable>
+                      <Pressable
+                        onPress={cyclePlaybackRate}
+                        style={({ pressed }) => [
+                          styles.speedButton,
+                          pressed && styles.buttonPressed,
+                        ]}
+                      >
+                        <Text style={styles.speedButtonText}>
+                          {playbackRate}x
+                        </Text>
                       </Pressable>
                     </View>
                   </View>
@@ -422,7 +473,7 @@ const styles = StyleSheet.create({
   bubblesContent: {
     paddingHorizontal: 16,
     paddingTop: 8,
-    paddingBottom: 16,
+    paddingBottom: 40,
   },
   bubble: {
     backgroundColor: '#fff',
@@ -514,7 +565,6 @@ const styles = StyleSheet.create({
   },
   wordTextHighlighted: {
     color: '#1a1a2e',
-    fontWeight: '600',
   },
   audioButton: {
     marginLeft: 8,
@@ -524,6 +574,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  speedButton: {
+    marginLeft: 4,
+    paddingHorizontal: 8,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#e8e8e8',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  speedButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#666',
   },
   navOverlay: {
     position: 'absolute',

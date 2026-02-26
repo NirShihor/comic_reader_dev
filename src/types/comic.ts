@@ -62,6 +62,13 @@ export interface SavedWord {
   reviewState: 'new' | 'learning' | 'mastered';
 }
 
+export interface DictionaryEntry {
+  baseForm: string;
+  meaning: string;
+  partOfSpeech?: 'noun' | 'verb' | 'adjective' | 'adverb' | 'pronoun' | 'preposition' | 'conjunction' | 'interjection' | 'article';
+  audioUrl?: string;
+}
+
 export interface ReadingProgress {
   comicId: string;
   pageNumber: number;

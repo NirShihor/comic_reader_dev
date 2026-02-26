@@ -1,6 +1,6 @@
 import { StyleSheet, Pressable, Image, View, Dimensions, StatusBar, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -18,10 +18,36 @@ export default function PageScreen() {
   const { comicId, pageId } = useLocalSearchParams<{ comicId: string; pageId: string }>();
   const insets = useSafeAreaInsets();
   const { saveProgress } = useReadingProgress();
+  const [imageBounds, setImageBounds] = useState({ x: 0, y: 0, width: SCREEN_WIDTH, height: SCREEN_HEIGHT });
 
   const comic = comics.find((c) => c.id === comicId);
   const page = comic?.pages.find((p) => p.id === pageId);
   const currentPageIndex = comic?.pages.findIndex((p) => p.id === pageId) ?? 0;
+
+  // Calculate actual image bounds when image loads (for resizeMode="contain")
+  const handleImageLoad = (event: { nativeEvent: { source: { width: number; height: number } } }) => {
+    const { width: imgWidth, height: imgHeight } = event.nativeEvent.source;
+    const imageAspect = imgWidth / imgHeight;
+    const screenAspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+    let renderedWidth, renderedHeight, offsetX, offsetY;
+
+    if (imageAspect > screenAspect) {
+      // Image is wider than screen - letterbox top/bottom
+      renderedWidth = SCREEN_WIDTH;
+      renderedHeight = SCREEN_WIDTH / imageAspect;
+      offsetX = 0;
+      offsetY = (SCREEN_HEIGHT - renderedHeight) / 2;
+    } else {
+      // Image is taller than screen - letterbox left/right
+      renderedHeight = SCREEN_HEIGHT;
+      renderedWidth = SCREEN_HEIGHT * imageAspect;
+      offsetX = (SCREEN_WIDTH - renderedWidth) / 2;
+      offsetY = 0;
+    }
+
+    setImageBounds({ x: offsetX, y: offsetY, width: renderedWidth, height: renderedHeight });
+  };
 
   // Save reading progress when page is viewed
   useEffect(() => {
@@ -64,6 +90,7 @@ export default function PageScreen() {
         source={getImageSource(page.masterImage)}
         style={styles.masterImage}
         resizeMode="contain"
+        onLoad={handleImageLoad}
       />
 
       {/* Panel tap zones - absolute positioned over image */}
@@ -74,10 +101,10 @@ export default function PageScreen() {
           style={[
             styles.panelTapZone,
             {
-              left: panel.tapZoneX * SCREEN_WIDTH,
-              top: panel.tapZoneY * SCREEN_HEIGHT,
-              width: panel.tapZoneWidth * SCREEN_WIDTH,
-              height: panel.tapZoneHeight * SCREEN_HEIGHT,
+              left: imageBounds.x + (panel.tapZoneX * imageBounds.width),
+              top: imageBounds.y + (panel.tapZoneY * imageBounds.height),
+              width: panel.tapZoneWidth * imageBounds.width,
+              height: panel.tapZoneHeight * imageBounds.height,
             },
             DEBUG_TAP_ZONES && styles.debugBorder,
           ]}

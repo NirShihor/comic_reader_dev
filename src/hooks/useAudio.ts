@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAudioPlayer, AudioPlayer } from 'expo-audio';
+import { useAudioPlayer } from 'expo-audio';
 import { Word } from '../types/comic';
+import { getAudioSource, isLocalAudio, isWordAudio, isDictionaryAudio } from '../utils/audio';
 
 interface UseAudioOptions {
   words?: Word[];
@@ -14,6 +15,8 @@ interface UseAudioReturn {
   play: (audioUrl: string) => Promise<void>;
   stop: () => Promise<void>;
   error: string | null;
+  playbackRate: number;
+  setPlaybackRate: (rate: number) => void;
 }
 
 export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
@@ -23,17 +26,31 @@ export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
   const [currentWordIndex, setCurrentWordIndex] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [audioSource, setAudioSource] = useState<string | null>(null);
+  const [playbackRate, setPlaybackRateState] = useState(1.0);
 
   const highlightIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const wordsRef = useRef<Word[] | undefined>(words);
+  const playbackRateRef = useRef(1.0);
 
-  // Keep words ref updated
+  // Keep refs updated
   useEffect(() => {
     wordsRef.current = words;
   }, [words]);
 
-  // Create audio player
-  const player = useAudioPlayer(audioSource ? { uri: audioSource } : null);
+  useEffect(() => {
+    playbackRateRef.current = playbackRate;
+  }, [playbackRate]);
+
+  // Create audio player - getAudioSource returns require() result or {uri: string}
+  const source = audioSource ? getAudioSource(audioSource) : null;
+  const player = useAudioPlayer(source);
+
+  const setPlaybackRate = useCallback((rate: number) => {
+    setPlaybackRateState(rate);
+    if (player && player.setPlaybackRate) {
+      player.setPlaybackRate(rate);
+    }
+  }, [player]);
 
   // Clean up interval on unmount
   useEffect(() => {
@@ -49,78 +66,67 @@ export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
     onWordHighlight?.(currentWordIndex);
   }, [currentWordIndex, onWordHighlight]);
 
-  // Handle player status changes
+  // Monitor player state
   useEffect(() => {
-    if (player) {
-      if (player.playing) {
-        setIsPlaying(true);
-        setIsLoading(false);
-      } else if (!player.playing && isPlaying) {
-        // Playback finished or stopped
-        setIsPlaying(false);
-        setCurrentWordIndex(null);
-        if (highlightIntervalRef.current) {
-          clearInterval(highlightIntervalRef.current);
-          highlightIntervalRef.current = null;
+    if (!player) return;
+
+    const interval = setInterval(() => {
+      // Check if playback finished
+      if (isPlaying && !player.playing && player.duration > 0) {
+        const atEnd = player.currentTime >= player.duration - 0.1;
+        if (atEnd) {
+          setIsPlaying(false);
+          setCurrentWordIndex(null);
+          if (highlightIntervalRef.current) {
+            clearInterval(highlightIntervalRef.current);
+            highlightIntervalRef.current = null;
+          }
         }
       }
-    }
-  }, [player?.playing]);
+    }, 100);
 
-  const simulateHighlighting = useCallback(() => {
+    return () => clearInterval(interval);
+  }, [player, isPlaying]);
+
+  const startHighlighting = useCallback((durationMs: number) => {
     const currentWords = wordsRef.current;
     if (!currentWords || currentWords.length === 0) return;
 
-    setIsPlaying(true);
-    setIsLoading(false);
-    const wordDuration = 400; // 400ms per word for demo
-    let index = 0;
+    if (highlightIntervalRef.current) {
+      clearInterval(highlightIntervalRef.current);
+    }
+
+    const hasTimingData = currentWords.some(w => w.startTimeMs !== undefined);
     setCurrentWordIndex(0);
 
-    highlightIntervalRef.current = setInterval(() => {
-      index++;
-      if (index < currentWords.length) {
-        setCurrentWordIndex(index);
-      } else {
-        if (highlightIntervalRef.current) {
-          clearInterval(highlightIntervalRef.current);
-          highlightIntervalRef.current = null;
-        }
-        setCurrentWordIndex(null);
-        setIsPlaying(false);
-      }
-    }, wordDuration);
-  }, []);
-
-  const highlightWordsWithTiming = useCallback((durationMs: number) => {
-    const currentWords = wordsRef.current;
-    if (!currentWords || currentWords.length === 0) return;
-
-    // Check if words have timing data
-    const hasTimingData = currentWords.some(w => w.startTimeMs !== undefined);
-
-    if (hasTimingData) {
-      // Use actual timing data for highlighting
+    if (hasTimingData && player) {
       highlightIntervalRef.current = setInterval(() => {
-        if (player && player.playing) {
-          const currentPosition = player.currentTime * 1000; // Convert to ms
+        if (!player.playing) return;
+        const currentPosition = player.currentTime * 1000;
 
-          // Find which word should be highlighted
-          const wordIndex = currentWords.findIndex((word, idx) => {
-            const start = word.startTimeMs ?? 0;
-            const end = word.endTimeMs ?? (currentWords[idx + 1]?.startTimeMs ?? Infinity);
-            return currentPosition >= start && currentPosition < end;
-          });
+        let wordIndex = currentWords.findIndex((word, idx) => {
+          const start = word.startTimeMs ?? 0;
+          const end = word.endTimeMs ?? (currentWords[idx + 1]?.startTimeMs ?? Infinity);
+          return currentPosition >= start && currentPosition < end;
+        });
 
-          setCurrentWordIndex(wordIndex >= 0 ? wordIndex : null);
+        if (wordIndex < 0) {
+          for (let i = currentWords.length - 1; i >= 0; i--) {
+            if (currentPosition >= (currentWords[i].startTimeMs ?? 0)) {
+              wordIndex = i;
+              break;
+            }
+          }
         }
-      }, 50); // Check every 50ms for smooth highlighting
-    } else {
-      // Fallback: highlight words sequentially based on audio duration
-      const wordDuration = durationMs / currentWords.length;
 
+        if (wordIndex >= 0) {
+          setCurrentWordIndex(wordIndex);
+        }
+      }, 50);
+    } else {
+      const adjustedDuration = durationMs / playbackRateRef.current;
+      const wordDuration = adjustedDuration / currentWords.length;
       let index = 0;
-      setCurrentWordIndex(0);
 
       highlightIntervalRef.current = setInterval(() => {
         index++;
@@ -139,43 +145,74 @@ export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
   const play = useCallback(async (audioUrl: string) => {
     try {
       setError(null);
-      setIsLoading(true);
 
-      // Clear any existing highlighting
       if (highlightIntervalRef.current) {
         clearInterval(highlightIntervalRef.current);
         highlightIntervalRef.current = null;
       }
 
-      // If no valid URL, simulate playback
-      if (!audioUrl || audioUrl === '' || !audioUrl.startsWith('http')) {
-        simulateHighlighting();
+      if (!audioUrl || audioUrl === '') {
         return;
       }
 
-      // Set the audio source - this will trigger the player to load
-      setAudioSource(audioUrl);
+      const isLocal = isLocalAudio(audioUrl);
+      const isWord = isWordAudio(audioUrl);
+      const isDict = isDictionaryAudio(audioUrl);
+      const isRemote = audioUrl.startsWith('http');
 
-      // Start playback
-      if (player) {
-        player.play();
-
-        // Start word highlighting
-        // Estimate duration as 2 seconds if we can't get it
-        const duration = player.duration ? player.duration * 1000 : 2000;
-        highlightWordsWithTiming(duration);
+      if (!isLocal && !isWord && !isDict && !isRemote) {
+        return;
       }
+
+      setIsLoading(true);
+
+      // If same source, replay from beginning
+      if (audioSource === audioUrl && player) {
+        player.seekTo(0);
+        if (player.setPlaybackRate) {
+          player.setPlaybackRate(playbackRateRef.current);
+        }
+        player.play();
+        setIsPlaying(true);
+        setIsLoading(false);
+        const duration = player.duration ? player.duration * 1000 : 4500;
+        startHighlighting(duration);
+        return;
+      }
+
+      // Set new source - this triggers useAudioPlayer to load new audio
+      setAudioSource(audioUrl);
 
     } catch (e) {
       setIsLoading(false);
       setIsPlaying(false);
       setError(e instanceof Error ? e.message : 'Failed to play audio');
       console.log('Audio playback error:', e);
-
-      // Fallback to simulation
-      simulateHighlighting();
     }
-  }, [player, simulateHighlighting, highlightWordsWithTiming]);
+  }, [player, audioSource, startHighlighting]);
+
+  // When player changes (new source loaded), start playback
+  useEffect(() => {
+    if (!player || !audioSource || !isLoading) return;
+
+    // Wait for player to be ready (has duration)
+    const checkAndPlay = () => {
+      if (player.duration > 0) {
+        if (player.setPlaybackRate) {
+          player.setPlaybackRate(playbackRateRef.current);
+        }
+        player.play();
+        setIsPlaying(true);
+        setIsLoading(false);
+        startHighlighting(player.duration * 1000);
+      } else {
+        // Not ready yet, check again
+        setTimeout(checkAndPlay, 50);
+      }
+    };
+
+    checkAndPlay();
+  }, [player, audioSource, isLoading, startHighlighting]);
 
   const stop = useCallback(async () => {
     if (highlightIntervalRef.current) {
@@ -190,7 +227,6 @@ export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
 
     setIsPlaying(false);
     setCurrentWordIndex(null);
-    setAudioSource(null);
   }, [player]);
 
   return {
@@ -200,5 +236,7 @@ export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
     play,
     stop,
     error,
+    playbackRate,
+    setPlaybackRate,
   };
 }
