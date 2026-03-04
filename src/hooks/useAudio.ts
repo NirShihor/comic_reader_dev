@@ -172,11 +172,20 @@ export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
         if (player.setPlaybackRate) {
           player.setPlaybackRate(playbackRateRef.current);
         }
+        // Dictionary/word audio is quieter, boost volume by 50%
+        if (isDictionaryAudio(audioUrl) || isWordAudio(audioUrl)) {
+          player.volume = 2.0;
+        } else {
+          player.volume = 1.0;
+        }
         player.play();
         setIsPlaying(true);
         setIsLoading(false);
         const duration = player.duration ? player.duration * 1000 : 4500;
-        startHighlighting(duration);
+        // Delay to ensure player.playing state has updated
+        setTimeout(() => {
+          startHighlighting(duration);
+        }, 100);
         return;
       }
 
@@ -200,6 +209,12 @@ export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
       if (player.duration > 0) {
         if (player.setPlaybackRate) {
           player.setPlaybackRate(playbackRateRef.current);
+        }
+        // Dictionary/word audio is quieter, boost volume by 50%
+        if (isDictionaryAudio(audioSource) || isWordAudio(audioSource)) {
+          player.volume = 2.0;
+        } else {
+          player.volume = 1.0;
         }
         player.play();
         setIsPlaying(true);

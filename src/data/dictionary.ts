@@ -61,6 +61,72 @@ export const dictionary: Record<string, DictionaryEntry> = {
     partOfSpeech: 'verb',
     audioUrl: 'dict:encontrar',
   },
+  'tener': {
+    baseForm: 'tener',
+    meaning: 'to have',
+    partOfSpeech: 'verb',
+    audioUrl: 'dict:tener',
+  },
+  'venir': {
+    baseForm: 'venir',
+    meaning: 'to come',
+    partOfSpeech: 'verb',
+    audioUrl: 'dict:venir',
+  },
+  'perderse': {
+    baseForm: 'perderse',
+    meaning: 'to get lost',
+    partOfSpeech: 'verb',
+    audioUrl: 'dict:perderse',
+  },
+  'poder': {
+    baseForm: 'poder',
+    meaning: 'to be able, can',
+    partOfSpeech: 'verb',
+    audioUrl: 'dict:poder',
+  },
+  'ayudar': {
+    baseForm: 'ayudar',
+    meaning: 'to help',
+    partOfSpeech: 'verb',
+    audioUrl: 'dict:ayudar',
+  },
+  'hablar': {
+    baseForm: 'hablar',
+    meaning: 'to speak',
+    partOfSpeech: 'verb',
+    audioUrl: 'dict:hablar',
+  },
+  'aprender': {
+    baseForm: 'aprender',
+    meaning: 'to learn',
+    partOfSpeech: 'verb',
+    audioUrl: 'dict:aprender',
+  },
+  'preocuparse': {
+    baseForm: 'preocuparse',
+    meaning: 'to worry',
+    partOfSpeech: 'verb',
+    audioUrl: 'dict:preocuparse',
+  },
+  'ir': {
+    baseForm: 'ir',
+    meaning: 'to go',
+    partOfSpeech: 'verb',
+    audioUrl: 'dict:ir',
+  },
+  'pasar': {
+    baseForm: 'pasar',
+    meaning: 'to happen, to pass',
+    partOfSpeech: 'verb',
+    audioUrl: 'dict:pasar',
+  },
+  'tomar': {
+    baseForm: 'tomar',
+    meaning: 'to take',
+    partOfSpeech: 'verb',
+    audioUrl: 'dict:tomar',
+  },
 
   // Nouns
   'apartamento': {
@@ -74,6 +140,12 @@ export const dictionary: Record<string, DictionaryEntry> = {
     meaning: 'neighbor',
     partOfSpeech: 'noun',
     audioUrl: 'dict:vecino',
+  },
+  'visitante': {
+    baseForm: 'visitante',
+    meaning: 'visitor',
+    partOfSpeech: 'noun',
+    audioUrl: 'dict:visitante',
   },
   'gusto': {
     baseForm: 'gusto',
@@ -116,6 +188,60 @@ export const dictionary: Record<string, DictionaryEntry> = {
     meaning: 'time, weather',
     partOfSpeech: 'noun',
     audioUrl: 'dict:tiempo',
+  },
+  'tarde': {
+    baseForm: 'tarde',
+    meaning: 'afternoon, late',
+    partOfSpeech: 'noun',
+    audioUrl: 'dict:tarde',
+  },
+  'noche': {
+    baseForm: 'noche',
+    meaning: 'night',
+    partOfSpeech: 'noun',
+    audioUrl: 'dict:noche',
+  },
+  'miedo': {
+    baseForm: 'miedo',
+    meaning: 'fear',
+    partOfSpeech: 'noun',
+    audioUrl: 'dict:miedo',
+  },
+  'planeta': {
+    baseForm: 'planeta',
+    meaning: 'planet',
+    partOfSpeech: 'noun',
+    audioUrl: 'dict:planeta',
+  },
+  'accidente': {
+    baseForm: 'accidente',
+    meaning: 'accident',
+    partOfSpeech: 'noun',
+    audioUrl: 'dict:accidente',
+  },
+  'casa': {
+    baseForm: 'casa',
+    meaning: 'house, home',
+    partOfSpeech: 'noun',
+    audioUrl: 'dict:casa',
+  },
+  'control': {
+    baseForm: 'control',
+    meaning: 'control',
+    partOfSpeech: 'noun',
+    audioUrl: 'dict:control',
+  },
+  'sueño': {
+    baseForm: 'sueño',
+    meaning: 'dream, sleep',
+    partOfSpeech: 'noun',
+    audioUrl: 'dict:sueño',
+  },
+  'español': {
+    baseForm: 'español',
+    meaning: 'Spanish (language)',
+    partOfSpeech: 'noun',
+    audioUrl: 'dict:español',
   },
 
   // Adjectives
@@ -167,6 +293,24 @@ export const dictionary: Record<string, DictionaryEntry> = {
     partOfSpeech: 'adjective',
     audioUrl: 'dict:justo',
   },
+  'solo': {
+    baseForm: 'solo',
+    meaning: 'only, alone',
+    partOfSpeech: 'adjective',
+    audioUrl: 'dict:solo',
+  },
+  'poco': {
+    baseForm: 'poco',
+    meaning: 'little, few',
+    partOfSpeech: 'adjective',
+    audioUrl: 'dict:poco',
+  },
+  'claro': {
+    baseForm: 'claro',
+    meaning: 'clear, of course',
+    partOfSpeech: 'adjective',
+    audioUrl: 'dict:claro',
+  },
 
   // Adverbs
   'muy': {
@@ -211,6 +355,18 @@ export const dictionary: Record<string, DictionaryEntry> = {
     partOfSpeech: 'adverb',
     audioUrl: 'dict:súper',
   },
+  'aquí': {
+    baseForm: 'aquí',
+    meaning: 'here',
+    partOfSpeech: 'adverb',
+    audioUrl: 'dict:aquí',
+  },
+  'no': {
+    baseForm: 'no',
+    meaning: 'no, not',
+    partOfSpeech: 'adverb',
+    audioUrl: 'dict:no',
+  },
 
   // Pronouns
   'yo': {
@@ -243,6 +399,24 @@ export const dictionary: Record<string, DictionaryEntry> = {
     partOfSpeech: 'pronoun',
     audioUrl: 'dict:lo',
   },
+  'qué': {
+    baseForm: 'qué',
+    meaning: 'what (interrogative)',
+    partOfSpeech: 'pronoun',
+    audioUrl: 'dict:qué',
+  },
+  'eso': {
+    baseForm: 'eso',
+    meaning: 'that (demonstrative)',
+    partOfSpeech: 'pronoun',
+    audioUrl: 'dict:eso',
+  },
+  'quién': {
+    baseForm: 'quién',
+    meaning: 'who (interrogative)',
+    partOfSpeech: 'pronoun',
+    audioUrl: 'dict:quién',
+  },
 
   // Prepositions
   'a': {
@@ -269,6 +443,12 @@ export const dictionary: Record<string, DictionaryEntry> = {
     partOfSpeech: 'preposition',
     audioUrl: 'dict:al',
   },
+  'por': {
+    baseForm: 'por',
+    meaning: 'for, by, because of',
+    partOfSpeech: 'preposition',
+    audioUrl: 'dict:por',
+  },
 
   // Articles
   'la': {
@@ -276,6 +456,18 @@ export const dictionary: Record<string, DictionaryEntry> = {
     meaning: 'the (feminine)',
     partOfSpeech: 'article',
     audioUrl: 'dict:la',
+  },
+  'el': {
+    baseForm: 'el',
+    meaning: 'the (masculine)',
+    partOfSpeech: 'article',
+    audioUrl: 'dict:el',
+  },
+  'un': {
+    baseForm: 'un',
+    meaning: 'a, an (masculine)',
+    partOfSpeech: 'article',
+    audioUrl: 'dict:un',
   },
 
   // Possessives / Determiners
@@ -330,6 +522,12 @@ export const dictionary: Record<string, DictionaryEntry> = {
     meaning: 'thank you',
     partOfSpeech: 'interjection',
     audioUrl: 'dict:gracias',
+  },
+  'oh': {
+    baseForm: 'oh',
+    meaning: 'oh (interjection)',
+    partOfSpeech: 'interjection',
+    audioUrl: 'dict:oh',
   },
 };
 

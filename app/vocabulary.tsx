@@ -5,14 +5,27 @@ import { Text } from '@/components/Themed';
 import { useVocabulary } from '@/src/hooks/useVocabulary';
 import { useAudio } from '@/src/hooks/useAudio';
 import { SavedWord } from '@/src/types/comic';
+import { getWordAudioUrl, hasDictionaryAudio } from '@/src/utils/audio';
 
 export default function VocabularyScreen() {
   const { savedWords, isLoading, removeWord, clearAll } = useVocabulary();
   const { play } = useAudio();
 
-  const handlePlayWord = async (audioUrl?: string) => {
-    if (audioUrl) {
-      await play(audioUrl);
+  const handlePlayWord = async (wordText: string, baseForm?: string) => {
+    // Try word audio first
+    const wordAudioUrl = getWordAudioUrl(wordText);
+    console.log('handlePlayWord:', { wordText, baseForm, wordAudioUrl });
+    if (wordAudioUrl) {
+      console.log('Playing word audio:', wordAudioUrl);
+      await play(wordAudioUrl);
+      return;
+    }
+    // Fall back to dictionary audio using baseForm
+    if (baseForm && hasDictionaryAudio(baseForm)) {
+      console.log('Playing dict audio:', `dict:${baseForm}`);
+      await play(`dict:${baseForm}`);
+    } else {
+      console.log('No audio found for:', wordText, baseForm);
     }
   };
 
@@ -66,7 +79,7 @@ export default function VocabularyScreen() {
       <View style={styles.cardActions}>
         <Pressable
           style={styles.playButton}
-          onPress={() => handlePlayWord(item.word.audioUrl)}
+          onPress={() => handlePlayWord(item.word.text, item.word.baseForm)}
         >
           <Ionicons name="volume-medium" size={22} color="#1a1a2e" />
         </Pressable>
