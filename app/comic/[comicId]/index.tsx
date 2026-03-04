@@ -77,7 +77,7 @@ export default function ComicOverviewScreen() {
               </Pressable>
             </Link>
             {progress.pageNumber > 1 && (
-              <Link href={`/comic/${comicId}/reader`} asChild>
+              <Link href={`/comic/${comicId}/reader?startOver=true`} asChild>
                 <Pressable style={styles.restartButton}>
                   <Text style={styles.restartButtonText}>Start Over</Text>
                 </Pressable>
