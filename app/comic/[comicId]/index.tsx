@@ -69,7 +69,7 @@ export default function ComicOverviewScreen() {
       <View style={styles.buttonContainer}>
         {progress ? (
           <>
-            <Link href={`/comic/${comicId}/page/${progress.pageId}`} asChild>
+            <Link href={`/comic/${comicId}/reader`} asChild>
               <Pressable style={styles.startButton}>
                 <Text style={styles.startButtonText}>
                   Continue from Page {progress.pageNumber}
@@ -77,7 +77,7 @@ export default function ComicOverviewScreen() {
               </Pressable>
             </Link>
             {progress.pageNumber > 1 && (
-              <Link href={`/comic/${comicId}/page/${comic.pages[0]?.id}`} asChild>
+              <Link href={`/comic/${comicId}/reader`} asChild>
                 <Pressable style={styles.restartButton}>
                   <Text style={styles.restartButtonText}>Start Over</Text>
                 </Pressable>
@@ -85,7 +85,7 @@ export default function ComicOverviewScreen() {
             )}
           </>
         ) : (
-          <Link href={`/comic/${comicId}/page/${comic.pages[0]?.id}`} asChild>
+          <Link href={`/comic/${comicId}/reader`} asChild>
             <Pressable style={styles.startButton}>
               <Text style={styles.startButtonText}>Start Reading</Text>
             </Pressable>

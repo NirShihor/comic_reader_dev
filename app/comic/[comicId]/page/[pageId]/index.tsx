@@ -125,8 +125,9 @@ export default function PageScreen() {
           <Ionicons name="close" size={24} color="#fff" />
         </TouchableOpacity>
 
-        <View style={styles.rightControls}>
-          <View style={styles.pageIndicator}>
+        {/* Centered page indicator */}
+        <View style={styles.pageIndicator} pointerEvents="box-none">
+          <View style={styles.pageIndicatorInner}>
             <TouchableOpacity
               onPress={goToPrevPage}
               style={[
@@ -157,7 +158,9 @@ export default function PageScreen() {
               <Ionicons name="chevron-forward" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
+        </View>
 
+        <View style={styles.rightControls}>
           <TouchableOpacity
             onPress={() => router.push('/vocabulary')}
             style={styles.navButton}
@@ -248,6 +251,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  pageIndicator: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   navButton: {
     width: 40,
     height: 40,
@@ -256,7 +267,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  pageIndicator: {
+  pageIndicatorInner: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',

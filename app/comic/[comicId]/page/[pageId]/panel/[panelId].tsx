@@ -333,7 +333,7 @@ export default function PanelScreen() {
         ))}
       </ScrollView>
 
-      {/* Navigation overlay */}
+      {/* Navigation overlay - side buttons */}
       <View style={[styles.navOverlay, { top: insets.top + 10 }]}>
         <Pressable
           onPress={() => router.back()}
@@ -343,36 +343,6 @@ export default function PanelScreen() {
         </Pressable>
 
         <View style={styles.rightControls}>
-          <View style={styles.panelIndicator}>
-            <Pressable
-              onPress={goToPrevPanel}
-              style={({ pressed }) => [
-                styles.arrowButton,
-                currentGlobalIndex === 0 && styles.arrowDisabled,
-                pressed && currentGlobalIndex !== 0 && styles.buttonPressed,
-              ]}
-              disabled={currentGlobalIndex === 0}
-            >
-              <Ionicons name="chevron-back" size={20} color="#fff" />
-            </Pressable>
-
-            <Text style={styles.panelNumberText}>
-              {currentGlobalIndex + 1}/{allPanels.length}
-            </Text>
-
-            <Pressable
-              onPress={goToNextPanel}
-              style={({ pressed }) => [
-                styles.arrowButton,
-                currentGlobalIndex === allPanels.length - 1 && styles.arrowDisabled,
-                pressed && currentGlobalIndex !== allPanels.length - 1 && styles.buttonPressed,
-              ]}
-              disabled={currentGlobalIndex === allPanels.length - 1}
-            >
-              <Ionicons name="chevron-forward" size={20} color="#fff" />
-            </Pressable>
-          </View>
-
           <Pressable
             onPress={() => router.push('/vocabulary')}
             style={({ pressed }) => [styles.navButton, pressed && styles.buttonPressed]}
@@ -385,6 +355,39 @@ export default function PanelScreen() {
             style={({ pressed }) => [styles.navButton, pressed && styles.buttonPressed]}
           >
             <Ionicons name="settings-outline" size={20} color="#fff" />
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Centered panel indicator */}
+      <View style={[styles.centerIndicator, { top: insets.top + 10 }]} pointerEvents="box-none">
+        <View style={styles.panelIndicator}>
+          <Pressable
+            onPress={goToPrevPanel}
+            style={({ pressed }) => [
+              styles.arrowButton,
+              currentGlobalIndex === 0 && styles.arrowDisabled,
+              pressed && currentGlobalIndex !== 0 && styles.buttonPressed,
+            ]}
+            disabled={currentGlobalIndex === 0}
+          >
+            <Ionicons name="chevron-back" size={20} color="#fff" />
+          </Pressable>
+
+          <Text style={styles.panelNumberText}>
+            {currentGlobalIndex + 1}/{allPanels.length}
+          </Text>
+
+          <Pressable
+            onPress={goToNextPanel}
+            style={({ pressed }) => [
+              styles.arrowButton,
+              currentGlobalIndex === allPanels.length - 1 && styles.arrowDisabled,
+              pressed && currentGlobalIndex !== allPanels.length - 1 && styles.buttonPressed,
+            ]}
+            disabled={currentGlobalIndex === allPanels.length - 1}
+          >
+            <Ionicons name="chevron-forward" size={20} color="#fff" />
           </Pressable>
         </View>
       </View>
@@ -596,6 +599,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    zIndex: 100,
+    pointerEvents: 'box-none',
+  },
+  centerIndicator: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 101,
   },
   rightControls: {
     flexDirection: 'row',
