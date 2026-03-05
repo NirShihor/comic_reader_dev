@@ -16,10 +16,11 @@ import { getWordAudioUrl } from '@/src/utils/audio';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function PanelScreen() {
-  const { comicId, pageId, panelId } = useLocalSearchParams<{
+  const { comicId, pageId, panelId, highlightWord } = useLocalSearchParams<{
     comicId: string;
     pageId: string;
     panelId: string;
+    highlightWord?: string;
   }>();
   const insets = useSafeAreaInsets();
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
@@ -250,15 +251,20 @@ export default function PanelScreen() {
                   <View style={styles.sentenceContainer}>
                     <View style={styles.wordsContainer}>
                       {sentence.words.map((word, index) => {
-                        const isHighlighted = isCurrentSentence && highlightedWordIndex === index;
+                        const isAudioHighlighted = isCurrentSentence && highlightedWordIndex === index;
                         const isSaved = isWordSaved(word.id);
+                        // Check if this word matches the highlightWord from quiz context
+                        const normalizedWordText = word.text.toLowerCase().replace(/[¿?¡!.,]/g, '');
+                        const normalizedHighlight = highlightWord?.toLowerCase().replace(/[¿?¡!.,]/g, '') || '';
+                        const isContextHighlighted = highlightWord && normalizedWordText.includes(normalizedHighlight);
                         return (
                           <Pressable
                             key={word.id}
                             onPress={() => handleWordPress(word)}
                             style={({ pressed }) => [
                               styles.wordButton,
-                              isHighlighted && styles.wordHighlighted,
+                              isContextHighlighted && styles.wordContextHighlighted,
+                              isAudioHighlighted && styles.wordHighlighted,
                               isSaved && styles.wordSaved,
                               pressed && styles.wordPressed,
                             ]}
@@ -266,7 +272,8 @@ export default function PanelScreen() {
                             <Text
                               style={[
                                 styles.wordText,
-                                isHighlighted && styles.wordTextHighlighted,
+                                isAudioHighlighted && styles.wordTextHighlighted,
+                                isContextHighlighted && styles.wordTextContextHighlighted,
                               ]}
                             >
                               {word.text}
@@ -557,6 +564,11 @@ const styles = StyleSheet.create({
   wordHighlighted: {
     backgroundColor: '#ffeaa7',
   },
+  wordContextHighlighted: {
+    backgroundColor: '#a8e6cf',
+    borderRadius: 6,
+    paddingHorizontal: 4,
+  },
   wordSaved: {
     borderBottomWidth: 2,
     borderBottomColor: '#3498db',
@@ -568,6 +580,10 @@ const styles = StyleSheet.create({
   },
   wordTextHighlighted: {
     color: '#1a1a2e',
+  },
+  wordTextContextHighlighted: {
+    color: '#1a1a2e',
+    fontWeight: '700',
   },
   audioButton: {
     marginLeft: 8,

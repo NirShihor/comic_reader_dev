@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAudioPlayer } from 'expo-audio';
 import { Word } from '../types/comic';
-import { getAudioSource, isLocalAudio, isWordAudio, isDictionaryAudio } from '../utils/audio';
+import { getAudioSource, isLocalAudio, isWordAudio, isDictionaryAudio, isPhraseAudio } from '../utils/audio';
 
 interface UseAudioOptions {
   words?: Word[];
@@ -29,6 +29,7 @@ export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
   const [playbackRate, setPlaybackRateState] = useState(1.0);
 
   const highlightIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const checkAndPlayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wordsRef = useRef<Word[] | undefined>(words);
   const playbackRateRef = useRef(1.0);
 
@@ -158,9 +159,10 @@ export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
       const isLocal = isLocalAudio(audioUrl);
       const isWord = isWordAudio(audioUrl);
       const isDict = isDictionaryAudio(audioUrl);
+      const isPhrase = isPhraseAudio(audioUrl);
       const isRemote = audioUrl.startsWith('http');
 
-      if (!isLocal && !isWord && !isDict && !isRemote) {
+      if (!isLocal && !isWord && !isDict && !isPhrase && !isRemote) {
         return;
       }
 
@@ -172,9 +174,9 @@ export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
         if (player.setPlaybackRate) {
           player.setPlaybackRate(playbackRateRef.current);
         }
-        // Dictionary/word audio is quieter, boost volume by 50%
-        if (isDictionaryAudio(audioUrl) || isWordAudio(audioUrl)) {
-          player.volume = 2.0;
+        // Dictionary/word audio is quieter, boost volume significantly
+        if (isDictionaryAudio(audioUrl) || isWordAudio(audioUrl) || isPhraseAudio(audioUrl)) {
+          player.volume = 6.0;
         } else {
           player.volume = 1.0;
         }
@@ -202,31 +204,56 @@ export function useAudio(options: UseAudioOptions = {}): UseAudioReturn {
 
   // When player changes (new source loaded), start playback
   useEffect(() => {
+    // Cancel any pending checkAndPlay
+    if (checkAndPlayTimeoutRef.current) {
+      clearTimeout(checkAndPlayTimeoutRef.current);
+      checkAndPlayTimeoutRef.current = null;
+    }
+
     if (!player || !audioSource || !isLoading) return;
 
     // Wait for player to be ready (has duration)
     const checkAndPlay = () => {
-      if (player.duration > 0) {
-        if (player.setPlaybackRate) {
-          player.setPlaybackRate(playbackRateRef.current);
+      try {
+        // Guard against stale player reference
+        if (!player || player.duration === undefined) {
+          setIsLoading(false);
+          return;
         }
-        // Dictionary/word audio is quieter, boost volume by 50%
-        if (isDictionaryAudio(audioSource) || isWordAudio(audioSource)) {
-          player.volume = 2.0;
+
+        if (player.duration > 0) {
+          if (player.setPlaybackRate) {
+            player.setPlaybackRate(playbackRateRef.current);
+          }
+          // Dictionary/word audio is quieter, boost volume significantly
+          if (isDictionaryAudio(audioSource) || isWordAudio(audioSource) || isPhraseAudio(audioSource)) {
+            player.volume = 6.0;
+          } else {
+            player.volume = 1.0;
+          }
+          player.play();
+          setIsPlaying(true);
+          setIsLoading(false);
+          startHighlighting(player.duration * 1000);
         } else {
-          player.volume = 1.0;
+          // Not ready yet, check again
+          checkAndPlayTimeoutRef.current = setTimeout(checkAndPlay, 50);
         }
-        player.play();
-        setIsPlaying(true);
+      } catch (e) {
+        // Player became invalid, stop trying
         setIsLoading(false);
-        startHighlighting(player.duration * 1000);
-      } else {
-        // Not ready yet, check again
-        setTimeout(checkAndPlay, 50);
+        console.log('Audio player error:', e);
       }
     };
 
     checkAndPlay();
+
+    return () => {
+      if (checkAndPlayTimeoutRef.current) {
+        clearTimeout(checkAndPlayTimeoutRef.current);
+        checkAndPlayTimeoutRef.current = null;
+      }
+    };
   }, [player, audioSource, isLoading, startHighlighting]);
 
   const stop = useCallback(async () => {

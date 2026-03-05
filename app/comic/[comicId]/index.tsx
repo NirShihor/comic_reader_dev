@@ -1,5 +1,6 @@
 import { StyleSheet, FlatList, Pressable, Image, View } from 'react-native';
 import { useLocalSearchParams, Link, Stack } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@/components/Themed';
 import { HeaderButtons } from '@/components/HeaderButtons';
 import { comics } from '@/src/data/comics';
@@ -88,6 +89,16 @@ export default function ComicOverviewScreen() {
           <Link href={`/comic/${comicId}/reader`} asChild>
             <Pressable style={styles.startButton}>
               <Text style={styles.startButtonText}>Start Reading</Text>
+            </Pressable>
+          </Link>
+        )}
+
+        {comic.reviewWords && comic.reviewWords.length > 0 && (
+          <Link href={`/comic/${comicId}/quiz`} asChild>
+            <Pressable style={styles.practiceButton}>
+              <Ionicons name="school-outline" size={20} color="#1a1a2e" />
+              <Text style={styles.practiceButtonText}>Practice Vocabulary</Text>
+              <Text style={styles.wordCount}>{comic.reviewWords.length} words</Text>
             </Pressable>
           </Link>
         )}
@@ -187,5 +198,23 @@ const styles = StyleSheet.create({
     color: '#1a1a2e',
     fontSize: 16,
     fontWeight: '500',
+  },
+  practiceButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#e8f4f8',
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 8,
+  },
+  practiceButtonText: {
+    color: '#1a1a2e',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  wordCount: {
+    color: '#666',
+    fontSize: 14,
   },
 });

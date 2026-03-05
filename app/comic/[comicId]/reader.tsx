@@ -1,4 +1,4 @@
-import { StyleSheet, View, StatusBar, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, StatusBar, TouchableOpacity, Modal, Pressable, Animated } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,8 +16,11 @@ export default function ReaderScreen() {
   const { getProgress, saveProgress, isLoaded } = useReadingProgress();
   const readerRef = useRef<SkiaPageReaderRef>(null);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [showQuizPrompt, setShowQuizPrompt] = useState(false);
+  const [hasShownQuizPrompt, setHasShownQuizPrompt] = useState(false);
 
   const comic = comicId ? comics.find((c) => c.id === comicId) : undefined;
+  const hasReviewWords = comic?.reviewWords && comic.reviewWords.length > 0;
 
   // Update initial page when progress loads (skip if startOver=true)
   useEffect(() => {
@@ -40,7 +43,17 @@ export default function ReaderScreen() {
   const handlePageChange = useCallback((pageIndex: number, page: Page) => {
     setCurrentPageIndex(pageIndex);
     saveProgress(comicId, page.id, page.pageNumber);
-  }, [comicId, saveProgress]);
+
+    // Show quiz prompt when user finishes the comic (reaches last page)
+    // The SkiaPageReader tracks panels, so we check if this is the last page
+    if (comic && pageIndex === comic.pages.length - 1 && hasReviewWords && !hasShownQuizPrompt) {
+      // Delay showing the prompt so user can see the final panel
+      setTimeout(() => {
+        setShowQuizPrompt(true);
+        setHasShownQuizPrompt(true);
+      }, 1500);
+    }
+  }, [comicId, saveProgress, comic, hasReviewWords, hasShownQuizPrompt]);
 
   const handlePanelPress = useCallback((panelId: string, pageId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -138,6 +151,41 @@ export default function ReaderScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Quiz prompt modal */}
+      <Modal
+        visible={showQuizPrompt}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowQuizPrompt(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Ionicons name="school" size={48} color="#1a1a2e" />
+            <Text style={styles.modalTitle}>Great job!</Text>
+            <Text style={styles.modalText}>
+              You've finished reading! Ready to practice the vocabulary?
+            </Text>
+            <View style={styles.modalButtons}>
+              <Pressable
+                style={styles.modalButtonSecondary}
+                onPress={() => setShowQuizPrompt(false)}
+              >
+                <Text style={styles.modalButtonSecondaryText}>Later</Text>
+              </Pressable>
+              <Pressable
+                style={styles.modalButtonPrimary}
+                onPress={() => {
+                  setShowQuizPrompt(false);
+                  router.push(`/comic/${comicId}/quiz`);
+                }}
+              >
+                <Text style={styles.modalButtonPrimaryText}>Start Quiz</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -199,6 +247,61 @@ const styles = StyleSheet.create({
   pageNumberText: {
     color: '#fff',
     fontSize: 14,
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 32,
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 340,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1a1a2e',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  modalText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalButtonSecondary: {
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: '#e0e0e0',
+  },
+  modalButtonSecondaryText: {
+    color: '#666',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalButtonPrimary: {
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: '#1a1a2e',
+  },
+  modalButtonPrimaryText: {
+    color: '#fff',
+    fontSize: 16,
     fontWeight: '600',
   },
 });

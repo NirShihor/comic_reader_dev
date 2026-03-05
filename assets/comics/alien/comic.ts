@@ -60,6 +60,53 @@ export const comic: Comic = {
   coverImage: 'local:alien_cover',
   level: 'beginner',
   isPremium: false,
+  reviewWords: [
+    {
+      word: { id: 'a4', text: 'noche', meaning: 'night', baseForm: 'noche' },
+      panelId: 'alien-panel-1-1',
+      pageId: 'alien-page-1',
+    },
+    {
+      word: { id: 'a5', text: 'qué', meaning: 'what', baseForm: 'qué' },
+      panelId: 'alien-panel-1-2',
+      pageId: 'alien-page-1',
+    },
+    {
+      word: { id: 'a9', text: 'quién', meaning: 'who', baseForm: 'quién' },
+      panelId: 'alien-panel-2-2',
+      pageId: 'alien-page-2',
+    },
+    {
+      word: { id: 'a12', text: 'me llamo', meaning: 'my name is / I call myself', baseForm: 'llamarse', audioUrl: 'phrase:me_llamo' },
+      panelId: 'alien-panel-2-3',
+      pageId: 'alien-page-2',
+    },
+    {
+      word: { id: 'a21', text: 'bien', meaning: 'good, well', baseForm: 'bien' },
+      panelId: 'alien-panel-3-1',
+      pageId: 'alien-page-3',
+    },
+    {
+      word: { id: 'a23', text: 'tengo', meaning: 'I have', baseForm: 'tener' },
+      panelId: 'alien-panel-3-2',
+      pageId: 'alien-page-3',
+    },
+    {
+      word: { id: 'a26', text: 'dónde', meaning: 'where', baseForm: 'dónde' },
+      panelId: 'alien-panel-3-3',
+      pageId: 'alien-page-3',
+    },
+    {
+      word: { id: 'a51', text: 'hablo', meaning: 'I speak', baseForm: 'hablar' },
+      panelId: 'alien-panel-5-3',
+      pageId: 'alien-page-5',
+    },
+    {
+      word: { id: 'a67', text: 'la casa', meaning: 'the house', baseForm: 'casa', audioUrl: 'phrase:la_casa' },
+      panelId: 'alien-panel-5-4',
+      pageId: 'alien-page-5',
+    },
+  ],
   pages: [
     {
       id: 'alien-page-cover',
@@ -353,7 +400,7 @@ export const comic: Comic = {
                 {
                   id: 'alien-s3-2',
                   text: 'Yo... tengo miedo.',
-                  translation: "I... I'm scared.",
+                  translation: "I... I'm scared. (I have fear = I am scared)",
                   audioUrl: 'local:alien_p3_s2',
                   words: [
                     { id: 'a22', text: 'Yo...', meaning: 'I', baseForm: 'yo', startTimeMs: 119, endTimeMs: 560 },
