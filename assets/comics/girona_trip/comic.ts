@@ -20,6 +20,38 @@ export const comic: Comic = {
   coverImage: 'local:girona_page1',
   level: 'beginner',
   isPremium: false,
+  reviewWords: [
+    {
+      word: { id: 'g3', text: 'emocionada', meaning: 'excited (feminine)', baseForm: 'emocionado' },
+      panelId: 'girona-panel-1',
+      pageId: 'girona-page-1',
+    },
+    {
+      word: { id: 'g4', text: 'nunca', meaning: 'never', baseForm: 'nunca' },
+      panelId: 'girona-panel-1',
+      pageId: 'girona-page-1',
+    },
+    {
+      word: { id: 'g10', text: 'necesito', meaning: 'I need', baseForm: 'necesitar' },
+      panelId: 'girona-panel-2',
+      pageId: 'girona-page-1',
+    },
+    {
+      word: { id: 'g11', text: 'encontrar', meaning: 'to find', baseForm: 'encontrar' },
+      panelId: 'girona-panel-2',
+      pageId: 'girona-page-1',
+    },
+    {
+      word: { id: 'g13', text: 'plataforma', meaning: 'platform', baseForm: 'plataforma' },
+      panelId: 'girona-panel-2',
+      pageId: 'girona-page-1',
+    },
+    {
+      word: { id: 'g20', text: 'tiempo', meaning: 'time', baseForm: 'tiempo' },
+      panelId: 'girona-panel-3',
+      pageId: 'girona-page-1',
+    },
+  ],
   pages: [
     {
       id: 'girona-page-1',

@@ -45,6 +45,12 @@ export interface Page {
   panels: Panel[];
 }
 
+export interface ReviewWord {
+  word: Word;
+  panelId: string;   // For "see in context" navigation
+  pageId: string;
+}
+
 export interface Comic {
   id: string;
   title: string;
@@ -53,6 +59,7 @@ export interface Comic {
   level: 'beginner' | 'intermediate' | 'advanced';
   isPremium: boolean;
   pages: Page[];
+  reviewWords?: ReviewWord[];  // Curated vocabulary for quiz
 }
 
 export interface SavedWord {

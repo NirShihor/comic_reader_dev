@@ -108,6 +108,12 @@ export const wordAudio: { [key: string]: AudioSource } = {
   'yo': require('@/assets/dictionary/yo.mp3'),
 };
 
+// Import phrase audio files (multi-word expressions for quiz)
+export const phraseAudio: { [key: string]: AudioSource } = {
+  'me_llamo': require('@/assets/phrases/me_llamo.mp3'),
+  'la_casa': require('@/assets/phrases/la_casa.mp3'),
+};
+
 // Import dictionary audio files (base forms for definitions)
 export const dictionaryAudio: { [key: string]: AudioSource } = {
   'llegar': require('@/assets/dictionary/llegar.mp3'),
@@ -243,6 +249,11 @@ export function getAudioSource(uri: string): AudioSource | null {
     return dictionaryAudio[key] || null;
   }
 
+  if (uri.startsWith('phrase:')) {
+    const key = uri.replace('phrase:', '');
+    return phraseAudio[key] || null;
+  }
+
   // Return as URI for remote files
   return { uri };
 }
@@ -257,6 +268,10 @@ export function isWordAudio(uri: string): boolean {
 
 export function isDictionaryAudio(uri: string): boolean {
   return uri?.startsWith('dict:') ?? false;
+}
+
+export function isPhraseAudio(uri: string): boolean {
+  return uri?.startsWith('phrase:') ?? false;
 }
 
 export function hasWordAudio(word: string): boolean {

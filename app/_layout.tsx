@@ -11,7 +11,11 @@ import { HeaderButtons } from '@/components/HeaderButtons';
 
 export { ErrorBoundary } from 'expo-router';
 
-SplashScreen.preventAutoHideAsync();
+try {
+  SplashScreen.preventAutoHideAsync().catch(() => {});
+} catch {
+  // Ignore - splash screen may not be registered in dev mode
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -25,9 +29,11 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync().catch(() => {
+      try {
+        SplashScreen.hideAsync().catch(() => {});
+      } catch {
         // Ignore - splash screen may not be registered in dev mode
-      });
+      }
     }
   }, [loaded]);
 
@@ -63,6 +69,15 @@ export default function RootLayout() {
             options={{
               headerShown: false,
               presentation: 'fullScreenModal',
+            }}
+          />
+          <Stack.Screen
+            name="comic/[comicId]/quiz"
+            options={{
+              title: 'Vocabulary Quiz',
+              headerShown: true,
+              headerBackVisible: true,
+              presentation: 'modal',
             }}
           />
           <Stack.Screen
