@@ -1,0 +1,758 @@
+{
+  "alien_p1_s1.mp3": [
+    {
+      "text": "Tarde",
+      "startTimeMs": 119,
+      "endTimeMs": 519
+    },
+    {
+      "text": " ",
+      "startTimeMs": 519,
+      "endTimeMs": 540
+    },
+    {
+      "text": "en",
+      "startTimeMs": 540,
+      "endTimeMs": 639
+    },
+    {
+      "text": " ",
+      "startTimeMs": 639,
+      "endTimeMs": 680
+    },
+    {
+      "text": "la",
+      "startTimeMs": 680,
+      "endTimeMs": 719
+    },
+    {
+      "text": " ",
+      "startTimeMs": 719,
+      "endTimeMs": 779
+    },
+    {
+      "text": "noche.",
+      "startTimeMs": 779,
+      "endTimeMs": 1179
+    }
+  ],
+  "alien_p1_s2.mp3": [
+    {
+      "text": "¿Qué",
+      "startTimeMs": 119,
+      "endTimeMs": 399
+    },
+    {
+      "text": " ",
+      "startTimeMs": 399,
+      "endTimeMs": 419
+    },
+    {
+      "text": "fue",
+      "startTimeMs": 419,
+      "endTimeMs": 680
+    },
+    {
+      "text": " ",
+      "startTimeMs": 680,
+      "endTimeMs": 679
+    },
+    {
+      "text": "eso?",
+      "startTimeMs": 679,
+      "endTimeMs": 1660
+    }
+  ],
+  "alien_p2_s2.mp3": [
+    {
+      "text": "¿Qué?",
+      "startTimeMs": 140,
+      "endTimeMs": 500
+    },
+    {
+      "text": " ",
+      "startTimeMs": 500,
+      "endTimeMs": 939
+    },
+    {
+      "text": "¿Quién",
+      "startTimeMs": 939,
+      "endTimeMs": 1179
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1179,
+      "endTimeMs": 1259
+    },
+    {
+      "text": "eres?",
+      "startTimeMs": 1259,
+      "endTimeMs": 1579
+    }
+  ],
+  "alien_p2_s3.mp3": [
+    {
+      "text": "Me",
+      "startTimeMs": 199,
+      "endTimeMs": 339
+    },
+    {
+      "text": " ",
+      "startTimeMs": 339,
+      "endTimeMs": 379
+    },
+    {
+      "text": "llamo",
+      "startTimeMs": 379,
+      "endTimeMs": 680
+    },
+    {
+      "text": " ",
+      "startTimeMs": 680,
+      "endTimeMs": 759
+    },
+    {
+      "text": "Zeke.",
+      "startTimeMs": 759,
+      "endTimeMs": 1199
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1199,
+      "endTimeMs": 1579
+    },
+    {
+      "text": "¿Cómo",
+      "startTimeMs": 1579,
+      "endTimeMs": 1819
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1819,
+      "endTimeMs": 1839
+    },
+    {
+      "text": "te",
+      "startTimeMs": 1839,
+      "endTimeMs": 1960
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1960,
+      "endTimeMs": 1979
+    },
+    {
+      "text": "llamas?",
+      "startTimeMs": 1979,
+      "endTimeMs": 2539
+    }
+  ],
+  "alien_p2_s4.mp3": [
+    {
+      "text": "Me",
+      "startTimeMs": 119,
+      "endTimeMs": 259
+    },
+    {
+      "text": " ",
+      "startTimeMs": 259,
+      "endTimeMs": 339
+    },
+    {
+      "text": "llamo",
+      "startTimeMs": 339,
+      "endTimeMs": 679
+    },
+    {
+      "text": " ",
+      "startTimeMs": 679,
+      "endTimeMs": 679
+    },
+    {
+      "text": "Mia.",
+      "startTimeMs": 679,
+      "endTimeMs": 1740
+    }
+  ],
+  "alien_p3_s1.mp3": [
+    {
+      "text": "¿Estás",
+      "startTimeMs": 119,
+      "endTimeMs": 599
+    },
+    {
+      "text": " ",
+      "startTimeMs": 599,
+      "endTimeMs": 599
+    },
+    {
+      "text": "bien?",
+      "startTimeMs": 599,
+      "endTimeMs": 1579
+    }
+  ],
+  "alien_p3_s2.mp3": [
+    {
+      "text": "Yo",
+      "startTimeMs": 119,
+      "endTimeMs": 560
+    },
+    {
+      "text": " ",
+      "startTimeMs": 560,
+      "endTimeMs": 859
+    },
+    {
+      "text": "tengo",
+      "startTimeMs": 859,
+      "endTimeMs": 1120
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1120,
+      "endTimeMs": 1180
+    },
+    {
+      "text": "miedo.",
+      "startTimeMs": 1180,
+      "endTimeMs": 1499
+    }
+  ],
+  "alien_p3_s3.mp3": [
+    {
+      "text": "¿De",
+      "startTimeMs": 119,
+      "endTimeMs": 319
+    },
+    {
+      "text": " ",
+      "startTimeMs": 319,
+      "endTimeMs": 339
+    },
+    {
+      "text": "dónde",
+      "startTimeMs": 339,
+      "endTimeMs": 619
+    },
+    {
+      "text": " ",
+      "startTimeMs": 619,
+      "endTimeMs": 659
+    },
+    {
+      "text": "eres?",
+      "startTimeMs": 659,
+      "endTimeMs": 1100
+    }
+  ],
+  "alien_p4_s1.mp3": [
+    {
+      "text": "Vengo",
+      "startTimeMs": 140,
+      "endTimeMs": 539
+    },
+    {
+      "text": " ",
+      "startTimeMs": 539,
+      "endTimeMs": 539
+    },
+    {
+      "text": "de",
+      "startTimeMs": 539,
+      "endTimeMs": 719
+    },
+    {
+      "text": " ",
+      "startTimeMs": 719,
+      "endTimeMs": 759
+    },
+    {
+      "text": "Zizark.",
+      "startTimeMs": 759,
+      "endTimeMs": 1340
+    }
+  ],
+  "alien_p4_s2.mp3": [
+    {
+      "text": "¿Sisarc?",
+      "startTimeMs": 259,
+      "endTimeMs": 2000
+    },
+    {
+      "text": " ",
+      "startTimeMs": 2000,
+      "endTimeMs": 1999
+    },
+    {
+      "text": "¿Dónde",
+      "startTimeMs": 1999,
+      "endTimeMs": 2379
+    },
+    {
+      "text": " ",
+      "startTimeMs": 2379,
+      "endTimeMs": 2539
+    },
+    {
+      "text": "está",
+      "startTimeMs": 2539,
+      "endTimeMs": 2700
+    },
+    {
+      "text": " ",
+      "startTimeMs": 2700,
+      "endTimeMs": 2739
+    },
+    {
+      "text": "eso?",
+      "startTimeMs": 2740,
+      "endTimeMs": 3179
+    }
+  ],
+  "alien_p4_s3.mp3": [
+    {
+      "text": "¡Es",
+      "startTimeMs": 79,
+      "endTimeMs": 379
+    },
+    {
+      "text": " ",
+      "startTimeMs": 379,
+      "endTimeMs": 479
+    },
+    {
+      "text": "un",
+      "startTimeMs": 479,
+      "endTimeMs": 679
+    },
+    {
+      "text": " ",
+      "startTimeMs": 679,
+      "endTimeMs": 699
+    },
+    {
+      "text": "planeta!",
+      "startTimeMs": 699,
+      "endTimeMs": 1419
+    }
+  ],
+  "alien_p5_s1.mp3": [
+    {
+      "text": "¿Un",
+      "startTimeMs": 199,
+      "endTimeMs": 459
+    },
+    {
+      "text": " ",
+      "startTimeMs": 459,
+      "endTimeMs": 479
+    },
+    {
+      "text": "planeta?",
+      "startTimeMs": 479,
+      "endTimeMs": 2159
+    },
+    {
+      "text": " ",
+      "startTimeMs": 2159,
+      "endTimeMs": 2219
+    },
+    {
+      "text": "¿Por",
+      "startTimeMs": 2219,
+      "endTimeMs": 2339
+    },
+    {
+      "text": " ",
+      "startTimeMs": 2339,
+      "endTimeMs": 2419
+    },
+    {
+      "text": "qué",
+      "startTimeMs": 2419,
+      "endTimeMs": 2500
+    },
+    {
+      "text": " ",
+      "startTimeMs": 2500,
+      "endTimeMs": 2539
+    },
+    {
+      "text": "viniste",
+      "startTimeMs": 2539,
+      "endTimeMs": 2899
+    },
+    {
+      "text": " ",
+      "startTimeMs": 2899,
+      "endTimeMs": 2919
+    },
+    {
+      "text": "aquí?",
+      "startTimeMs": 2919,
+      "endTimeMs": 4460
+    }
+  ],
+  "alien_p5_s2.mp3": [
+    {
+      "text": "¡Por",
+      "startTimeMs": 99,
+      "endTimeMs": 279
+    },
+    {
+      "text": " ",
+      "startTimeMs": 279,
+      "endTimeMs": 319
+    },
+    {
+      "text": "accidente",
+      "startTimeMs": 319,
+      "endTimeMs": 999
+    },
+    {
+      "text": " ",
+      "startTimeMs": 999,
+      "endTimeMs": 1439
+    },
+    {
+      "text": "me",
+      "startTimeMs": 1439,
+      "endTimeMs": 1620
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1620,
+      "endTimeMs": 1639
+    },
+    {
+      "text": "perdí!",
+      "startTimeMs": 1639,
+      "endTimeMs": 2139
+    }
+  ],
+  "alien_p5_s3.mp3": [
+    {
+      "text": "¿Puedes",
+      "startTimeMs": 99,
+      "endTimeMs": 579
+    },
+    {
+      "text": " ",
+      "startTimeMs": 579,
+      "endTimeMs": 699
+    },
+    {
+      "text": "ayudarme?",
+      "startTimeMs": 699,
+      "endTimeMs": 1680
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1680,
+      "endTimeMs": 1859
+    },
+    {
+      "text": "Solo",
+      "startTimeMs": 1860,
+      "endTimeMs": 2119
+    },
+    {
+      "text": " ",
+      "startTimeMs": 2119,
+      "endTimeMs": 2199
+    },
+    {
+      "text": "hablo",
+      "startTimeMs": 2200,
+      "endTimeMs": 2459
+    },
+    {
+      "text": " ",
+      "startTimeMs": 2459,
+      "endTimeMs": 2480
+    },
+    {
+      "text": "un",
+      "startTimeMs": 2480,
+      "endTimeMs": 2659
+    },
+    {
+      "text": " ",
+      "startTimeMs": 2659,
+      "endTimeMs": 2659
+    },
+    {
+      "text": "poco",
+      "startTimeMs": 2659,
+      "endTimeMs": 2960
+    },
+    {
+      "text": " ",
+      "startTimeMs": 2960,
+      "endTimeMs": 2959
+    },
+    {
+      "text": "de",
+      "startTimeMs": 2960,
+      "endTimeMs": 3039
+    },
+    {
+      "text": " ",
+      "startTimeMs": 3039,
+      "endTimeMs": 3079
+    },
+    {
+      "text": "español,",
+      "startTimeMs": 3079,
+      "endTimeMs": 3860
+    },
+    {
+      "text": " ",
+      "startTimeMs": 3860,
+      "endTimeMs": 3939
+    },
+    {
+      "text": "estoy",
+      "startTimeMs": 3939,
+      "endTimeMs": 4339
+    },
+    {
+      "text": " ",
+      "startTimeMs": 4339,
+      "endTimeMs": 4359
+    },
+    {
+      "text": "aprendiendo.",
+      "startTimeMs": 4360,
+      "endTimeMs": 5179
+    }
+  ],
+  "alien_p5_s4.mp3": [
+    {
+      "text": "Claro,",
+      "startTimeMs": 119,
+      "endTimeMs": 860
+    },
+    {
+      "text": " ",
+      "startTimeMs": 860,
+      "endTimeMs": 899
+    },
+    {
+      "text": "no",
+      "startTimeMs": 899,
+      "endTimeMs": 979
+    },
+    {
+      "text": " ",
+      "startTimeMs": 979,
+      "endTimeMs": 1019
+    },
+    {
+      "text": "te",
+      "startTimeMs": 1019,
+      "endTimeMs": 1079
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1079,
+      "endTimeMs": 1139
+    },
+    {
+      "text": "preocupes,",
+      "startTimeMs": 1139,
+      "endTimeMs": 1799
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1799,
+      "endTimeMs": 1819
+    },
+    {
+      "text": "te",
+      "startTimeMs": 1819,
+      "endTimeMs": 1879
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1879,
+      "endTimeMs": 1940
+    },
+    {
+      "text": "ayudaré.",
+      "startTimeMs": 1940,
+      "endTimeMs": 2819
+    },
+    {
+      "text": " ",
+      "startTimeMs": 2819,
+      "endTimeMs": 2839
+    },
+    {
+      "text": "Vamos",
+      "startTimeMs": 2839,
+      "endTimeMs": 3059
+    },
+    {
+      "text": " ",
+      "startTimeMs": 3059,
+      "endTimeMs": 3079
+    },
+    {
+      "text": "a",
+      "startTimeMs": 3079,
+      "endTimeMs": 3119
+    },
+    {
+      "text": " ",
+      "startTimeMs": 3119,
+      "endTimeMs": 3139
+    },
+    {
+      "text": "la",
+      "startTimeMs": 3139,
+      "endTimeMs": 3259
+    },
+    {
+      "text": " ",
+      "startTimeMs": 3259,
+      "endTimeMs": 3279
+    },
+    {
+      "text": "casa.",
+      "startTimeMs": 3279,
+      "endTimeMs": 3579
+    }
+  ],
+  "alien_p6_s2.mp3": [
+    {
+      "text": "¿Qué",
+      "startTimeMs": 79,
+      "endTimeMs": 179
+    },
+    {
+      "text": " ",
+      "startTimeMs": 179,
+      "endTimeMs": 179
+    },
+    {
+      "text": "está",
+      "startTimeMs": 179,
+      "endTimeMs": 359
+    },
+    {
+      "text": " ",
+      "startTimeMs": 359,
+      "endTimeMs": 360
+    },
+    {
+      "text": "pasando?",
+      "startTimeMs": 360,
+      "endTimeMs": 1019
+    }
+  ],
+  "alien_p6_s3.mp3": [
+    {
+      "text": "Hemos",
+      "startTimeMs": 119,
+      "endTimeMs": 740
+    },
+    {
+      "text": " ",
+      "startTimeMs": 740,
+      "endTimeMs": 759
+    },
+    {
+      "text": "venido",
+      "startTimeMs": 759,
+      "endTimeMs": 1559
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1559,
+      "endTimeMs": 1579
+    },
+    {
+      "text": "a",
+      "startTimeMs": 1579,
+      "endTimeMs": 1879
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1879,
+      "endTimeMs": 1899
+    },
+    {
+      "text": "tomar",
+      "startTimeMs": 1899,
+      "endTimeMs": 2400
+    },
+    {
+      "text": " ",
+      "startTimeMs": 2400,
+      "endTimeMs": 2459
+    },
+    {
+      "text": "el",
+      "startTimeMs": 2460,
+      "endTimeMs": 2660
+    },
+    {
+      "text": " ",
+      "startTimeMs": 2660,
+      "endTimeMs": 2679
+    },
+    {
+      "text": "control.",
+      "startTimeMs": 2679,
+      "endTimeMs": 3339
+    }
+  ],
+  "alien_p6_s4.mp3": [
+    {
+      "text": "Aaah,",
+      "startTimeMs": 99,
+      "endTimeMs": 819
+    },
+    {
+      "text": " ",
+      "startTimeMs": 819,
+      "endTimeMs": 919
+    },
+    {
+      "text": "sólo",
+      "startTimeMs": 919,
+      "endTimeMs": 1200
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1200,
+      "endTimeMs": 1199
+    },
+    {
+      "text": "era",
+      "startTimeMs": 1199,
+      "endTimeMs": 1320
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1320,
+      "endTimeMs": 1319
+    },
+    {
+      "text": "un",
+      "startTimeMs": 1319,
+      "endTimeMs": 1499
+    },
+    {
+      "text": " ",
+      "startTimeMs": 1499,
+      "endTimeMs": 1519
+    },
+    {
+      "text": "sueño.",
+      "startTimeMs": 1519,
+      "endTimeMs": 1899
+    }
+  ]
+}

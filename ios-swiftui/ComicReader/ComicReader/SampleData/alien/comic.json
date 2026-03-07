@@ -1,0 +1,135 @@
+{
+  "id": "alien-friend",
+  "title": "My Alien Friend",
+  "description": "A young girl discovers a friendly alien in her backyard",
+  "coverImage": "cover",
+  "level": "beginner",
+  "totalPages": 6,
+  "estimatedMinutes": 15,
+  "language": "es",
+  "targetLanguage": "en",
+  "version": "1.0",
+  "pages": [
+    {
+      "id": "page-0",
+      "pageNumber": 0,
+      "masterImage": "alien_cover",
+      "noTextImage": null,
+      "panels": [
+        {
+          "id": "panel-cover",
+          "artworkImage": "alien_cover",
+          "panelOrder": 1,
+          "tapZone": { "x": 0.0, "y": 0.0, "width": 1.0, "height": 1.0 },
+          "bubbles": [
+            {
+              "id": "bubble-cover-1",
+              "type": "narration",
+              "position": { "x": 0.5, "y": 0.1, "width": 0.8, "height": 0.1 },
+              "sentences": [
+                {
+                  "id": "s-cover-1",
+                  "text": "Mi Amiga Alien",
+                  "translation": "My Alien Friend",
+                  "audioUrl": "alien_cover",
+                  "words": [
+                    { "id": "w1", "text": "Mi", "meaning": "My", "baseForm": "mi", "audioUrl": null, "startTimeMs": 0, "endTimeMs": 300 },
+                    { "id": "w2", "text": "Amiga", "meaning": "Friend (female)", "baseForm": "amigo", "audioUrl": null, "startTimeMs": 300, "endTimeMs": 700 },
+                    { "id": "w3", "text": "Alien", "meaning": "Alien", "baseForm": "alien", "audioUrl": null, "startTimeMs": 700, "endTimeMs": 1100 }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "page-1",
+      "pageNumber": 1,
+      "masterImage": "alien_page_1",
+      "noTextImage": "alien_page_1_no_text",
+      "panels": [
+        {
+          "id": "panel-1-1",
+          "artworkImage": "alien_p1_panel1",
+          "panelOrder": 1,
+          "tapZone": { "x": 0.02, "y": 0.025, "width": 0.96, "height": 0.28 },
+          "bubbles": [
+            {
+              "id": "bubble-1-1-1",
+              "type": "narration",
+              "position": { "x": 0.1, "y": 0.05, "width": 0.4, "height": 0.08 },
+              "sentences": [
+                {
+                  "id": "s-1-1",
+                  "text": "Tarde en la noche",
+                  "translation": "Late at night",
+                  "audioUrl": "alien_p1_s1",
+                  "words": [
+                    { "id": "w-1-1-1", "text": "Tarde", "meaning": "Late", "baseForm": "tarde", "audioUrl": null, "startTimeMs": 0, "endTimeMs": 400 },
+                    { "id": "w-1-1-2", "text": "en", "meaning": "in/at", "baseForm": "en", "audioUrl": null, "startTimeMs": 400, "endTimeMs": 550 },
+                    { "id": "w-1-1-3", "text": "la", "meaning": "the", "baseForm": "el", "audioUrl": null, "startTimeMs": 550, "endTimeMs": 700 },
+                    { "id": "w-1-1-4", "text": "noche", "meaning": "night", "baseForm": "noche", "audioUrl": null, "startTimeMs": 700, "endTimeMs": 1100 }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "panel-1-2",
+          "artworkImage": "alien_p1_panel2",
+          "panelOrder": 2,
+          "tapZone": { "x": 0.02, "y": 0.31, "width": 0.48, "height": 0.35 },
+          "bubbles": [
+            {
+              "id": "bubble-1-2-1",
+              "type": "speech",
+              "position": { "x": 0.5, "y": 0.2, "width": 0.4, "height": 0.15 },
+              "sentences": [
+                {
+                  "id": "s-1-2",
+                  "text": "¿Qué fue eso...?",
+                  "translation": "What was that...?",
+                  "audioUrl": "alien_p1_s2",
+                  "words": [
+                    { "id": "w-1-2-1", "text": "¿Qué", "meaning": "What", "baseForm": "qué", "audioUrl": null, "startTimeMs": 0, "endTimeMs": 300 },
+                    { "id": "w-1-2-2", "text": "fue", "meaning": "was", "baseForm": "ser", "audioUrl": null, "startTimeMs": 300, "endTimeMs": 550 },
+                    { "id": "w-1-2-3", "text": "eso...?", "meaning": "that...?", "baseForm": "eso", "audioUrl": null, "startTimeMs": 550, "endTimeMs": 1000 }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "panel-1-3",
+          "artworkImage": "alien_p1_panel3",
+          "panelOrder": 3,
+          "tapZone": { "x": 0.50, "y": 0.31, "width": 0.48, "height": 0.35 },
+          "bubbles": []
+        },
+        {
+          "id": "panel-1-4",
+          "artworkImage": "alien_p1_panel4",
+          "panelOrder": 4,
+          "tapZone": { "x": 0.02, "y": 0.67, "width": 0.48, "height": 0.31 },
+          "bubbles": []
+        },
+        {
+          "id": "panel-1-5",
+          "artworkImage": "alien_p1_panel5",
+          "panelOrder": 5,
+          "tapZone": { "x": 0.50, "y": 0.67, "width": 0.48, "height": 0.31 },
+          "bubbles": []
+        }
+      ]
+    }
+  ],
+  "reviewWords": [
+    { "id": "review-1", "text": "noche", "meaning": "night", "baseForm": "noche", "audioUrl": null },
+    { "id": "review-2", "text": "tarde", "meaning": "late/afternoon", "baseForm": "tarde", "audioUrl": null },
+    { "id": "review-3", "text": "amiga", "meaning": "friend (female)", "baseForm": "amigo", "audioUrl": null }
+  ]
+}
