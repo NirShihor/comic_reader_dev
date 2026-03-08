@@ -14,20 +14,26 @@ struct PageView: View {
     @State private var showingVocabulary = false
     @State private var showingSettings = false
 
+    // Pages sorted by pageNumber for consistent navigation
+    private var sortedPages: [Page] {
+        comic.pages.sorted { $0.pageNumber < $1.pageNumber }
+    }
+
     init(comic: Comic, page: Page) {
         self.comic = comic
         self.page = page
-        // Initialize currentPageIndex to the correct page
-        let index = comic.pages.firstIndex(where: { $0.id == page.id }) ?? 0
+        // Initialize currentPageIndex to the correct page in sorted order
+        let sorted = comic.pages.sorted { $0.pageNumber < $1.pageNumber }
+        let index = sorted.firstIndex(where: { $0.id == page.id }) ?? 0
         _currentPageIndex = State(initialValue: index)
     }
 
     var currentPage: Page {
-        comic.pages[currentPageIndex]
+        sortedPages[currentPageIndex]
     }
 
     private func goToNextPage() {
-        guard currentPageIndex < comic.pages.count - 1 else { return }
+        guard currentPageIndex < sortedPages.count - 1 else { return }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
         withAnimation {
             currentPageIndex += 1
@@ -121,9 +127,9 @@ struct PageView: View {
                         goToNextPage()
                     } label: {
                         Image(systemName: "chevron.right")
-                            .foregroundStyle(currentPageIndex < comic.pages.count - 1 ? .white : .gray)
+                            .foregroundStyle(currentPageIndex < sortedPages.count - 1 ? .white : .gray)
                     }
-                    .disabled(currentPageIndex >= comic.pages.count - 1)
+                    .disabled(currentPageIndex >= sortedPages.count - 1)
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {

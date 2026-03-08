@@ -25,8 +25,37 @@ struct ComicDetailView: View {
                     .padding(.horizontal, 16)
 
                 // Action buttons
-                actionButtons
+                HStack(spacing: 12) {
+                    Label(
+                        progressManager.getProgress(for: comic.id) != nil ? "Continue" : "Start Reading",
+                        systemImage: "book.fill"
+                    )
+                    .font(.subheadline)
                     .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color.accentColor)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        selectedPage = startingPage
+                    }
+
+                    if progressManager.getProgress(for: comic.id) != nil {
+                        Label("Start Again", systemImage: "arrow.counterclockwise")
+                            .font(.subheadline)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Color(.systemGray5))
+                            .foregroundStyle(.primary)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                selectedPage = firstPage
+                            }
+                    }
+                }
+                .padding(.horizontal, 16)
 
                 // Pages grid
                 pagesGrid
@@ -68,6 +97,7 @@ struct ComicDetailView: View {
         }
         .navigationDestination(item: $selectedPage) { page in
             PageView(comic: comic, page: page)
+                .id(page.id)  // Force new view instance for each page
         }
     }
 
@@ -111,38 +141,14 @@ struct ComicDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
-    // MARK: - Action Buttons
-    private var actionButtons: some View {
-        HStack(spacing: 12) {
-            Button {
-                selectedPage = startingPage
-            } label: {
-                Label(
-                    progressManager.getProgress(for: comic.id) != nil ? "Continue" : "Start Reading",
-                    systemImage: "book.fill"
-                )
-                .font(.subheadline)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .background(Color.accentColor)
-                .foregroundStyle(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-            }
+    // Pages sorted by pageNumber for navigation
+    private var sortedPages: [Page] {
+        comic.pages.sorted { $0.pageNumber < $1.pageNumber }
+    }
 
-            if progressManager.getProgress(for: comic.id) != nil {
-                Button {
-                    selectedPage = comic.pages.min(by: { $0.pageNumber < $1.pageNumber })
-                } label: {
-                    Label("Start Again", systemImage: "arrow.counterclockwise")
-                        .font(.subheadline)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(Color(.systemGray5))
-                        .foregroundStyle(.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-            }
-        }
+    // The first page (cover)
+    private var firstPage: Page {
+        sortedPages.first ?? comic.pages[0]
     }
 
     private var startingPage: Page {
@@ -150,23 +156,23 @@ struct ComicDetailView: View {
            let page = comic.pages.first(where: { $0.pageNumber == progress.pageNumber }) {
             return page
         }
-        // Return the page with the lowest pageNumber (cover)
-        return comic.pages.min(by: { $0.pageNumber < $1.pageNumber }) ?? comic.pages[0]
+        // Return the first page (cover)
+        return firstPage
     }
 
     // MARK: - Pages Grid
     private var pagesGrid: some View {
         LazyVGrid(columns: columns, spacing: 12) {
             ForEach(comic.pages) { page in
-                Button {
-                    selectedPage = page
-                } label: {
-                    PageThumbnail(page: page, comic: comic)
-                }
-                .buttonStyle(.plain)
+                PageThumbnail(page: page, comic: comic)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        selectedPage = page
+                    }
             }
         }
         .padding(.horizontal, 16)
+        .clipped()
     }
 
     private var levelColor: Color {
