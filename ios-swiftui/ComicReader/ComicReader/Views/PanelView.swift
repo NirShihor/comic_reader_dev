@@ -546,7 +546,16 @@ struct WordButton: View {
 
                     // Play actual word from sentence (priority, 2x volume)
                     Button {
-                        let audioFile = word.audioUrl ?? word.text.lowercased()
+                        // Use audioUrl if available, otherwise baseForm, otherwise clean text
+                        let audioFile = word.audioUrl ?? word.baseForm?.lowercased() ?? word.text
+                            .lowercased()
+                            .replacingOccurrences(of: "¿", with: "")
+                            .replacingOccurrences(of: "?", with: "")
+                            .replacingOccurrences(of: "¡", with: "")
+                            .replacingOccurrences(of: "!", with: "")
+                            .replacingOccurrences(of: ".", with: "")
+                            .replacingOccurrences(of: ",", with: "")
+                            .trimmingCharacters(in: .whitespacesAndNewlines)
                         audioManager.play(audioFile, volume: 2.0)
                     } label: {
                         Image(systemName: "speaker.wave.2.fill")
