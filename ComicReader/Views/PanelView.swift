@@ -544,10 +544,10 @@ struct WordButton: View {
 
                     Spacer()
 
-                    // Play actual word from sentence (priority, 2x volume)
+                    // Play actual word from sentence (not base form)
                     Button {
-                        // Use audioUrl if available, otherwise baseForm, otherwise clean text
-                        let audioFile = word.audioUrl ?? word.baseForm?.lowercased() ?? word.text
+                        // Use audioUrl if available, otherwise clean the word text
+                        let audioFile = word.audioUrl ?? word.text
                             .lowercased()
                             .replacingOccurrences(of: "¿", with: "")
                             .replacingOccurrences(of: "?", with: "")
