@@ -101,6 +101,7 @@ struct ComicCard: View {
                         .background(levelColor.opacity(0.2))
                         .foregroundStyle(levelColor)
                         .clipShape(Capsule())
+                        .fixedSize()
 
                     // Premium badge
                     if comic.isPremium {
@@ -110,13 +111,6 @@ struct ComicCard: View {
                     }
 
                     Spacer()
-
-                    // Progress indicator
-                    if let progress = progress {
-                        Text("Page \(progress.pageNumber)/\(comic.pages.count)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
                 }
             }
 

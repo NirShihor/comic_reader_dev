@@ -18,9 +18,18 @@ struct PanelView: View {
     @State private var isRecording = false
     @State private var isProcessing = false
     @State private var practiceFeedback: PracticeFeedback?
-    @State private var currentPanelIndex: Int = 0
+    @State private var currentPanelId: String
     @State private var showingError = false
     @State private var errorMessage = ""
+
+    init(comic: Comic, page: Page, panel: Panel, navigateToPage: Binding<Int?>) {
+        self.comic = comic
+        self.page = page
+        self.panel = panel
+        self._navigateToPage = navigateToPage
+        // Store the panel ID directly - no index calculations
+        _currentPanelId = State(initialValue: panel.id)
+    }
 
     struct PracticeFeedback {
         let isCorrect: Bool
@@ -28,13 +37,23 @@ struct PanelView: View {
         let expectedText: String
     }
 
+    // Panels sorted by panelOrder for consistent navigation
+    var sortedPanels: [Panel] {
+        page.panels.sorted { $0.panelOrder < $1.panelOrder }
+    }
+
+    // Find current panel by ID - always returns the correct panel
     var currentPanel: Panel {
-        guard currentPanelIndex < page.panels.count else { return panel }
-        return page.panels[currentPanelIndex]
+        sortedPanels.first(where: { $0.id == currentPanelId }) ?? panel
+    }
+
+    // Get current index for display purposes
+    var currentPanelIndex: Int {
+        sortedPanels.firstIndex(where: { $0.id == currentPanelId }) ?? 0
     }
 
     var isLastPanel: Bool {
-        currentPanelIndex >= page.panels.count - 1
+        currentPanelIndex >= sortedPanels.count - 1
     }
 
     var isFirstPanel: Bool {
@@ -71,6 +90,10 @@ struct PanelView: View {
                     // Speech bubbles / sentences
                     if let sentence = currentSentence {
                         sentenceCard(sentence)
+                    } else if !currentPanel.bubbles.isEmpty {
+                        // Fallback: show raw text if sentence parsing failed
+                        Text("No sentence data")
+                            .foregroundStyle(.secondary)
                     }
 
                     // Practice feedback
@@ -113,7 +136,7 @@ struct PanelView: View {
                         }
                         .disabled(isFirstPanel && !hasPreviousPage)
 
-                        Text("Panel \(currentPanelIndex + 1) of \(page.panels.count)")
+                        Text("Panel \(currentPanelIndex + 1) of \(sortedPanels.count)")
                             .font(.headline)
 
                         Button {
@@ -132,6 +155,7 @@ struct PanelView: View {
                 }
             }
         }
+        .id(panel.id) // Force view recreation when panel changes
         .onChange(of: settingsManager.speakingPracticeMode) { _, _ in
             textRevealed = false
             practiceFeedback = nil
@@ -162,10 +186,6 @@ struct PanelView: View {
         }
         .onAppear {
             audioManager.setPlaybackRate(Float(settingsManager.playbackSpeed))
-            // Initialize to the panel that was tapped
-            if let panelIndex = page.panels.firstIndex(where: { $0.id == panel.id }) {
-                currentPanelIndex = panelIndex
-            }
         }
         .alert("Speech Recognition Error", isPresented: $showingError) {
             Button("OK", role: .cancel) { }
@@ -188,10 +208,13 @@ struct PanelView: View {
                 dismiss()
             }
         } else {
-            // Move to next panel
-            withAnimation {
-                currentPanelIndex += 1
-                resetPanelState()
+            // Move to next panel by ID
+            let nextIndex = currentPanelIndex + 1
+            if nextIndex < sortedPanels.count {
+                withAnimation {
+                    currentPanelId = sortedPanels[nextIndex].id
+                    resetPanelState()
+                }
             }
         }
     }
@@ -205,10 +228,13 @@ struct PanelView: View {
                 dismiss()
             }
         } else {
-            // Move to previous panel
-            withAnimation {
-                currentPanelIndex -= 1
-                resetPanelState()
+            // Move to previous panel by ID
+            let prevIndex = currentPanelIndex - 1
+            if prevIndex >= 0 {
+                withAnimation {
+                    currentPanelId = sortedPanels[prevIndex].id
+                    resetPanelState()
+                }
             }
         }
     }
@@ -270,13 +296,19 @@ struct PanelView: View {
                     .font(.title3)
                     .fontWeight(.medium)
             } else {
-                // Show Spanish word-by-word
-                FlowLayout(spacing: 8) {
-                    ForEach(Array(sentence.words.enumerated()), id: \.element.id) { index, word in
-                        WordButton(
-                            word: word,
-                            isHighlighted: highlightedWordIndex == index
-                        )
+                // Show Spanish word-by-word, or plain text if no words
+                if sentence.words.isEmpty {
+                    Text(sentence.text)
+                        .font(.title3)
+                        .fontWeight(.medium)
+                } else {
+                    FlowLayout(spacing: 8) {
+                        ForEach(Array(sentence.words.enumerated()), id: \.element.id) { index, word in
+                            WordButton(
+                                word: word,
+                                isHighlighted: highlightedWordIndex == index
+                            )
+                        }
                     }
                 }
             }
@@ -547,7 +579,7 @@ struct WordButton: View {
                     // Play actual word from sentence (not base form)
                     Button {
                         // Use audioUrl if available, otherwise clean the word text
-                        let audioFile = word.audioUrl ?? word.text
+                        let cleanedText = word.text
                             .lowercased()
                             .replacingOccurrences(of: "¿", with: "")
                             .replacingOccurrences(of: "?", with: "")
@@ -556,7 +588,9 @@ struct WordButton: View {
                             .replacingOccurrences(of: ".", with: "")
                             .replacingOccurrences(of: ",", with: "")
                             .trimmingCharacters(in: .whitespacesAndNewlines)
-                        audioManager.play(audioFile, volume: 2.0)
+                        // Remove accents for audio file lookup
+                        let audioFile = word.audioUrl ?? (cleanedText.folding(options: .diacriticInsensitive, locale: .current))
+                        audioManager.play(audioFile, volume: 1.0)
                     } label: {
                         Image(systemName: "speaker.wave.2.fill")
                             .foregroundStyle(.blue)
@@ -576,7 +610,9 @@ struct WordButton: View {
 
                         // Play base form as alternative (30% quieter)
                         Button {
-                            audioManager.play(baseForm.lowercased(), volume: 0.7)
+                            // Remove accents for audio file lookup
+                            let audioFile = baseForm.lowercased().folding(options: .diacriticInsensitive, locale: .current)
+                            audioManager.play(audioFile, volume: 1.0)
                         } label: {
                             Image(systemName: "speaker.wave.1.fill")
                                 .font(.caption)

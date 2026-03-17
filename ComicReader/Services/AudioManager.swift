@@ -68,7 +68,7 @@ class AudioManager: ObservableObject {
         // Ensure audio session is active
         setupAudioSession()
 
-        // Use standard playback (AVAudioEngine has issues on simulator)
+        // Use standard playback (AVAudioEngine has issues on devices)
         playWithPlayer(url: audioUrl, volume: min(volume, 1.0))
     }
 

@@ -13,6 +13,7 @@ struct PageView: View {
     @State private var navigateToPage: Int?
     @State private var showingVocabulary = false
     @State private var showingSettings = false
+    @State private var showDebugZones = false
 
     // Pages sorted by pageNumber for consistent navigation
     private var sortedPages: [Page] {
@@ -55,43 +56,81 @@ struct PageView: View {
             Color.black.ignoresSafeArea()
 
             GeometryReader { geometry in
-                ZStack {
-                    // Page image
-                    let imageName = settingsManager.speakingPracticeMode && !textRevealed
-                        ? (currentPage.noTextImage ?? currentPage.masterImage)
-                        : currentPage.masterImage
+                // Page image
+                let imageName = settingsManager.speakingPracticeMode && !textRevealed
+                    ? (currentPage.noTextImage ?? currentPage.masterImage)
+                    : currentPage.masterImage
 
-                    ComicImage(imageName: imageName, comicId: comic.id)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                        .onTapGesture {
-                            if settingsManager.speakingPracticeMode {
-                                withAnimation {
-                                    textRevealed.toggle()
+                ComicImage(imageName: imageName, comicId: comic.id)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .overlay {
+                        // Panel tap overlay - coordinates are relative to the image
+                        GeometryReader { imageGeometry in
+                            ZStack {
+                                // Debug: Show tap zones when enabled (triple-tap to toggle)
+                                if showDebugZones {
+                                    ForEach(currentPage.panels.sorted { $0.panelOrder < $1.panelOrder }) { panel in
+                                        Rectangle()
+                                            .stroke(Color.red, lineWidth: 2)
+                                            .background(Color.blue.opacity(0.2))
+                                            .frame(
+                                                width: panel.tapZoneWidth * imageGeometry.size.width,
+                                                height: panel.tapZoneHeight * imageGeometry.size.height
+                                            )
+                                            .overlay {
+                                                Text("P\(panel.panelOrder)")
+                                                    .font(.title)
+                                                    .foregroundColor(.white)
+                                                    .shadow(radius: 2)
+                                            }
+                                            .position(
+                                                x: (panel.tapZoneX + panel.tapZoneWidth / 2) * imageGeometry.size.width,
+                                                y: (panel.tapZoneY + panel.tapZoneHeight / 2) * imageGeometry.size.height
+                                            )
+                                    }
                                 }
-                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+
+                                // Tap handler
+                                Color.clear
+                                    .contentShape(Rectangle())
+                                    .onTapGesture(count: 3) {
+                                        // Triple-tap to toggle debug zones
+                                        withAnimation {
+                                            showDebugZones.toggle()
+                                        }
+                                    }
+                                    .onTapGesture { location in
+                                        // Handle speaking practice mode text reveal
+                                        if settingsManager.speakingPracticeMode {
+                                            withAnimation {
+                                                textRevealed.toggle()
+                                            }
+                                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                            return
+                                        }
+
+                                        // Convert tap location to normalized coordinates (0-1)
+                                        let normalizedX = location.x / imageGeometry.size.width
+                                        let normalizedY = location.y / imageGeometry.size.height
+
+                                        // Find which panel was tapped
+                                        let sortedPanels = currentPage.panels.sorted { $0.panelOrder < $1.panelOrder }
+                                        for panel in sortedPanels {
+                                            let inXRange = normalizedX >= panel.tapZoneX &&
+                                                          normalizedX <= (panel.tapZoneX + panel.tapZoneWidth)
+                                            let inYRange = normalizedY >= panel.tapZoneY &&
+                                                          normalizedY <= (panel.tapZoneY + panel.tapZoneHeight)
+                                            if inXRange && inYRange {
+                                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                                selectedPanel = panel
+                                                break
+                                            }
+                                        }
+                                    }
                             }
                         }
-
-                    // Panel tap zones
-                    ForEach(currentPage.panels) { panel in
-                        Rectangle()
-                            .fill(Color.white.opacity(0.001))
-                            .frame(
-                                width: panel.tapZoneWidth * geometry.size.width,
-                                height: panel.tapZoneHeight * geometry.size.height
-                            )
-                            .contentShape(Rectangle())
-                            .position(
-                                x: (panel.tapZoneX + panel.tapZoneWidth / 2) * geometry.size.width,
-                                y: (panel.tapZoneY + panel.tapZoneHeight / 2) * geometry.size.height
-                            )
-                            .onTapGesture {
-                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                selectedPanel = panel
-                            }
                     }
-                }
                 .gesture(
                     DragGesture(minimumDistance: 50)
                         .onEnded { value in

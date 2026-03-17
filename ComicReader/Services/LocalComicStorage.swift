@@ -42,8 +42,9 @@ class LocalComicStorage: ObservableObject {
             }
         }
 
-        // Also load bundled sample comics (for development)
-        if let bundledComic = loadBundledSampleComic() {
+        // Also load bundled comics
+        let bundledComics = loadBundledComics()
+        for bundledComic in bundledComics {
             // Only add if not already downloaded
             if !comics.contains(where: { $0.id == bundledComic.id }) {
                 comics.append(bundledComic)
@@ -122,24 +123,30 @@ class LocalComicStorage: ObservableObject {
         return comicJSON.toComic(basePath: folder)
     }
 
-    /// Load bundled sample comics from the app bundle
-    private func loadBundledSampleComic() -> Comic? {
+    /// Load all bundled comics from the app bundle
+    private func loadBundledComics() -> [Comic] {
+        var comics: [Comic] = []
+
         // Load from BundledComics folder in the app bundle
         guard let bundledComicsURL = Bundle.main.url(forResource: "BundledComics", withExtension: nil),
               let comicFolders = try? fileManager.contentsOfDirectory(at: bundledComicsURL, includingPropertiesForKeys: nil) else {
             // Fallback to hardcoded ComicData if bundle folder not found
-            return ComicData.allComics.first
+            return ComicData.allComics
         }
 
-        // Load the first bundled comic (alien)
+        // Load all bundled comics
         for folder in comicFolders where folder.hasDirectoryPath {
             if let comic = loadComic(from: folder) {
-                return comic
+                comics.append(comic)
             }
         }
 
-        // Fallback to ComicData if JSON loading fails
-        return ComicData.allComics.first
+        // Fallback to ComicData if no comics loaded
+        if comics.isEmpty {
+            return ComicData.allComics
+        }
+
+        return comics
     }
 }
 
@@ -157,7 +164,7 @@ struct ComicJSON: Codable {
     let targetLanguage: String
     let version: String
     let pages: [PageJSON]
-    let reviewWords: [ReviewWordJSON]?
+    let reviewWords: [ReviewWordEntry]?
 
     func toComic(basePath: URL) -> Comic {
         Comic(
@@ -173,17 +180,40 @@ struct ComicJSON: Codable {
     }
 }
 
-struct ReviewWordJSON: Codable {
-    let word: WordJSON
-    let panelId: String
-    let pageId: String
+/// Handles both old format { word, panelId, pageId } and new format (just WordJSON)
+struct ReviewWordEntry: Codable {
+    // Old format fields
+    let word: WordJSON?
+    let panelId: String?
+    let pageId: String?
+
+    // New format fields (word properties directly)
+    let id: String?
+    let text: String?
+    let meaning: String?
+    let baseForm: String?
 
     func toReviewWord() -> ReviewWord {
-        ReviewWord(
-            word: word.toWord(),
-            panelId: panelId,
-            pageId: pageId
-        )
+        if let word = word {
+            // Old format
+            return ReviewWord(
+                word: word.toWord(),
+                panelId: panelId ?? "",
+                pageId: pageId ?? ""
+            )
+        } else {
+            // New format - word properties are at top level
+            let wordObj = Word(
+                id: id ?? "",
+                text: text ?? "",
+                meaning: meaning ?? "",
+                baseForm: baseForm,
+                audioUrl: nil,
+                startTimeMs: nil,
+                endTimeMs: nil
+            )
+            return ReviewWord(word: wordObj, panelId: "", pageId: "")
+        }
     }
 }
 
