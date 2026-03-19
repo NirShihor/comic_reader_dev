@@ -6,9 +6,12 @@ struct Word: Identifiable, Codable, Hashable {
     let text: String
     let meaning: String
     var baseForm: String?
-    var audioUrl: String?
+    var audioUrl: String?  // Legacy field
+    var wordAudioUrl: String?  // Audio for the exact word as spoken
+    var baseFormAudioUrl: String?  // Audio for the dictionary/base form
     var startTimeMs: Int?
     var endTimeMs: Int?
+    var manual: Bool?
 }
 
 // MARK: - Sentence
@@ -24,6 +27,7 @@ struct Sentence: Identifiable, Codable, Hashable {
 struct Bubble: Identifiable, Codable, Hashable {
     let id: String
     let type: BubbleType
+    var isSoundEffect: Bool?
     let positionX: Double  // percentage 0-1
     let positionY: Double
     let width: Double

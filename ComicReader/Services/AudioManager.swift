@@ -11,6 +11,7 @@ class AudioManager: ObservableObject {
     @Published var currentTime: TimeInterval = 0
     @Published var duration: TimeInterval = 0
     @Published var playbackRate: Float = 1.0
+    @Published var isSentencePlayback = false  // True when playing full sentence (enables word highlighting)
 
     private var player: AVAudioPlayer?
     private var timer: Timer?
@@ -36,8 +37,10 @@ class AudioManager: ObservableObject {
     /// - Parameters:
     ///   - filename: Audio filename without extension
     ///   - volume: Volume level (1.0 = normal, 2.0 = double volume for dictionary words)
-    func play(_ filename: String, volume: Float = 1.0) {
+    ///   - enableHighlighting: Set to true for sentence playback to enable word highlighting
+    func play(_ filename: String, volume: Float = 1.0, enableHighlighting: Bool = false) {
         stop()
+        isSentencePlayback = enableHighlighting
 
         // Try to find the file in multiple locations
         var url: URL?
@@ -159,6 +162,7 @@ class AudioManager: ObservableObject {
         playerNode = nil
 
         isPlaying = false
+        isSentencePlayback = false
         currentTime = 0
         stopTimer()
     }

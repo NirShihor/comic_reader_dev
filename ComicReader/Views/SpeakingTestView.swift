@@ -4,8 +4,8 @@ struct SpeakingTestView: View {
     let comic: Comic
 
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var whisperService = WhisperService.shared
-    @StateObject private var audioManager = AudioManager.shared
+    @ObservedObject private var whisperService = WhisperService.shared
+    @ObservedObject private var audioManager = AudioManager.shared
 
     @State private var currentIndex = 0
     @State private var isRecording = false
@@ -16,6 +16,8 @@ struct SpeakingTestView: View {
     @State private var testComplete = false
     @State private var showingContext = false
     @State private var dummyNavigateToPage: Int? = nil
+    @State private var showingError = false
+    @State private var errorMessage = ""
 
     var reviewWords: [ReviewWord] {
         comic.reviewWords ?? []
@@ -28,12 +30,32 @@ struct SpeakingTestView: View {
 
     var contextPage: Page? {
         guard let word = currentWord else { return nil }
-        return comic.pages.first(where: { $0.id == word.pageId })
+        if let page = comic.pages.first(where: { $0.id == word.pageId }) {
+            return page
+        }
+        return comic.pages.first(where: { page in
+            page.panels.contains(where: { panel in
+                panel.bubbles.contains(where: { bubble in
+                    bubble.sentences.contains(where: { sentence in
+                        sentence.words.contains(where: { $0.id == word.word.id })
+                    })
+                })
+            })
+        })
     }
 
     var contextPanel: Panel? {
         guard let word = currentWord, let page = contextPage else { return nil }
-        return page.panels.first(where: { $0.id == word.panelId })
+        if let panel = page.panels.first(where: { $0.id == word.panelId }) {
+            return panel
+        }
+        return page.panels.first(where: { panel in
+            panel.bubbles.contains(where: { bubble in
+                bubble.sentences.contains(where: { sentence in
+                    sentence.words.contains(where: { $0.id == word.word.id })
+                })
+            })
+        })
     }
 
     var body: some View {
@@ -62,6 +84,20 @@ struct SpeakingTestView: View {
                 )
                 .environmentObject(SettingsManager())
             }
+        }
+        .onChange(of: whisperService.error) { _, newError in
+            if let error = newError {
+                print("[SpeakingTest] WhisperService error: \(error)")
+                errorMessage = error
+                showingError = true
+                isRecording = false
+                whisperService.error = nil
+            }
+        }
+        .alert("Speech Recognition Error", isPresented: $showingError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage)
         }
     }
 
@@ -273,18 +309,22 @@ struct SpeakingTestView: View {
 
     // MARK: - Actions
     private func startRecording() {
+        print("[SpeakingTest] startRecording tapped, current isRecording: \(isRecording)")
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         Task {
             await whisperService.startRecording()
             isRecording = whisperService.isRecording
+            print("[SpeakingTest] after startRecording, isRecording: \(isRecording), whisper.isRecording: \(whisperService.isRecording), error: \(whisperService.error ?? "none")")
         }
     }
 
     private func stopRecording() {
+        print("[SpeakingTest] stopRecording tapped")
         Task {
             let transcription = await whisperService.stopRecording()
             isRecording = false
             spokenText = transcription
+            print("[SpeakingTest] transcription: '\(transcription)', error: \(whisperService.error ?? "none")")
 
             // Compare with expected word
             let expectedWord = currentWord?.word.text ?? ""
@@ -344,16 +384,47 @@ struct SpeakingTestView: View {
 
     private func playWordAudio() {
         guard let reviewWord = currentWord else { return }
-        // Use baseForm if available, otherwise use the word text (lowercased, cleaned)
-        let audioName = reviewWord.word.baseForm ?? reviewWord.word.text
-            .lowercased()
-            .replacingOccurrences(of: "¿", with: "")
-            .replacingOccurrences(of: "?", with: "")
-            .replacingOccurrences(of: "¡", with: "")
-            .replacingOccurrences(of: "!", with: "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        // Play the word as spoken in the sentence first, then base form after a delay
+        if let wordAudio = reviewWord.word.wordAudioUrl {
+            audioManager.play(wordAudio)
+            // Also play base form after a short delay if it differs
+            if let baseAudio = reviewWord.word.baseFormAudioUrl, baseAudio != wordAudio {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    audioManager.play(baseAudio)
+                }
+            }
+        } else if let baseAudio = reviewWord.word.baseFormAudioUrl {
+            audioManager.play(baseAudio)
+        } else if let sentenceAudio = findSentenceAudio(for: reviewWord) {
+            // Fallback: play the parent sentence audio
+            audioManager.play(sentenceAudio)
+        } else {
+            // Last resort: clean the word text for dictionary lookup
+            let audioName = reviewWord.word.text
+                .lowercased()
+                .replacingOccurrences(of: "¿", with: "")
+                .replacingOccurrences(of: "?", with: "")
+                .replacingOccurrences(of: "¡", with: "")
+                .replacingOccurrences(of: "!", with: "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            audioManager.play(audioName)
+        }
+    }
 
-        audioManager.play(audioName)
+    private func findSentenceAudio(for reviewWord: ReviewWord) -> String? {
+        guard let page = comic.pages.first(where: { $0.id == reviewWord.pageId }),
+              let panel = page.panels.first(where: { $0.id == reviewWord.panelId }) else {
+            return nil
+        }
+        for bubble in panel.bubbles {
+            for sentence in bubble.sentences {
+                if sentence.words.contains(where: { $0.id == reviewWord.word.id }),
+                   let audioUrl = sentence.audioUrl, !audioUrl.isEmpty {
+                    return audioUrl
+                }
+            }
+        }
+        return nil
     }
 
     private func scoreColor(percentage: Int) -> Color {

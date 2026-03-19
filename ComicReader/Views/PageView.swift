@@ -149,6 +149,14 @@ struct PageView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "house.fill")
+                        .foregroundStyle(.white)
+                }
+            }
             ToolbarItem(placement: .principal) {
                 HStack(spacing: 20) {
                     Button {
@@ -196,7 +204,10 @@ struct PageView: View {
                 comic: comic,
                 page: currentPage,
                 panel: panel,
-                navigateToPage: $navigateToPage
+                navigateToPage: $navigateToPage,
+                dismissToHome: {
+                    dismiss()
+                }
             )
             .environmentObject(settingsManager)
         }

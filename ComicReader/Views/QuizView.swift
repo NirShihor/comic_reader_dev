@@ -12,6 +12,7 @@ struct QuizView: View {
     @State private var quizComplete = false
     @State private var showingContext = false
     @State private var dummyNavigateToPage: Int? = nil
+    @ObservedObject private var audioManager = AudioManager.shared
 
     var reviewWords: [ReviewWord] {
         comic.reviewWords ?? []
@@ -24,12 +25,36 @@ struct QuizView: View {
 
     var contextPage: Page? {
         guard let word = currentWord else { return nil }
-        return comic.pages.first(where: { $0.id == word.pageId })
+        // Try by ID first, then search for the word in all pages
+        if let page = comic.pages.first(where: { $0.id == word.pageId }) {
+            return page
+        }
+        // Fallback: find first page containing this word
+        return comic.pages.first(where: { page in
+            page.panels.contains(where: { panel in
+                panel.bubbles.contains(where: { bubble in
+                    bubble.sentences.contains(where: { sentence in
+                        sentence.words.contains(where: { $0.id == word.word.id })
+                    })
+                })
+            })
+        })
     }
 
     var contextPanel: Panel? {
         guard let word = currentWord, let page = contextPage else { return nil }
-        return page.panels.first(where: { $0.id == word.panelId })
+        // Try by ID first, then search for the word in panels
+        if let panel = page.panels.first(where: { $0.id == word.panelId }) {
+            return panel
+        }
+        // Fallback: find first panel containing this word
+        return page.panels.first(where: { panel in
+            panel.bubbles.contains(where: { bubble in
+                bubble.sentences.contains(where: { sentence in
+                    sentence.words.contains(where: { $0.id == word.word.id })
+                })
+            })
+        })
     }
 
     var body: some View {
@@ -308,8 +333,26 @@ struct QuizView: View {
     }
 
     private func playWordAudio() {
-        // TODO: Implement audio playback
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        guard let reviewWord = currentWord else { return }
+        if let wordAudio = reviewWord.word.wordAudioUrl {
+            audioManager.play(wordAudio)
+            if let baseAudio = reviewWord.word.baseFormAudioUrl, baseAudio != wordAudio {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    audioManager.play(baseAudio)
+                }
+            }
+        } else if let baseAudio = reviewWord.word.baseFormAudioUrl {
+            audioManager.play(baseAudio)
+        } else {
+            let audioName = reviewWord.word.text
+                .lowercased()
+                .replacingOccurrences(of: "¿", with: "")
+                .replacingOccurrences(of: "?", with: "")
+                .replacingOccurrences(of: "¡", with: "")
+                .replacingOccurrences(of: "!", with: "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            audioManager.play(audioName)
+        }
     }
 
     private func scoreColor(percentage: Int) -> Color {

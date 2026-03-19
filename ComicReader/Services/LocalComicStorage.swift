@@ -210,7 +210,8 @@ struct ReviewWordEntry: Codable {
                 baseForm: baseForm,
                 audioUrl: nil,
                 startTimeMs: nil,
-                endTimeMs: nil
+                endTimeMs: nil,
+                manual: nil
             )
             return ReviewWord(word: wordObj, panelId: "", pageId: "")
         }
@@ -264,6 +265,7 @@ struct TapZoneJSON: Codable {
 struct BubbleJSON: Codable {
     let id: String
     let type: String
+    let isSoundEffect: Bool?
     let position: PositionJSON
     let sentences: [SentenceJSON]
 
@@ -271,6 +273,7 @@ struct BubbleJSON: Codable {
         Bubble(
             id: id,
             type: Bubble.BubbleType(rawValue: type) ?? .speech,
+            isSoundEffect: isSoundEffect,
             positionX: position.x,
             positionY: position.y,
             width: position.width,
@@ -311,8 +314,11 @@ struct WordJSON: Codable {
     let meaning: String
     let baseForm: String?
     let audioUrl: String?
+    let wordAudioUrl: String?
+    let baseFormAudioUrl: String?
     let startTimeMs: Int?
     let endTimeMs: Int?
+    let manual: Bool?
 
     func toWord() -> Word {
         Word(
@@ -321,8 +327,11 @@ struct WordJSON: Codable {
             meaning: meaning,
             baseForm: baseForm,
             audioUrl: audioUrl,
+            wordAudioUrl: wordAudioUrl,
+            baseFormAudioUrl: baseFormAudioUrl,
             startTimeMs: startTimeMs,
-            endTimeMs: endTimeMs
+            endTimeMs: endTimeMs,
+            manual: manual
         )
     }
 }

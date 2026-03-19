@@ -2,6 +2,7 @@ import SwiftUI
 
 struct VocabularyView: View {
     @StateObject private var vocabularyManager = VocabularyManager()
+    @StateObject private var comicStorage = LocalComicStorage.shared
     @State private var selectedFilter: SavedWord.ReviewState? = nil
 
     var body: some View {
@@ -40,7 +41,7 @@ struct VocabularyView: View {
     private var wordList: some View {
         List {
             ForEach(filteredWords) { savedWord in
-                WordRow(savedWord: savedWord)
+                WordRow(savedWord: savedWord, comics: comicStorage.downloadedComics)
             }
             .onDelete(perform: deleteWords)
         }
@@ -65,7 +66,28 @@ struct VocabularyView: View {
 // MARK: - Word Row
 struct WordRow: View {
     let savedWord: SavedWord
+    let comics: [Comic]
     @StateObject private var audioManager = AudioManager.shared
+    @State private var showingContext = false
+    @State private var dummyNavigateToPage: Int? = nil
+
+    /// Find the first comic/page/panel where this word appears
+    private var wordContext: (comic: Comic, page: Page, panel: Panel)? {
+        for comic in comics {
+            for page in comic.pages {
+                for panel in page.panels {
+                    for bubble in panel.bubbles {
+                        for sentence in bubble.sentences {
+                            if sentence.words.contains(where: { $0.id == savedWord.word.id }) {
+                                return (comic, page, panel)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return nil
+    }
 
     var body: some View {
         HStack {
@@ -91,6 +113,17 @@ struct WordRow: View {
                 .fill(stateColor)
                 .frame(width: 10, height: 10)
 
+            // Hint button - show panel context
+            if wordContext != nil {
+                Button {
+                    showingContext = true
+                } label: {
+                    Image(systemName: "text.bubble")
+                        .foregroundStyle(.orange)
+                }
+                .buttonStyle(.plain)
+            }
+
             // Play audio button
             if let audioUrl = savedWord.word.audioUrl {
                 Button {
@@ -103,6 +136,17 @@ struct WordRow: View {
             }
         }
         .padding(.vertical, 4)
+        .sheet(isPresented: $showingContext) {
+            if let context = wordContext {
+                PanelView(
+                    comic: context.comic,
+                    page: context.page,
+                    panel: context.panel,
+                    navigateToPage: $dummyNavigateToPage
+                )
+                .environmentObject(SettingsManager())
+            }
+        }
     }
 
     private var stateColor: Color {

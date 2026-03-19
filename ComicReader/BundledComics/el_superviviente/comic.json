@@ -48,7 +48,9 @@
                       "meaning": "",
                       "baseForm": "el",
                       "startTimeMs": 0,
-                      "endTimeMs": 316
+                      "endTimeMs": 316,
+                      "wordAudioUrl": "words/el",
+                      "baseFormAudioUrl": "words/el"
                     },
                     {
                       "id": "el_superviviente-w2",
@@ -56,7 +58,9 @@
                       "meaning": "",
                       "baseForm": "sobreviviente",
                       "startTimeMs": 416,
-                      "endTimeMs": 2715
+                      "endTimeMs": 2715,
+                      "wordAudioUrl": "words/sobreviviente",
+                      "baseFormAudioUrl": "words/sobreviviente"
                     }
                   ]
                 }
@@ -572,49 +576,37 @@
                       "id": "el_superviviente-w44",
                       "text": "No",
                       "meaning": "no",
-                      "baseForm": "no",
-                      "startTimeMs": 0,
-                      "endTimeMs": 80
+                      "baseForm": "no"
                     },
                     {
                       "id": "el_superviviente-w45",
                       "text": "puedo",
                       "meaning": "I can",
-                      "baseForm": "poder",
-                      "startTimeMs": 133,
-                      "endTimeMs": 398
+                      "baseForm": "poder"
                     },
                     {
                       "id": "el_superviviente-w46",
                       "text": "ver.",
                       "meaning": "to see",
-                      "baseForm": "ver",
-                      "startTimeMs": 458,
-                      "endTimeMs": 718
+                      "baseForm": "ver"
                     },
                     {
                       "id": "el_superviviente-w47",
                       "text": "Está",
                       "meaning": "is",
-                      "baseForm": "estar",
-                      "startTimeMs": 818,
-                      "endTimeMs": 1238
+                      "baseForm": "estar"
                     },
                     {
                       "id": "el_superviviente-w48",
                       "text": "muy",
                       "meaning": "very",
-                      "baseForm": "muy",
-                      "startTimeMs": 1268,
-                      "endTimeMs": 1358
+                      "baseForm": "muy"
                     },
                     {
                       "id": "el_superviviente-w49",
-                      "text": "oscuro",
+                      "text": "oscuro...",
                       "meaning": "dark",
-                      "baseForm": "oscuro",
-                      "startTimeMs": 1418,
-                      "endTimeMs": 4231
+                      "baseForm": "oscuro"
                     }
                   ]
                 }
@@ -637,8 +629,8 @@
               "id": "el_superviviente-bubble-2-3-7",
               "type": "speech",
               "position": {
-                "x": 0.07999999999999993,
-                "y": 0.49083333333333345,
+                "x": 0.05499999999999983,
+                "y": 0.47583333333333355,
                 "width": 0.18500000000000008,
                 "height": 0.1399999999999999
               },
@@ -651,27 +643,21 @@
                   "words": [
                     {
                       "id": "el_superviviente-w50",
-                      "text": "Hay",
+                      "text": "¿Hay",
                       "meaning": "there is/are",
-                      "baseForm": "haber",
-                      "startTimeMs": 0,
-                      "endTimeMs": 231
+                      "baseForm": "haber"
                     },
                     {
                       "id": "el_superviviente-w51",
                       "text": "alguien",
                       "meaning": "someone/anyone",
-                      "baseForm": "alguien",
-                      "startTimeMs": 271,
-                      "endTimeMs": 551
+                      "baseForm": "alguien"
                     },
                     {
                       "id": "el_superviviente-w52",
-                      "text": "aquí",
+                      "text": "aquí?",
                       "meaning": "here",
-                      "baseForm": "aquí",
-                      "startTimeMs": 647,
-                      "endTimeMs": 1191
+                      "baseForm": "aquí"
                     }
                   ]
                 }
@@ -734,8 +720,8 @@
                   "words": [
                     {
                       "id": "el_superviviente-w54",
-                      "text": "Hola",
-                      "meaning": "Hello",
+                      "text": "¿Hola...?",
+                      "meaning": "hello",
                       "baseForm": "hola",
                       "startTimeMs": 0,
                       "endTimeMs": 1757
@@ -794,7 +780,7 @@
                   "words": [
                     {
                       "id": "el_superviviente-w55",
-                      "text": "Eh",
+                      "text": "¡Eh!",
                       "meaning": "hey",
                       "baseForm": "eh",
                       "startTimeMs": 0,
@@ -802,9 +788,9 @@
                     },
                     {
                       "id": "el_superviviente-w56",
-                      "text": "Quién",
-                      "meaning": "Who",
-                      "baseForm": "quien",
+                      "text": "¿Quién",
+                      "meaning": "who",
+                      "baseForm": "quién",
                       "startTimeMs": 560,
                       "endTimeMs": 838
                     },
@@ -818,9 +804,9 @@
                     },
                     {
                       "id": "el_superviviente-w58",
-                      "text": "allí",
+                      "text": "allí?",
                       "meaning": "there",
-                      "baseForm": "alli",
+                      "baseForm": "allí",
                       "startTimeMs": 998,
                       "endTimeMs": 1598
                     }
@@ -876,14 +862,14 @@
                     {
                       "id": "el_superviviente-w61",
                       "text": "hagas",
-                      "meaning": "do",
+                      "meaning": "do (subjunctive form)",
                       "baseForm": "hacer",
                       "startTimeMs": 278,
                       "endTimeMs": 558
                     },
                     {
                       "id": "el_superviviente-w62",
-                      "text": "daño",
+                      "text": "daño...!",
                       "meaning": "harm",
                       "baseForm": "daño",
                       "startTimeMs": 611,
@@ -899,7 +885,7 @@
                     },
                     {
                       "id": "el_superviviente-w64",
-                      "text": "favor",
+                      "text": "favor...!",
                       "meaning": "favor",
                       "baseForm": "favor",
                       "startTimeMs": 1421,
@@ -940,7 +926,7 @@
                   "words": [
                     {
                       "id": "el_superviviente-w65",
-                      "text": "Espera",
+                      "text": "Espera...",
                       "meaning": "wait",
                       "baseForm": "esperar",
                       "startTimeMs": 0,
@@ -948,7 +934,7 @@
                     },
                     {
                       "id": "el_superviviente-w66",
-                      "text": "Quédate",
+                      "text": "¡Quédate",
                       "meaning": "stay",
                       "baseForm": "quedarse",
                       "startTimeMs": 1379,
@@ -956,7 +942,7 @@
                     },
                     {
                       "id": "el_superviviente-w67",
-                      "text": "ahí",
+                      "text": "ahí!",
                       "meaning": "there",
                       "baseForm": "ahí",
                       "startTimeMs": 1732,
@@ -1004,7 +990,7 @@
                   "words": [
                     {
                       "id": "el_superviviente-w68",
-                      "text": "Quién",
+                      "text": "¿Quién",
                       "meaning": "who",
                       "baseForm": "quién",
                       "startTimeMs": 0,
@@ -1012,7 +998,7 @@
                     },
                     {
                       "id": "el_superviviente-w69",
-                      "text": "eres",
+                      "text": "eres?",
                       "meaning": "are",
                       "baseForm": "ser",
                       "startTimeMs": 292,
@@ -1020,7 +1006,7 @@
                     },
                     {
                       "id": "el_superviviente-w70",
-                      "text": "Cómo",
+                      "text": "¿Cómo",
                       "meaning": "how",
                       "baseForm": "cómo",
                       "startTimeMs": 2898,
@@ -1029,15 +1015,15 @@
                     {
                       "id": "el_superviviente-w71",
                       "text": "te",
-                      "meaning": "you",
+                      "meaning": "you (reflexive)",
                       "baseForm": "tú",
                       "startTimeMs": 3011,
                       "endTimeMs": 3117
                     },
                     {
                       "id": "el_superviviente-w72",
-                      "text": "llamas",
-                      "meaning": "call",
+                      "text": "llamas...?",
+                      "meaning": "call (your name)",
                       "baseForm": "llamar",
                       "startTimeMs": 3170,
                       "endTimeMs": 3835
@@ -1093,14 +1079,6 @@
                     },
                     {
                       "id": "el_superviviente-w75",
-                      "text": "Diego",
-                      "meaning": "Diego",
-                      "baseForm": "Diego",
-                      "startTimeMs": 621,
-                      "endTimeMs": 1911
-                    },
-                    {
-                      "id": "el_superviviente-w76",
                       "text": "Vivo",
                       "meaning": "live",
                       "baseForm": "vivir",
@@ -1108,15 +1086,15 @@
                       "endTimeMs": 2307
                     },
                     {
-                      "id": "el_superviviente-w77",
-                      "text": "aquí",
+                      "id": "el_superviviente-w76",
+                      "text": "aquí...",
                       "meaning": "here",
                       "baseForm": "aquí",
                       "startTimeMs": 2419,
                       "endTimeMs": 3986
                     },
                     {
-                      "id": "el_superviviente-w78",
+                      "id": "el_superviviente-w77",
                       "text": "En",
                       "meaning": "in",
                       "baseForm": "en",
@@ -1124,7 +1102,7 @@
                       "endTimeMs": 4144
                     },
                     {
-                      "id": "el_superviviente-w79",
+                      "id": "el_superviviente-w78",
                       "text": "esta",
                       "meaning": "this",
                       "baseForm": "este",
@@ -1132,8 +1110,8 @@
                       "endTimeMs": 4464
                     },
                     {
-                      "id": "el_superviviente-w80",
-                      "text": "casa",
+                      "id": "el_superviviente-w79",
+                      "text": "casa...",
                       "meaning": "house",
                       "baseForm": "casa",
                       "startTimeMs": 4560,
@@ -1160,7 +1138,7 @@
               "id": "el_superviviente-bubble-4-3-15",
               "type": "speech",
               "position": {
-                "x": 0.6475,
+                "x": 0.6449999999999999,
                 "y": 0.8248333231608074,
                 "width": 0.2849999999999999,
                 "height": 0.135
@@ -1173,55 +1151,55 @@
                   "audioUrl": "el_superviviente_p4_s3",
                   "words": [
                     {
-                      "id": "el_superviviente-w81",
-                      "text": "Vives",
-                      "meaning": "you live",
+                      "id": "el_superviviente-w80",
+                      "text": "¿Vives",
+                      "meaning": "do you live",
                       "baseForm": "vivir",
                       "startTimeMs": 0,
                       "endTimeMs": 320
                     },
                     {
-                      "id": "el_superviviente-w82",
-                      "text": "aquí",
+                      "id": "el_superviviente-w81",
+                      "text": "aquí...?",
                       "meaning": "here",
                       "baseForm": "aquí",
                       "startTimeMs": 400,
                       "endTimeMs": 1238
                     },
                     {
-                      "id": "el_superviviente-w83",
-                      "text": "Estás",
-                      "meaning": "you are",
+                      "id": "el_superviviente-w82",
+                      "text": "¿Estás",
+                      "meaning": "are you",
                       "baseForm": "estar",
                       "startTimeMs": 1458,
                       "endTimeMs": 1917
                     },
                     {
-                      "id": "el_superviviente-w84",
-                      "text": "solo",
+                      "id": "el_superviviente-w83",
+                      "text": "solo...?",
                       "meaning": "alone",
                       "baseForm": "solo",
                       "startTimeMs": 2013,
                       "endTimeMs": 3316
                     },
                     {
-                      "id": "el_superviviente-w85",
-                      "text": "Dónde",
+                      "id": "el_superviviente-w84",
+                      "text": "¿Dónde",
                       "meaning": "where",
                       "baseForm": "dónde",
                       "startTimeMs": 3336,
                       "endTimeMs": 3515
                     },
                     {
-                      "id": "el_superviviente-w86",
+                      "id": "el_superviviente-w85",
                       "text": "están",
-                      "meaning": "they are",
+                      "meaning": "are",
                       "baseForm": "estar",
                       "startTimeMs": 3555,
                       "endTimeMs": 3755
                     },
                     {
-                      "id": "el_superviviente-w87",
+                      "id": "el_superviviente-w86",
                       "text": "tus",
                       "meaning": "your",
                       "baseForm": "tu",
@@ -1229,8 +1207,8 @@
                       "endTimeMs": 3915
                     },
                     {
-                      "id": "el_superviviente-w88",
-                      "text": "padres",
+                      "id": "el_superviviente-w87",
+                      "text": "padres?",
                       "meaning": "parents",
                       "baseForm": "padre",
                       "startTimeMs": 3975,
@@ -1277,7 +1255,7 @@
                   "audioUrl": "el_superviviente_p5_s1",
                   "words": [
                     {
-                      "id": "el_superviviente-w89",
+                      "id": "el_superviviente-w88",
                       "text": "Mi",
                       "meaning": "my",
                       "baseForm": "mi",
@@ -1285,7 +1263,7 @@
                       "endTimeMs": 158
                     },
                     {
-                      "id": "el_superviviente-w90",
+                      "id": "el_superviviente-w89",
                       "text": "madre",
                       "meaning": "mother",
                       "baseForm": "madre",
@@ -1294,7 +1272,7 @@
                       "vocabQuiz": true
                     },
                     {
-                      "id": "el_superviviente-w91",
+                      "id": "el_superviviente-w90",
                       "text": "está",
                       "meaning": "is",
                       "baseForm": "estar",
@@ -1302,15 +1280,15 @@
                       "endTimeMs": 794
                     },
                     {
-                      "id": "el_superviviente-w92",
-                      "text": "muerta",
+                      "id": "el_superviviente-w91",
+                      "text": "muerta,",
                       "meaning": "dead",
                       "baseForm": "muerto",
                       "startTimeMs": 847,
                       "endTimeMs": 1273
                     },
                     {
-                      "id": "el_superviviente-w93",
+                      "id": "el_superviviente-w92",
                       "text": "y",
                       "meaning": "and",
                       "baseForm": "y",
@@ -1318,15 +1296,15 @@
                       "endTimeMs": 2473
                     },
                     {
-                      "id": "el_superviviente-w94",
+                      "id": "el_superviviente-w93",
                       "text": "mi",
                       "meaning": "my",
                       "baseForm": "mi",
-                      "startTimeMs": 2526,
-                      "endTimeMs": 2632
+                      "startTimeMs": 0,
+                      "endTimeMs": 158
                     },
                     {
-                      "id": "el_superviviente-w95",
+                      "id": "el_superviviente-w94",
                       "text": "padre",
                       "meaning": "father",
                       "baseForm": "padre",
@@ -1335,15 +1313,15 @@
                       "vocabQuiz": true
                     },
                     {
-                      "id": "el_superviviente-w96",
+                      "id": "el_superviviente-w95",
                       "text": "está",
                       "meaning": "is",
                       "baseForm": "estar",
-                      "startTimeMs": 2998,
-                      "endTimeMs": 3190
+                      "startTimeMs": 602,
+                      "endTimeMs": 794
                     },
                     {
-                      "id": "el_superviviente-w97",
+                      "id": "el_superviviente-w96",
                       "text": "con",
                       "meaning": "with",
                       "baseForm": "con",
@@ -1352,7 +1330,7 @@
                       "vocabQuiz": true
                     },
                     {
-                      "id": "el_superviviente-w98",
+                      "id": "el_superviviente-w97",
                       "text": "ellos",
                       "meaning": "them",
                       "baseForm": "ellos",
@@ -1361,8 +1339,8 @@
                       "vocabQuiz": true
                     },
                     {
-                      "id": "el_superviviente-w99",
-                      "text": "ahora",
+                      "id": "el_superviviente-w98",
+                      "text": "ahora.",
                       "meaning": "now",
                       "baseForm": "ahora",
                       "startTimeMs": 3721,
@@ -1402,8 +1380,8 @@
                   "audioUrl": "el_superviviente_p5_s2",
                   "words": [
                     {
-                      "id": "el_superviviente-w100",
-                      "text": "Quién",
+                      "id": "el_superviviente-w99",
+                      "text": "¿Quién",
                       "meaning": "who",
                       "baseForm": "quién",
                       "startTimeMs": 0,
@@ -1411,16 +1389,16 @@
                       "vocabQuiz": true
                     },
                     {
-                      "id": "el_superviviente-w101",
-                      "text": "eres",
-                      "meaning": "are",
+                      "id": "el_superviviente-w100",
+                      "text": "eres?",
+                      "meaning": "you are",
                       "baseForm": "ser",
                       "startTimeMs": 371,
                       "endTimeMs": 797
                     },
                     {
-                      "id": "el_superviviente-w102",
-                      "text": "Cómo",
+                      "id": "el_superviviente-w101",
+                      "text": "¿Cómo",
                       "meaning": "how",
                       "baseForm": "cómo",
                       "startTimeMs": 1397,
@@ -1428,31 +1406,31 @@
                       "vocabQuiz": true
                     },
                     {
-                      "id": "el_superviviente-w103",
+                      "id": "el_superviviente-w102",
                       "text": "te",
-                      "meaning": "you",
+                      "meaning": "you (reflexive)",
                       "baseForm": "tú",
                       "startTimeMs": 2210,
                       "endTimeMs": 2316
                     },
                     {
-                      "id": "el_superviviente-w104",
-                      "text": "llamas",
-                      "meaning": "call",
+                      "id": "el_superviviente-w103",
+                      "text": "llamas?",
+                      "meaning": "you call",
                       "baseForm": "llamar",
                       "startTimeMs": 2369,
                       "endTimeMs": 3995
                     },
                     {
-                      "id": "el_superviviente-w105",
-                      "text": "De",
+                      "id": "el_superviviente-w104",
+                      "text": "¿De",
                       "meaning": "from",
                       "baseForm": "de",
                       "startTimeMs": 4355,
                       "endTimeMs": 4873
                     },
                     {
-                      "id": "el_superviviente-w106",
+                      "id": "el_superviviente-w105",
                       "text": "dónde",
                       "meaning": "where",
                       "baseForm": "dónde",
@@ -1461,12 +1439,12 @@
                       "vocabQuiz": true
                     },
                     {
-                      "id": "el_superviviente-w107",
-                      "text": "eres",
-                      "meaning": "are",
+                      "id": "el_superviviente-w106",
+                      "text": "eres?",
+                      "meaning": "you are",
                       "baseForm": "ser",
-                      "startTimeMs": 5325,
-                      "endTimeMs": 5911
+                      "startTimeMs": 371,
+                      "endTimeMs": 797
                     }
                   ]
                 }
@@ -1502,7 +1480,7 @@
                   "audioUrl": "el_superviviente_p5_s3",
                   "words": [
                     {
-                      "id": "el_superviviente-w108",
+                      "id": "el_superviviente-w107",
                       "text": "Me",
                       "meaning": "me",
                       "baseForm": "me",
@@ -1511,7 +1489,7 @@
                       "vocabQuiz": true
                     },
                     {
-                      "id": "el_superviviente-w109",
+                      "id": "el_superviviente-w108",
                       "text": "llamo",
                       "meaning": "call",
                       "baseForm": "llamar",
@@ -1519,7 +1497,7 @@
                       "endTimeMs": 391
                     },
                     {
-                      "id": "el_superviviente-w110",
+                      "id": "el_superviviente-w109",
                       "text": "Vengo",
                       "meaning": "come",
                       "baseForm": "venir",
@@ -1528,7 +1506,7 @@
                       "vocabQuiz": true
                     },
                     {
-                      "id": "el_superviviente-w111",
+                      "id": "el_superviviente-w110",
                       "text": "de",
                       "meaning": "from",
                       "baseForm": "de",
@@ -1536,7 +1514,7 @@
                       "endTimeMs": 2545
                     },
                     {
-                      "id": "el_superviviente-w112",
+                      "id": "el_superviviente-w111",
                       "text": "Mi",
                       "meaning": "my",
                       "baseForm": "mi",
@@ -1544,8 +1522,8 @@
                       "endTimeMs": 4703
                     },
                     {
-                      "id": "el_superviviente-w113",
-                      "text": "familia",
+                      "id": "el_superviviente-w112",
+                      "text": "familia...",
                       "meaning": "family",
                       "baseForm": "familia",
                       "startTimeMs": 4803,
@@ -1553,15 +1531,15 @@
                       "vocabQuiz": true
                     },
                     {
-                      "id": "el_superviviente-w114",
-                      "text": "bueno",
+                      "id": "el_superviviente-w113",
+                      "text": "bueno...",
                       "meaning": "well",
                       "baseForm": "bueno",
                       "startTimeMs": 6152,
                       "endTimeMs": 7418
                     },
                     {
-                      "id": "el_superviviente-w115",
+                      "id": "el_superviviente-w114",
                       "text": "ellos",
                       "meaning": "they",
                       "baseForm": "ellos",
@@ -1569,7 +1547,7 @@
                       "endTimeMs": 7736
                     },
                     {
-                      "id": "el_superviviente-w116",
+                      "id": "el_superviviente-w115",
                       "text": "también",
                       "meaning": "also",
                       "baseForm": "también",
@@ -1578,7 +1556,7 @@
                       "vocabQuiz": true
                     },
                     {
-                      "id": "el_superviviente-w117",
+                      "id": "el_superviviente-w116",
                       "text": "se",
                       "meaning": "oneself",
                       "baseForm": "se",
@@ -1586,7 +1564,7 @@
                       "endTimeMs": 8295
                     },
                     {
-                      "id": "el_superviviente-w118",
+                      "id": "el_superviviente-w117",
                       "text": "han",
                       "meaning": "have",
                       "baseForm": "haber",
@@ -1595,8 +1573,8 @@
                       "vocabQuiz": true
                     },
                     {
-                      "id": "el_superviviente-w119",
-                      "text": "ido",
+                      "id": "el_superviviente-w118",
+                      "text": "ido.",
                       "meaning": "gone",
                       "baseForm": "ir",
                       "startTimeMs": 8428,
@@ -1643,15 +1621,15 @@
                   "audioUrl": "el_superviviente_p6_s1",
                   "words": [
                     {
-                      "id": "el_superviviente-w120",
-                      "text": "No",
+                      "id": "el_superviviente-w119",
+                      "text": "¿No",
                       "meaning": "no",
                       "baseForm": "no",
                       "startTimeMs": 0,
                       "endTimeMs": 160
                     },
                     {
-                      "id": "el_superviviente-w121",
+                      "id": "el_superviviente-w120",
                       "text": "tienes",
                       "meaning": "you have",
                       "baseForm": "tener",
@@ -1659,15 +1637,15 @@
                       "endTimeMs": 559
                     },
                     {
-                      "id": "el_superviviente-w122",
-                      "text": "familia",
+                      "id": "el_superviviente-w121",
+                      "text": "familia?",
                       "meaning": "family",
                       "baseForm": "familia",
                       "startTimeMs": 639,
                       "endTimeMs": 1999
                     },
                     {
-                      "id": "el_superviviente-w123",
+                      "id": "el_superviviente-w122",
                       "text": "Quizás",
                       "meaning": "maybe",
                       "baseForm": "quizás",
@@ -1675,7 +1653,7 @@
                       "endTimeMs": 4308
                     },
                     {
-                      "id": "el_superviviente-w124",
+                      "id": "el_superviviente-w123",
                       "text": "podamos",
                       "meaning": "we can",
                       "baseForm": "poder",
@@ -1683,7 +1661,7 @@
                       "endTimeMs": 4868
                     },
                     {
-                      "id": "el_superviviente-w125",
+                      "id": "el_superviviente-w124",
                       "text": "ser",
                       "meaning": "to be",
                       "baseForm": "ser",
@@ -1691,12 +1669,12 @@
                       "endTimeMs": 5188
                     },
                     {
-                      "id": "el_superviviente-w126",
-                      "text": "familia",
+                      "id": "el_superviviente-w125",
+                      "text": "familia...?",
                       "meaning": "family",
                       "baseForm": "familia",
-                      "startTimeMs": 5268,
-                      "endTimeMs": 7427
+                      "startTimeMs": 639,
+                      "endTimeMs": 1999
                     }
                   ]
                 }
@@ -1732,15 +1710,15 @@
                   "audioUrl": "el_superviviente_p6_s2",
                   "words": [
                     {
-                      "id": "el_superviviente-w127",
-                      "text": "Tienes",
+                      "id": "el_superviviente-w126",
+                      "text": "¿Tienes",
                       "meaning": "you have",
                       "baseForm": "tener",
                       "startTimeMs": 0,
                       "endTimeMs": 475
                     },
                     {
-                      "id": "el_superviviente-w128",
+                      "id": "el_superviviente-w127",
                       "text": "algo",
                       "meaning": "something",
                       "baseForm": "algo",
@@ -1748,7 +1726,7 @@
                       "endTimeMs": 795
                     },
                     {
-                      "id": "el_superviviente-w129",
+                      "id": "el_superviviente-w128",
                       "text": "para",
                       "meaning": "for",
                       "baseForm": "para",
@@ -1756,9 +1734,9 @@
                       "endTimeMs": 1035
                     },
                     {
-                      "id": "el_superviviente-w130",
-                      "text": "comer",
-                      "meaning": "eat",
+                      "id": "el_superviviente-w129",
+                      "text": "comer...?",
+                      "meaning": "to eat",
                       "baseForm": "comer",
                       "startTimeMs": 1128,
                       "endTimeMs": 1671
@@ -1797,15 +1775,15 @@
                   "audioUrl": "el_superviviente_p6_s3",
                   "words": [
                     {
-                      "id": "el_superviviente-w131",
-                      "text": "No",
+                      "id": "el_superviviente-w130",
+                      "text": "No...",
                       "meaning": "no",
                       "baseForm": "no",
                       "startTimeMs": 0,
                       "endTimeMs": 556
                     },
                     {
-                      "id": "el_superviviente-w132",
+                      "id": "el_superviviente-w131",
                       "text": "pero",
                       "meaning": "but",
                       "baseForm": "pero",
@@ -1813,7 +1791,7 @@
                       "endTimeMs": 2424
                     },
                     {
-                      "id": "el_superviviente-w133",
+                      "id": "el_superviviente-w132",
                       "text": "podemos",
                       "meaning": "we can",
                       "baseForm": "poder",
@@ -1821,7 +1799,7 @@
                       "endTimeMs": 2704
                     },
                     {
-                      "id": "el_superviviente-w134",
+                      "id": "el_superviviente-w133",
                       "text": "salir",
                       "meaning": "to go out",
                       "baseForm": "salir",
@@ -1829,7 +1807,7 @@
                       "endTimeMs": 3022
                     },
                     {
-                      "id": "el_superviviente-w135",
+                      "id": "el_superviviente-w134",
                       "text": "a",
                       "meaning": "to",
                       "baseForm": "a",
@@ -1837,7 +1815,7 @@
                       "endTimeMs": 3102
                     },
                     {
-                      "id": "el_superviviente-w136",
+                      "id": "el_superviviente-w135",
                       "text": "buscar",
                       "meaning": "to get",
                       "baseForm": "buscar",
@@ -1845,8 +1823,8 @@
                       "endTimeMs": 3578
                     },
                     {
-                      "id": "el_superviviente-w137",
-                      "text": "algo",
+                      "id": "el_superviviente-w136",
+                      "text": "algo.",
                       "meaning": "something",
                       "baseForm": "algo",
                       "startTimeMs": 3642,
@@ -1886,15 +1864,15 @@
                   "audioUrl": "el_superviviente_p6_s4",
                   "words": [
                     {
-                      "id": "el_superviviente-w138",
-                      "text": "Conseguir",
+                      "id": "el_superviviente-w137",
+                      "text": "¿Conseguir",
                       "meaning": "to get",
                       "baseForm": "conseguir",
                       "startTimeMs": 0,
                       "endTimeMs": 637
                     },
                     {
-                      "id": "el_superviviente-w139",
+                      "id": "el_superviviente-w138",
                       "text": "algo",
                       "meaning": "something",
                       "baseForm": "algo",
@@ -1902,7 +1880,7 @@
                       "endTimeMs": 877
                     },
                     {
-                      "id": "el_superviviente-w140",
+                      "id": "el_superviviente-w139",
                       "text": "de",
                       "meaning": "of",
                       "baseForm": "de",
@@ -1910,18 +1888,18 @@
                       "endTimeMs": 1036
                     },
                     {
-                      "id": "el_superviviente-w141",
-                      "text": "comida",
+                      "id": "el_superviviente-w140",
+                      "text": "comida..?",
                       "meaning": "food",
                       "baseForm": "comida",
                       "startTimeMs": 1104,
                       "endTimeMs": 1672
                     },
                     {
-                      "id": "el_superviviente-w142",
-                      "text": "Dónde",
-                      "meaning": "Where",
-                      "baseForm": "donde",
+                      "id": "el_superviviente-w141",
+                      "text": "¿Dónde?",
+                      "meaning": "where",
+                      "baseForm": "dónde",
                       "startTimeMs": 2312,
                       "endTimeMs": 5031
                     }
@@ -1966,16 +1944,16 @@
                   "audioUrl": "el_superviviente_p7_s1",
                   "words": [
                     {
-                      "id": "el_superviviente-w143",
+                      "id": "el_superviviente-w142",
                       "text": "Espera",
-                      "meaning": "Wait",
+                      "meaning": "wait",
                       "baseForm": "esperar",
                       "startTimeMs": 0,
                       "endTimeMs": 479
                     },
                     {
-                      "id": "el_superviviente-w144",
-                      "text": "aquí",
+                      "id": "el_superviviente-w143",
+                      "text": "aquí...",
                       "meaning": "here",
                       "baseForm": "aquí",
                       "startTimeMs": 511,
@@ -2015,8 +1993,8 @@
                   "audioUrl": "el_superviviente_p7_s2",
                   "words": [
                     {
-                      "id": "el_superviviente-w145",
-                      "text": "Adónde",
+                      "id": "el_superviviente-w144",
+                      "text": "¿Adónde",
                       "meaning": "where",
                       "baseForm": "adónde",
                       "startTimeMs": 0,
@@ -2024,9 +2002,9 @@
                       "vocabQuiz": true
                     },
                     {
-                      "id": "el_superviviente-w146",
-                      "text": "vas",
-                      "meaning": "you are going",
+                      "id": "el_superviviente-w145",
+                      "text": "vas...?",
+                      "meaning": "you go",
                       "baseForm": "ir",
                       "startTimeMs": 498,
                       "endTimeMs": 1837
@@ -2096,15 +2074,15 @@
                   "audioUrl": "el_superviviente_p8_s1",
                   "words": [
                     {
-                      "id": "el_superviviente-w147",
-                      "text": "Para",
+                      "id": "el_superviviente-w146",
+                      "text": "¿Para",
                       "meaning": "for",
                       "baseForm": "para",
                       "startTimeMs": 0,
                       "endTimeMs": 152
                     },
                     {
-                      "id": "el_superviviente-w148",
+                      "id": "el_superviviente-w147",
                       "text": "qué",
                       "meaning": "what",
                       "baseForm": "qué",
@@ -2112,7 +2090,7 @@
                       "endTimeMs": 312
                     },
                     {
-                      "id": "el_superviviente-w149",
+                      "id": "el_superviviente-w148",
                       "text": "es",
                       "meaning": "is",
                       "baseForm": "ser",
@@ -2120,8 +2098,8 @@
                       "endTimeMs": 471
                     },
                     {
-                      "id": "el_superviviente-w150",
-                      "text": "esto",
+                      "id": "el_superviviente-w149",
+                      "text": "esto...?",
                       "meaning": "this",
                       "baseForm": "esto",
                       "startTimeMs": 567,
@@ -2161,7 +2139,7 @@
                   "audioUrl": "el_superviviente_p8_s2",
                   "words": [
                     {
-                      "id": "el_superviviente-w151",
+                      "id": "el_superviviente-w150",
                       "text": "Para",
                       "meaning": "to",
                       "baseForm": "para",
@@ -2169,7 +2147,7 @@
                       "endTimeMs": 237
                     },
                     {
-                      "id": "el_superviviente-w152",
+                      "id": "el_superviviente-w151",
                       "text": "conseguir",
                       "meaning": "to get",
                       "baseForm": "conseguir",
@@ -2177,8 +2155,8 @@
                       "endTimeMs": 797
                     },
                     {
-                      "id": "el_superviviente-w153",
-                      "text": "comida",
+                      "id": "el_superviviente-w152",
+                      "text": "comida.",
                       "meaning": "food",
                       "baseForm": "comida",
                       "startTimeMs": 865,
@@ -2186,12 +2164,18 @@
                       "vocabQuiz": true
                     },
                     {
-                      "id": "el_superviviente-w154",
+                      "id": "el_superviviente-w153",
                       "text": "Ven",
                       "meaning": "come",
                       "baseForm": "venir",
                       "startTimeMs": 2313,
                       "endTimeMs": 3273
+                    },
+                    {
+                      "id": "el_superviviente-w154",
+                      "text": ".",
+                      "meaning": "",
+                      "baseForm": "."
                     }
                   ]
                 }
@@ -2228,7 +2212,7 @@
                   "words": [
                     {
                       "id": "el_superviviente-w155",
-                      "text": "Consigues",
+                      "text": "¿Consigues",
                       "meaning": "you get",
                       "baseForm": "conseguir",
                       "startTimeMs": 0,
@@ -2236,7 +2220,7 @@
                     },
                     {
                       "id": "el_superviviente-w156",
-                      "text": "comida",
+                      "text": "comida...",
                       "meaning": "food",
                       "baseForm": "comida",
                       "startTimeMs": 570,
@@ -2252,7 +2236,7 @@
                     },
                     {
                       "id": "el_superviviente-w158",
-                      "text": "esto",
+                      "text": "esto...?",
                       "meaning": "this",
                       "baseForm": "esto",
                       "startTimeMs": 1338,
@@ -2301,16 +2285,16 @@
                   "words": [
                     {
                       "id": "el_superviviente-w159",
-                      "text": "Sí",
-                      "meaning": "Yes",
+                      "text": "¡Sí!",
+                      "meaning": "yes",
                       "baseForm": "sí",
                       "startTimeMs": 0,
                       "endTimeMs": 600
                     },
                     {
                       "id": "el_superviviente-w160",
-                      "text": "VamosTe",
-                      "meaning": "we go",
+                      "text": "Vamos...¡Te",
+                      "meaning": "lets go",
                       "baseForm": "ir",
                       "startTimeMs": 740,
                       "endTimeMs": 1908
@@ -2325,7 +2309,7 @@
                     },
                     {
                       "id": "el_superviviente-w162",
-                      "text": "mostraré",
+                      "text": "mostraré!",
                       "meaning": "I will show",
                       "baseForm": "mostrar",
                       "startTimeMs": 2127,
@@ -2390,7 +2374,7 @@
                     },
                     {
                       "id": "el_superviviente-w166",
-                      "text": "salió",
+                      "text": "salió.",
                       "meaning": "went out",
                       "baseForm": "salir",
                       "startTimeMs": 765,
@@ -2438,7 +2422,7 @@
                     },
                     {
                       "id": "el_superviviente-w172",
-                      "text": "noche",
+                      "text": "noche...",
                       "meaning": "night",
                       "baseForm": "noche",
                       "startTimeMs": 3407,
@@ -2479,7 +2463,7 @@
                   "words": [
                     {
                       "id": "el_superviviente-w173",
-                      "text": "No",
+                      "text": "No...",
                       "meaning": "no",
                       "baseForm": "no",
                       "startTimeMs": 0,
@@ -2490,8 +2474,8 @@
                       "text": "No",
                       "meaning": "no",
                       "baseForm": "no",
-                      "startTimeMs": 1146,
-                      "endTimeMs": 1198
+                      "startTimeMs": 0,
+                      "endTimeMs": 1120
                     },
                     {
                       "id": "el_superviviente-w175",
@@ -2504,14 +2488,14 @@
                     {
                       "id": "el_superviviente-w176",
                       "text": "que",
-                      "meaning": "that",
+                      "meaning": "to",
                       "baseForm": "que",
                       "startTimeMs": 1698,
                       "endTimeMs": 1758
                     },
                     {
                       "id": "el_superviviente-w177",
-                      "text": "esperar",
+                      "text": "esperar.",
                       "meaning": "to wait",
                       "baseForm": "esperar",
                       "startTimeMs": 1798,
@@ -2551,7 +2535,7 @@
                     },
                     {
                       "id": "el_superviviente-w182",
-                      "text": "tiempo",
+                      "text": "tiempo.",
                       "meaning": "time",
                       "baseForm": "tiempo",
                       "startTimeMs": 3812,
@@ -2562,8 +2546,8 @@
                       "text": "No",
                       "meaning": "no",
                       "baseForm": "no",
-                      "startTimeMs": 4527,
-                      "endTimeMs": 5113
+                      "startTimeMs": 0,
+                      "endTimeMs": 1120
                     },
                     {
                       "id": "el_superviviente-w184",
@@ -2583,7 +2567,7 @@
                     },
                     {
                       "id": "el_superviviente-w186",
-                      "text": "lugar",
+                      "text": "lugar.",
                       "meaning": "place",
                       "baseForm": "lugar",
                       "startTimeMs": 5804,
@@ -2607,7 +2591,7 @@
                     },
                     {
                       "id": "el_superviviente-w189",
-                      "text": "salvo",
+                      "text": "salvo.",
                       "meaning": "safe",
                       "baseForm": "salvo",
                       "startTimeMs": 7327,
@@ -2656,7 +2640,7 @@
                     },
                     {
                       "id": "el_superviviente-w191",
-                      "text": "astutos",
+                      "text": "astutos.",
                       "meaning": "clever",
                       "baseForm": "astuto",
                       "startTimeMs": 219,
@@ -2681,7 +2665,7 @@
                     },
                     {
                       "id": "el_superviviente-w194",
-                      "text": "esperándonos",
+                      "text": "esperándonos.",
                       "meaning": "waiting for us",
                       "baseForm": "esperar",
                       "startTimeMs": 2845,
@@ -2737,7 +2721,7 @@
                     },
                     {
                       "id": "el_superviviente-w196",
-                      "text": "bien",
+                      "text": "bien.",
                       "meaning": "alright",
                       "baseForm": "bien",
                       "startTimeMs": 476,
@@ -2745,7 +2729,7 @@
                     },
                     {
                       "id": "el_superviviente-w197",
-                      "text": "Lo",
+                      "text": "¡Lo",
                       "meaning": "it",
                       "baseForm": "lo",
                       "startTimeMs": 1156,
@@ -2777,7 +2761,7 @@
                     },
                     {
                       "id": "el_superviviente-w201",
-                      "text": "veces",
+                      "text": "veces!",
                       "meaning": "times",
                       "baseForm": "vez",
                       "startTimeMs": 2880,
@@ -2826,7 +2810,7 @@
                     },
                     {
                       "id": "el_superviviente-w203",
-                      "text": "bien",
+                      "text": "bien.",
                       "meaning": "well",
                       "baseForm": "bien",
                       "startTimeMs": 351,
@@ -2834,7 +2818,7 @@
                     },
                     {
                       "id": "el_superviviente-w204",
-                      "text": "Vamos",
+                      "text": "¡Vamos!",
                       "meaning": "lets go",
                       "baseForm": "ir",
                       "startTimeMs": 659,
@@ -2899,7 +2883,7 @@
                     },
                     {
                       "id": "el_superviviente-w208",
-                      "text": "mí",
+                      "text": "mí.",
                       "meaning": "me",
                       "baseForm": "yo",
                       "startTimeMs": 1036,
@@ -2923,7 +2907,7 @@
                     },
                     {
                       "id": "el_superviviente-w211",
-                      "text": "ir",
+                      "text": "ir...",
                       "meaning": "to go",
                       "baseForm": "ir",
                       "startTimeMs": 2714,
@@ -2931,7 +2915,7 @@
                     },
                     {
                       "id": "el_superviviente-w212",
-                      "text": "Muy",
+                      "text": "Muy,",
                       "meaning": "very",
                       "baseForm": "muy",
                       "startTimeMs": 3552,
@@ -2942,9 +2926,8 @@
                       "text": "muy",
                       "meaning": "very",
                       "baseForm": "muy",
-                      "startTimeMs": 4552,
-                      "endTimeMs": 5272,
-                      "vocabQuiz": true
+                      "startTimeMs": 3552,
+                      "endTimeMs": 4312
                     },
                     {
                       "id": "el_superviviente-w214",
@@ -2956,7 +2939,7 @@
                     },
                     {
                       "id": "el_superviviente-w215",
-                      "text": "silencio",
+                      "text": "silencio.",
                       "meaning": "silence",
                       "baseForm": "silencio",
                       "startTimeMs": 5491,
@@ -2997,7 +2980,7 @@
                   "words": [
                     {
                       "id": "el_superviviente-w216",
-                      "text": "Vamos",
+                      "text": "¡Vamos!",
                       "meaning": "lets go",
                       "baseForm": "ir",
                       "startTimeMs": 0,
@@ -3045,7 +3028,7 @@
                   "words": [
                     {
                       "id": "el_superviviente-w217",
-                      "text": "CONTINUARÁ",
+                      "text": "CONTINUARÁ...",
                       "meaning": "to be continued",
                       "baseForm": "continuar",
                       "startTimeMs": 0,
@@ -3080,92 +3063,92 @@
       "baseForm": "estar"
     },
     {
-      "id": "el_superviviente-w90",
+      "id": "el_superviviente-w89",
       "text": "madre",
       "meaning": "mother",
       "baseForm": "madre"
     },
     {
-      "id": "el_superviviente-w95",
+      "id": "el_superviviente-w94",
       "text": "padre",
       "meaning": "father",
       "baseForm": "padre"
     },
     {
-      "id": "el_superviviente-w97",
+      "id": "el_superviviente-w96",
       "text": "con",
       "meaning": "with",
       "baseForm": "con"
     },
     {
-      "id": "el_superviviente-w98",
+      "id": "el_superviviente-w97",
       "text": "ellos",
       "meaning": "them",
       "baseForm": "ellos"
     },
     {
-      "id": "el_superviviente-w100",
-      "text": "Quién",
+      "id": "el_superviviente-w99",
+      "text": "¿Quién",
       "meaning": "who",
       "baseForm": "quién"
     },
     {
-      "id": "el_superviviente-w102",
-      "text": "Cómo",
+      "id": "el_superviviente-w101",
+      "text": "¿Cómo",
       "meaning": "how",
       "baseForm": "cómo"
     },
     {
-      "id": "el_superviviente-w106",
+      "id": "el_superviviente-w105",
       "text": "dónde",
       "meaning": "where",
       "baseForm": "dónde"
     },
     {
-      "id": "el_superviviente-w108",
+      "id": "el_superviviente-w107",
       "text": "Me",
       "meaning": "me",
       "baseForm": "me"
     },
     {
-      "id": "el_superviviente-w110",
+      "id": "el_superviviente-w109",
       "text": "Vengo",
       "meaning": "come",
       "baseForm": "venir"
     },
     {
-      "id": "el_superviviente-w113",
-      "text": "familia",
+      "id": "el_superviviente-w112",
+      "text": "familia...",
       "meaning": "family",
       "baseForm": "familia"
     },
     {
-      "id": "el_superviviente-w116",
+      "id": "el_superviviente-w115",
       "text": "también",
       "meaning": "also",
       "baseForm": "también"
     },
     {
-      "id": "el_superviviente-w118",
+      "id": "el_superviviente-w117",
       "text": "han",
       "meaning": "have",
       "baseForm": "haber"
     },
     {
-      "id": "el_superviviente-w145",
-      "text": "Adónde",
+      "id": "el_superviviente-w144",
+      "text": "¿Adónde",
       "meaning": "where",
       "baseForm": "adónde"
     },
     {
-      "id": "el_superviviente-w153",
-      "text": "comida",
+      "id": "el_superviviente-w152",
+      "text": "comida.",
       "meaning": "food",
       "baseForm": "comida"
     },
     {
       "id": "el_superviviente-w158",
-      "text": "esto",
+      "text": "esto...?",
       "meaning": "this",
       "baseForm": "esto"
     },
@@ -3174,12 +3157,10 @@
       "text": "estar",
       "meaning": "to be",
       "baseForm": "estar"
-    },
-    {
-      "id": "el_superviviente-w213",
-      "text": "muy",
-      "meaning": "very",
-      "baseForm": "muy"
     }
-  ]
+  ],
+  "wordAudioMap": {
+    "el": "words/el",
+    "sobreviviente": "words/sobreviviente"
+  }
 }

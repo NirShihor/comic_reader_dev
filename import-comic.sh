@@ -25,7 +25,8 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-EXPORT_PATH="$1"
+# Remove trailing slash if present
+EXPORT_PATH="${1%/}"
 
 # Verify the export path exists
 if [ ! -d "$EXPORT_PATH" ]; then
@@ -56,12 +57,14 @@ cp -R "$EXPORT_PATH" "$BUNDLED_COMICS_DIR/"
 # Verify the copy
 if [ -d "$BUNDLED_COMICS_DIR/$COMIC_NAME" ]; then
     # Count files
-    IMAGE_COUNT=$(ls -1 "$BUNDLED_COMICS_DIR/$COMIC_NAME/images" 2>/dev/null | wc -l | tr -d ' ')
-    AUDIO_COUNT=$(ls -1 "$BUNDLED_COMICS_DIR/$COMIC_NAME/audio" 2>/dev/null | wc -l | tr -d ' ')
+    IMAGE_COUNT=$(find "$BUNDLED_COMICS_DIR/$COMIC_NAME/images" -type f -name "*.png" 2>/dev/null | wc -l | tr -d ' ')
+    SENTENCE_AUDIO_COUNT=$(find "$BUNDLED_COMICS_DIR/$COMIC_NAME/audio" -maxdepth 1 -type f -name "*.mp3" 2>/dev/null | wc -l | tr -d ' ')
+    WORD_AUDIO_COUNT=$(find "$BUNDLED_COMICS_DIR/$COMIC_NAME/audio/words" -type f -name "*.mp3" 2>/dev/null | wc -l | tr -d ' ')
 
     echo -e "${GREEN}Successfully imported: $COMIC_NAME${NC}"
     echo "  - Images: $IMAGE_COUNT"
-    echo "  - Audio files: $AUDIO_COUNT"
+    echo "  - Sentence audio: $SENTENCE_AUDIO_COUNT"
+    echo "  - Word audio: $WORD_AUDIO_COUNT"
     echo ""
     echo -e "${YELLOW}Rebuild the app in Xcode (Cmd+R) to see changes.${NC}"
 else
