@@ -7,10 +7,13 @@ enum PracticeDestination: Hashable {
 
 struct ComicDetailView: View {
     let comic: Comic
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var progressManager: ReadingProgressManager
+    @StateObject private var localStorage = LocalComicStorage.shared
 
     @State private var practiceDestination: PracticeDestination?
     @State private var selectedPage: Page?
+    @State private var showingDeleteConfirmation = false
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -67,25 +70,45 @@ struct ComicDetailView: View {
         .background(Color(.systemGroupedBackground))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Section("Practice Key Words") {
-                        Button {
-                            practiceDestination = .quiz
-                        } label: {
-                            Label("Writing", systemImage: "pencil.line")
-                        }
+                HStack(spacing: 16) {
+                    Menu {
+                        Section("Practice Key Words") {
+                            Button {
+                                practiceDestination = .quiz
+                            } label: {
+                                Label("Writing", systemImage: "pencil.line")
+                            }
 
-                        Button {
-                            practiceDestination = .speaking
-                        } label: {
-                            Label("Speaking", systemImage: "mic.fill")
+                            Button {
+                                practiceDestination = .speaking
+                            } label: {
+                                Label("Speaking", systemImage: "mic.fill")
+                            }
                         }
+                    } label: {
+                        Image(systemName: "graduationcap.fill")
+                            .font(.body)
                     }
-                } label: {
-                    Image(systemName: "graduationcap.fill")
-                        .font(.body)
+
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.body)
+                            .foregroundStyle(.red)
+                    }
                 }
             }
+        }
+        .alert("Delete Comic", isPresented: $showingDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                try? localStorage.deleteComic(comic.id)
+                progressManager.clearProgress(for: comic.id)
+                dismiss()
+            }
+        } message: {
+            Text("Delete \"\(comic.title)\"? This will remove it from your device. You can re-download it later.")
         }
         .navigationDestination(item: $practiceDestination) { destination in
             switch destination {

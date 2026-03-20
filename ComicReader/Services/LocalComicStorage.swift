@@ -42,16 +42,38 @@ class LocalComicStorage: ObservableObject {
             }
         }
 
-        // Also load bundled comics
+        // Also load bundled comics from app bundle
         let bundledComics = loadBundledComics()
         for bundledComic in bundledComics {
-            // Only add if not already downloaded
             if !comics.contains(where: { $0.id == bundledComic.id }) {
                 comics.append(bundledComic)
             }
         }
 
         downloadedComics = comics.sorted { $0.title < $1.title }
+    }
+
+    /// Comics grouped into library items (standalone comics + collections)
+    var libraryItems: [LibraryItem] {
+        var items: [LibraryItem] = []
+        var collectionMap: [String: [Comic]] = [:]
+
+        for comic in downloadedComics {
+            if let collectionId = comic.collectionId {
+                collectionMap[collectionId, default: []].append(comic)
+            } else {
+                items.append(.standalone(comic))
+            }
+        }
+
+        for (collectionId, comics) in collectionMap {
+            let sorted = comics.sorted { ($0.episodeNumber ?? 0) < ($1.episodeNumber ?? 0) }
+            let title = sorted.first?.collectionTitle ?? "Collection"
+            let collection = ComicCollection(id: collectionId, title: title, comics: sorted)
+            items.append(.collection(collection))
+        }
+
+        return items.sorted { $0.sortTitle.localizedCaseInsensitiveCompare($1.sortTitle) == .orderedAscending }
     }
 
     /// Get the base path for a comic's assets
@@ -123,29 +145,19 @@ class LocalComicStorage: ObservableObject {
         return comicJSON.toComic(basePath: folder)
     }
 
-    /// Load all bundled comics from the app bundle
+    /// Load comics from the BundledComics folder in the app bundle
     private func loadBundledComics() -> [Comic] {
-        var comics: [Comic] = []
-
-        // Load from BundledComics folder in the app bundle
         guard let bundledComicsURL = Bundle.main.url(forResource: "BundledComics", withExtension: nil),
               let comicFolders = try? fileManager.contentsOfDirectory(at: bundledComicsURL, includingPropertiesForKeys: nil) else {
-            // Fallback to hardcoded ComicData if bundle folder not found
-            return ComicData.allComics
+            return []
         }
 
-        // Load all bundled comics
+        var comics: [Comic] = []
         for folder in comicFolders where folder.hasDirectoryPath {
             if let comic = loadComic(from: folder) {
                 comics.append(comic)
             }
         }
-
-        // Fallback to ComicData if no comics loaded
-        if comics.isEmpty {
-            return ComicData.allComics
-        }
-
         return comics
     }
 }
@@ -166,6 +178,11 @@ struct ComicJSON: Codable {
     let pages: [PageJSON]
     let reviewWords: [ReviewWordEntry]?
 
+    // Collection fields (optional)
+    let collectionId: String?
+    let collectionTitle: String?
+    let episodeNumber: Int?
+
     func toComic(basePath: URL) -> Comic {
         Comic(
             id: id,
@@ -175,7 +192,10 @@ struct ComicJSON: Codable {
             level: Comic.DifficultyLevel(rawValue: level) ?? .beginner,
             isPremium: false,
             pages: pages.map { $0.toPage() },
-            reviewWords: reviewWords?.map { $0.toReviewWord() }
+            reviewWords: reviewWords?.map { $0.toReviewWord() },
+            collectionId: collectionId,
+            collectionTitle: collectionTitle,
+            episodeNumber: episodeNumber
         )
     }
 }
@@ -222,6 +242,7 @@ struct PageJSON: Codable {
     let id: String
     let pageNumber: Int
     let masterImage: String
+    let noTextImage: String?
     let panels: [PanelJSON]
 
     func toPage() -> Page {
@@ -229,6 +250,7 @@ struct PageJSON: Codable {
             id: id,
             pageNumber: pageNumber,
             masterImage: masterImage,
+            noTextImage: noTextImage,
             panels: panels.map { $0.toPanel() }
         )
     }
@@ -237,6 +259,7 @@ struct PageJSON: Codable {
 struct PanelJSON: Codable {
     let id: String
     let artworkImage: String
+    let noTextImage: String?
     let panelOrder: Int
     let tapZone: TapZoneJSON
     let bubbles: [BubbleJSON]
@@ -245,6 +268,7 @@ struct PanelJSON: Codable {
         Panel(
             id: id,
             artworkImage: artworkImage,
+            noTextImage: noTextImage,
             panelOrder: panelOrder,
             tapZoneX: tapZone.x,
             tapZoneY: tapZone.y,

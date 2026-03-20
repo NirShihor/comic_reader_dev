@@ -45,6 +45,7 @@ struct Bubble: Identifiable, Codable, Hashable {
 struct Panel: Identifiable, Codable, Hashable {
     let id: String
     let artworkImage: String
+    var noTextImage: String?
     let panelOrder: Int
     // Tap zone coordinates for master page (percentage 0-1)
     let tapZoneX: Double
@@ -52,15 +53,6 @@ struct Panel: Identifiable, Codable, Hashable {
     let tapZoneWidth: Double
     let tapZoneHeight: Double
     let bubbles: [Bubble]
-
-    /// Returns the no-text version image name if available
-    var noTextImage: String? {
-        // No bubbles = no text, use regular image
-        guard !bubbles.isEmpty else { return nil }
-        // Convention: append _no_text before extension
-        guard artworkImage.contains("_") else { return nil }
-        return "\(artworkImage)_no_text"
-    }
 }
 
 // MARK: - Page
@@ -68,12 +60,8 @@ struct Page: Identifiable, Codable, Hashable {
     let id: String
     let pageNumber: Int
     let masterImage: String
+    var noTextImage: String?
     let panels: [Panel]
-
-    /// Returns the no-text version image name if available
-    var noTextImage: String? {
-        return "\(masterImage)_no_text"
-    }
 }
 
 // MARK: - ReviewWord
@@ -94,6 +82,11 @@ struct Comic: Identifiable, Codable, Hashable {
     let pages: [Page]
     var reviewWords: [ReviewWord]?
 
+    // Collection fields (optional — comics without these are standalone)
+    var collectionId: String?
+    var collectionTitle: String?
+    var episodeNumber: Int?
+
     enum DifficultyLevel: String, Codable, Hashable {
         case beginner
         case intermediate
@@ -113,6 +106,49 @@ struct Comic: Identifiable, Codable, Hashable {
             case .intermediate: return "orange"
             case .advanced: return "red"
             }
+        }
+    }
+}
+
+// MARK: - ComicCollection
+struct ComicCollection: Identifiable, Hashable {
+    let id: String
+    let title: String
+    let comics: [Comic]
+
+    var coverImage: String {
+        comics.first?.coverImage ?? ""
+    }
+
+    var coverComicId: String {
+        comics.first?.id ?? ""
+    }
+
+    var episodeCount: Int {
+        comics.count
+    }
+
+    var level: Comic.DifficultyLevel {
+        comics.first?.level ?? .beginner
+    }
+}
+
+// MARK: - LibraryItem
+enum LibraryItem: Identifiable, Hashable {
+    case standalone(Comic)
+    case collection(ComicCollection)
+
+    var id: String {
+        switch self {
+        case .standalone(let comic): return comic.id
+        case .collection(let collection): return collection.id
+        }
+    }
+
+    var sortTitle: String {
+        switch self {
+        case .standalone(let comic): return comic.title
+        case .collection(let collection): return collection.title
         }
     }
 }

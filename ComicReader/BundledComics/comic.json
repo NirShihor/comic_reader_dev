@@ -1,0 +1,3166 @@
+{
+  "id": "comic-el_superviviente",
+  "title": "EL SUPERVIVIENTE",
+  "description": "A man is doing his best to survive in a dangerous, apocalyptic world",
+  "coverImage": "el_superviviente_cover",
+  "level": "beginner",
+  "totalPages": 12,
+  "estimatedMinutes": 24,
+  "language": "es",
+  "targetLanguage": "en",
+  "version": "1.0",
+  "pages": [
+    {
+      "id": "el_superviviente-page-cover",
+      "pageNumber": 1,
+      "masterImage": "el_superviviente_cover",
+      "panels": [
+        {
+          "id": "el_superviviente-panel-cover",
+          "artworkImage": "el_superviviente_cover",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-cover-1",
+              "type": "narration",
+              "position": {
+                "x": 0.41750000000000004,
+                "y": 0.04241666158040365,
+                "width": 0.46749999999999997,
+                "height": 0.15499999999999997
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s1",
+                  "text": "el sobreviviente",
+                  "translation": "the survivor",
+                  "audioUrl": "el_superviviente_p0_s1",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w1",
+                      "text": "el",
+                      "meaning": "",
+                      "baseForm": "el",
+                      "startTimeMs": 0,
+                      "endTimeMs": 316,
+                      "wordAudioUrl": "words/el",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "el_superviviente-w2",
+                      "text": "sobreviviente",
+                      "meaning": "",
+                      "baseForm": "sobreviviente",
+                      "startTimeMs": 416,
+                      "endTimeMs": 2715,
+                      "wordAudioUrl": "words/sobreviviente",
+                      "baseFormAudioUrl": "words/sobreviviente"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_superviviente-page-1",
+      "pageNumber": 2,
+      "masterImage": "el_superviviente_p1",
+      "panels": [
+        {
+          "id": "el_superviviente-panel-1-1",
+          "artworkImage": "el_superviviente_p1_s1",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.5148333231608073
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-1-1-2",
+              "type": "narration",
+              "position": {
+                "x": 0.609375,
+                "y": 0.0008333333333333248,
+                "width": 0.36250000000000004,
+                "height": 0.14166666666666666
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s2",
+                  "text": "En ese futuro no tan lejano",
+                  "translation": "In that not so distant future...",
+                  "audioUrl": "el_superviviente_p1_s1",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w3",
+                      "text": "En",
+                      "meaning": "In",
+                      "baseForm": "en",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160
+                    },
+                    {
+                      "id": "el_superviviente-w4",
+                      "text": "ese",
+                      "meaning": "that",
+                      "baseForm": "ese",
+                      "startTimeMs": 220,
+                      "endTimeMs": 400
+                    },
+                    {
+                      "id": "el_superviviente-w5",
+                      "text": "futuro",
+                      "meaning": "future",
+                      "baseForm": "futuro",
+                      "startTimeMs": 468,
+                      "endTimeMs": 876
+                    },
+                    {
+                      "id": "el_superviviente-w6",
+                      "text": "no",
+                      "meaning": "not",
+                      "baseForm": "no",
+                      "startTimeMs": 982,
+                      "endTimeMs": 1194
+                    },
+                    {
+                      "id": "el_superviviente-w7",
+                      "text": "tan",
+                      "meaning": "so",
+                      "baseForm": "tan",
+                      "startTimeMs": 1274,
+                      "endTimeMs": 1514
+                    },
+                    {
+                      "id": "el_superviviente-w8",
+                      "text": "lejano…",
+                      "meaning": "distant",
+                      "baseForm": "lejano",
+                      "startTimeMs": 1594,
+                      "endTimeMs": 2552
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-1-2",
+          "artworkImage": "el_superviviente_p1_s2",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.5148333231608073,
+            "width": 0.45999999999999996,
+            "height": 0.4851666768391927
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-1-2-3",
+              "type": "thought",
+              "position": {
+                "x": 0.03924999237060545,
+                "y": 0.7888333384195962,
+                "width": 0.40750000000000003,
+                "height": 0.18133333841959642
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s3",
+                  "text": "Estoy demasiado cansado y tengo frío. Se están acercando. No llegaré muy lejos. Necesito descansar hasta la mañana.",
+                  "translation": "I am too tired and cold. They are getting closer. I will not get very far. I need to rest until the morning.",
+                  "audioUrl": "el_superviviente_p1_s2",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w9",
+                      "text": "Estoy",
+                      "meaning": "I am",
+                      "baseForm": "estar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 319
+                    },
+                    {
+                      "id": "el_superviviente-w10",
+                      "text": "demasiado",
+                      "meaning": "too",
+                      "baseForm": "demasiado",
+                      "startTimeMs": 364,
+                      "endTimeMs": 712
+                    },
+                    {
+                      "id": "el_superviviente-w11",
+                      "text": "cansado",
+                      "meaning": "tired",
+                      "baseForm": "cansado",
+                      "startTimeMs": 776,
+                      "endTimeMs": 1272
+                    },
+                    {
+                      "id": "el_superviviente-w12",
+                      "text": "y",
+                      "meaning": "and",
+                      "baseForm": "y",
+                      "startTimeMs": 1352,
+                      "endTimeMs": 1432
+                    },
+                    {
+                      "id": "el_superviviente-w13",
+                      "text": "tengo",
+                      "meaning": "I have",
+                      "baseForm": "tener",
+                      "startTimeMs": 1485,
+                      "endTimeMs": 1750
+                    },
+                    {
+                      "id": "el_superviviente-w14",
+                      "text": "frío.",
+                      "meaning": "cold",
+                      "baseForm": "frío",
+                      "startTimeMs": 1803,
+                      "endTimeMs": 2309
+                    },
+                    {
+                      "id": "el_superviviente-w15",
+                      "text": "Se",
+                      "meaning": "oneself",
+                      "baseForm": "se",
+                      "startTimeMs": 2469,
+                      "endTimeMs": 2789
+                    },
+                    {
+                      "id": "el_superviviente-w16",
+                      "text": "están",
+                      "meaning": "they are",
+                      "baseForm": "estar",
+                      "startTimeMs": 2829,
+                      "endTimeMs": 3029
+                    },
+                    {
+                      "id": "el_superviviente-w17",
+                      "text": "acercando.",
+                      "meaning": "approaching",
+                      "baseForm": "acercar",
+                      "startTimeMs": 3082,
+                      "endTimeMs": 4427
+                    },
+                    {
+                      "id": "el_superviviente-w18",
+                      "text": "No",
+                      "meaning": "I will arrive",
+                      "baseForm": "llegar",
+                      "startTimeMs": 4807,
+                      "endTimeMs": 5267
+                    },
+                    {
+                      "id": "el_superviviente-w19",
+                      "text": "llegaré",
+                      "meaning": "very",
+                      "baseForm": "muy",
+                      "startTimeMs": 5312,
+                      "endTimeMs": 5662
+                    },
+                    {
+                      "id": "el_superviviente-w20",
+                      "text": "muy",
+                      "meaning": "far",
+                      "baseForm": "lejos",
+                      "startTimeMs": 5702,
+                      "endTimeMs": 5822
+                    },
+                    {
+                      "id": "el_superviviente-w21",
+                      "text": "lejos.",
+                      "meaning": "I need",
+                      "baseForm": "necesitar",
+                      "startTimeMs": 5875,
+                      "endTimeMs": 6379
+                    },
+                    {
+                      "id": "el_superviviente-w22",
+                      "text": "Necesito",
+                      "meaning": "to rest",
+                      "baseForm": "descansar",
+                      "startTimeMs": 6899,
+                      "endTimeMs": 7898
+                    },
+                    {
+                      "id": "el_superviviente-w23",
+                      "text": "descansar",
+                      "meaning": "until",
+                      "baseForm": "hasta",
+                      "startTimeMs": 7962,
+                      "endTimeMs": 8537
+                    },
+                    {
+                      "id": "el_superviviente-w24",
+                      "text": "hasta",
+                      "meaning": "the",
+                      "baseForm": "la",
+                      "startTimeMs": 8577,
+                      "endTimeMs": 8777
+                    },
+                    {
+                      "id": "el_superviviente-w25",
+                      "text": "la",
+                      "meaning": "morning",
+                      "baseForm": "mañana",
+                      "startTimeMs": 8803,
+                      "endTimeMs": 8855
+                    },
+                    {
+                      "id": "el_superviviente-w26",
+                      "text": "mañana.",
+                      "meaning": "morning",
+                      "baseForm": "mañana",
+                      "startTimeMs": 8923,
+                      "endTimeMs": 11331
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-1-3",
+          "artworkImage": "el_superviviente_p1_s3",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.45999999999999996,
+            "y": 0.5148333231608073,
+            "width": 0.54,
+            "height": 0.4851666768391927
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-1-3-4",
+              "type": "thought",
+              "position": {
+                "x": 0.48174999237060545,
+                "y": 0.805,
+                "width": 0.395,
+                "height": 0.15874999999999995
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s4",
+                  "text": "Veo una casa grande, en la colina. Creo que está lo bastante cerca.",
+                  "translation": "I see a big house on the hill. I think it is close enough.",
+                  "audioUrl": "el_superviviente_p1_s3",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w27",
+                      "text": "[frightened]Veo",
+                      "meaning": "I see",
+                      "baseForm": "ver",
+                      "startTimeMs": 0,
+                      "endTimeMs": 159
+                    },
+                    {
+                      "id": "el_superviviente-w28",
+                      "text": "una",
+                      "meaning": "a",
+                      "baseForm": "uno",
+                      "startTimeMs": 199,
+                      "endTimeMs": 319
+                    },
+                    {
+                      "id": "el_superviviente-w29",
+                      "text": "casa",
+                      "meaning": "house",
+                      "baseForm": "casa",
+                      "startTimeMs": 367,
+                      "endTimeMs": 559,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w30",
+                      "text": "grande,",
+                      "meaning": "big",
+                      "baseForm": "grande",
+                      "startTimeMs": 604,
+                      "endTimeMs": 1034,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w31",
+                      "text": "en",
+                      "meaning": "on",
+                      "baseForm": "en",
+                      "startTimeMs": 1060,
+                      "endTimeMs": 1112
+                    },
+                    {
+                      "id": "el_superviviente-w32",
+                      "text": "la",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 1165,
+                      "endTimeMs": 1271
+                    },
+                    {
+                      "id": "el_superviviente-w33",
+                      "text": "colina.",
+                      "meaning": "hill",
+                      "baseForm": "colina",
+                      "startTimeMs": 1311,
+                      "endTimeMs": 1751
+                    },
+                    {
+                      "id": "el_superviviente-w34",
+                      "text": "Creo",
+                      "meaning": "I think",
+                      "baseForm": "creer",
+                      "startTimeMs": 2391,
+                      "endTimeMs": 3270
+                    },
+                    {
+                      "id": "el_superviviente-w35",
+                      "text": "que",
+                      "meaning": "that",
+                      "baseForm": "que",
+                      "startTimeMs": 3290,
+                      "endTimeMs": 3350
+                    },
+                    {
+                      "id": "el_superviviente-w36",
+                      "text": "está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 3398,
+                      "endTimeMs": 3590,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w37",
+                      "text": "lo",
+                      "meaning": "it",
+                      "baseForm": "lo",
+                      "startTimeMs": 3643,
+                      "endTimeMs": 3749
+                    },
+                    {
+                      "id": "el_superviviente-w38",
+                      "text": "bastante",
+                      "meaning": "enough",
+                      "baseForm": "bastante",
+                      "startTimeMs": 3793,
+                      "endTimeMs": 4145
+                    },
+                    {
+                      "id": "el_superviviente-w39",
+                      "text": "cerca.[pause]",
+                      "meaning": "close",
+                      "baseForm": "cerca",
+                      "startTimeMs": 4211,
+                      "endTimeMs": 7021
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_superviviente-page-2",
+      "pageNumber": 3,
+      "masterImage": "el_superviviente_p2",
+      "panels": [
+        {
+          "id": "el_superviviente-panel-2-1",
+          "artworkImage": "el_superviviente_p2_s1",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.4825,
+            "height": 0.471999994913737
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-2-1-5",
+              "type": "thought",
+              "position": {
+                "x": 0.08745834350585924,
+                "y": 0.3389999898274739,
+                "width": 0.27499999999999997,
+                "height": 0.08300000508626304
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s5",
+                  "text": "La puerta está abierta...",
+                  "translation": "The door is open...",
+                  "audioUrl": "el_superviviente_p2_s1",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w40",
+                      "text": "La",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 0,
+                      "endTimeMs": 145
+                    },
+                    {
+                      "id": "el_superviviente-w41",
+                      "text": "puerta",
+                      "meaning": "door",
+                      "baseForm": "puerta",
+                      "startTimeMs": 225,
+                      "endTimeMs": 625
+                    },
+                    {
+                      "id": "el_superviviente-w42",
+                      "text": "está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 673,
+                      "endTimeMs": 865
+                    },
+                    {
+                      "id": "el_superviviente-w43",
+                      "text": "abierta...",
+                      "meaning": "open",
+                      "baseForm": "abierto",
+                      "startTimeMs": 918,
+                      "endTimeMs": 1663
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-2-2",
+          "artworkImage": "el_superviviente_p2_s2",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.4825,
+            "y": 0,
+            "width": 0.5175000000000001,
+            "height": 0.471999994913737
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-2-2-6",
+              "type": "thought",
+              "position": {
+                "x": 0.5549583435058594,
+                "y": 0.313000005086263,
+                "width": 0.3100416564941406,
+                "height": 0.11716667175292966
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s6",
+                  "text": "No puedo ver. Está muy oscuro...",
+                  "translation": "I can't see. It's very dark.",
+                  "audioUrl": "el_superviviente_p2_s2",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w44",
+                      "text": "No",
+                      "meaning": "no",
+                      "baseForm": "no"
+                    },
+                    {
+                      "id": "el_superviviente-w45",
+                      "text": "puedo",
+                      "meaning": "I can",
+                      "baseForm": "poder"
+                    },
+                    {
+                      "id": "el_superviviente-w46",
+                      "text": "ver.",
+                      "meaning": "to see",
+                      "baseForm": "ver"
+                    },
+                    {
+                      "id": "el_superviviente-w47",
+                      "text": "Está",
+                      "meaning": "is",
+                      "baseForm": "estar"
+                    },
+                    {
+                      "id": "el_superviviente-w48",
+                      "text": "muy",
+                      "meaning": "very",
+                      "baseForm": "muy"
+                    },
+                    {
+                      "id": "el_superviviente-w49",
+                      "text": "oscuro...",
+                      "meaning": "dark",
+                      "baseForm": "oscuro"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-2-3",
+          "artworkImage": "el_superviviente_p2_s3",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.471999994913737,
+            "width": 1,
+            "height": 0.265
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-2-3-7",
+              "type": "speech",
+              "position": {
+                "x": 0.05499999999999983,
+                "y": 0.47583333333333355,
+                "width": 0.18500000000000008,
+                "height": 0.1399999999999999
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s7",
+                  "text": "¿Hay alguien aquí?",
+                  "translation": "Is there anyone here?",
+                  "audioUrl": "el_superviviente_p2_s3",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w50",
+                      "text": "¿Hay",
+                      "meaning": "there is/are",
+                      "baseForm": "haber"
+                    },
+                    {
+                      "id": "el_superviviente-w51",
+                      "text": "alguien",
+                      "meaning": "someone/anyone",
+                      "baseForm": "alguien"
+                    },
+                    {
+                      "id": "el_superviviente-w52",
+                      "text": "aquí?",
+                      "meaning": "here",
+                      "baseForm": "aquí"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-2-4",
+          "artworkImage": "el_superviviente_p2_s4",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0,
+            "y": 0.736999994913737,
+            "width": 1,
+            "height": 0.263000005086263
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-2-4-8",
+              "type": "narration",
+              "position": {
+                "x": 0.6824583435058593,
+                "y": 0.8101666768391927,
+                "width": 0.2649999999999999,
+                "height": 0.11408332824707024
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s8",
+                  "text": "CREEEAK",
+                  "translation": "",
+                  "audioUrl": "",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w53",
+                      "text": "",
+                      "meaning": "",
+                      "baseForm": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "el_superviviente-bubble-2-4-9",
+              "type": "speech",
+              "position": {
+                "x": 0.1624583435058595,
+                "y": 0.8161666615804036,
+                "width": 0.1625,
+                "height": 0.08308334350585933
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s9",
+                  "text": "¿Hola...?",
+                  "translation": "Hello...?",
+                  "audioUrl": "el_superviviente_p2_s4",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w54",
+                      "text": "¿Hola...?",
+                      "meaning": "hello",
+                      "baseForm": "hola",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1757
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_superviviente-page-3",
+      "pageNumber": 4,
+      "masterImage": "el_superviviente_p3",
+      "panels": [
+        {
+          "id": "el_superviviente-panel-3-1",
+          "artworkImage": "el_superviviente_p3_s1",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.35866666158040367
+          },
+          "bubbles": []
+        },
+        {
+          "id": "el_superviviente-panel-3-2",
+          "artworkImage": "el_superviviente_p3_s2",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.35866666158040367,
+            "width": 0.4825,
+            "height": 0.3491666666666667
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-3-2-10",
+              "type": "speech",
+              "position": {
+                "x": 0.2450000000000001,
+                "y": 0.5561666615804037,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s10",
+                  "text": "¡Eh! ¿Quién está allí?",
+                  "translation": "Hey! Who's there?",
+                  "audioUrl": "el_superviviente_p3_s2",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w55",
+                      "text": "¡Eh!",
+                      "meaning": "hey",
+                      "baseForm": "eh",
+                      "startTimeMs": 0,
+                      "endTimeMs": 480
+                    },
+                    {
+                      "id": "el_superviviente-w56",
+                      "text": "¿Quién",
+                      "meaning": "who",
+                      "baseForm": "quién",
+                      "startTimeMs": 560,
+                      "endTimeMs": 838
+                    },
+                    {
+                      "id": "el_superviviente-w57",
+                      "text": "está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 862,
+                      "endTimeMs": 958
+                    },
+                    {
+                      "id": "el_superviviente-w58",
+                      "text": "allí?",
+                      "meaning": "there",
+                      "baseForm": "allí",
+                      "startTimeMs": 998,
+                      "endTimeMs": 1598
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-3-3",
+          "artworkImage": "el_superviviente_p3_s3",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.4825,
+            "y": 0.35866666158040367,
+            "width": 0.5175000000000001,
+            "height": 0.3491666666666667
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-3-3-11",
+              "type": "speech",
+              "position": {
+                "x": 0.7549999999999999,
+                "y": 0.5744999949137369,
+                "width": 0.208499984741211,
+                "height": 0.10475001017252605
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s11",
+                  "text": "No me hagas daño...! por favor...!",
+                  "translation": "Don't hurt me, please...",
+                  "audioUrl": "el_superviviente_p3_s3",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w59",
+                      "text": "No",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160
+                    },
+                    {
+                      "id": "el_superviviente-w60",
+                      "text": "me",
+                      "meaning": "me",
+                      "baseForm": "me",
+                      "startTimeMs": 186,
+                      "endTimeMs": 238
+                    },
+                    {
+                      "id": "el_superviviente-w61",
+                      "text": "hagas",
+                      "meaning": "do (subjunctive form)",
+                      "baseForm": "hacer",
+                      "startTimeMs": 278,
+                      "endTimeMs": 558
+                    },
+                    {
+                      "id": "el_superviviente-w62",
+                      "text": "daño...!",
+                      "meaning": "harm",
+                      "baseForm": "daño",
+                      "startTimeMs": 611,
+                      "endTimeMs": 1275
+                    },
+                    {
+                      "id": "el_superviviente-w63",
+                      "text": "por",
+                      "meaning": "for",
+                      "baseForm": "por",
+                      "startTimeMs": 1295,
+                      "endTimeMs": 1355
+                    },
+                    {
+                      "id": "el_superviviente-w64",
+                      "text": "favor...!",
+                      "meaning": "favor",
+                      "baseForm": "favor",
+                      "startTimeMs": 1421,
+                      "endTimeMs": 1910
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-3-4",
+          "artworkImage": "el_superviviente_p3_s4",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0,
+            "y": 0.7078333282470703,
+            "width": 1,
+            "height": 0.29216667175292965
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-3-4-12",
+              "type": "speech",
+              "position": {
+                "x": 0.05499999999999999,
+                "y": 0.8616666666666665,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s12",
+                  "text": "Espera... ¡Quédate ahí!",
+                  "translation": "Wait... Stay there!",
+                  "audioUrl": "el_superviviente_p3_s4",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w65",
+                      "text": "Espera...",
+                      "meaning": "wait",
+                      "baseForm": "esperar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1359
+                    },
+                    {
+                      "id": "el_superviviente-w66",
+                      "text": "¡Quédate",
+                      "meaning": "stay",
+                      "baseForm": "quedarse",
+                      "startTimeMs": 1379,
+                      "endTimeMs": 1679
+                    },
+                    {
+                      "id": "el_superviviente-w67",
+                      "text": "ahí!",
+                      "meaning": "there",
+                      "baseForm": "ahí",
+                      "startTimeMs": 1732,
+                      "endTimeMs": 1996
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_superviviente-page-4",
+      "pageNumber": 5,
+      "masterImage": "el_superviviente_p4",
+      "panels": [
+        {
+          "id": "el_superviviente-panel-4-1",
+          "artworkImage": "el_superviviente_p4_s1",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.331000010172526
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-4-1-13",
+              "type": "speech",
+              "position": {
+                "x": 0.030000000000000096,
+                "y": 0.06,
+                "width": 0.22749999999999992,
+                "height": 0.14016665140787754
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s13",
+                  "text": "¿Quién eres? ¿Cómo te llamas...?",
+                  "translation": "Who are you? What's your name?",
+                  "audioUrl": "el_superviviente_p4_s1",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w68",
+                      "text": "¿Quién",
+                      "meaning": "who",
+                      "baseForm": "quién",
+                      "startTimeMs": 0,
+                      "endTimeMs": 239
+                    },
+                    {
+                      "id": "el_superviviente-w69",
+                      "text": "eres?",
+                      "meaning": "are",
+                      "baseForm": "ser",
+                      "startTimeMs": 292,
+                      "endTimeMs": 878
+                    },
+                    {
+                      "id": "el_superviviente-w70",
+                      "text": "¿Cómo",
+                      "meaning": "how",
+                      "baseForm": "cómo",
+                      "startTimeMs": 2898,
+                      "endTimeMs": 2958
+                    },
+                    {
+                      "id": "el_superviviente-w71",
+                      "text": "te",
+                      "meaning": "you (reflexive)",
+                      "baseForm": "tú",
+                      "startTimeMs": 3011,
+                      "endTimeMs": 3117
+                    },
+                    {
+                      "id": "el_superviviente-w72",
+                      "text": "llamas...?",
+                      "meaning": "call (your name)",
+                      "baseForm": "llamar",
+                      "startTimeMs": 3170,
+                      "endTimeMs": 3835
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-4-2",
+          "artworkImage": "el_superviviente_p4_s2",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.331000010172526,
+            "width": 1,
+            "height": 0.2975
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-4-2-14",
+              "type": "speech",
+              "position": {
+                "x": 0.027500000000000024,
+                "y": 0.3433333333333332,
+                "width": 0.35,
+                "height": 0.08416666666666678
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s14",
+                  "text": "Me llamo Diego... Vivo aquí... En esta casa...",
+                  "translation": "My name is Diego. I live here. In this house.",
+                  "audioUrl": "el_superviviente_p4_s2",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w73",
+                      "text": "Me",
+                      "meaning": "me",
+                      "baseForm": "me",
+                      "startTimeMs": 0,
+                      "endTimeMs": 156
+                    },
+                    {
+                      "id": "el_superviviente-w74",
+                      "text": "llamo",
+                      "meaning": "call",
+                      "baseForm": "llamar",
+                      "startTimeMs": 209,
+                      "endTimeMs": 555
+                    },
+                    {
+                      "id": "el_superviviente-w75",
+                      "text": "Vivo",
+                      "meaning": "live",
+                      "baseForm": "vivir",
+                      "startTimeMs": 2223,
+                      "endTimeMs": 2307
+                    },
+                    {
+                      "id": "el_superviviente-w76",
+                      "text": "aquí...",
+                      "meaning": "here",
+                      "baseForm": "aquí",
+                      "startTimeMs": 2419,
+                      "endTimeMs": 3986
+                    },
+                    {
+                      "id": "el_superviviente-w77",
+                      "text": "En",
+                      "meaning": "in",
+                      "baseForm": "en",
+                      "startTimeMs": 4124,
+                      "endTimeMs": 4144
+                    },
+                    {
+                      "id": "el_superviviente-w78",
+                      "text": "esta",
+                      "meaning": "this",
+                      "baseForm": "este",
+                      "startTimeMs": 4208,
+                      "endTimeMs": 4464
+                    },
+                    {
+                      "id": "el_superviviente-w79",
+                      "text": "casa...",
+                      "meaning": "house",
+                      "baseForm": "casa",
+                      "startTimeMs": 4560,
+                      "endTimeMs": 6063
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-4-3",
+          "artworkImage": "el_superviviente_p4_s3",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.628500010172526,
+            "width": 1,
+            "height": 0.371499989827474
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-4-3-15",
+              "type": "speech",
+              "position": {
+                "x": 0.6449999999999999,
+                "y": 0.8248333231608074,
+                "width": 0.2849999999999999,
+                "height": 0.135
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s15",
+                  "text": "¿Vives aquí...? ¿Estás solo...? ¿Dónde están tus padres?",
+                  "translation": "Do you live here? Are you alone? Where are your parents?",
+                  "audioUrl": "el_superviviente_p4_s3",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w80",
+                      "text": "¿Vives",
+                      "meaning": "do you live",
+                      "baseForm": "vivir",
+                      "startTimeMs": 0,
+                      "endTimeMs": 320
+                    },
+                    {
+                      "id": "el_superviviente-w81",
+                      "text": "aquí...?",
+                      "meaning": "here",
+                      "baseForm": "aquí",
+                      "startTimeMs": 400,
+                      "endTimeMs": 1238
+                    },
+                    {
+                      "id": "el_superviviente-w82",
+                      "text": "¿Estás",
+                      "meaning": "are you",
+                      "baseForm": "estar",
+                      "startTimeMs": 1458,
+                      "endTimeMs": 1917
+                    },
+                    {
+                      "id": "el_superviviente-w83",
+                      "text": "solo...?",
+                      "meaning": "alone",
+                      "baseForm": "solo",
+                      "startTimeMs": 2013,
+                      "endTimeMs": 3316
+                    },
+                    {
+                      "id": "el_superviviente-w84",
+                      "text": "¿Dónde",
+                      "meaning": "where",
+                      "baseForm": "dónde",
+                      "startTimeMs": 3336,
+                      "endTimeMs": 3515
+                    },
+                    {
+                      "id": "el_superviviente-w85",
+                      "text": "están",
+                      "meaning": "are",
+                      "baseForm": "estar",
+                      "startTimeMs": 3555,
+                      "endTimeMs": 3755
+                    },
+                    {
+                      "id": "el_superviviente-w86",
+                      "text": "tus",
+                      "meaning": "your",
+                      "baseForm": "tu",
+                      "startTimeMs": 3795,
+                      "endTimeMs": 3915
+                    },
+                    {
+                      "id": "el_superviviente-w87",
+                      "text": "padres?",
+                      "meaning": "parents",
+                      "baseForm": "padre",
+                      "startTimeMs": 3975,
+                      "endTimeMs": 4475
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_superviviente-page-5",
+      "pageNumber": 6,
+      "masterImage": "el_superviviente_p5",
+      "panels": [
+        {
+          "id": "el_superviviente-panel-5-1",
+          "artworkImage": "el_superviviente_p5_s1",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.45,
+            "height": 0.3709166717529297
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-5-1-16",
+              "type": "speech",
+              "position": {
+                "x": 0.05249999999999999,
+                "y": 0.27016667683919277,
+                "width": 0.3625,
+                "height": 0.08833333333333326
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s16",
+                  "text": "Mi madre está muerta, y mi padre está con ellos ahora.",
+                  "translation": "My mother is dead, and my father is with them now.",
+                  "audioUrl": "el_superviviente_p5_s1",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w88",
+                      "text": "Mi",
+                      "meaning": "my",
+                      "baseForm": "mi",
+                      "startTimeMs": 0,
+                      "endTimeMs": 158
+                    },
+                    {
+                      "id": "el_superviviente-w89",
+                      "text": "madre",
+                      "meaning": "mother",
+                      "baseForm": "madre",
+                      "startTimeMs": 224,
+                      "endTimeMs": 554,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w90",
+                      "text": "está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 602,
+                      "endTimeMs": 794
+                    },
+                    {
+                      "id": "el_superviviente-w91",
+                      "text": "muerta,",
+                      "meaning": "dead",
+                      "baseForm": "muerto",
+                      "startTimeMs": 847,
+                      "endTimeMs": 1273
+                    },
+                    {
+                      "id": "el_superviviente-w92",
+                      "text": "y",
+                      "meaning": "and",
+                      "baseForm": "y",
+                      "startTimeMs": 1873,
+                      "endTimeMs": 2473
+                    },
+                    {
+                      "id": "el_superviviente-w93",
+                      "text": "mi",
+                      "meaning": "my",
+                      "baseForm": "mi",
+                      "startTimeMs": 0,
+                      "endTimeMs": 158
+                    },
+                    {
+                      "id": "el_superviviente-w94",
+                      "text": "padre",
+                      "meaning": "father",
+                      "baseForm": "padre",
+                      "startTimeMs": 2685,
+                      "endTimeMs": 2950,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w95",
+                      "text": "está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 602,
+                      "endTimeMs": 794
+                    },
+                    {
+                      "id": "el_superviviente-w96",
+                      "text": "con",
+                      "meaning": "with",
+                      "baseForm": "con",
+                      "startTimeMs": 3230,
+                      "endTimeMs": 3350,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w97",
+                      "text": "ellos",
+                      "meaning": "them",
+                      "baseForm": "ellos",
+                      "startTimeMs": 3403,
+                      "endTimeMs": 3668,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w98",
+                      "text": "ahora.",
+                      "meaning": "now",
+                      "baseForm": "ahora",
+                      "startTimeMs": 3721,
+                      "endTimeMs": 4146
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-5-2",
+          "artworkImage": "el_superviviente_p5_s2",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3709166717529297,
+            "width": 0.45,
+            "height": 0.6290833282470703
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-5-2-17",
+              "type": "speech",
+              "position": {
+                "x": 0.18250000000000002,
+                "y": 0.7806666564941406,
+                "width": 0.23750000000000002,
+                "height": 0.1383333333333333
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s17",
+                  "text": "¿Quién eres? ¿Cómo te llamas? ¿De dónde eres?",
+                  "translation": "Who are you? What's your name? Where are you from?",
+                  "audioUrl": "el_superviviente_p5_s2",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w99",
+                      "text": "¿Quién",
+                      "meaning": "who",
+                      "baseForm": "quién",
+                      "startTimeMs": 0,
+                      "endTimeMs": 318,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w100",
+                      "text": "eres?",
+                      "meaning": "you are",
+                      "baseForm": "ser",
+                      "startTimeMs": 371,
+                      "endTimeMs": 797
+                    },
+                    {
+                      "id": "el_superviviente-w101",
+                      "text": "¿Cómo",
+                      "meaning": "how",
+                      "baseForm": "cómo",
+                      "startTimeMs": 1397,
+                      "endTimeMs": 2157,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w102",
+                      "text": "te",
+                      "meaning": "you (reflexive)",
+                      "baseForm": "tú",
+                      "startTimeMs": 2210,
+                      "endTimeMs": 2316
+                    },
+                    {
+                      "id": "el_superviviente-w103",
+                      "text": "llamas?",
+                      "meaning": "you call",
+                      "baseForm": "llamar",
+                      "startTimeMs": 2369,
+                      "endTimeMs": 3995
+                    },
+                    {
+                      "id": "el_superviviente-w104",
+                      "text": "¿De",
+                      "meaning": "from",
+                      "baseForm": "de",
+                      "startTimeMs": 4355,
+                      "endTimeMs": 4873
+                    },
+                    {
+                      "id": "el_superviviente-w105",
+                      "text": "dónde",
+                      "meaning": "where",
+                      "baseForm": "dónde",
+                      "startTimeMs": 4926,
+                      "endTimeMs": 5272,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w106",
+                      "text": "eres?",
+                      "meaning": "you are",
+                      "baseForm": "ser",
+                      "startTimeMs": 371,
+                      "endTimeMs": 797
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-5-3",
+          "artworkImage": "el_superviviente_p5_s3",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.45,
+            "y": 0,
+            "width": 0.55,
+            "height": 1
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-5-3-18",
+              "type": "speech",
+              "position": {
+                "x": 0.4750000000000001,
+                "y": 0.44850001017252594,
+                "width": 0.45624999999999993,
+                "height": 0.12066665649414066
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s18",
+                  "text": "Me llamo Javier. Vengo de Madrid. Mi familia... bueno... ellos también se han ido.",
+                  "translation": "My name is Javier. I come from Madrid. My family... well... they are gone too.",
+                  "audioUrl": "el_superviviente_p5_s3",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w107",
+                      "text": "Me",
+                      "meaning": "me",
+                      "baseForm": "me",
+                      "startTimeMs": 0,
+                      "endTimeMs": 154,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w108",
+                      "text": "llamo",
+                      "meaning": "call",
+                      "baseForm": "llamar",
+                      "startTimeMs": 180,
+                      "endTimeMs": 391
+                    },
+                    {
+                      "id": "el_superviviente-w109",
+                      "text": "Vengo",
+                      "meaning": "come",
+                      "baseForm": "venir",
+                      "startTimeMs": 2227,
+                      "endTimeMs": 2467,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w110",
+                      "text": "de",
+                      "meaning": "from",
+                      "baseForm": "de",
+                      "startTimeMs": 2493,
+                      "endTimeMs": 2545
+                    },
+                    {
+                      "id": "el_superviviente-w111",
+                      "text": "Mi",
+                      "meaning": "my",
+                      "baseForm": "mi",
+                      "startTimeMs": 3691,
+                      "endTimeMs": 4703
+                    },
+                    {
+                      "id": "el_superviviente-w112",
+                      "text": "familia...",
+                      "meaning": "family",
+                      "baseForm": "familia",
+                      "startTimeMs": 4803,
+                      "endTimeMs": 6142,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w113",
+                      "text": "bueno...",
+                      "meaning": "well",
+                      "baseForm": "bueno",
+                      "startTimeMs": 6152,
+                      "endTimeMs": 7418
+                    },
+                    {
+                      "id": "el_superviviente-w114",
+                      "text": "ellos",
+                      "meaning": "they",
+                      "baseForm": "ellos",
+                      "startTimeMs": 7471,
+                      "endTimeMs": 7736
+                    },
+                    {
+                      "id": "el_superviviente-w115",
+                      "text": "también",
+                      "meaning": "also",
+                      "baseForm": "también",
+                      "startTimeMs": 7786,
+                      "endTimeMs": 8136,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w116",
+                      "text": "se",
+                      "meaning": "oneself",
+                      "baseForm": "se",
+                      "startTimeMs": 8189,
+                      "endTimeMs": 8295
+                    },
+                    {
+                      "id": "el_superviviente-w117",
+                      "text": "han",
+                      "meaning": "have",
+                      "baseForm": "haber",
+                      "startTimeMs": 8315,
+                      "endTimeMs": 8375,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w118",
+                      "text": "ido.",
+                      "meaning": "gone",
+                      "baseForm": "ir",
+                      "startTimeMs": 8428,
+                      "endTimeMs": 11334
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_superviviente-page-6",
+      "pageNumber": 7,
+      "masterImage": "el_superviviente_p6",
+      "panels": [
+        {
+          "id": "el_superviviente-panel-6-1",
+          "artworkImage": "el_superviviente_p6_s1",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.47375,
+            "height": 0.4884166717529297
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-6-1-19",
+              "type": "speech",
+              "position": {
+                "x": 0.185,
+                "y": 0.331750005086263,
+                "width": 0.24500000000000005,
+                "height": 0.1266666666666667
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s19",
+                  "text": "¿No tienes familia? Quizás podamos ser familia...?",
+                  "translation": "No Family? Maybe we can be family...?",
+                  "audioUrl": "el_superviviente_p6_s1",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w119",
+                      "text": "¿No",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160
+                    },
+                    {
+                      "id": "el_superviviente-w120",
+                      "text": "tienes",
+                      "meaning": "you have",
+                      "baseForm": "tener",
+                      "startTimeMs": 217,
+                      "endTimeMs": 559
+                    },
+                    {
+                      "id": "el_superviviente-w121",
+                      "text": "familia?",
+                      "meaning": "family",
+                      "baseForm": "familia",
+                      "startTimeMs": 639,
+                      "endTimeMs": 1999
+                    },
+                    {
+                      "id": "el_superviviente-w122",
+                      "text": "Quizás",
+                      "meaning": "maybe",
+                      "baseForm": "quizás",
+                      "startTimeMs": 3760,
+                      "endTimeMs": 4308
+                    },
+                    {
+                      "id": "el_superviviente-w123",
+                      "text": "podamos",
+                      "meaning": "we can",
+                      "baseForm": "poder",
+                      "startTimeMs": 4388,
+                      "endTimeMs": 4868
+                    },
+                    {
+                      "id": "el_superviviente-w124",
+                      "text": "ser",
+                      "meaning": "to be",
+                      "baseForm": "ser",
+                      "startTimeMs": 4948,
+                      "endTimeMs": 5188
+                    },
+                    {
+                      "id": "el_superviviente-w125",
+                      "text": "familia...?",
+                      "meaning": "family",
+                      "baseForm": "familia",
+                      "startTimeMs": 639,
+                      "endTimeMs": 1999
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-6-2",
+          "artworkImage": "el_superviviente_p6_s2",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.47375,
+            "y": 0,
+            "width": 0.52625,
+            "height": 0.4884166717529297
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-6-2-20",
+              "type": "speech",
+              "position": {
+                "x": 0.70375,
+                "y": 0.33258333841959636,
+                "width": 0.19625000000000004,
+                "height": 0.1315833282470703
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s20",
+                  "text": "¿Tienes algo para comer...?",
+                  "translation": "Do you have anything to eat?",
+                  "audioUrl": "el_superviviente_p6_s2",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w126",
+                      "text": "¿Tienes",
+                      "meaning": "you have",
+                      "baseForm": "tener",
+                      "startTimeMs": 0,
+                      "endTimeMs": 475
+                    },
+                    {
+                      "id": "el_superviviente-w127",
+                      "text": "algo",
+                      "meaning": "something",
+                      "baseForm": "algo",
+                      "startTimeMs": 539,
+                      "endTimeMs": 795
+                    },
+                    {
+                      "id": "el_superviviente-w128",
+                      "text": "para",
+                      "meaning": "for",
+                      "baseForm": "para",
+                      "startTimeMs": 843,
+                      "endTimeMs": 1035
+                    },
+                    {
+                      "id": "el_superviviente-w129",
+                      "text": "comer...?",
+                      "meaning": "to eat",
+                      "baseForm": "comer",
+                      "startTimeMs": 1128,
+                      "endTimeMs": 1671
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-6-3",
+          "artworkImage": "el_superviviente_p6_s3",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.4884166717529297,
+            "width": 0.5075,
+            "height": 0.5115833282470703
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-6-3-21",
+              "type": "speech",
+              "position": {
+                "x": 0.10249999999999998,
+                "y": 0.8181666564941406,
+                "width": 0.255,
+                "height": 0.1301666768391928
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s21",
+                  "text": "No... pero podemos salir a buscar algo.",
+                  "translation": "I don't, but we can go out to get something.",
+                  "audioUrl": "el_superviviente_p6_s3",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w130",
+                      "text": "No...",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 556
+                    },
+                    {
+                      "id": "el_superviviente-w131",
+                      "text": "pero",
+                      "meaning": "but",
+                      "baseForm": "pero",
+                      "startTimeMs": 2049,
+                      "endTimeMs": 2424
+                    },
+                    {
+                      "id": "el_superviviente-w132",
+                      "text": "podemos",
+                      "meaning": "we can",
+                      "baseForm": "poder",
+                      "startTimeMs": 2459,
+                      "endTimeMs": 2704
+                    },
+                    {
+                      "id": "el_superviviente-w133",
+                      "text": "salir",
+                      "meaning": "to go out",
+                      "baseForm": "salir",
+                      "startTimeMs": 2757,
+                      "endTimeMs": 3022
+                    },
+                    {
+                      "id": "el_superviviente-w134",
+                      "text": "a",
+                      "meaning": "to",
+                      "baseForm": "a",
+                      "startTimeMs": 3062,
+                      "endTimeMs": 3102
+                    },
+                    {
+                      "id": "el_superviviente-w135",
+                      "text": "buscar",
+                      "meaning": "to get",
+                      "baseForm": "buscar",
+                      "startTimeMs": 3170,
+                      "endTimeMs": 3578
+                    },
+                    {
+                      "id": "el_superviviente-w136",
+                      "text": "algo.",
+                      "meaning": "something",
+                      "baseForm": "algo",
+                      "startTimeMs": 3642,
+                      "endTimeMs": 6538
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-6-4",
+          "artworkImage": "el_superviviente_p6_s4",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.5075,
+            "y": 0.4884166717529297,
+            "width": 0.49250000000000005,
+            "height": 0.5115833282470703
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-6-4-22",
+              "type": "speech",
+              "position": {
+                "x": 0.68,
+                "y": 0.8168333435058593,
+                "width": 0.2699999999999999,
+                "height": 0.13183331807454424
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s22",
+                  "text": "¿Conseguir algo de comida..? ¿Dónde?",
+                  "translation": "Get some food? Where?",
+                  "audioUrl": "el_superviviente_p6_s4",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w137",
+                      "text": "¿Conseguir",
+                      "meaning": "to get",
+                      "baseForm": "conseguir",
+                      "startTimeMs": 0,
+                      "endTimeMs": 637
+                    },
+                    {
+                      "id": "el_superviviente-w138",
+                      "text": "algo",
+                      "meaning": "something",
+                      "baseForm": "algo",
+                      "startTimeMs": 685,
+                      "endTimeMs": 877
+                    },
+                    {
+                      "id": "el_superviviente-w139",
+                      "text": "de",
+                      "meaning": "of",
+                      "baseForm": "de",
+                      "startTimeMs": 930,
+                      "endTimeMs": 1036
+                    },
+                    {
+                      "id": "el_superviviente-w140",
+                      "text": "comida..?",
+                      "meaning": "food",
+                      "baseForm": "comida",
+                      "startTimeMs": 1104,
+                      "endTimeMs": 1672
+                    },
+                    {
+                      "id": "el_superviviente-w141",
+                      "text": "¿Dónde?",
+                      "meaning": "where",
+                      "baseForm": "dónde",
+                      "startTimeMs": 2312,
+                      "endTimeMs": 5031
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_superviviente-page-7",
+      "pageNumber": 8,
+      "masterImage": "el_superviviente_p7",
+      "panels": [
+        {
+          "id": "el_superviviente-panel-7-1",
+          "artworkImage": "el_superviviente_p7_s1",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.33008333841959636
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-7-1-23",
+              "type": "speech",
+              "position": {
+                "x": 0.34249999999999986,
+                "y": 0.07183334350585938,
+                "width": 0.1625000000000001,
+                "height": 0.08349998474121093
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s23",
+                  "text": "Espera aquí...",
+                  "translation": "Wait here...",
+                  "audioUrl": "el_superviviente_p7_s1",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w142",
+                      "text": "Espera",
+                      "meaning": "wait",
+                      "baseForm": "esperar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 479
+                    },
+                    {
+                      "id": "el_superviviente-w143",
+                      "text": "aquí...",
+                      "meaning": "here",
+                      "baseForm": "aquí",
+                      "startTimeMs": 511,
+                      "endTimeMs": 717
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-7-2",
+          "artworkImage": "el_superviviente_p7_s2",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.33008333841959636,
+            "width": 0.4975,
+            "height": 0.2833333333333333
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-7-2-24",
+              "type": "speech",
+              "position": {
+                "x": 0.2975,
+                "y": 0.355,
+                "width": 0.17000000000000004,
+                "height": 0.08666666666666673
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s24",
+                  "text": "¿Adónde vas...?",
+                  "translation": "Where are you going?",
+                  "audioUrl": "el_superviviente_p7_s2",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w144",
+                      "text": "¿Adónde",
+                      "meaning": "where",
+                      "baseForm": "adónde",
+                      "startTimeMs": 0,
+                      "endTimeMs": 398,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w145",
+                      "text": "vas...?",
+                      "meaning": "you go",
+                      "baseForm": "ir",
+                      "startTimeMs": 498,
+                      "endTimeMs": 1837
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-7-3",
+          "artworkImage": "el_superviviente_p7_s3",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.4975,
+            "y": 0.33008333841959636,
+            "width": 0.5025,
+            "height": 0.2833333333333333
+          },
+          "bubbles": []
+        },
+        {
+          "id": "el_superviviente-panel-7-4",
+          "artworkImage": "el_superviviente_p7_s4",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6134166717529297,
+            "width": 1,
+            "height": 0.3865833282470703
+          },
+          "bubbles": []
+        }
+      ]
+    },
+    {
+      "id": "el_superviviente-page-8",
+      "pageNumber": 9,
+      "masterImage": "el_superviviente_p8",
+      "panels": [
+        {
+          "id": "el_superviviente-panel-8-1",
+          "artworkImage": "el_superviviente_p8_s1",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.4975,
+            "height": 1
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-8-1-25",
+              "type": "speech",
+              "position": {
+                "x": 0.08249999999999999,
+                "y": 0.45391667683919273,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s25",
+                  "text": "¿Para qué es esto...?",
+                  "translation": "What is this for...?",
+                  "audioUrl": "el_superviviente_p8_s1",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w146",
+                      "text": "¿Para",
+                      "meaning": "for",
+                      "baseForm": "para",
+                      "startTimeMs": 0,
+                      "endTimeMs": 152
+                    },
+                    {
+                      "id": "el_superviviente-w147",
+                      "text": "qué",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 192,
+                      "endTimeMs": 312
+                    },
+                    {
+                      "id": "el_superviviente-w148",
+                      "text": "es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 365,
+                      "endTimeMs": 471
+                    },
+                    {
+                      "id": "el_superviviente-w149",
+                      "text": "esto...?",
+                      "meaning": "this",
+                      "baseForm": "esto",
+                      "startTimeMs": 567,
+                      "endTimeMs": 1749
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-8-2",
+          "artworkImage": "el_superviviente_p8_s2",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.4975,
+            "y": 0,
+            "width": 0.5025,
+            "height": 0.48149998982747394
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-8-2-26",
+              "type": "speech",
+              "position": {
+                "x": 0.7475,
+                "y": 0.21899998982747393,
+                "width": 0.2124999999999999,
+                "height": 0.1295000203450521
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s26",
+                  "text": "Para conseguir comida. Ven .",
+                  "translation": "To get food. Come.",
+                  "audioUrl": "el_superviviente_p8_s2",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w150",
+                      "text": "Para",
+                      "meaning": "to",
+                      "baseForm": "para",
+                      "startTimeMs": 0,
+                      "endTimeMs": 237
+                    },
+                    {
+                      "id": "el_superviviente-w151",
+                      "text": "conseguir",
+                      "meaning": "to get",
+                      "baseForm": "conseguir",
+                      "startTimeMs": 293,
+                      "endTimeMs": 797
+                    },
+                    {
+                      "id": "el_superviviente-w152",
+                      "text": "comida.",
+                      "meaning": "food",
+                      "baseForm": "comida",
+                      "startTimeMs": 865,
+                      "endTimeMs": 1993,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w153",
+                      "text": "Ven",
+                      "meaning": "come",
+                      "baseForm": "venir",
+                      "startTimeMs": 2313,
+                      "endTimeMs": 3273
+                    },
+                    {
+                      "id": "el_superviviente-w154",
+                      "text": ".",
+                      "meaning": "",
+                      "baseForm": "."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-8-3",
+          "artworkImage": "el_superviviente_p8_s3",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.4975,
+            "y": 0.48149998982747394,
+            "width": 0.5025,
+            "height": 0.5185000101725261
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-8-3-27",
+              "type": "speech",
+              "position": {
+                "x": 0.535,
+                "y": 0.7562500000000001,
+                "width": 0.23749999999999993,
+                "height": 0.12166666666666659
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s27",
+                  "text": "¿Consigues comida... con esto...?",
+                  "translation": "You get food... with this...?",
+                  "audioUrl": "el_superviviente_p8_s3",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w155",
+                      "text": "¿Consigues",
+                      "meaning": "you get",
+                      "baseForm": "conseguir",
+                      "startTimeMs": 0,
+                      "endTimeMs": 479
+                    },
+                    {
+                      "id": "el_superviviente-w156",
+                      "text": "comida...",
+                      "meaning": "food",
+                      "baseForm": "comida",
+                      "startTimeMs": 570,
+                      "endTimeMs": 1194
+                    },
+                    {
+                      "id": "el_superviviente-w157",
+                      "text": "con",
+                      "meaning": "with",
+                      "baseForm": "con",
+                      "startTimeMs": 1214,
+                      "endTimeMs": 1274
+                    },
+                    {
+                      "id": "el_superviviente-w158",
+                      "text": "esto...?",
+                      "meaning": "this",
+                      "baseForm": "esto",
+                      "startTimeMs": 1338,
+                      "endTimeMs": 1753,
+                      "vocabQuiz": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_superviviente-page-9",
+      "pageNumber": 10,
+      "masterImage": "el_superviviente_p9",
+      "panels": [
+        {
+          "id": "el_superviviente-panel-9-1",
+          "artworkImage": "el_superviviente_p9_s1",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.4375,
+            "height": 0.4816666666666667
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-9-1-28",
+              "type": "speech",
+              "position": {
+                "x": 0.03500000000000003,
+                "y": 0.326999994913737,
+                "width": 0.27874999999999994,
+                "height": 0.10883333841959636
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s28",
+                  "text": "¡Sí! Vamos...¡Te lo mostraré!",
+                  "translation": "Yes! Come on. I'll show you!",
+                  "audioUrl": "el_superviviente_p9_s1",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w159",
+                      "text": "¡Sí!",
+                      "meaning": "yes",
+                      "baseForm": "sí",
+                      "startTimeMs": 0,
+                      "endTimeMs": 600
+                    },
+                    {
+                      "id": "el_superviviente-w160",
+                      "text": "Vamos...¡Te",
+                      "meaning": "lets go",
+                      "baseForm": "ir",
+                      "startTimeMs": 740,
+                      "endTimeMs": 1908
+                    },
+                    {
+                      "id": "el_superviviente-w161",
+                      "text": "lo",
+                      "meaning": "it",
+                      "baseForm": "lo",
+                      "startTimeMs": 1961,
+                      "endTimeMs": 2067
+                    },
+                    {
+                      "id": "el_superviviente-w162",
+                      "text": "mostraré!",
+                      "meaning": "I will show",
+                      "baseForm": "mostrar",
+                      "startTimeMs": 2127,
+                      "endTimeMs": 2866
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-9-2",
+          "artworkImage": "el_superviviente_p9_s2",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.4375,
+            "y": 0,
+            "width": 0.5625,
+            "height": 0.4816666666666667
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-9-2-29",
+              "type": "speech",
+              "position": {
+                "x": 0.5824999999999998,
+                "y": 0.3155000050862631,
+                "width": 0.3700000000000001,
+                "height": 0.13133333841959632
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s29",
+                  "text": "El sol ya salió. Tenemos que esperar hasta la noche...",
+                  "translation": "The sun is up. We need to wait until night.",
+                  "audioUrl": "el_superviviente_p9_s2",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w163",
+                      "text": "El",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 0,
+                      "endTimeMs": 146
+                    },
+                    {
+                      "id": "el_superviviente-w164",
+                      "text": "sol",
+                      "meaning": "sun",
+                      "baseForm": "sol",
+                      "startTimeMs": 246,
+                      "endTimeMs": 546
+                    },
+                    {
+                      "id": "el_superviviente-w165",
+                      "text": "ya",
+                      "meaning": "already",
+                      "baseForm": "ya",
+                      "startTimeMs": 599,
+                      "endTimeMs": 705
+                    },
+                    {
+                      "id": "el_superviviente-w166",
+                      "text": "salió.",
+                      "meaning": "went out",
+                      "baseForm": "salir",
+                      "startTimeMs": 765,
+                      "endTimeMs": 1265
+                    },
+                    {
+                      "id": "el_superviviente-w167",
+                      "text": "Tenemos",
+                      "meaning": "we have",
+                      "baseForm": "tener",
+                      "startTimeMs": 1525,
+                      "endTimeMs": 2545
+                    },
+                    {
+                      "id": "el_superviviente-w168",
+                      "text": "que",
+                      "meaning": "that",
+                      "baseForm": "que",
+                      "startTimeMs": 2565,
+                      "endTimeMs": 2625
+                    },
+                    {
+                      "id": "el_superviviente-w169",
+                      "text": "esperar",
+                      "meaning": "to wait",
+                      "baseForm": "esperar",
+                      "startTimeMs": 2678,
+                      "endTimeMs": 3023
+                    },
+                    {
+                      "id": "el_superviviente-w170",
+                      "text": "hasta",
+                      "meaning": "until",
+                      "baseForm": "hasta",
+                      "startTimeMs": 3063,
+                      "endTimeMs": 3263
+                    },
+                    {
+                      "id": "el_superviviente-w171",
+                      "text": "la",
+                      "meaning": "the",
+                      "baseForm": "la",
+                      "startTimeMs": 3289,
+                      "endTimeMs": 3341
+                    },
+                    {
+                      "id": "el_superviviente-w172",
+                      "text": "noche...",
+                      "meaning": "night",
+                      "baseForm": "noche",
+                      "startTimeMs": 3407,
+                      "endTimeMs": 4051
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-9-3",
+          "artworkImage": "el_superviviente_p9_s3",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.4816666666666667,
+            "width": 0.52,
+            "height": 0.5183333333333333
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-9-3-30",
+              "type": "speech",
+              "position": {
+                "x": 0.044999999999999984,
+                "y": 0.824250005086263,
+                "width": 0.445,
+                "height": 0.15000000000000002
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s30",
+                  "text": "No... No tenemos que esperar. Hago esto todo el tiempo. No conocen este lugar. Estaremos a salvo.",
+                  "translation": "No... We don't have to wait. I do this all the time. They don't know about this place. We'll be safe.",
+                  "audioUrl": "el_superviviente_p9_s3",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w173",
+                      "text": "No...",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1120
+                    },
+                    {
+                      "id": "el_superviviente-w174",
+                      "text": "No",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1120
+                    },
+                    {
+                      "id": "el_superviviente-w175",
+                      "text": "tenemos",
+                      "meaning": "we have",
+                      "baseForm": "tener",
+                      "startTimeMs": 1258,
+                      "endTimeMs": 1678
+                    },
+                    {
+                      "id": "el_superviviente-w176",
+                      "text": "que",
+                      "meaning": "to",
+                      "baseForm": "que",
+                      "startTimeMs": 1698,
+                      "endTimeMs": 1758
+                    },
+                    {
+                      "id": "el_superviviente-w177",
+                      "text": "esperar.",
+                      "meaning": "to wait",
+                      "baseForm": "esperar",
+                      "startTimeMs": 1798,
+                      "endTimeMs": 2238
+                    },
+                    {
+                      "id": "el_superviviente-w178",
+                      "text": "Hago",
+                      "meaning": "I do",
+                      "baseForm": "hacer",
+                      "startTimeMs": 2598,
+                      "endTimeMs": 3117
+                    },
+                    {
+                      "id": "el_superviviente-w179",
+                      "text": "esto",
+                      "meaning": "this",
+                      "baseForm": "esto",
+                      "startTimeMs": 3165,
+                      "endTimeMs": 3357
+                    },
+                    {
+                      "id": "el_superviviente-w180",
+                      "text": "todo",
+                      "meaning": "all",
+                      "baseForm": "todo",
+                      "startTimeMs": 3421,
+                      "endTimeMs": 3677
+                    },
+                    {
+                      "id": "el_superviviente-w181",
+                      "text": "el",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 3703,
+                      "endTimeMs": 3755
+                    },
+                    {
+                      "id": "el_superviviente-w182",
+                      "text": "tiempo.",
+                      "meaning": "time",
+                      "baseForm": "tiempo",
+                      "startTimeMs": 3812,
+                      "endTimeMs": 4234
+                    },
+                    {
+                      "id": "el_superviviente-w183",
+                      "text": "No",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1120
+                    },
+                    {
+                      "id": "el_superviviente-w184",
+                      "text": "conocen",
+                      "meaning": "they know",
+                      "baseForm": "conocer",
+                      "startTimeMs": 5166,
+                      "endTimeMs": 5511
+                    },
+                    {
+                      "id": "el_superviviente-w185",
+                      "text": "este",
+                      "meaning": "this",
+                      "baseForm": "este",
+                      "startTimeMs": 5559,
+                      "endTimeMs": 5751
+                    },
+                    {
+                      "id": "el_superviviente-w186",
+                      "text": "lugar.",
+                      "meaning": "place",
+                      "baseForm": "lugar",
+                      "startTimeMs": 5804,
+                      "endTimeMs": 6709
+                    },
+                    {
+                      "id": "el_superviviente-w187",
+                      "text": "Estaremos",
+                      "meaning": "we will be",
+                      "baseForm": "estar",
+                      "startTimeMs": 6749,
+                      "endTimeMs": 7187
+                    },
+                    {
+                      "id": "el_superviviente-w188",
+                      "text": "a",
+                      "meaning": "to",
+                      "baseForm": "a",
+                      "startTimeMs": 7227,
+                      "endTimeMs": 7267
+                    },
+                    {
+                      "id": "el_superviviente-w189",
+                      "text": "salvo.",
+                      "meaning": "safe",
+                      "baseForm": "salvo",
+                      "startTimeMs": 7327,
+                      "endTimeMs": 9907
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-9-4",
+          "artworkImage": "el_superviviente_p9_s4",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.52,
+            "y": 0.4816666666666667,
+            "width": 0.48,
+            "height": 0.5183333333333333
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-9-4-31",
+              "type": "speech",
+              "position": {
+                "x": 0.7075,
+                "y": 0.7987500000000001,
+                "width": 0.2392499923706054,
+                "height": 0.169750010172526
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s31",
+                  "text": "Son astutos. Podrían estar esperándonos.",
+                  "translation": "They are clever. They could be waiting for us.",
+                  "audioUrl": "el_superviviente_p9_s4",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w190",
+                      "text": "Son",
+                      "meaning": "they are",
+                      "baseForm": "ser",
+                      "startTimeMs": 0,
+                      "endTimeMs": 159
+                    },
+                    {
+                      "id": "el_superviviente-w191",
+                      "text": "astutos.",
+                      "meaning": "clever",
+                      "baseForm": "astuto",
+                      "startTimeMs": 219,
+                      "endTimeMs": 1359
+                    },
+                    {
+                      "id": "el_superviviente-w192",
+                      "text": "Podrían",
+                      "meaning": "they could",
+                      "baseForm": "poder",
+                      "startTimeMs": 1599,
+                      "endTimeMs": 2396
+                    },
+                    {
+                      "id": "el_superviviente-w193",
+                      "text": "estar",
+                      "meaning": "to be",
+                      "baseForm": "estar",
+                      "startTimeMs": 2462,
+                      "endTimeMs": 2792,
+                      "vocabQuiz": true
+                    },
+                    {
+                      "id": "el_superviviente-w194",
+                      "text": "esperándonos.",
+                      "meaning": "waiting for us",
+                      "baseForm": "esperar",
+                      "startTimeMs": 2845,
+                      "endTimeMs": 3826
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_superviviente-page-10",
+      "pageNumber": 11,
+      "masterImage": "el_superviviente_p10",
+      "panels": [
+        {
+          "id": "el_superviviente-panel-10-1",
+          "artworkImage": "el_superviviente_p10_s1",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.5825,
+            "height": 0.47175000508626297
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-10-1-32",
+              "type": "speech",
+              "position": {
+                "x": 0.3175,
+                "y": 0.017166671752929713,
+                "width": 0.23999999999999994,
+                "height": 0.11916666666666664
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s32",
+                  "text": "Está bien. ¡Lo he hecho muchas veces!",
+                  "translation": "It is alright. I've done it many times!",
+                  "audioUrl": "el_superviviente_p10_s1",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w195",
+                      "text": "Está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 436
+                    },
+                    {
+                      "id": "el_superviviente-w196",
+                      "text": "bien.",
+                      "meaning": "alright",
+                      "baseForm": "bien",
+                      "startTimeMs": 476,
+                      "endTimeMs": 716
+                    },
+                    {
+                      "id": "el_superviviente-w197",
+                      "text": "¡Lo",
+                      "meaning": "it",
+                      "baseForm": "lo",
+                      "startTimeMs": 1156,
+                      "endTimeMs": 1756
+                    },
+                    {
+                      "id": "el_superviviente-w198",
+                      "text": "he",
+                      "meaning": "I have",
+                      "baseForm": "haber",
+                      "startTimeMs": 1809,
+                      "endTimeMs": 1915
+                    },
+                    {
+                      "id": "el_superviviente-w199",
+                      "text": "hecho",
+                      "meaning": "done",
+                      "baseForm": "hacer",
+                      "startTimeMs": 1981,
+                      "endTimeMs": 2311
+                    },
+                    {
+                      "id": "el_superviviente-w200",
+                      "text": "muchas",
+                      "meaning": "many",
+                      "baseForm": "mucho",
+                      "startTimeMs": 2379,
+                      "endTimeMs": 2787
+                    },
+                    {
+                      "id": "el_superviviente-w201",
+                      "text": "veces!",
+                      "meaning": "times",
+                      "baseForm": "vez",
+                      "startTimeMs": 2880,
+                      "endTimeMs": 3505
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-10-2",
+          "artworkImage": "el_superviviente_p10_s2",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.5825,
+            "y": 0,
+            "width": 0.4175,
+            "height": 0.47175000508626297
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-10-2-33",
+              "type": "speech",
+              "position": {
+                "x": 0.63,
+                "y": 0.32683334350585935,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s33",
+                  "text": "Está bien. ¡Vamos!",
+                  "translation": "Alright. Let's go.",
+                  "audioUrl": "el_superviviente_p10_s2",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w202",
+                      "text": "Está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 319
+                    },
+                    {
+                      "id": "el_superviviente-w203",
+                      "text": "bien.",
+                      "meaning": "well",
+                      "baseForm": "bien",
+                      "startTimeMs": 351,
+                      "endTimeMs": 599
+                    },
+                    {
+                      "id": "el_superviviente-w204",
+                      "text": "¡Vamos!",
+                      "meaning": "lets go",
+                      "baseForm": "ir",
+                      "startTimeMs": 659,
+                      "endTimeMs": 1279
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-10-3",
+          "artworkImage": "el_superviviente_p10_s3",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.47175000508626297,
+            "width": 0.48,
+            "height": 0.528249994913737
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-10-3-34",
+              "type": "speech",
+              "position": {
+                "x": 0.02999999999999997,
+                "y": 0.7898333231608073,
+                "width": 0.3350000000000001,
+                "height": 0.10850001017252597
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s34",
+                  "text": "Quédate detrás de mí. Sé adónde ir... Muy, muy en silencio.",
+                  "translation": "Stay behind me. I know where to go. Very, very quietly.",
+                  "audioUrl": "el_superviviente_p10_s3",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w205",
+                      "text": "Quédate",
+                      "meaning": "stay",
+                      "baseForm": "quedarse",
+                      "startTimeMs": 0,
+                      "endTimeMs": 478
+                    },
+                    {
+                      "id": "el_superviviente-w206",
+                      "text": "detrás",
+                      "meaning": "behind",
+                      "baseForm": "detrás",
+                      "startTimeMs": 542,
+                      "endTimeMs": 878
+                    },
+                    {
+                      "id": "el_superviviente-w207",
+                      "text": "de",
+                      "meaning": "of",
+                      "baseForm": "de",
+                      "startTimeMs": 904,
+                      "endTimeMs": 956
+                    },
+                    {
+                      "id": "el_superviviente-w208",
+                      "text": "mí.",
+                      "meaning": "me",
+                      "baseForm": "yo",
+                      "startTimeMs": 1036,
+                      "endTimeMs": 1276
+                    },
+                    {
+                      "id": "el_superviviente-w209",
+                      "text": "Sé",
+                      "meaning": "I know",
+                      "baseForm": "saber",
+                      "startTimeMs": 1596,
+                      "endTimeMs": 2236
+                    },
+                    {
+                      "id": "el_superviviente-w210",
+                      "text": "adónde",
+                      "meaning": "where to",
+                      "baseForm": "adónde",
+                      "startTimeMs": 2289,
+                      "endTimeMs": 2634
+                    },
+                    {
+                      "id": "el_superviviente-w211",
+                      "text": "ir...",
+                      "meaning": "to go",
+                      "baseForm": "ir",
+                      "startTimeMs": 2714,
+                      "endTimeMs": 2952
+                    },
+                    {
+                      "id": "el_superviviente-w212",
+                      "text": "Muy,",
+                      "meaning": "very",
+                      "baseForm": "muy",
+                      "startTimeMs": 3552,
+                      "endTimeMs": 4312
+                    },
+                    {
+                      "id": "el_superviviente-w213",
+                      "text": "muy",
+                      "meaning": "very",
+                      "baseForm": "muy",
+                      "startTimeMs": 3552,
+                      "endTimeMs": 4312
+                    },
+                    {
+                      "id": "el_superviviente-w214",
+                      "text": "en",
+                      "meaning": "in",
+                      "baseForm": "en",
+                      "startTimeMs": 5325,
+                      "endTimeMs": 5431
+                    },
+                    {
+                      "id": "el_superviviente-w215",
+                      "text": "silencio.",
+                      "meaning": "silence",
+                      "baseForm": "silencio",
+                      "startTimeMs": 5491,
+                      "endTimeMs": 6151
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_superviviente-panel-10-4",
+          "artworkImage": "el_superviviente_p10_s4",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.48,
+            "y": 0.47175000508626297,
+            "width": 0.52,
+            "height": 0.528249994913737
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-10-4-35",
+              "type": "speech",
+              "position": {
+                "x": 0.77,
+                "y": 0.8516666666666667,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s35",
+                  "text": "¡Vamos!",
+                  "translation": "Let's go!",
+                  "audioUrl": "el_superviviente_p10_s4",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w216",
+                      "text": "¡Vamos!",
+                      "meaning": "lets go",
+                      "baseForm": "ir",
+                      "startTimeMs": 0,
+                      "endTimeMs": 716
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_superviviente-page-11",
+      "pageNumber": 12,
+      "masterImage": "el_superviviente_p11",
+      "panels": [
+        {
+          "id": "el_superviviente-panel-11-1",
+          "artworkImage": "el_superviviente_p11_s1",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          },
+          "bubbles": [
+            {
+              "id": "el_superviviente-bubble-11-1-36",
+              "type": "narration",
+              "position": {
+                "x": 0.5549999999999999,
+                "y": 0.7903333282470704,
+                "width": 0.41000000000000003,
+                "height": 0.1383333333333333
+              },
+              "sentences": [
+                {
+                  "id": "el_superviviente-s36",
+                  "text": "CONTINUARÁ...",
+                  "translation": "TO BE CONTINUED...",
+                  "audioUrl": "el_superviviente_p11_s1",
+                  "words": [
+                    {
+                      "id": "el_superviviente-w217",
+                      "text": "CONTINUARÁ...",
+                      "meaning": "to be continued",
+                      "baseForm": "continuar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1194
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "reviewWords": [
+    {
+      "id": "el_superviviente-w29",
+      "text": "casa",
+      "meaning": "house",
+      "baseForm": "casa"
+    },
+    {
+      "id": "el_superviviente-w30",
+      "text": "grande,",
+      "meaning": "big",
+      "baseForm": "grande"
+    },
+    {
+      "id": "el_superviviente-w36",
+      "text": "está",
+      "meaning": "is",
+      "baseForm": "estar"
+    },
+    {
+      "id": "el_superviviente-w89",
+      "text": "madre",
+      "meaning": "mother",
+      "baseForm": "madre"
+    },
+    {
+      "id": "el_superviviente-w94",
+      "text": "padre",
+      "meaning": "father",
+      "baseForm": "padre"
+    },
+    {
+      "id": "el_superviviente-w96",
+      "text": "con",
+      "meaning": "with",
+      "baseForm": "con"
+    },
+    {
+      "id": "el_superviviente-w97",
+      "text": "ellos",
+      "meaning": "them",
+      "baseForm": "ellos"
+    },
+    {
+      "id": "el_superviviente-w99",
+      "text": "¿Quién",
+      "meaning": "who",
+      "baseForm": "quién"
+    },
+    {
+      "id": "el_superviviente-w101",
+      "text": "¿Cómo",
+      "meaning": "how",
+      "baseForm": "cómo"
+    },
+    {
+      "id": "el_superviviente-w105",
+      "text": "dónde",
+      "meaning": "where",
+      "baseForm": "dónde"
+    },
+    {
+      "id": "el_superviviente-w107",
+      "text": "Me",
+      "meaning": "me",
+      "baseForm": "me"
+    },
+    {
+      "id": "el_superviviente-w109",
+      "text": "Vengo",
+      "meaning": "come",
+      "baseForm": "venir"
+    },
+    {
+      "id": "el_superviviente-w112",
+      "text": "familia...",
+      "meaning": "family",
+      "baseForm": "familia"
+    },
+    {
+      "id": "el_superviviente-w115",
+      "text": "también",
+      "meaning": "also",
+      "baseForm": "también"
+    },
+    {
+      "id": "el_superviviente-w117",
+      "text": "han",
+      "meaning": "have",
+      "baseForm": "haber"
+    },
+    {
+      "id": "el_superviviente-w144",
+      "text": "¿Adónde",
+      "meaning": "where",
+      "baseForm": "adónde"
+    },
+    {
+      "id": "el_superviviente-w152",
+      "text": "comida.",
+      "meaning": "food",
+      "baseForm": "comida"
+    },
+    {
+      "id": "el_superviviente-w158",
+      "text": "esto...?",
+      "meaning": "this",
+      "baseForm": "esto"
+    },
+    {
+      "id": "el_superviviente-w193",
+      "text": "estar",
+      "meaning": "to be",
+      "baseForm": "estar"
+    }
+  ],
+  "wordAudioMap": {
+    "el": "words/el",
+    "sobreviviente": "words/sobreviviente"
+  }
+}

@@ -101,15 +101,6 @@ struct PageView: View {
                                         }
                                     }
                                     .onTapGesture { location in
-                                        // Handle speaking practice mode text reveal
-                                        if settingsManager.speakingPracticeMode {
-                                            withAnimation {
-                                                textRevealed.toggle()
-                                            }
-                                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                            return
-                                        }
-
                                         // Convert tap location to normalized coordinates (0-1)
                                         let normalizedX = location.x / imageGeometry.size.width
                                         let normalizedY = location.y / imageGeometry.size.height

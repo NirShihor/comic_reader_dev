@@ -16,8 +16,8 @@ struct PanelView: View {
     @State private var translationRevealed: Set<String> = [] // Track by sentence ID
     @State private var highlightedWordIndex: Int?
     @State private var playingSentenceId: String?
-    @State private var isRecording = false
-    @State private var isProcessing = false
+    @State private var recordingSentenceId: String?
+    @State private var processingSentenceId: String?
     @State private var practiceFeedback: PracticeFeedback?
     @State private var currentPanelId: String
     @State private var showingError = false
@@ -166,8 +166,8 @@ struct PanelView: View {
         .onChange(of: whisperService.error) { _, newError in
             // Only show error if we have no transcribed text (actual failure)
             if let error = newError, whisperService.transcribedText.isEmpty {
-                isRecording = false
-                isProcessing = false
+                recordingSentenceId = nil
+                processingSentenceId = nil
                 errorMessage = error
                 showingError = true
                 whisperService.error = nil
@@ -257,9 +257,15 @@ struct PanelView: View {
             ? (currentPanel.noTextImage ?? currentPanel.artworkImage)
             : currentPanel.artworkImage
 
+        // In practice mode, cap image height so practice UI stays visible without scrolling
+        let maxImageHeight: CGFloat? = settingsManager.speakingPracticeMode
+            ? UIScreen.main.bounds.height * 0.4
+            : nil
+
         return ZStack {
             ComicImage(imageName: imageName, comicId: comic.id)
                 .aspectRatio(contentMode: .fit)
+                .frame(maxHeight: maxImageHeight)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .shadow(radius: 4)
 
@@ -350,28 +356,29 @@ struct PanelView: View {
                     if let audioUrl = sentence.audioUrl, !audioUrl.isEmpty {
                         HStack {
                             if settingsManager.speakingPracticeMode {
+                                let isThisRecording = recordingSentenceId == sentence.id
                                 Button {
-                                    if isRecording {
+                                    if isThisRecording {
                                         stopRecording(for: sentence)
                                     } else {
                                         startRecording(for: sentence)
                                     }
                                 } label: {
                                     Label(
-                                        isRecording ? "Stop" : "Speak",
-                                        systemImage: isRecording ? "stop.fill" : "mic.fill"
+                                        isThisRecording ? "Stop" : "Speak",
+                                        systemImage: isThisRecording ? "stop.fill" : "mic.fill"
                                     )
                                     .font(.subheadline)
                                     .fontWeight(.medium)
                                     .foregroundStyle(.white)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 10)
-                                    .background(isRecording ? Color.red : Color.blue)
+                                    .background(isThisRecording ? Color.red : Color.blue)
                                     .clipShape(Capsule())
                                 }
-                                .disabled(isProcessing)
+                                .disabled(processingSentenceId != nil || (recordingSentenceId != nil && !isThisRecording))
 
-                                if isProcessing {
+                                if processingSentenceId == sentence.id {
                                     ProgressView()
                                         .padding(.leading, 8)
                                 }
@@ -508,21 +515,23 @@ struct PanelView: View {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         Task {
             await whisperService.startRecording()
-            isRecording = whisperService.isRecording
+            if whisperService.isRecording {
+                recordingSentenceId = sentence.id
+            }
         }
     }
 
     private func stopRecording(for sentence: Sentence) {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        isRecording = false
-        isProcessing = true
+        recordingSentenceId = nil
+        processingSentenceId = sentence.id
 
         Task {
             let spokenText = await whisperService.stopRecording()
             let expectedText = sentence.text
 
             if let error = whisperService.error, spokenText.isEmpty {
-                isProcessing = false
+                processingSentenceId = nil
                 errorMessage = error
                 showingError = true
                 whisperService.error = nil
@@ -534,7 +543,7 @@ struct PanelView: View {
 
             try? await Task.sleep(nanoseconds: 300_000_000)
 
-            isProcessing = false
+            processingSentenceId = nil
             practiceFeedback = PracticeFeedback(
                 isCorrect: isCorrect,
                 spokenText: spokenText.isEmpty ? "(no speech detected)" : spokenText,

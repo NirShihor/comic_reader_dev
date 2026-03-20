@@ -216,16 +216,25 @@ struct QuizView: View {
                 HStack {
                     Text("Correct answer:")
                         .foregroundStyle(.secondary)
-                    Text(reviewWord.word.text)
+                    Text(stripPunctuation(reviewWord.word.text).capitalized)
                         .fontWeight(.semibold)
                 }
 
-                Button {
-                    playWordAudio()
-                } label: {
-                    Label("Listen", systemImage: "speaker.wave.2.fill")
+                HStack(spacing: 12) {
+                    Button {
+                        playWordAudio()
+                    } label: {
+                        Label("Listen", systemImage: "speaker.wave.2.fill")
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button {
+                        tryAgain()
+                    } label: {
+                        Label("Try Again", systemImage: "arrow.counterclockwise")
+                    }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.bordered)
                 .padding(.top, 8)
             }
         }
@@ -280,13 +289,24 @@ struct QuizView: View {
     }
 
     // MARK: - Actions
-    private func checkAnswer() {
-        let normalizedAnswer = userAnswer.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        let normalizedCorrect = (currentWord?.word.text ?? "").lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+    private func stripPunctuation(_ text: String) -> String {
+        text.lowercased()
+            .replacingOccurrences(of: "¿", with: "")
+            .replacingOccurrences(of: "?", with: "")
+            .replacingOccurrences(of: "¡", with: "")
+            .replacingOccurrences(of: "!", with: "")
+            .replacingOccurrences(of: "...", with: "")
+            .replacingOccurrences(of: ".", with: "")
+            .replacingOccurrences(of: ",", with: "")
+            .replacingOccurrences(of: "…", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 
-        // Simple comparison - could add fuzzy matching later
-        isCorrect = normalizedAnswer == normalizedCorrect ||
-                    normalizedAnswer == normalizedCorrect.replacingOccurrences(of: "¡", with: "").replacingOccurrences(of: "!", with: "")
+    private func checkAnswer() {
+        let normalizedAnswer = stripPunctuation(userAnswer)
+        let normalizedCorrect = stripPunctuation(currentWord?.word.text ?? "")
+
+        isCorrect = normalizedAnswer == normalizedCorrect
 
         if isCorrect {
             score += 1
@@ -310,6 +330,12 @@ struct QuizView: View {
         } else {
             quizComplete = true
         }
+    }
+
+    private func tryAgain() {
+        userAnswer = ""
+        showResult = false
+        isCorrect = false
     }
 
     private func skipWord() {
@@ -336,23 +362,30 @@ struct QuizView: View {
         guard let reviewWord = currentWord else { return }
         if let wordAudio = reviewWord.word.wordAudioUrl {
             audioManager.play(wordAudio)
-            if let baseAudio = reviewWord.word.baseFormAudioUrl, baseAudio != wordAudio {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    audioManager.play(baseAudio)
-                }
-            }
         } else if let baseAudio = reviewWord.word.baseFormAudioUrl {
             audioManager.play(baseAudio)
+        } else if let sentenceAudio = findSentenceAudio(for: reviewWord) {
+            audioManager.play(sentenceAudio)
         } else {
-            let audioName = reviewWord.word.text
-                .lowercased()
-                .replacingOccurrences(of: "¿", with: "")
-                .replacingOccurrences(of: "?", with: "")
-                .replacingOccurrences(of: "¡", with: "")
-                .replacingOccurrences(of: "!", with: "")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let audioName = stripPunctuation(reviewWord.word.text)
             audioManager.play(audioName)
         }
+    }
+
+    private func findSentenceAudio(for reviewWord: ReviewWord) -> String? {
+        guard let page = comic.pages.first(where: { $0.id == reviewWord.pageId }),
+              let panel = page.panels.first(where: { $0.id == reviewWord.panelId }) else {
+            return nil
+        }
+        for bubble in panel.bubbles {
+            for sentence in bubble.sentences {
+                if sentence.words.contains(where: { $0.id == reviewWord.word.id }),
+                   let audioUrl = sentence.audioUrl, !audioUrl.isEmpty {
+                    return audioUrl
+                }
+            }
+        }
+        return nil
     }
 
     private func scoreColor(percentage: Int) -> Color {

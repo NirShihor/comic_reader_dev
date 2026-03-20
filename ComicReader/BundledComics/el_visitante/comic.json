@@ -9,6 +9,9 @@
   "language": "es",
   "targetLanguage": "en",
   "version": "1.0",
+  "collectionId": "el_visitante",
+  "collectionTitle": "EL VISITANTE",
+  "episodeNumber": 1,
   "pages": [
     {
       "id": "el_visitante-page-cover",
@@ -74,10 +77,12 @@
       "id": "el_visitante-page-1",
       "pageNumber": 2,
       "masterImage": "el_visitante_p1",
+      "noTextImage": "el_visitante_p1_no_text",
       "panels": [
         {
           "id": "el_visitante-panel-1-1",
           "artworkImage": "el_visitante_p1_s1",
+          "noTextImage": "el_visitante_p1_s1_no_text",
           "panelOrder": 1,
           "tapZone": {
             "x": 0,
@@ -108,7 +113,9 @@
                       "meaning": "a",
                       "baseForm": "uno",
                       "startTimeMs": 0,
-                      "endTimeMs": 236
+                      "endTimeMs": 236,
+                      "wordAudioUrl": "words/una",
+                      "baseFormAudioUrl": "words/uno"
                     },
                     {
                       "id": "el_visitante-w4",
@@ -116,7 +123,9 @@
                       "meaning": "night",
                       "baseForm": "noche",
                       "startTimeMs": 316,
-                      "endTimeMs": 1156
+                      "endTimeMs": 1156,
+                      "wordAudioUrl": "words/noche",
+                      "baseFormAudioUrl": "words/noche"
                     },
                     {
                       "id": "el_visitante-w5",
@@ -124,7 +133,9 @@
                       "meaning": "very",
                       "baseForm": "muy",
                       "startTimeMs": 1266,
-                      "endTimeMs": 1596
+                      "endTimeMs": 1596,
+                      "wordAudioUrl": "words/muy",
+                      "baseFormAudioUrl": "words/muy"
                     },
                     {
                       "id": "el_visitante-w6",
@@ -132,7 +143,9 @@
                       "meaning": "late",
                       "baseForm": "tarde",
                       "startTimeMs": 1689,
-                      "endTimeMs": 4152
+                      "endTimeMs": 4152,
+                      "wordAudioUrl": "words/tarde",
+                      "baseFormAudioUrl": "words/tarde"
                     }
                   ]
                 }
@@ -143,6 +156,7 @@
         {
           "id": "el_visitante-panel-1-2",
           "artworkImage": "el_visitante_p1_s2",
+          "noTextImage": "el_visitante_p1_s2_no_text",
           "panelOrder": 2,
           "tapZone": {
             "x": 0,
@@ -174,7 +188,9 @@
                       "baseForm": "qué",
                       "startTimeMs": 0,
                       "endTimeMs": 877,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
                     }
                   ]
                 },
@@ -212,6 +228,7 @@
         {
           "id": "el_visitante-panel-1-3",
           "artworkImage": "el_visitante_p1_s3",
+          "noTextImage": "el_visitante_p1_s3_no_text",
           "panelOrder": 3,
           "tapZone": {
             "x": 0.43000000000000005,
@@ -242,7 +259,9 @@
                       "meaning": "what",
                       "baseForm": "qué",
                       "startTimeMs": 0,
-                      "endTimeMs": 158
+                      "endTimeMs": 158,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
                     },
                     {
                       "id": "el_visitante-w9",
@@ -250,7 +269,9 @@
                       "meaning": "is",
                       "baseForm": "ser",
                       "startTimeMs": 211,
-                      "endTimeMs": 317
+                      "endTimeMs": 317,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
                     },
                     {
                       "id": "el_visitante-w10",
@@ -258,13 +279,17 @@
                       "meaning": "that",
                       "baseForm": "eso",
                       "startTimeMs": 437,
-                      "endTimeMs": 1277
+                      "endTimeMs": 1277,
+                      "wordAudioUrl": "words/eso",
+                      "baseFormAudioUrl": "words/eso"
                     },
                     {
                       "id": "el_visitante-w11",
                       "text": "¿Qué es eso?",
                       "meaning": "What is that? ",
-                      "baseForm": "¿Qué es eso?"
+                      "baseForm": "¿Qué es eso?",
+                      "wordAudioUrl": "words/qué_es_eso",
+                      "baseFormAudioUrl": "words/qué_es_eso"
                     }
                   ]
                 }
@@ -278,10 +303,12 @@
       "id": "el_visitante-page-2",
       "pageNumber": 3,
       "masterImage": "el_visitante_p2",
+      "noTextImage": "el_visitante_p2_no_text",
       "panels": [
         {
           "id": "el_visitante-panel-2-1",
           "artworkImage": "el_visitante_p2_s1",
+          "noTextImage": "el_visitante_p2_s1_no_text",
           "panelOrder": 1,
           "tapZone": {
             "x": 0,
@@ -313,7 +340,9 @@
                       "baseForm": "hola",
                       "startTimeMs": 0,
                       "endTimeMs": 1671,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hola",
+                      "baseFormAudioUrl": "words/hola"
                     }
                   ]
                 }
@@ -342,7 +371,9 @@
                       "baseForm": "quién",
                       "startTimeMs": 0,
                       "endTimeMs": 717,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/quién",
+                      "baseFormAudioUrl": "words/quién"
                     }
                   ]
                 }
@@ -353,6 +384,7 @@
         {
           "id": "el_visitante-panel-2-2",
           "artworkImage": "el_visitante_p2_s2",
+          "noTextImage": "el_visitante_p2_s2_no_text",
           "panelOrder": 2,
           "tapZone": {
             "x": 0,
@@ -384,7 +416,9 @@
                       "baseForm": "hola",
                       "startTimeMs": 0,
                       "endTimeMs": 960,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hola",
+                      "baseFormAudioUrl": "words/hola"
                     }
                   ]
                 }
@@ -412,7 +446,9 @@
                       "meaning": "hello",
                       "baseForm": "hola",
                       "startTimeMs": 0,
-                      "endTimeMs": 1039
+                      "endTimeMs": 1039,
+                      "wordAudioUrl": "words/hola",
+                      "baseFormAudioUrl": "words/hola"
                     }
                   ]
                 }
@@ -423,6 +459,7 @@
         {
           "id": "el_visitante-panel-2-3",
           "artworkImage": "el_visitante_p2_s3",
+          "noTextImage": "el_visitante_p2_s3_no_text",
           "panelOrder": 3,
           "tapZone": {
             "x": 0,
@@ -454,7 +491,9 @@
                       "baseForm": "hablar",
                       "startTimeMs": 0,
                       "endTimeMs": 479,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hablas",
+                      "baseFormAudioUrl": "words/hablar"
                     },
                     {
                       "id": "el_visitante-w17",
@@ -462,7 +501,9 @@
                       "meaning": "Spanish",
                       "baseForm": "español",
                       "startTimeMs": 559,
-                      "endTimeMs": 1359
+                      "endTimeMs": 1359,
+                      "wordAudioUrl": "words/español",
+                      "baseFormAudioUrl": "words/español"
                     }
                   ]
                 }
@@ -490,7 +531,9 @@
                       "meaning": "a",
                       "baseForm": "un",
                       "startTimeMs": 0,
-                      "endTimeMs": 158
+                      "endTimeMs": 158,
+                      "wordAudioUrl": "words/un",
+                      "baseFormAudioUrl": "words/un"
                     },
                     {
                       "id": "el_visitante-w19",
@@ -499,7 +542,9 @@
                       "baseForm": "poco",
                       "startTimeMs": 302,
                       "endTimeMs": 1118,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/poco",
+                      "baseFormAudioUrl": "words/poco"
                     }
                   ]
                 }
@@ -513,10 +558,12 @@
       "id": "el_visitante-page-3",
       "pageNumber": 4,
       "masterImage": "el_visitante_p3",
+      "noTextImage": "el_visitante_p3_no_text",
       "panels": [
         {
           "id": "el_visitante-panel-3-1",
           "artworkImage": "el_visitante_p3_s1",
+          "noTextImage": "el_visitante_p3_s1_no_text",
           "panelOrder": 1,
           "tapZone": {
             "x": 0,
@@ -548,7 +595,9 @@
                       "baseForm": "ser",
                       "startTimeMs": 0,
                       "endTimeMs": 316,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/soy",
+                      "baseFormAudioUrl": "words/ser"
                     },
                     {
                       "id": "el_visitante-w21",
@@ -557,7 +606,9 @@
                       "baseForm": "uno",
                       "startTimeMs": 396,
                       "endTimeMs": 636,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/una",
+                      "baseFormAudioUrl": "words/uno"
                     },
                     {
                       "id": "el_visitante-w22",
@@ -566,7 +617,9 @@
                       "baseForm": "chica",
                       "startTimeMs": 716,
                       "endTimeMs": 1276,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/chica",
+                      "baseFormAudioUrl": "words/chica"
                     }
                   ]
                 }
@@ -594,15 +647,19 @@
                       "meaning": "I am",
                       "baseForm": "ser",
                       "startTimeMs": 0,
-                      "endTimeMs": 160
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/soy",
+                      "baseFormAudioUrl": "words/ser"
                     },
                     {
                       "id": "el_visitante-w24",
-                      "text": "Mía.",
-                      "meaning": "mine",
-                      "baseForm": "mío",
+                      "text": "Mía",
+                      "meaning": "Mia",
+                      "baseForm": "Mía",
                       "startTimeMs": 240,
-                      "endTimeMs": 1040
+                      "endTimeMs": 1040,
+                      "wordAudioUrl": "words/mía",
+                      "baseFormAudioUrl": "words/mía"
                     }
                   ]
                 }
@@ -631,7 +688,9 @@
                       "baseForm": "mi",
                       "startTimeMs": 0,
                       "endTimeMs": 160,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mi",
+                      "baseFormAudioUrl": "words/mi"
                     },
                     {
                       "id": "el_visitante-w26",
@@ -640,7 +699,9 @@
                       "baseForm": "nombre",
                       "startTimeMs": 251,
                       "endTimeMs": 797,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/nombre",
+                      "baseFormAudioUrl": "words/nombre"
                     },
                     {
                       "id": "el_visitante-w27",
@@ -648,7 +709,9 @@
                       "meaning": "is",
                       "baseForm": "ser",
                       "startTimeMs": 1010,
-                      "endTimeMs": 1436
+                      "endTimeMs": 1436,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
                     },
                     {
                       "id": "el_visitante-w28",
@@ -656,7 +719,9 @@
                       "meaning": "mine",
                       "baseForm": "mío",
                       "startTimeMs": 1716,
-                      "endTimeMs": 2396
+                      "endTimeMs": 2396,
+                      "wordAudioUrl": "words/mía",
+                      "baseFormAudioUrl": "words/mío"
                     }
                   ]
                 }
@@ -667,6 +732,7 @@
         {
           "id": "el_visitante-panel-3-2",
           "artworkImage": "el_visitante_p3_s2",
+          "noTextImage": "el_visitante_p3_s2_no_text",
           "panelOrder": 2,
           "tapZone": {
             "x": 0,
@@ -697,7 +763,9 @@
                       "meaning": "me",
                       "baseForm": "me",
                       "startTimeMs": 0,
-                      "endTimeMs": 160
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/me",
+                      "baseFormAudioUrl": "words/me"
                     },
                     {
                       "id": "el_visitante-w30",
@@ -705,13 +773,17 @@
                       "meaning": "I call",
                       "baseForm": "llamar",
                       "startTimeMs": 213,
-                      "endTimeMs": 559
+                      "endTimeMs": 559,
+                      "wordAudioUrl": "words/llamo",
+                      "baseFormAudioUrl": "words/llamar"
                     },
                     {
                       "id": "el_visitante-w31",
                       "text": "Zik",
                       "meaning": "Zik (name)",
-                      "baseForm": "Zik"
+                      "baseForm": "Zik",
+                      "wordAudioUrl": "words/zik",
+                      "baseFormAudioUrl": "words/zik"
                     }
                   ]
                 }
@@ -722,6 +794,7 @@
         {
           "id": "el_visitante-panel-3-3",
           "artworkImage": "el_visitante_p3_s3",
+          "noTextImage": "el_visitante_p3_s3_no_text",
           "panelOrder": 3,
           "tapZone": {
             "x": 0.475,
@@ -753,7 +826,9 @@
                       "baseForm": "mal",
                       "startTimeMs": 0,
                       "endTimeMs": 714,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mal",
+                      "baseFormAudioUrl": "words/mal"
                     }
                   ]
                 }
@@ -782,7 +857,9 @@
                       "baseForm": "muy",
                       "startTimeMs": 0,
                       "endTimeMs": 476,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/muy",
+                      "baseFormAudioUrl": "words/muy"
                     },
                     {
                       "id": "el_visitante-w34",
@@ -790,7 +867,9 @@
                       "meaning": "bad",
                       "baseForm": "mal",
                       "startTimeMs": 696,
-                      "endTimeMs": 1515
+                      "endTimeMs": 1515,
+                      "wordAudioUrl": "words/mal",
+                      "baseFormAudioUrl": "words/mal"
                     }
                   ]
                 }
@@ -804,10 +883,12 @@
       "id": "el_visitante-page-4",
       "pageNumber": 5,
       "masterImage": "el_visitante_p4",
+      "noTextImage": "el_visitante_p4_no_text",
       "panels": [
         {
           "id": "el_visitante-panel-4-1",
           "artworkImage": "el_visitante_p4_s1",
+          "noTextImage": "el_visitante_p4_s1_no_text",
           "panelOrder": 1,
           "tapZone": {
             "x": 0,
@@ -838,7 +919,9 @@
                       "meaning": "problem",
                       "baseForm": "problema",
                       "startTimeMs": 0,
-                      "endTimeMs": 1439
+                      "endTimeMs": 1439,
+                      "wordAudioUrl": "words/problema",
+                      "baseFormAudioUrl": "words/problema"
                     }
                   ]
                 }
@@ -866,7 +949,9 @@
                       "meaning": "it",
                       "baseForm": "lo",
                       "startTimeMs": 0,
-                      "endTimeMs": 280
+                      "endTimeMs": 280,
+                      "wordAudioUrl": "words/lo",
+                      "baseFormAudioUrl": "words/lo"
                     },
                     {
                       "id": "el_visitante-w37",
@@ -874,7 +959,9 @@
                       "meaning": "I feel",
                       "baseForm": "sentir",
                       "startTimeMs": 300,
-                      "endTimeMs": 800
+                      "endTimeMs": 800,
+                      "wordAudioUrl": "words/siento",
+                      "baseFormAudioUrl": "words/sentir"
                     }
                   ]
                 }
@@ -885,6 +972,7 @@
         {
           "id": "el_visitante-panel-4-2",
           "artworkImage": "el_visitante_p4_s2",
+          "noTextImage": "el_visitante_p4_s2_no_text",
           "panelOrder": 2,
           "tapZone": {
             "x": 0.43374999999999997,
@@ -915,7 +1003,9 @@
                       "meaning": "yes",
                       "baseForm": "sí",
                       "startTimeMs": 0,
-                      "endTimeMs": 1118
+                      "endTimeMs": 1118,
+                      "wordAudioUrl": "words/sí",
+                      "baseFormAudioUrl": "words/sí"
                     },
                     {
                       "id": "el_visitante-w39",
@@ -923,7 +1013,9 @@
                       "meaning": "problem",
                       "baseForm": "problema",
                       "startTimeMs": 1215,
-                      "endTimeMs": 2311
+                      "endTimeMs": 2311,
+                      "wordAudioUrl": "words/problema",
+                      "baseFormAudioUrl": "words/problema"
                     }
                   ]
                 }
@@ -934,6 +1026,7 @@
         {
           "id": "el_visitante-panel-4-3",
           "artworkImage": "el_visitante_p4_s3",
+          "noTextImage": "el_visitante_p4_s3_no_text",
           "panelOrder": 3,
           "tapZone": {
             "x": 0,
@@ -964,7 +1057,9 @@
                       "meaning": "it",
                       "baseForm": "lo",
                       "startTimeMs": 0,
-                      "endTimeMs": 280
+                      "endTimeMs": 280,
+                      "wordAudioUrl": "words/lo",
+                      "baseFormAudioUrl": "words/lo"
                     },
                     {
                       "id": "el_visitante-w41",
@@ -972,7 +1067,9 @@
                       "meaning": "I feel",
                       "baseForm": "sentir",
                       "startTimeMs": 300,
-                      "endTimeMs": 800
+                      "endTimeMs": 800,
+                      "wordAudioUrl": "words/siento",
+                      "baseFormAudioUrl": "words/sentir"
                     }
                   ]
                 }
@@ -983,6 +1080,7 @@
         {
           "id": "el_visitante-panel-4-4",
           "artworkImage": "el_visitante_p4_s4",
+          "noTextImage": "el_visitante_p4_s4_no_text",
           "panelOrder": 4,
           "tapZone": {
             "x": 0.50625,
@@ -998,10 +1096,12 @@
       "id": "el_visitante-page-5",
       "pageNumber": 6,
       "masterImage": "el_visitante_p5",
+      "noTextImage": "el_visitante_p5_no_text",
       "panels": [
         {
           "id": "el_visitante-panel-5-1",
           "artworkImage": "el_visitante_p5_s1",
+          "noTextImage": "el_visitante_p5_s1_no_text",
           "panelOrder": 1,
           "tapZone": {
             "x": 0,
@@ -1032,7 +1132,9 @@
                       "meaning": "water",
                       "baseForm": "agua",
                       "startTimeMs": 0,
-                      "endTimeMs": 1120
+                      "endTimeMs": 1120,
+                      "wordAudioUrl": "words/agua",
+                      "baseFormAudioUrl": "words/agua"
                     }
                   ]
                 }
@@ -1061,7 +1163,9 @@
                       "baseForm": "agua",
                       "startTimeMs": 0,
                       "endTimeMs": 1040,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/agua",
+                      "baseFormAudioUrl": "words/agua"
                     }
                   ]
                 }
@@ -1072,6 +1176,7 @@
         {
           "id": "el_visitante-panel-5-2",
           "artworkImage": "el_visitante_p5_s2",
+          "noTextImage": "el_visitante_p5_s2_no_text",
           "panelOrder": 2,
           "tapZone": {
             "x": 0,
@@ -1103,7 +1208,9 @@
                       "baseForm": "casa",
                       "startTimeMs": 0,
                       "endTimeMs": 1037,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/casa",
+                      "baseFormAudioUrl": "words/casa"
                     }
                   ]
                 }
@@ -1131,7 +1238,9 @@
                       "meaning": "yes",
                       "baseForm": "sí",
                       "startTimeMs": 0,
-                      "endTimeMs": 1199
+                      "endTimeMs": 1199,
+                      "wordAudioUrl": "words/sí",
+                      "baseFormAudioUrl": "words/sí"
                     }
                   ]
                 }
@@ -1142,6 +1251,7 @@
         {
           "id": "el_visitante-panel-5-3",
           "artworkImage": "el_visitante_p5_s3",
+          "noTextImage": "el_visitante_p5_s3_no_text",
           "panelOrder": 3,
           "tapZone": {
             "x": 0,
@@ -1172,7 +1282,9 @@
                       "meaning": "I",
                       "baseForm": "yo",
                       "startTimeMs": 0,
-                      "endTimeMs": 634
+                      "endTimeMs": 634,
+                      "wordAudioUrl": "words/yo",
+                      "baseFormAudioUrl": "words/yo"
                     },
                     {
                       "id": "el_visitante-w47",
@@ -1180,7 +1292,9 @@
                       "meaning": "water",
                       "baseForm": "agua",
                       "startTimeMs": 954,
-                      "endTimeMs": 2788
+                      "endTimeMs": 2788,
+                      "wordAudioUrl": "words/agua",
+                      "baseFormAudioUrl": "words/agua"
                     }
                   ]
                 }
@@ -1194,10 +1308,12 @@
       "id": "el_visitante-page-6",
       "pageNumber": 7,
       "masterImage": "el_visitante_p6",
+      "noTextImage": "el_visitante_p6_no_text",
       "panels": [
         {
           "id": "el_visitante-panel-6-1",
           "artworkImage": "el_visitante_p6_s1",
+          "noTextImage": "el_visitante_p6_s1_no_text",
           "panelOrder": 1,
           "tapZone": {
             "x": 0,
@@ -1228,7 +1344,9 @@
                       "meaning": "no",
                       "baseForm": "no",
                       "startTimeMs": 0,
-                      "endTimeMs": 960
+                      "endTimeMs": 960,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
                     },
                     {
                       "id": "el_visitante-w49",
@@ -1236,7 +1354,9 @@
                       "meaning": "no",
                       "baseForm": "no",
                       "startTimeMs": 1146,
-                      "endTimeMs": 1518
+                      "endTimeMs": 1518,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
                     },
                     {
                       "id": "el_visitante-w50",
@@ -1245,7 +1365,9 @@
                       "baseForm": "mamá",
                       "startTimeMs": 1598,
                       "endTimeMs": 2318,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mamá",
+                      "baseFormAudioUrl": "words/mamá"
                     },
                     {
                       "id": "el_visitante-w51",
@@ -1253,7 +1375,9 @@
                       "meaning": "no",
                       "baseForm": "no",
                       "startTimeMs": 2451,
-                      "endTimeMs": 2717
+                      "endTimeMs": 2717,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
                     },
                     {
                       "id": "el_visitante-w52",
@@ -1262,7 +1386,9 @@
                       "baseForm": "papá",
                       "startTimeMs": 2777,
                       "endTimeMs": 3597,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/papá",
+                      "baseFormAudioUrl": "words/papá"
                     }
                   ]
                 }
@@ -1291,7 +1417,9 @@
                       "baseForm": "amigo",
                       "startTimeMs": 0,
                       "endTimeMs": 1760,
-                      "vocabQuiz": true
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/amigo",
+                      "baseFormAudioUrl": "words/amigo"
                     }
                   ]
                 }
@@ -1302,6 +1430,7 @@
         {
           "id": "el_visitante-panel-6-2",
           "artworkImage": "el_visitante_p6_s2",
+          "noTextImage": "el_visitante_p6_s2_no_text",
           "panelOrder": 2,
           "tapZone": {
             "x": 0,
@@ -1332,7 +1461,9 @@
                       "meaning": "friend",
                       "baseForm": "amigo",
                       "startTimeMs": 0,
-                      "endTimeMs": 1036
+                      "endTimeMs": 1036,
+                      "wordAudioUrl": "words/amigoa",
+                      "baseFormAudioUrl": "words/amigo"
                     }
                   ]
                 }
@@ -1343,6 +1474,7 @@
         {
           "id": "el_visitante-panel-6-3",
           "artworkImage": "el_visitante_p6_s3",
+          "noTextImage": "el_visitante_p6_s3_no_text",
           "panelOrder": 3,
           "tapZone": {
             "x": 0.49375,
@@ -1373,7 +1505,9 @@
                       "meaning": "yes",
                       "baseForm": "sí",
                       "startTimeMs": 0,
-                      "endTimeMs": 1000
+                      "endTimeMs": 1000,
+                      "wordAudioUrl": "words/sí",
+                      "baseFormAudioUrl": "words/sí"
                     },
                     {
                       "id": "el_visitante-w56",
@@ -1381,7 +1515,9 @@
                       "meaning": "friend",
                       "baseForm": "amigo",
                       "startTimeMs": 1300,
-                      "endTimeMs": 3279
+                      "endTimeMs": 3279,
+                      "wordAudioUrl": "words/amiga",
+                      "baseFormAudioUrl": "words/amigo"
                     }
                   ]
                 }
@@ -1395,10 +1531,12 @@
       "id": "el_visitante-page-7",
       "pageNumber": 8,
       "masterImage": "el_visitante_p7",
+      "noTextImage": "el_visitante_p7_no_text",
       "panels": [
         {
           "id": "el_visitante-panel-7-1",
           "artworkImage": "el_visitante_p7_s1",
+          "noTextImage": "el_visitante_p7_s1_no_text",
           "panelOrder": 1,
           "tapZone": {
             "x": 0,
@@ -1429,7 +1567,9 @@
                       "meaning": "come",
                       "baseForm": "venir",
                       "startTimeMs": 0,
-                      "endTimeMs": 1517
+                      "endTimeMs": 1517,
+                      "wordAudioUrl": "words/ven",
+                      "baseFormAudioUrl": "words/venir"
                     }
                   ]
                 }
@@ -1440,6 +1580,7 @@
         {
           "id": "el_visitante-panel-7-2",
           "artworkImage": "el_visitante_p7_s2",
+          "noTextImage": "el_visitante_p7_s2_no_text",
           "panelOrder": 2,
           "tapZone": {
             "x": 0,
@@ -1470,7 +1611,9 @@
                       "meaning": "is",
                       "baseForm": "estar",
                       "startTimeMs": 0,
-                      "endTimeMs": 318
+                      "endTimeMs": 318,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
                     },
                     {
                       "id": "el_visitante-w59",
@@ -1478,7 +1621,9 @@
                       "meaning": "okay",
                       "baseForm": "bien",
                       "startTimeMs": 414,
-                      "endTimeMs": 1558
+                      "endTimeMs": 1558,
+                      "wordAudioUrl": "words/bien",
+                      "baseFormAudioUrl": "words/bien"
                     },
                     {
                       "id": "el_visitante-w60",
@@ -1486,7 +1631,9 @@
                       "meaning": "everything",
                       "baseForm": "todo",
                       "startTimeMs": 1938,
-                      "endTimeMs": 2555
+                      "endTimeMs": 2555,
+                      "wordAudioUrl": "words/todo",
+                      "baseFormAudioUrl": "words/todo"
                     },
                     {
                       "id": "el_visitante-w61",
@@ -1494,7 +1641,9 @@
                       "meaning": "is",
                       "baseForm": "estar",
                       "startTimeMs": 2619,
-                      "endTimeMs": 2875
+                      "endTimeMs": 2875,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
                     },
                     {
                       "id": "el_visitante-w62",
@@ -1502,7 +1651,9 @@
                       "meaning": "okay",
                       "baseForm": "bien",
                       "startTimeMs": 2987,
-                      "endTimeMs": 4555
+                      "endTimeMs": 4555,
+                      "wordAudioUrl": "words/bien",
+                      "baseFormAudioUrl": "words/bien"
                     }
                   ]
                 }
@@ -1513,6 +1664,7 @@
         {
           "id": "el_visitante-panel-7-3",
           "artworkImage": "el_visitante_p7_s3",
+          "noTextImage": "el_visitante_p7_s3_no_text",
           "panelOrder": 3,
           "tapZone": {
             "x": 0.47875,
@@ -1528,10 +1680,12 @@
       "id": "el_visitante-page-8",
       "pageNumber": 9,
       "masterImage": "el_visitante_p8",
+      "noTextImage": "el_visitante_p8_no_text",
       "panels": [
         {
           "id": "el_visitante-panel-8-1",
           "artworkImage": "el_visitante_p8_s1",
+          "noTextImage": "el_visitante_p8_s1_no_text",
           "panelOrder": 1,
           "tapZone": {
             "x": 0,
@@ -1562,7 +1716,9 @@
                       "meaning": "will continue",
                       "baseForm": "continuar",
                       "startTimeMs": 0,
-                      "endTimeMs": 954
+                      "endTimeMs": 954,
+                      "wordAudioUrl": "words/continuará",
+                      "baseFormAudioUrl": "words/continuar"
                     }
                   ]
                 }
@@ -1579,7 +1735,9 @@
         "id": "el_visitante-w7",
         "text": "¿Qué...?",
         "meaning": "what",
-        "baseForm": "qué"
+        "baseForm": "qué",
+        "wordAudioUrl": "words/qué",
+        "baseFormAudioUrl": "words/qué"
       },
       "panelId": "el_visitante-panel-1-2",
       "pageId": "el_visitante-page-1"
@@ -1589,7 +1747,9 @@
         "id": "el_visitante-w12",
         "text": "¿Hola...?",
         "meaning": "hello",
-        "baseForm": "hola"
+        "baseForm": "hola",
+        "wordAudioUrl": "words/hola",
+        "baseFormAudioUrl": "words/hola"
       },
       "panelId": "el_visitante-panel-2-1",
       "pageId": "el_visitante-page-2"
@@ -1599,7 +1759,9 @@
         "id": "el_visitante-w13",
         "text": "¿Quién...?",
         "meaning": "who",
-        "baseForm": "quién"
+        "baseForm": "quién",
+        "wordAudioUrl": "words/quién",
+        "baseFormAudioUrl": "words/quién"
       },
       "panelId": "el_visitante-panel-2-1",
       "pageId": "el_visitante-page-2"
@@ -1609,7 +1771,9 @@
         "id": "el_visitante-w14",
         "text": "Hola...",
         "meaning": "hello",
-        "baseForm": "hola"
+        "baseForm": "hola",
+        "wordAudioUrl": "words/hola",
+        "baseFormAudioUrl": "words/hola"
       },
       "panelId": "el_visitante-panel-2-2",
       "pageId": "el_visitante-page-2"
@@ -1619,7 +1783,9 @@
         "id": "el_visitante-w16",
         "text": "¿Hablas",
         "meaning": "you speak",
-        "baseForm": "hablar"
+        "baseForm": "hablar",
+        "wordAudioUrl": "words/hablas",
+        "baseFormAudioUrl": "words/hablar"
       },
       "panelId": "el_visitante-panel-2-3",
       "pageId": "el_visitante-page-2"
@@ -1629,7 +1795,9 @@
         "id": "el_visitante-w19",
         "text": "poco...",
         "meaning": "little",
-        "baseForm": "poco"
+        "baseForm": "poco",
+        "wordAudioUrl": "words/poco",
+        "baseFormAudioUrl": "words/poco"
       },
       "panelId": "el_visitante-panel-2-3",
       "pageId": "el_visitante-page-2"
@@ -1639,7 +1807,9 @@
         "id": "el_visitante-w20",
         "text": "Soy",
         "meaning": "I am",
-        "baseForm": "ser"
+        "baseForm": "ser",
+        "wordAudioUrl": "words/soy",
+        "baseFormAudioUrl": "words/ser"
       },
       "panelId": "el_visitante-panel-3-1",
       "pageId": "el_visitante-page-3"
@@ -1649,7 +1819,9 @@
         "id": "el_visitante-w21",
         "text": "una",
         "meaning": "a",
-        "baseForm": "uno"
+        "baseForm": "uno",
+        "wordAudioUrl": "words/una",
+        "baseFormAudioUrl": "words/uno"
       },
       "panelId": "el_visitante-panel-3-1",
       "pageId": "el_visitante-page-3"
@@ -1659,7 +1831,9 @@
         "id": "el_visitante-w22",
         "text": "chica",
         "meaning": "girl",
-        "baseForm": "chica"
+        "baseForm": "chica",
+        "wordAudioUrl": "words/chica",
+        "baseFormAudioUrl": "words/chica"
       },
       "panelId": "el_visitante-panel-3-1",
       "pageId": "el_visitante-page-3"
@@ -1669,7 +1843,9 @@
         "id": "el_visitante-w25",
         "text": "Mi",
         "meaning": "my",
-        "baseForm": "mi"
+        "baseForm": "mi",
+        "wordAudioUrl": "words/mi",
+        "baseFormAudioUrl": "words/mi"
       },
       "panelId": "el_visitante-panel-3-1",
       "pageId": "el_visitante-page-3"
@@ -1679,7 +1855,9 @@
         "id": "el_visitante-w26",
         "text": "nombre",
         "meaning": "name",
-        "baseForm": "nombre"
+        "baseForm": "nombre",
+        "wordAudioUrl": "words/nombre",
+        "baseFormAudioUrl": "words/nombre"
       },
       "panelId": "el_visitante-panel-3-1",
       "pageId": "el_visitante-page-3"
@@ -1689,7 +1867,9 @@
         "id": "el_visitante-w32",
         "text": "Mal…",
         "meaning": "bad",
-        "baseForm": "mal"
+        "baseForm": "mal",
+        "wordAudioUrl": "words/mal",
+        "baseFormAudioUrl": "words/mal"
       },
       "panelId": "el_visitante-panel-3-3",
       "pageId": "el_visitante-page-3"
@@ -1699,7 +1879,9 @@
         "id": "el_visitante-w33",
         "text": "Muy",
         "meaning": "very",
-        "baseForm": "muy"
+        "baseForm": "muy",
+        "wordAudioUrl": "words/muy",
+        "baseFormAudioUrl": "words/muy"
       },
       "panelId": "el_visitante-panel-3-3",
       "pageId": "el_visitante-page-3"
@@ -1709,7 +1891,9 @@
         "id": "el_visitante-w43",
         "text": "¿Agua...?",
         "meaning": "water",
-        "baseForm": "agua"
+        "baseForm": "agua",
+        "wordAudioUrl": "words/agua",
+        "baseFormAudioUrl": "words/agua"
       },
       "panelId": "el_visitante-panel-5-1",
       "pageId": "el_visitante-page-5"
@@ -1719,7 +1903,9 @@
         "id": "el_visitante-w44",
         "text": "Casa...",
         "meaning": "house",
-        "baseForm": "casa"
+        "baseForm": "casa",
+        "wordAudioUrl": "words/casa",
+        "baseFormAudioUrl": "words/casa"
       },
       "panelId": "el_visitante-panel-5-2",
       "pageId": "el_visitante-page-5"
@@ -1729,7 +1915,9 @@
         "id": "el_visitante-w50",
         "text": "mamá…",
         "meaning": "mum",
-        "baseForm": "mamá"
+        "baseForm": "mamá",
+        "wordAudioUrl": "words/mamá",
+        "baseFormAudioUrl": "words/mamá"
       },
       "panelId": "el_visitante-panel-6-1",
       "pageId": "el_visitante-page-6"
@@ -1739,7 +1927,9 @@
         "id": "el_visitante-w52",
         "text": "papá…",
         "meaning": "dad",
-        "baseForm": "papá"
+        "baseForm": "papá",
+        "wordAudioUrl": "words/papá",
+        "baseFormAudioUrl": "words/papá"
       },
       "panelId": "el_visitante-panel-6-1",
       "pageId": "el_visitante-page-6"
@@ -1749,7 +1939,9 @@
         "id": "el_visitante-w53",
         "text": "Amigo...",
         "meaning": "friend",
-        "baseForm": "amigo"
+        "baseForm": "amigo",
+        "wordAudioUrl": "words/amigo",
+        "baseFormAudioUrl": "words/amigo"
       },
       "panelId": "el_visitante-panel-6-1",
       "pageId": "el_visitante-page-6"
@@ -1757,6 +1949,56 @@
   ],
   "wordAudioMap": {
     "el": "words/el",
-    "visitante": "words/visitante"
+    "visitante": "words/visitante",
+    "una": "words/una",
+    "uno": "words/uno",
+    "noche": "words/noche",
+    "muy": "words/muy",
+    "tarde": "words/tarde",
+    "qué": "words/qué",
+    "es": "words/es",
+    "ser": "words/ser",
+    "eso": "words/eso",
+    "qué_es_eso": "words/qué_es_eso",
+    "hola": "words/hola",
+    "quién": "words/quién",
+    "hablas": "words/hablas",
+    "hablar": "words/hablar",
+    "español": "words/español",
+    "un": "words/un",
+    "poco": "words/poco",
+    "soy": "words/soy",
+    "chica": "words/chica",
+    "mía": "words/mía",
+    "mi": "words/mi",
+    "nombre": "words/nombre",
+    "mío": "words/mío",
+    "me": "words/me",
+    "llamo": "words/llamo",
+    "llamar": "words/llamar",
+    "zik": "words/zik",
+    "mal": "words/mal",
+    "problema": "words/problema",
+    "lo": "words/lo",
+    "siento": "words/siento",
+    "sentir": "words/sentir",
+    "sí": "words/sí",
+    "agua": "words/agua",
+    "casa": "words/casa",
+    "yo": "words/yo",
+    "no": "words/no",
+    "mamá": "words/mamá",
+    "papá": "words/papá",
+    "amigo": "words/amigo",
+    "amigoa": "words/amigoa",
+    "amiga": "words/amiga",
+    "ven": "words/ven",
+    "venir": "words/venir",
+    "está": "words/está",
+    "estar": "words/estar",
+    "bien": "words/bien",
+    "todo": "words/todo",
+    "continuará": "words/continuará",
+    "continuar": "words/continuar"
   }
 }

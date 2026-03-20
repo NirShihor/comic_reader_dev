@@ -236,7 +236,7 @@ struct SpeakingTestView: View {
                 HStack {
                     Text("Correct pronunciation:")
                         .foregroundStyle(.secondary)
-                    Text(reviewWord.word.text)
+                    Text(stripPunctuation(reviewWord.word.text).capitalized)
                         .fontWeight(.semibold)
                 }
 
@@ -308,6 +308,19 @@ struct SpeakingTestView: View {
     }
 
     // MARK: - Actions
+    private func stripPunctuation(_ text: String) -> String {
+        text.lowercased()
+            .replacingOccurrences(of: "¿", with: "")
+            .replacingOccurrences(of: "?", with: "")
+            .replacingOccurrences(of: "¡", with: "")
+            .replacingOccurrences(of: "!", with: "")
+            .replacingOccurrences(of: "...", with: "")
+            .replacingOccurrences(of: ".", with: "")
+            .replacingOccurrences(of: ",", with: "")
+            .replacingOccurrences(of: "…", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     private func startRecording() {
         print("[SpeakingTest] startRecording tapped, current isRecording: \(isRecording)")
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -326,8 +339,8 @@ struct SpeakingTestView: View {
             spokenText = transcription
             print("[SpeakingTest] transcription: '\(transcription)', error: \(whisperService.error ?? "none")")
 
-            // Compare with expected word
-            let expectedWord = currentWord?.word.text ?? ""
+            // Compare with expected word (strip punctuation for fair comparison)
+            let expectedWord = stripPunctuation(currentWord?.word.text ?? "")
             let (correct, _) = whisperService.compareText(spoken: transcription, expected: expectedWord)
             isCorrect = correct
 
@@ -384,29 +397,14 @@ struct SpeakingTestView: View {
 
     private func playWordAudio() {
         guard let reviewWord = currentWord else { return }
-        // Play the word as spoken in the sentence first, then base form after a delay
         if let wordAudio = reviewWord.word.wordAudioUrl {
             audioManager.play(wordAudio)
-            // Also play base form after a short delay if it differs
-            if let baseAudio = reviewWord.word.baseFormAudioUrl, baseAudio != wordAudio {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    audioManager.play(baseAudio)
-                }
-            }
         } else if let baseAudio = reviewWord.word.baseFormAudioUrl {
             audioManager.play(baseAudio)
         } else if let sentenceAudio = findSentenceAudio(for: reviewWord) {
-            // Fallback: play the parent sentence audio
             audioManager.play(sentenceAudio)
         } else {
-            // Last resort: clean the word text for dictionary lookup
-            let audioName = reviewWord.word.text
-                .lowercased()
-                .replacingOccurrences(of: "¿", with: "")
-                .replacingOccurrences(of: "?", with: "")
-                .replacingOccurrences(of: "¡", with: "")
-                .replacingOccurrences(of: "!", with: "")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let audioName = stripPunctuation(reviewWord.word.text)
             audioManager.play(audioName)
         }
     }

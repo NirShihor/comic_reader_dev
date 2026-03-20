@@ -196,23 +196,63 @@ class WhisperService: ObservableObject {
         let spokenClean = normalizeText(spoken)
         let expectedClean = normalizeText(expected)
 
-        // Simple word coverage check
-        let spokenWords = Set(spokenClean.split(separator: " ").map { String($0) })
+        let spokenWords = spokenClean.split(separator: " ").map { String($0) }
         let expectedWords = expectedClean.split(separator: " ").map { String($0) }
 
         guard !expectedWords.isEmpty else { return (true, 1.0) }
 
         var matchedCount = 0
-        for word in expectedWords {
-            if spokenWords.contains(word) {
+        var usedSpokenIndices = Set<Int>()
+
+        for expectedWord in expectedWords {
+            // Try exact match first
+            if let idx = spokenWords.indices.first(where: { !usedSpokenIndices.contains($0) && spokenWords[$0] == expectedWord }) {
                 matchedCount += 1
+                usedSpokenIndices.insert(idx)
+            } else {
+                // Fuzzy match: accept if edit distance is small relative to word length
+                // This handles Whisper transcribing names/sounds differently (e.g. "zik" vs "zeke")
+                for (idx, spokenWord) in spokenWords.enumerated() where !usedSpokenIndices.contains(idx) {
+                    let maxLen = max(expectedWord.count, spokenWord.count)
+                    let distance = levenshteinDistance(expectedWord, spokenWord)
+                    // Allow up to ~50% character difference (handles name variations like "zik"/"zeke")
+                    if maxLen > 0 && Double(distance) / Double(maxLen) <= 0.5 {
+                        matchedCount += 1
+                        usedSpokenIndices.insert(idx)
+                        break
+                    }
+                }
             }
         }
 
         let score = Double(matchedCount) / Double(expectedWords.count)
 
-        // Pass if 70% of words match (Whisper is accurate enough for this)
+        // Pass if 70% of words match
         return (score >= 0.7, score)
+    }
+
+    /// Levenshtein edit distance between two strings
+    private func levenshteinDistance(_ s1: String, _ s2: String) -> Int {
+        let a = Array(s1)
+        let b = Array(s2)
+        let m = a.count
+        let n = b.count
+
+        if m == 0 { return n }
+        if n == 0 { return m }
+
+        var prev = Array(0...n)
+        var curr = [Int](repeating: 0, count: n + 1)
+
+        for i in 1...m {
+            curr[0] = i
+            for j in 1...n {
+                let cost = a[i - 1] == b[j - 1] ? 0 : 1
+                curr[j] = min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost)
+            }
+            prev = curr
+        }
+        return prev[n]
     }
 
     private func normalizeText(_ text: String) -> String {

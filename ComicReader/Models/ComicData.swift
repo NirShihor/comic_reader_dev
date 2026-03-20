@@ -1,8 +1,8 @@
 import Foundation
 
-/// Static comic data - ported from React Native app
+/// Static comic data - legacy fallback (no longer used, comics are downloaded from server)
 enum ComicData {
-    static let allComics: [Comic] = [alienComic]
+    static let allComics: [Comic] = []
 
     // MARK: - Alien Comic
     static let alienComic = Comic(
