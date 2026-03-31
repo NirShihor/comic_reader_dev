@@ -106,7 +106,11 @@ struct PageView: View {
                                         let normalizedY = location.y / imageGeometry.size.height
 
                                         // Find which panel was tapped
-                                        let sortedPanels = currentPage.panels.sorted { $0.panelOrder < $1.panelOrder }
+                                        // Check floating panels first (higher z-order), then regular panels
+                                        let sortedPanels = currentPage.panels.sorted { p1, p2 in
+                                            if p1.floating != p2.floating { return p1.floating }
+                                            return p1.panelOrder < p2.panelOrder
+                                        }
                                         for panel in sortedPanels {
                                             let inXRange = normalizedX >= panel.tapZoneX &&
                                                           normalizedX <= (panel.tapZoneX + panel.tapZoneWidth)

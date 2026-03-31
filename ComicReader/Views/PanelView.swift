@@ -34,6 +34,7 @@ struct PanelView: View {
     }
 
     struct PracticeFeedback {
+        let sentenceId: String
         let isCorrect: Bool
         let spokenText: String
         let expectedText: String
@@ -88,15 +89,12 @@ struct PanelView: View {
                     // All bubbles displayed vertically
                     ForEach(currentPanel.bubbles) { bubble in
                         if bubble.isSoundEffect == true {
-                            soundEffectCard(bubble)
+                            if !settingsManager.speakingPracticeMode {
+                                soundEffectCard(bubble)
+                            }
                         } else {
                             bubbleCard(bubble)
                         }
-                    }
-
-                    // Practice feedback
-                    if let feedback = practiceFeedback {
-                        feedbackCard(feedback)
                     }
                 }
                 .padding()
@@ -191,6 +189,10 @@ struct PanelView: View {
         .onAppear {
             audioManager.setPlaybackRate(Float(settingsManager.playbackSpeed))
         }
+        .onDisappear {
+            audioManager.stop()
+            whisperService.cancelRecording()
+        }
         .alert("Speech Recognition Error", isPresented: $showingError) {
             Button("OK", role: .cancel) { }
         } message: {
@@ -248,7 +250,10 @@ struct PanelView: View {
         textRevealed = false
         practiceFeedback = nil
         playingSentenceId = nil
+        recordingSentenceId = nil
+        processingSentenceId = nil
         audioManager.stop()
+        whisperService.cancelRecording()
     }
 
     // MARK: - Panel Image
@@ -257,15 +262,13 @@ struct PanelView: View {
             ? (currentPanel.noTextImage ?? currentPanel.artworkImage)
             : currentPanel.artworkImage
 
-        // In practice mode, cap image height so practice UI stays visible without scrolling
-        let maxImageHeight: CGFloat? = settingsManager.speakingPracticeMode
-            ? UIScreen.main.bounds.height * 0.4
-            : nil
+        // Cap image height so bubble cards and controls stay visible without scrolling
+        let maxImageHeight: CGFloat = UIScreen.main.bounds.height * 0.4
 
         return ZStack {
             ComicImage(imageName: imageName, comicId: comic.id)
                 .aspectRatio(contentMode: .fit)
-                .frame(maxHeight: maxImageHeight)
+                .frame(maxWidth: .infinity, maxHeight: maxImageHeight)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .shadow(radius: 4)
 
@@ -319,11 +322,12 @@ struct PanelView: View {
                                 .font(.title3)
                                 .fontWeight(.medium)
                         } else {
-                            FlowLayout(spacing: 8) {
-                                ForEach(Array(displayWords.enumerated()), id: \.element.id) { index, word in
+                            FlowLayout(spacing: 2) {
+                                ForEach(displayWords) { word in
+                                    let originalIndex = sentence.words.firstIndex(where: { $0.id == word.id })
                                     WordButton(
                                         word: word,
-                                        isHighlighted: playingSentenceId == sentence.id && highlightedWordIndex == index
+                                        isHighlighted: playingSentenceId == sentence.id && highlightedWordIndex == originalIndex
                                     )
                                 }
                             }
@@ -424,6 +428,19 @@ struct PanelView: View {
                         }
                     }
 
+                    // Show Spanish text when revealed in practice mode
+                    if settingsManager.speakingPracticeMode && textRevealed {
+                        Text(sentence.text)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .italic()
+                    }
+
+                    // Inline practice feedback for this sentence
+                    if let feedback = practiceFeedback, feedback.sentenceId == sentence.id {
+                        feedbackCard(feedback)
+                    }
+
                     if sentence.id != bubble.sentences.last?.id {
                         Divider()
                     }
@@ -476,6 +493,10 @@ struct PanelView: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
+            } else {
+                Text(feedback.expectedText)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
 
             HStack {
@@ -527,8 +548,8 @@ struct PanelView: View {
         processingSentenceId = sentence.id
 
         Task {
-            let spokenText = await whisperService.stopRecording()
             let expectedText = sentence.text
+            let spokenText = await whisperService.stopRecording(expectedText: expectedText)
 
             if let error = whisperService.error, spokenText.isEmpty {
                 processingSentenceId = nil
@@ -539,18 +560,37 @@ struct PanelView: View {
             }
             whisperService.error = nil
 
-            let (isCorrect, _) = whisperService.compareText(spoken: spokenText, expected: expectedText)
+            var isCorrect = false
+            var matchedText = expectedText
+            var matchedAudio = sentence.audioUrl
+
+            let (mainCorrect, _) = whisperService.compareText(spoken: spokenText, expected: expectedText)
+            if mainCorrect {
+                isCorrect = true
+            } else if let alternatives = sentence.alternativeTexts {
+                for (i, alt) in alternatives.enumerated() {
+                    if whisperService.compareText(spoken: spokenText, expected: alt).isCorrect {
+                        isCorrect = true
+                        matchedText = alt
+                        if let altAudios = sentence.alternativeAudioUrls, i < altAudios.count {
+                            matchedAudio = altAudios[i]
+                        }
+                        break
+                    }
+                }
+            }
 
             try? await Task.sleep(nanoseconds: 300_000_000)
 
             processingSentenceId = nil
             practiceFeedback = PracticeFeedback(
+                sentenceId: sentence.id,
                 isCorrect: isCorrect,
                 spokenText: spokenText.isEmpty ? "(no speech detected)" : spokenText,
-                expectedText: expectedText
+                expectedText: matchedText
             )
             playingSentenceId = sentence.id
-            playAudio(sentence.audioUrl)
+            playAudio(matchedAudio)
         }
     }
 }
@@ -572,7 +612,7 @@ struct WordButton: View {
         } label: {
             Text(word.text)
                 .font(.body)
-                .padding(.horizontal, 8)
+                .padding(.horizontal, 4)
                 .padding(.vertical, 4)
                 .background(isHighlighted ? Color.yellow.opacity(0.3) : Color(.systemGray6))
                 .clipShape(RoundedRectangle(cornerRadius: 6))

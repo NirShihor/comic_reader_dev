@@ -8,10 +8,12 @@ struct QuizView: View {
     @State private var userAnswer = ""
     @State private var showResult = false
     @State private var isCorrect = false
+    @State private var isGenderVariant = false
     @State private var score = 0
     @State private var quizComplete = false
     @State private var showingContext = false
     @State private var dummyNavigateToPage: Int? = nil
+    @FocusState private var isAnswerFocused: Bool
     @ObservedObject private var audioManager = AudioManager.shared
 
     var reviewWords: [ReviewWord] {
@@ -73,6 +75,11 @@ struct QuizView: View {
         }
         .navigationTitle("Vocabulary Quiz")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                isAnswerFocused = true
+            }
+        }
         .sheet(isPresented: $showingContext) {
             if let page = contextPage, let panel = contextPanel {
                 PanelView(
@@ -150,6 +157,8 @@ struct QuizView: View {
                 .multilineTextAlignment(.center)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
+                .focused($isAnswerFocused)
+                .onSubmit { checkAnswer() }
                 .padding(.horizontal)
 
             Button {
@@ -199,22 +208,28 @@ struct QuizView: View {
     // MARK: - Result View
     private func resultView(for reviewWord: ReviewWord) -> some View {
         VStack(spacing: 16) {
-            Image(systemName: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
+            Image(systemName: isCorrect || isGenderVariant ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .font(.system(size: 60))
-                .foregroundStyle(isCorrect ? .green : .red)
+                .foregroundStyle(isCorrect || isGenderVariant ? .green : .red)
 
-            Text(isCorrect ? "Correct!" : "Not quite")
+            Text(isCorrect ? "Correct!" : isGenderVariant ? "Correct!" : "Not quite")
                 .font(.title2)
                 .fontWeight(.bold)
 
             VStack(spacing: 8) {
-                if !isCorrect {
+                if isGenderVariant {
+                    Text("The comic uses \"\(stripPunctuation(reviewWord.word.text))\" here (gender context)")
+                        .font(.subheadline)
+                        .foregroundStyle(.orange)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                } else if !isCorrect {
                     Text("Your answer: \(userAnswer)")
                         .foregroundStyle(.secondary)
                 }
 
                 HStack {
-                    Text("Correct answer:")
+                    Text(isGenderVariant ? "In the comic:" : "Correct answer:")
                         .foregroundStyle(.secondary)
                     Text(stripPunctuation(reviewWord.word.text).capitalized)
                         .fontWeight(.semibold)
@@ -307,12 +322,18 @@ struct QuizView: View {
         let normalizedCorrect = stripPunctuation(currentWord?.word.text ?? "")
 
         isCorrect = normalizedAnswer == normalizedCorrect
+        isGenderVariant = false
 
-        if isCorrect {
+        if !isCorrect {
+            // Check for gendered variant (o↔a, os↔as endings)
+            isGenderVariant = isGenderedVariant(normalizedAnswer, normalizedCorrect)
+        }
+
+        if isCorrect || isGenderVariant {
             score += 1
         }
 
-        UIImpactFeedbackGenerator(style: isCorrect ? .light : .medium).impactOccurred()
+        UIImpactFeedbackGenerator(style: isCorrect || isGenderVariant ? .light : .medium).impactOccurred()
         showResult = true
 
         // Auto-play correct pronunciation
@@ -321,12 +342,33 @@ struct QuizView: View {
         }
     }
 
+    /// Check if two words are gendered variants of each other (e.g. uno/una, bueno/buena)
+    private func isGenderedVariant(_ a: String, _ b: String) -> Bool {
+        // o ↔ a ending
+        if a.dropLast() == b.dropLast() && a.count == b.count {
+            let endA = a.last, endB = b.last
+            if (endA == "o" && endB == "a") || (endA == "a" && endB == "o") {
+                return true
+            }
+        }
+        // os ↔ as ending
+        if a.count >= 2 && b.count >= 2 && a.dropLast(2) == b.dropLast(2) && a.count == b.count {
+            let suffA = String(a.suffix(2)), suffB = String(b.suffix(2))
+            if (suffA == "os" && suffB == "as") || (suffA == "as" && suffB == "os") {
+                return true
+            }
+        }
+        return false
+    }
+
     private func nextWord() {
         if currentIndex < reviewWords.count - 1 {
             currentIndex += 1
             userAnswer = ""
             showResult = false
             isCorrect = false
+            isGenderVariant = false
+            isAnswerFocused = true
         } else {
             quizComplete = true
         }
@@ -336,6 +378,8 @@ struct QuizView: View {
         userAnswer = ""
         showResult = false
         isCorrect = false
+        isGenderVariant = false
+        isAnswerFocused = true
     }
 
     private func skipWord() {
@@ -344,6 +388,7 @@ struct QuizView: View {
             userAnswer = ""
             showResult = false
             isCorrect = false
+            isGenderVariant = false
         } else {
             quizComplete = true
         }
@@ -354,6 +399,7 @@ struct QuizView: View {
         userAnswer = ""
         showResult = false
         isCorrect = false
+        isGenderVariant = false
         score = 0
         quizComplete = false
     }

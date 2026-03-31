@@ -10,6 +10,13 @@ class LocalComicStorage: ObservableObject {
     @Published private(set) var isLoading = false
 
     private let fileManager = FileManager.default
+    private let hiddenComicsKey = "hiddenComicIds"
+
+    /// IDs of comics the user has removed from their library
+    private var hiddenComicIds: Set<String> {
+        get { Set(UserDefaults.standard.stringArray(forKey: hiddenComicsKey) ?? []) }
+        set { UserDefaults.standard.set(Array(newValue), forKey: hiddenComicsKey) }
+    }
 
     /// Base directory for downloaded comics
     var comicsDirectory: URL {
@@ -50,6 +57,10 @@ class LocalComicStorage: ObservableObject {
             }
         }
 
+        // Filter out comics the user has deleted
+        let hidden = hiddenComicIds
+        comics.removeAll { hidden.contains($0.id) }
+
         downloadedComics = comics.sorted { $0.title < $1.title }
     }
 
@@ -85,15 +96,50 @@ class LocalComicStorage: ObservableObject {
         return nil
     }
 
-    /// Check if a comic is downloaded
+    /// Check if a comic is downloaded (and visible in library)
     func isDownloaded(_ comicId: String) -> Bool {
         downloadedComics.contains { $0.id == comicId }
     }
 
-    /// Delete a downloaded comic
-    func deleteComic(_ comicId: String) throws {
+    /// Check if a comic exists on device (bundled or downloaded), even if hidden
+    func existsOnDevice(_ comicId: String) -> Bool {
+        // Check Documents/Comics
         let comicFolder = comicsDirectory.appendingPathComponent(comicId)
-        try fileManager.removeItem(at: comicFolder)
+        if fileManager.fileExists(atPath: comicFolder.path) {
+            return true
+        }
+        // Check BundledComics
+        let slug = comicId.replacingOccurrences(of: "comic-", with: "")
+        if let bundledURL = Bundle.main.url(forResource: "BundledComics", withExtension: nil) {
+            let bundledFolder = bundledURL.appendingPathComponent(slug)
+            if fileManager.fileExists(atPath: bundledFolder.path) {
+                return true
+            }
+        }
+        return false
+    }
+
+    /// Check if a comic has been hidden (deleted from library)
+    func isHidden(_ comicId: String) -> Bool {
+        hiddenComicIds.contains(comicId)
+    }
+
+    /// Unhide a comic (e.g. when re-downloaded from the store)
+    func unhideComic(_ comicId: String) {
+        hiddenComicIds.remove(comicId)
+    }
+
+    /// Delete a comic from the library
+    func deleteComic(_ comicId: String) {
+        // Remove from Documents/Comics if it exists there
+        let comicFolder = comicsDirectory.appendingPathComponent(comicId)
+        if fileManager.fileExists(atPath: comicFolder.path) {
+            try? fileManager.removeItem(at: comicFolder)
+        }
+
+        // Mark as hidden so bundled comics don't reappear
+        hiddenComicIds.insert(comicId)
+
         downloadedComics.removeAll { $0.id == comicId }
     }
 
@@ -256,10 +302,17 @@ struct PageJSON: Codable {
     }
 }
 
+struct CornerPointJSON: Codable {
+    let x: Double
+    let y: Double
+}
+
 struct PanelJSON: Codable {
     let id: String
     let artworkImage: String
     let noTextImage: String?
+    let floating: Bool?
+    let corners: [CornerPointJSON]?
     let panelOrder: Int
     let tapZone: TapZoneJSON
     let bubbles: [BubbleJSON]
@@ -269,6 +322,8 @@ struct PanelJSON: Codable {
             id: id,
             artworkImage: artworkImage,
             noTextImage: noTextImage,
+            floating: floating ?? false,
+            corners: corners?.map { CornerPoint(x: $0.x, y: $0.y) },
             panelOrder: panelOrder,
             tapZoneX: tapZone.x,
             tapZoneY: tapZone.y,
@@ -290,6 +345,7 @@ struct BubbleJSON: Codable {
     let id: String
     let type: String
     let isSoundEffect: Bool?
+    let imageUrl: String?
     let position: PositionJSON
     let sentences: [SentenceJSON]
 
@@ -298,6 +354,7 @@ struct BubbleJSON: Codable {
             id: id,
             type: Bubble.BubbleType(rawValue: type) ?? .speech,
             isSoundEffect: isSoundEffect,
+            imageUrl: imageUrl,
             positionX: position.x,
             positionY: position.y,
             width: position.width,
@@ -319,6 +376,8 @@ struct SentenceJSON: Codable {
     let text: String
     let translation: String?
     let audioUrl: String?
+    let alternativeTexts: [String]?
+    let alternativeAudioUrls: [String]?
     let words: [WordJSON]
 
     func toSentence() -> Sentence {
@@ -327,6 +386,8 @@ struct SentenceJSON: Codable {
             text: text,
             translation: translation,
             audioUrl: audioUrl,
+            alternativeTexts: alternativeTexts,
+            alternativeAudioUrls: alternativeAudioUrls,
             words: words.map { $0.toWord() }
         )
     }

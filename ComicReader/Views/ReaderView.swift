@@ -36,7 +36,11 @@ struct ReaderView: View {
                             }
 
                         // Panel tap zones (invisible, on top)
-                        ForEach(currentPage.panels) { panel in
+                        // Render regular panels first, floating panels last (so they receive taps first)
+                        ForEach(currentPage.panels.filter { !$0.floating }) { panel in
+                            panelTapZone(panel: panel, in: geometry.size)
+                        }
+                        ForEach(currentPage.panels.filter { $0.floating }) { panel in
                             panelTapZone(panel: panel, in: geometry.size)
                         }
                     }

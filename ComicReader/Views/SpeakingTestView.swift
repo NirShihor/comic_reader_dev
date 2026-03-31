@@ -334,13 +334,11 @@ struct SpeakingTestView: View {
     private func stopRecording() {
         print("[SpeakingTest] stopRecording tapped")
         Task {
-            let transcription = await whisperService.stopRecording()
+            let expectedWord = stripPunctuation(currentWord?.word.text ?? "")
+            let transcription = await whisperService.stopRecording(expectedText: "The word is: \(expectedWord)")
             isRecording = false
             spokenText = transcription
             print("[SpeakingTest] transcription: '\(transcription)', error: \(whisperService.error ?? "none")")
-
-            // Compare with expected word (strip punctuation for fair comparison)
-            let expectedWord = stripPunctuation(currentWord?.word.text ?? "")
             let (correct, _) = whisperService.compareText(spoken: transcription, expected: expectedWord)
             isCorrect = correct
 

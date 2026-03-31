@@ -1,0 +1,3700 @@
+{
+  "id": "comic-el_secreto_del_jardn",
+  "title": "EL SECRETO DEL JARDÍN",
+  "description": "Alien tracks need covered before all is lost...",
+  "coverImage": "el_secreto_del_jardn_cover",
+  "level": "beginner",
+  "totalPages": 13,
+  "estimatedMinutes": 26,
+  "language": "es",
+  "targetLanguage": "en",
+  "version": "1.0",
+  "collectionId": "el_visitante",
+  "collectionTitle": "EL VISITANTE",
+  "episodeNumber": 4,
+  "pages": [
+    {
+      "id": "el_secreto_del_jardn-page-cover",
+      "pageNumber": 1,
+      "masterImage": "el_secreto_del_jardn_cover",
+      "panels": [
+        {
+          "id": "el_secreto_del_jardn-panel-cover",
+          "artworkImage": "el_secreto_del_jardn_cover",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-cover-1",
+              "type": "narration",
+              "position": {
+                "x": 0.6349999999999998,
+                "y": 0.03583333333333334,
+                "width": 0.3325000000000001,
+                "height": 0.16833333333333333
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s1",
+                  "text": "El secreto en el jardín",
+                  "translation": "The Secret in the garden",
+                  "audioUrl": "el_secreto_del_jardín_p0_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w1",
+                      "text": "El",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/el",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w2",
+                      "text": "secreto",
+                      "meaning": "secret",
+                      "baseForm": "secreto",
+                      "startTimeMs": 226,
+                      "endTimeMs": 716,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/secreto",
+                      "baseFormAudioUrl": "words/secreto"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w3",
+                      "text": "en",
+                      "meaning": "in",
+                      "baseForm": "en",
+                      "startTimeMs": 742,
+                      "endTimeMs": 794,
+                      "wordAudioUrl": "words/en",
+                      "baseFormAudioUrl": "words/en"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w4",
+                      "text": "El",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 847,
+                      "endTimeMs": 953,
+                      "wordAudioUrl": "words/el",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w5",
+                      "text": "jardín",
+                      "meaning": "garden",
+                      "baseForm": "jardín",
+                      "startTimeMs": 993,
+                      "endTimeMs": 1512,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/jardín",
+                      "baseFormAudioUrl": "words/jardín"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_secreto_del_jardn-page-1",
+      "pageNumber": 2,
+      "masterImage": "el_secreto_del_jardn_p1",
+      "noTextImage": "el_secreto_del_jardn_p1_no_text",
+      "panels": [
+        {
+          "id": "el_secreto_del_jardn-panel-1-1",
+          "artworkImage": "el_secreto_del_jardn_p1_s1",
+          "noTextImage": "el_secreto_del_jardn_p1_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.35
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-1-1-2",
+              "type": "speech",
+              "position": {
+                "x": 0.7825,
+                "y": 0.21916666666666668,
+                "width": 0.15999999999999992,
+                "height": 0.10666666666666663
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s2",
+                  "text": "No digas nada...!",
+                  "translation": "Don't say anything...",
+                  "audioUrl": "el_secreto_del_jardín_p1_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w6",
+                      "text": "No",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 299,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w7",
+                      "text": "digas",
+                      "meaning": "say",
+                      "baseForm": "decir",
+                      "startTimeMs": 379,
+                      "endTimeMs": 779,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/digas",
+                      "baseFormAudioUrl": "words/decir"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w8",
+                      "text": "nada...!",
+                      "meaning": "nothing",
+                      "baseForm": "nada",
+                      "startTimeMs": 907,
+                      "endTimeMs": 2697,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/nada",
+                      "baseFormAudioUrl": "words/nada"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-1-2",
+          "artworkImage": "el_secreto_del_jardn_p1_s2",
+          "noTextImage": "el_secreto_del_jardn_p1_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.35,
+            "width": 1,
+            "height": 0.31666666666666676
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-1-2-3",
+              "type": "speech",
+              "position": {
+                "x": 0.7275000000000001,
+                "y": 0.5083333333333333,
+                "width": 0.15749999999999986,
+                "height": 0.1366666666666666
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s3",
+                  "text": "Se están yendo...",
+                  "translation": "They're leaving...",
+                  "audioUrl": "el_secreto_del_jardín_p1_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w9",
+                      "text": "Se",
+                      "meaning": "reflexive pronoun",
+                      "baseForm": "se",
+                      "startTimeMs": 0,
+                      "endTimeMs": 319,
+                      "wordAudioUrl": "words/se",
+                      "baseFormAudioUrl": "words/se"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w10",
+                      "text": "están",
+                      "meaning": "they are",
+                      "baseForm": "estar",
+                      "startTimeMs": 399,
+                      "endTimeMs": 799,
+                      "wordAudioUrl": "words/están",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w11",
+                      "text": "yendo...",
+                      "meaning": "going",
+                      "baseForm": "ir",
+                      "startTimeMs": 879,
+                      "endTimeMs": 1518,
+                      "wordAudioUrl": "words/yendo",
+                      "baseFormAudioUrl": "words/ir"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-1-3",
+          "artworkImage": "el_secreto_del_jardn_p1_s3",
+          "noTextImage": "el_secreto_del_jardn_p1_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6666666666666667,
+            "width": 1,
+            "height": 0.33333333333333326
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-1-3-4",
+              "type": "speech",
+              "position": {
+                "x": 0.05250000000000002,
+                "y": 0.8883333333333334,
+                "width": 0.1975,
+                "height": 0.06499999999999995
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s4",
+                  "text": "Volverán...",
+                  "translation": "They will come back...",
+                  "audioUrl": "el_secreto_del_jardín_p1_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w12",
+                      "text": "Volverán...",
+                      "meaning": "they will come back",
+                      "baseForm": "volver",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1352,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/volverán",
+                      "baseFormAudioUrl": "words/volver"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_secreto_del_jardn-page-2",
+      "pageNumber": 3,
+      "masterImage": "el_secreto_del_jardn_p2",
+      "noTextImage": "el_secreto_del_jardn_p2_no_text",
+      "panels": [
+        {
+          "id": "el_secreto_del_jardn-panel-2-1",
+          "artworkImage": "el_secreto_del_jardn_p2_s1",
+          "noTextImage": "el_secreto_del_jardn_p2_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.3175
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-2-1-5",
+              "type": "speech",
+              "position": {
+                "x": 0.375,
+                "y": 0.030833333333333338,
+                "width": 0.23750000000000004,
+                "height": 0.07833333333333332
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s5",
+                  "text": "¿Por qué han venido?...",
+                  "translation": "Why have they come?",
+                  "audioUrl": "el_secreto_del_jardín_p2_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w13",
+                      "text": "¿Por",
+                      "meaning": "for",
+                      "baseForm": "por",
+                      "startTimeMs": 0,
+                      "endTimeMs": 239,
+                      "wordAudioUrl": "words/por",
+                      "baseFormAudioUrl": "words/por"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w14",
+                      "text": "qué",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 299,
+                      "endTimeMs": 479,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w15",
+                      "text": "han",
+                      "meaning": "they have",
+                      "baseForm": "haber",
+                      "startTimeMs": 519,
+                      "endTimeMs": 639,
+                      "wordAudioUrl": "words/han",
+                      "baseFormAudioUrl": "words/haber"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w16",
+                      "text": "venido?...",
+                      "meaning": "come",
+                      "baseForm": "venir",
+                      "startTimeMs": 719,
+                      "endTimeMs": 2556,
+                      "wordAudioUrl": "words/venido",
+                      "baseFormAudioUrl": "words/venir"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-2-2",
+          "artworkImage": "el_secreto_del_jardn_p2_s2",
+          "noTextImage": "el_secreto_del_jardn_p2_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3175,
+            "width": 0.435,
+            "height": 0.6825
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-2-2-6",
+              "type": "speech",
+              "position": {
+                "x": 0.0975,
+                "y": 0.8325,
+                "width": 0.2825,
+                "height": 0.08166666666666667
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s6",
+                  "text": "¿Quizá el ruido...?",
+                  "translation": "The noise maybe?",
+                  "audioUrl": "el_secreto_del_jardín_p2_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w17",
+                      "text": "¿Quizá",
+                      "meaning": "maybe",
+                      "baseForm": "quizá",
+                      "startTimeMs": 0,
+                      "endTimeMs": 560,
+                      "wordAudioUrl": "words/quizá",
+                      "baseFormAudioUrl": "words/quizá"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w18",
+                      "text": "el",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 693,
+                      "endTimeMs": 959,
+                      "wordAudioUrl": "words/el",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w19",
+                      "text": "ruido...?",
+                      "meaning": "noise",
+                      "baseForm": "ruido",
+                      "startTimeMs": 1039,
+                      "endTimeMs": 1919,
+                      "wordAudioUrl": "words/ruido",
+                      "baseFormAudioUrl": "words/ruido"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-2-3",
+          "artworkImage": "el_secreto_del_jardn_p2_s3",
+          "noTextImage": "el_secreto_del_jardn_p2_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.435,
+            "y": 0.3175,
+            "width": 0.565,
+            "height": 0.6825
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-2-3-7",
+              "type": "speech",
+              "position": {
+                "x": 0.6275000000000001,
+                "y": 0.3925,
+                "width": 0.18499999999999994,
+                "height": 0.08833333333333332
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s7",
+                  "text": "El barco...",
+                  "translation": "The ship...",
+                  "audioUrl": "el_secreto_del_jardín_p2_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w20",
+                      "text": "El",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/el",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w21",
+                      "text": "barco...",
+                      "meaning": "ship",
+                      "baseForm": "barco",
+                      "startTimeMs": 220,
+                      "endTimeMs": 879,
+                      "wordAudioUrl": "words/barco",
+                      "baseFormAudioUrl": "words/barco"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_secreto_del_jardn-page-3",
+      "pageNumber": 4,
+      "masterImage": "el_secreto_del_jardn_p3",
+      "noTextImage": "el_secreto_del_jardn_p3_no_text",
+      "panels": [
+        {
+          "id": "el_secreto_del_jardn-panel-3-1",
+          "artworkImage": "el_secreto_del_jardn_p3_s1",
+          "noTextImage": "el_secreto_del_jardn_p3_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.44833333333333336
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-3-1-8",
+              "type": "speech",
+              "position": {
+                "x": 0.8,
+                "y": 0.2558333333333333,
+                "width": 0.15499999999999997,
+                "height": 0.07833333333333332
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s8",
+                  "text": "Lo verán...",
+                  "translation": "They will see it...",
+                  "audioUrl": "el_secreto_del_jardín_p3_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w22",
+                      "text": "Lo",
+                      "meaning": "it",
+                      "baseForm": "lo",
+                      "startTimeMs": 0,
+                      "endTimeMs": 340,
+                      "wordAudioUrl": "words/lo",
+                      "baseFormAudioUrl": "words/lo"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w23",
+                      "text": "verán...",
+                      "meaning": "they will see",
+                      "baseForm": "ver",
+                      "startTimeMs": 355,
+                      "endTimeMs": 2000,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/verán",
+                      "baseFormAudioUrl": "words/ver"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-3-2",
+          "artworkImage": "el_secreto_del_jardn_p3_s2",
+          "noTextImage": "el_secreto_del_jardn_p3_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.44833333333333336,
+            "width": 0.49375,
+            "height": 0.5516666666666666
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-3-2-9",
+              "type": "speech",
+              "position": {
+                "x": 0.035,
+                "y": 0.5125,
+                "width": 0.1775,
+                "height": 0.08833333333333337
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s9",
+                  "text": "Lo siento mucho...",
+                  "translation": "I am very sorry...",
+                  "audioUrl": "el_secreto_del_jardín_p3_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w24",
+                      "text": "Lo",
+                      "meaning": "it",
+                      "baseForm": "lo",
+                      "startTimeMs": 0,
+                      "endTimeMs": 153,
+                      "wordAudioUrl": "words/lo",
+                      "baseFormAudioUrl": "words/lo"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w25",
+                      "text": "siento",
+                      "meaning": "I feel",
+                      "baseForm": "sentir",
+                      "startTimeMs": 233,
+                      "endTimeMs": 633,
+                      "wordAudioUrl": "words/siento",
+                      "baseFormAudioUrl": "words/sentir"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w26",
+                      "text": "mucho...",
+                      "meaning": "very",
+                      "baseForm": "mucho",
+                      "startTimeMs": 726,
+                      "endTimeMs": 1509,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mucho",
+                      "baseFormAudioUrl": "words/mucho"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-3-3",
+          "artworkImage": "el_secreto_del_jardn_p3_s3",
+          "noTextImage": "el_secreto_del_jardn_p3_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.49375,
+            "y": 0.44833333333333336,
+            "width": 0.50625,
+            "height": 0.5516666666666666
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-3-3-10",
+              "type": "speech",
+              "position": {
+                "x": 0.5250000000000001,
+                "y": 0.5541666666666668,
+                "width": 0.12499999999999989,
+                "height": 0.07333333333333325
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s10",
+                  "text": "Está bien...",
+                  "translation": "It's OK...",
+                  "audioUrl": "el_secreto_del_jardín_p3_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w27",
+                      "text": "Está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 515,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w28",
+                      "text": "bien...",
+                      "meaning": "well",
+                      "baseForm": "bien",
+                      "startTimeMs": 555,
+                      "endTimeMs": 1915,
+                      "wordAudioUrl": "words/bien",
+                      "baseFormAudioUrl": "words/bien"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_secreto_del_jardn-page-4",
+      "pageNumber": 5,
+      "masterImage": "el_secreto_del_jardn_p4",
+      "noTextImage": "el_secreto_del_jardn_p4_no_text",
+      "panels": [
+        {
+          "id": "el_secreto_del_jardn-panel-4-1",
+          "artworkImage": "el_secreto_del_jardn_p4_s1",
+          "noTextImage": "el_secreto_del_jardn_p4_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.5725,
+            "height": 0.48
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-4-1-11",
+              "type": "speech",
+              "position": {
+                "x": 0.1875,
+                "y": 0.27,
+                "width": 0.195,
+                "height": 0.14666666666666667
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s11",
+                  "text": "No podemos dejarlo ahí...",
+                  "translation": "We can't leave it there...",
+                  "audioUrl": "el_secreto_del_jardín_p4_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w29",
+                      "text": "No",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 316,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w30",
+                      "text": "podemos",
+                      "meaning": "we can",
+                      "baseForm": "poder",
+                      "startTimeMs": 376,
+                      "endTimeMs": 796,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/podemos",
+                      "baseFormAudioUrl": "words/poder"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w31",
+                      "text": "dejarlo",
+                      "meaning": "to leave it",
+                      "baseForm": "dejar",
+                      "startTimeMs": 849,
+                      "endTimeMs": 1274,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/dejarlo",
+                      "baseFormAudioUrl": "words/dejar"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w32",
+                      "text": "ahí...",
+                      "meaning": "there",
+                      "baseForm": "ahí",
+                      "startTimeMs": 1327,
+                      "endTimeMs": 2311,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/ahí",
+                      "baseFormAudioUrl": "words/ahí"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-4-2",
+          "artworkImage": "el_secreto_del_jardn_p4_s2",
+          "noTextImage": "el_secreto_del_jardn_p4_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.5725,
+            "y": 0,
+            "width": 0.4275,
+            "height": 0.48
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-4-2-12",
+              "type": "speech",
+              "position": {
+                "x": 0.7174999999999999,
+                "y": 0.015000000000000013,
+                "width": 0.22750000000000015,
+                "height": 0.07500000000000001
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s12",
+                  "text": "¿Puedes arreglarlo?",
+                  "translation": "Can you fix it? ",
+                  "audioUrl": "el_secreto_del_jardín_p4_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w33",
+                      "text": "¿Puedes",
+                      "meaning": "can you",
+                      "baseForm": "poder",
+                      "startTimeMs": 0,
+                      "endTimeMs": 477,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/puedes",
+                      "baseFormAudioUrl": "words/poder"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w34",
+                      "text": "arreglarlo?",
+                      "meaning": "to fix it",
+                      "baseForm": "arreglar",
+                      "startTimeMs": 530,
+                      "endTimeMs": 1275,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/arreglarlo",
+                      "baseFormAudioUrl": "words/arreglar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-4-3",
+          "artworkImage": "el_secreto_del_jardn_p4_s3",
+          "noTextImage": "el_secreto_del_jardn_p4_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.48,
+            "width": 0.4725,
+            "height": 0.52
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-4-3-13",
+              "type": "speech",
+              "position": {
+                "x": 0.034999999999999976,
+                "y": 0.6666666666666665,
+                "width": 0.15750000000000003,
+                "height": 0.08000000000000018
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s13",
+                  "text": "No... no hoy...",
+                  "translation": "No... not today...",
+                  "audioUrl": "el_secreto_del_jardín_p4_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w35",
+                      "text": "No...",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 794,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w36",
+                      "text": "no",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 1167,
+                      "endTimeMs": 1913,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w37",
+                      "text": "hoy...",
+                      "meaning": "today",
+                      "baseForm": "hoy",
+                      "startTimeMs": 2053,
+                      "endTimeMs": 2713,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hoy",
+                      "baseFormAudioUrl": "words/hoy"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-4-4",
+          "artworkImage": "el_secreto_del_jardn_p4_s4",
+          "noTextImage": "el_secreto_del_jardn_p4_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.4725,
+            "y": 0.48,
+            "width": 0.5275000000000001,
+            "height": 0.52
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-4-4-14",
+              "type": "speech",
+              "position": {
+                "x": 0.47750000000000004,
+                "y": 0.6349999999999999,
+                "width": 0.21750000000000003,
+                "height": 0.125
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s14",
+                  "text": "Entonces tenemos un problema...",
+                  "translation": "Then we have a problem...",
+                  "audioUrl": "el_secreto_del_jardín_p4_s4_b4_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w38",
+                      "text": "Entonces",
+                      "meaning": "then",
+                      "baseForm": "entonces",
+                      "startTimeMs": 0,
+                      "endTimeMs": 720,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/entonces",
+                      "baseFormAudioUrl": "words/entonces"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w39",
+                      "text": "tenemos",
+                      "meaning": "we have",
+                      "baseForm": "tener",
+                      "startTimeMs": 780,
+                      "endTimeMs": 1200,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/tenemos",
+                      "baseFormAudioUrl": "words/tener"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w40",
+                      "text": "un",
+                      "meaning": "a",
+                      "baseForm": "un",
+                      "startTimeMs": 1253,
+                      "endTimeMs": 1359,
+                      "wordAudioUrl": "words/un",
+                      "baseFormAudioUrl": "words/un"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w41",
+                      "text": "problema...",
+                      "meaning": "problem",
+                      "baseForm": "problema",
+                      "startTimeMs": 1421,
+                      "endTimeMs": 2076,
+                      "wordAudioUrl": "words/problema",
+                      "baseFormAudioUrl": "words/problema"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_secreto_del_jardn-page-5",
+      "pageNumber": 6,
+      "masterImage": "el_secreto_del_jardn_p5",
+      "noTextImage": "el_secreto_del_jardn_p5_no_text",
+      "panels": [
+        {
+          "id": "el_secreto_del_jardn-panel-5-1",
+          "artworkImage": "el_secreto_del_jardn_p5_s1",
+          "noTextImage": "el_secreto_del_jardn_p5_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.32916666666666666
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-5-1-15",
+              "type": "speech",
+              "position": {
+                "x": 0.38249999999999995,
+                "y": 0.017500000000000016,
+                "width": 0.18499999999999994,
+                "height": 0.1183333333333333
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s15",
+                  "text": "Es demasiado pesado...",
+                  "translation": "It's too heavy...",
+                  "audioUrl": "el_secreto_del_jardín_p5_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w42",
+                      "text": "Es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 0,
+                      "endTimeMs": 236,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w43",
+                      "text": "demasiado",
+                      "meaning": "too",
+                      "baseForm": "demasiado",
+                      "startTimeMs": 316,
+                      "endTimeMs": 955,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/demasiado",
+                      "baseFormAudioUrl": "words/demasiado"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w44",
+                      "text": "pesado...",
+                      "meaning": "heavy",
+                      "baseForm": "pesado",
+                      "startTimeMs": 1075,
+                      "endTimeMs": 2155,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/pesado",
+                      "baseFormAudioUrl": "words/pesado"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-5-2",
+          "artworkImage": "el_secreto_del_jardn_p5_s2",
+          "noTextImage": "el_secreto_del_jardn_p5_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.32916666666666666,
+            "width": 1,
+            "height": 0.34500000000000003
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-5-2-16",
+              "type": "speech",
+              "position": {
+                "x": 0.5075,
+                "y": 0.3458333333333333,
+                "width": 0.20750000000000002,
+                "height": 0.10833333333333334
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s16",
+                  "text": "Podemos ocultarlo...",
+                  "translation": "We can hide it...",
+                  "audioUrl": "el_secreto_del_jardín_p5_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w45",
+                      "text": "Podemos",
+                      "meaning": "we can",
+                      "baseForm": "poder",
+                      "startTimeMs": 0,
+                      "endTimeMs": 720,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/podemos",
+                      "baseFormAudioUrl": "words/poder"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w46",
+                      "text": "ocultarlo...",
+                      "meaning": "to hide it",
+                      "baseForm": "ocultar",
+                      "startTimeMs": 773,
+                      "endTimeMs": 1677,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/ocultarlo",
+                      "baseFormAudioUrl": "words/ocultar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-5-3",
+          "artworkImage": "el_secreto_del_jardn_p5_s3",
+          "noTextImage": "el_secreto_del_jardn_p5_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6741666666666667,
+            "width": 1,
+            "height": 0.3258333333333333
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-5-3-17",
+              "type": "speech",
+              "position": {
+                "x": 0.3825,
+                "y": 0.6974999999999999,
+                "width": 0.10499999999999998,
+                "height": 0.06166666666666676
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s17",
+                  "text": "Sí...",
+                  "translation": "Yes...",
+                  "audioUrl": "el_secreto_del_jardín_p5_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w47",
+                      "text": "Sí...",
+                      "meaning": "yes",
+                      "baseForm": "sí",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1436,
+                      "wordAudioUrl": "words/sí",
+                      "baseFormAudioUrl": "words/sí"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_secreto_del_jardn-page-6",
+      "pageNumber": 7,
+      "masterImage": "el_secreto_del_jardn_p6",
+      "noTextImage": "el_secreto_del_jardn_p6_no_text",
+      "panels": [
+        {
+          "id": "el_secreto_del_jardn-panel-6-1",
+          "artworkImage": "el_secreto_del_jardn_p6_s1",
+          "noTextImage": "el_secreto_del_jardn_p6_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.495,
+            "height": 1
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-6-1-18",
+              "type": "speech",
+              "position": {
+                "x": 0.255,
+                "y": 0.012499999999999976,
+                "width": 0.2125,
+                "height": 0.07500000000000001
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s18",
+                  "text": "No lo movemos...",
+                  "translation": "We don't move it...",
+                  "audioUrl": "el_secreto_del_jardín_p6_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w48",
+                      "text": "No",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 236,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w49",
+                      "text": "lo",
+                      "meaning": "it",
+                      "baseForm": "lo",
+                      "startTimeMs": 289,
+                      "endTimeMs": 395,
+                      "wordAudioUrl": "words/lo",
+                      "baseFormAudioUrl": "words/lo"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w50",
+                      "text": "movemos...",
+                      "meaning": "we move",
+                      "baseForm": "mover",
+                      "startTimeMs": 475,
+                      "endTimeMs": 1675,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/movemos",
+                      "baseFormAudioUrl": "words/mover"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "el_secreto_del_jardn-bubble-6-1-19",
+              "type": "speech",
+              "position": {
+                "x": 0.03249999999999997,
+                "y": 0.5733333333333334,
+                "width": 0.2725,
+                "height": 0.08833333333333326
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s19",
+                  "text": "Construimos algo alrededor...",
+                  "translation": "We build something around it...",
+                  "audioUrl": "el_secreto_del_jardín_p6_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w51",
+                      "text": "Construimos",
+                      "meaning": "we build",
+                      "baseForm": "construir",
+                      "startTimeMs": 0,
+                      "endTimeMs": 797,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/construimos",
+                      "baseFormAudioUrl": "words/construir"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w52",
+                      "text": "algo",
+                      "meaning": "something",
+                      "baseForm": "algo",
+                      "startTimeMs": 861,
+                      "endTimeMs": 1117,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/algo",
+                      "baseFormAudioUrl": "words/algo"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w53",
+                      "text": "alrededor...",
+                      "meaning": "around",
+                      "baseForm": "alrededor",
+                      "startTimeMs": 1170,
+                      "endTimeMs": 2955,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/alrededor",
+                      "baseFormAudioUrl": "words/alrededor"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-6-2",
+          "artworkImage": "el_secreto_del_jardn_p6_s2",
+          "noTextImage": "el_secreto_del_jardn_p6_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.495,
+            "y": 0,
+            "width": 0.505,
+            "height": 0.47750000000000004
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-6-2-20",
+              "type": "speech",
+              "position": {
+                "x": 0.8025,
+                "y": 0.15666666666666668,
+                "width": 0.14750000000000008,
+                "height": 0.10666666666666669
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s20",
+                  "text": "¿Como qué?",
+                  "translation": "Like what? ",
+                  "audioUrl": "el_secreto_del_jardín_p6_s2_b3_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w54",
+                      "text": "¿Como",
+                      "meaning": "like",
+                      "baseForm": "como",
+                      "startTimeMs": 0,
+                      "endTimeMs": 240,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/como",
+                      "baseFormAudioUrl": "words/como"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w55",
+                      "text": "qué?",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 300,
+                      "endTimeMs": 1040,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-6-3",
+          "artworkImage": "el_secreto_del_jardn_p6_s3",
+          "noTextImage": "el_secreto_del_jardn_p6_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.495,
+            "y": 0.47750000000000004,
+            "width": 0.505,
+            "height": 0.5225
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-6-3-21",
+              "type": "speech",
+              "position": {
+                "x": 0.5375000000000001,
+                "y": 0.7716666666666667,
+                "width": 0.1775,
+                "height": 0.08166666666666667
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s21",
+                  "text": "Un cobertizo",
+                  "translation": "A shed...",
+                  "audioUrl": "el_secreto_del_jardín_p6_s3_b4_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w56",
+                      "text": "Un",
+                      "meaning": "a",
+                      "baseForm": "un",
+                      "startTimeMs": 0,
+                      "endTimeMs": 280,
+                      "wordAudioUrl": "words/un",
+                      "baseFormAudioUrl": "words/un"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w57",
+                      "text": "cobertizo",
+                      "meaning": "shed",
+                      "baseForm": "cobertizo",
+                      "startTimeMs": 310,
+                      "endTimeMs": 1597,
+                      "wordAudioUrl": "words/cobertizo",
+                      "baseFormAudioUrl": "words/cobertizo"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_secreto_del_jardn-page-7",
+      "pageNumber": 8,
+      "masterImage": "el_secreto_del_jardn_p7",
+      "noTextImage": "el_secreto_del_jardn_p7_no_text",
+      "panels": [
+        {
+          "id": "el_secreto_del_jardn-panel-7-1",
+          "artworkImage": "el_secreto_del_jardn_p7_s1",
+          "noTextImage": "el_secreto_del_jardn_p7_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.35
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-7-1-22",
+              "type": "speech",
+              "position": {
+                "x": 0.24000000000000005,
+                "y": 0.010833333333333334,
+                "width": 0.29,
+                "height": 0.11333333333333333
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s22",
+                  "text": "Sí..... Un cobertizo en el jardín...",
+                  "translation": "Yes..... A shed in the garden...",
+                  "audioUrl": "el_secreto_del_jardín_p7_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w58",
+                      "text": "Sí.....",
+                      "meaning": "yes",
+                      "baseForm": "sí",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1520,
+                      "wordAudioUrl": "words/sí",
+                      "baseFormAudioUrl": "words/sí"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w59",
+                      "text": "Un",
+                      "meaning": "a",
+                      "baseForm": "un",
+                      "startTimeMs": 1546,
+                      "endTimeMs": 1598,
+                      "wordAudioUrl": "words/un",
+                      "baseFormAudioUrl": "words/un"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w60",
+                      "text": "cobertizo",
+                      "meaning": "shed",
+                      "baseForm": "cobertizo",
+                      "startTimeMs": 1678,
+                      "endTimeMs": 2557,
+                      "wordAudioUrl": "words/cobertizo",
+                      "baseFormAudioUrl": "words/cobertizo"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w61",
+                      "text": "en",
+                      "meaning": "in",
+                      "baseForm": "en",
+                      "startTimeMs": 2610,
+                      "endTimeMs": 2716,
+                      "wordAudioUrl": "words/en",
+                      "baseFormAudioUrl": "words/en"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w62",
+                      "text": "el",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 2742,
+                      "endTimeMs": 2794,
+                      "wordAudioUrl": "words/el",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w63",
+                      "text": "jardín...",
+                      "meaning": "garden",
+                      "baseForm": "jardín",
+                      "startTimeMs": 2874,
+                      "endTimeMs": 3832,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/jardín",
+                      "baseFormAudioUrl": "words/jardín"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-7-2",
+          "artworkImage": "el_secreto_del_jardn_p7_s2",
+          "noTextImage": "el_secreto_del_jardn_p7_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.35,
+            "width": 0.485,
+            "height": 0.65
+          },
+          "bubbles": []
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-7-3",
+          "artworkImage": "el_secreto_del_jardn_p7_s3",
+          "noTextImage": "el_secreto_del_jardn_p7_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.485,
+            "y": 0.35,
+            "width": 0.515,
+            "height": 0.65
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-7-3-23",
+              "type": "speech",
+              "position": {
+                "x": 0.5575,
+                "y": 0.6033333333333334,
+                "width": 0.1925,
+                "height": 0.07833333333333325
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s23",
+                  "text": "Dento - Nave...",
+                  "translation": "Dento - Nave...",
+                  "audioUrl": "el_secreto_del_jardín_p7_s3_b2_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w64",
+                      "text": "Dento",
+                      "meaning": "inside",
+                      "baseForm": "dento",
+                      "startTimeMs": 0,
+                      "endTimeMs": 720,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/dento",
+                      "baseFormAudioUrl": "words/dento"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w65",
+                      "text": "-",
+                      "meaning": "dash",
+                      "baseForm": "-",
+                      "startTimeMs": 1040,
+                      "endTimeMs": 1360,
+                      "wordAudioUrl": "words/-",
+                      "baseFormAudioUrl": "words/-"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w66",
+                      "text": "Nave...",
+                      "meaning": "ship",
+                      "baseForm": "nave",
+                      "startTimeMs": 1440,
+                      "endTimeMs": 2078,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/nave",
+                      "baseFormAudioUrl": "words/nave"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "el_secreto_del_jardn-bubble-7-3-24",
+              "type": "speech",
+              "position": {
+                "x": 0.72,
+                "y": 0.8083333333333333,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s24",
+                  "text": "Afuera - Cobertizo.",
+                  "translation": "Ouside - Shed...",
+                  "audioUrl": "el_secreto_del_jardín_p7_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w67",
+                      "text": "Afuera",
+                      "meaning": "outside",
+                      "baseForm": "afuera",
+                      "startTimeMs": 0,
+                      "endTimeMs": 640,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/afuera",
+                      "baseFormAudioUrl": "words/afuera"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w68",
+                      "text": "-",
+                      "meaning": "dash",
+                      "baseForm": "-",
+                      "startTimeMs": 1080,
+                      "endTimeMs": 1520,
+                      "wordAudioUrl": "words/-",
+                      "baseFormAudioUrl": "words/-"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w69",
+                      "text": "Cobertizo.",
+                      "meaning": "shed",
+                      "baseForm": "cobertizo",
+                      "startTimeMs": 1580,
+                      "endTimeMs": 2398,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/cobertizo",
+                      "baseFormAudioUrl": "words/cobertizo"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_secreto_del_jardn-page-8",
+      "pageNumber": 9,
+      "masterImage": "el_secreto_del_jardn_p8",
+      "noTextImage": "el_secreto_del_jardn_p8_no_text",
+      "panels": [
+        {
+          "id": "el_secreto_del_jardn-panel-8-1",
+          "artworkImage": "el_secreto_del_jardn_p8_s1",
+          "noTextImage": "el_secreto_del_jardn_p8_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.41000000000000003
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-8-1-25",
+              "type": "speech",
+              "position": {
+                "x": 0.73,
+                "y": 0.032500000000000015,
+                "width": 0.17750000000000005,
+                "height": 0.061666666666666675
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s25",
+                  "text": "Rápido!!",
+                  "translation": "Quickly...",
+                  "audioUrl": "el_secreto_del_jardín_p8_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w70",
+                      "text": "Rápido!!",
+                      "meaning": "quick",
+                      "baseForm": "rápido",
+                      "startTimeMs": 0,
+                      "endTimeMs": 639,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/rápido",
+                      "baseFormAudioUrl": "words/rápido"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-8-2",
+          "artworkImage": "el_secreto_del_jardn_p8_s2",
+          "noTextImage": "el_secreto_del_jardn_p8_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.41000000000000003,
+            "width": 0.475,
+            "height": 0.59
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-8-2-26",
+              "type": "speech",
+              "position": {
+                "x": 0.23250000000000004,
+                "y": 0.44249999999999995,
+                "width": 0.1325,
+                "height": 0.08666666666666667
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s26",
+                  "text": "Toma esto...",
+                  "translation": "Take this...",
+                  "audioUrl": "el_secreto_del_jardín_p8_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w71",
+                      "text": "Toma",
+                      "meaning": "take",
+                      "baseForm": "tomar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 320,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/toma",
+                      "baseFormAudioUrl": "words/tomar"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w72",
+                      "text": "esto...",
+                      "meaning": "this",
+                      "baseForm": "esto",
+                      "startTimeMs": 400,
+                      "endTimeMs": 960,
+                      "wordAudioUrl": "words/esto",
+                      "baseFormAudioUrl": "words/esto"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-8-3",
+          "artworkImage": "el_secreto_del_jardn_p8_s3",
+          "noTextImage": "el_secreto_del_jardn_p8_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.475,
+            "y": 0.41000000000000003,
+            "width": 0.525,
+            "height": 0.59
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-8-3-27",
+              "type": "speech",
+              "position": {
+                "x": 0.51,
+                "y": 0.6300000000000001,
+                "width": 0.1925,
+                "height": 0.08999999999999997
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s27",
+                  "text": "Tú... aquí... conmigo.",
+                  "translation": "You... here... with me...",
+                  "audioUrl": "el_secreto_del_jardín_p8_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w73",
+                      "text": "Tú...",
+                      "meaning": "you",
+                      "baseForm": "tú",
+                      "startTimeMs": 0,
+                      "endTimeMs": 638,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/tú",
+                      "baseFormAudioUrl": "words/tú"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w74",
+                      "text": "aquí...",
+                      "meaning": "here",
+                      "baseForm": "aquí",
+                      "startTimeMs": 814,
+                      "endTimeMs": 1638,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/aquí",
+                      "baseFormAudioUrl": "words/aquí"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w75",
+                      "text": "conmigo.",
+                      "meaning": "with me",
+                      "baseForm": "conmigo",
+                      "startTimeMs": 1668,
+                      "endTimeMs": 2636,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/conmigo",
+                      "baseFormAudioUrl": "words/conmigo"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "el_secreto_del_jardn-bubble-8-3-28",
+              "type": "speech",
+              "position": {
+                "x": 0.8150000000000001,
+                "y": 0.6466666666666666,
+                "width": 0.15000000000000002,
+                "height": 0.08333333333333337
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s28",
+                  "text": "Sí... ayudo.",
+                  "translation": "Yes... I help...",
+                  "audioUrl": "el_secreto_del_jardín_p8_s3_b4_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w76",
+                      "text": "Sí...",
+                      "meaning": "yes",
+                      "baseForm": "sí",
+                      "startTimeMs": 0,
+                      "endTimeMs": 638,
+                      "wordAudioUrl": "words/sí",
+                      "baseFormAudioUrl": "words/sí"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w77",
+                      "text": "ayudo.",
+                      "meaning": "I help",
+                      "baseForm": "ayudar",
+                      "startTimeMs": 851,
+                      "endTimeMs": 1996,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/ayudo",
+                      "baseFormAudioUrl": "words/ayudar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_secreto_del_jardn-page-9",
+      "pageNumber": 10,
+      "masterImage": "el_secreto_del_jardn_p9",
+      "noTextImage": "el_secreto_del_jardn_p9_no_text",
+      "panels": [
+        {
+          "id": "el_secreto_del_jardn-panel-9-1",
+          "artworkImage": "el_secreto_del_jardn_p9_s1",
+          "noTextImage": "el_secreto_del_jardn_p9_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.3433333333333333
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-9-1-29",
+              "type": "speech",
+              "position": {
+                "x": 0.03250000000000014,
+                "y": 0.013333333333333336,
+                "width": 0.20249999999999985,
+                "height": 0.2708333333333333
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s29",
+                  "text": "Aquí está el plan: uno, dos, tres, cuatro, cinco, seis, siete, ocho, nueve, diez",
+                  "translation": "Here is the plan: one, two, three, four, five, six, seven, eight, nine, ten",
+                  "audioUrl": "el_secreto_del_jardín_p9_s1_b3_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w78",
+                      "text": "Aquí",
+                      "meaning": "here",
+                      "baseForm": "aquí",
+                      "startTimeMs": 0,
+                      "endTimeMs": 314,
+                      "wordAudioUrl": "words/aquí",
+                      "baseFormAudioUrl": "words/aquí"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w79",
+                      "text": "está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 330,
+                      "endTimeMs": 394,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w80",
+                      "text": "el",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 420,
+                      "endTimeMs": 472,
+                      "wordAudioUrl": "words/el",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w81",
+                      "text": "plan:",
+                      "meaning": "plan",
+                      "baseForm": "plan",
+                      "startTimeMs": 536,
+                      "endTimeMs": 1272,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/plan",
+                      "baseFormAudioUrl": "words/plan"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w82",
+                      "text": "uno,",
+                      "meaning": "one",
+                      "baseForm": "uno",
+                      "startTimeMs": 1332,
+                      "endTimeMs": 1992,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/uno",
+                      "baseFormAudioUrl": "words/uno"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w83",
+                      "text": "dos,",
+                      "meaning": "two",
+                      "baseForm": "dos",
+                      "startTimeMs": 2092,
+                      "endTimeMs": 2632,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/dos",
+                      "baseFormAudioUrl": "words/dos"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w84",
+                      "text": "tres,",
+                      "meaning": "three",
+                      "baseForm": "tres",
+                      "startTimeMs": 2712,
+                      "endTimeMs": 3352,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/tres",
+                      "baseFormAudioUrl": "words/tres"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w85",
+                      "text": "cuatro,",
+                      "meaning": "four",
+                      "baseForm": "cuatro",
+                      "startTimeMs": 3397,
+                      "endTimeMs": 4147,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/cuatro",
+                      "baseFormAudioUrl": "words/cuatro"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w86",
+                      "text": "cinco,",
+                      "meaning": "five",
+                      "baseForm": "cinco",
+                      "startTimeMs": 4200,
+                      "endTimeMs": 4865,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/cinco",
+                      "baseFormAudioUrl": "words/cinco"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w87",
+                      "text": "seis,",
+                      "meaning": "six",
+                      "baseForm": "seis",
+                      "startTimeMs": 4945,
+                      "endTimeMs": 5665,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/seis",
+                      "baseFormAudioUrl": "words/seis"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w88",
+                      "text": "siete,",
+                      "meaning": "seven",
+                      "baseForm": "siete",
+                      "startTimeMs": 5745,
+                      "endTimeMs": 6465,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/siete",
+                      "baseFormAudioUrl": "words/siete"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w89",
+                      "text": "ocho,",
+                      "meaning": "eight",
+                      "baseForm": "ocho",
+                      "startTimeMs": 6545,
+                      "endTimeMs": 7183,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/ocho",
+                      "baseFormAudioUrl": "words/ocho"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w90",
+                      "text": "nueve,",
+                      "meaning": "nine",
+                      "baseForm": "nueve",
+                      "startTimeMs": 7223,
+                      "endTimeMs": 8063,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/nueve",
+                      "baseFormAudioUrl": "words/nueve"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w91",
+                      "text": "diez",
+                      "meaning": "ten",
+                      "baseForm": "diez",
+                      "startTimeMs": 8103,
+                      "endTimeMs": 8543,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/diez",
+                      "baseFormAudioUrl": "words/diez"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-9-2",
+          "artworkImage": "el_secreto_del_jardn_p9_s2",
+          "noTextImage": "el_secreto_del_jardn_p9_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3433333333333333,
+            "width": 1,
+            "height": 0.3591666666666667
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-9-2-30",
+              "type": "speech",
+              "position": {
+                "x": 0.4650000000000001,
+                "y": 0.35749999999999993,
+                "width": 0.16749999999999998,
+                "height": 0.11166666666666664
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s30",
+                  "text": "Trabajamos juntos!",
+                  "translation": "We work together...",
+                  "audioUrl": "el_secreto_del_jardín_p9_s2_b7_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w92",
+                      "text": "Trabajamos",
+                      "meaning": "we work",
+                      "baseForm": "trabajar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 720,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/trabajamos",
+                      "baseFormAudioUrl": "words/trabajar"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w93",
+                      "text": "juntos!",
+                      "meaning": "together",
+                      "baseForm": "juntos",
+                      "startTimeMs": 760,
+                      "endTimeMs": 1520,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/juntos",
+                      "baseFormAudioUrl": "words/juntos"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-9-3",
+          "artworkImage": "el_secreto_del_jardn_p9_s3",
+          "noTextImage": "el_secreto_del_jardn_p9_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.7025,
+            "width": 1,
+            "height": 0.2975
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-9-3-31",
+              "type": "speech",
+              "position": {
+                "x": 0.4625,
+                "y": 0.7274999999999999,
+                "width": 0.16499999999999992,
+                "height": 0.10333333333333339
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s31",
+                  "text": "¡Escucha!",
+                  "translation": "Listen!",
+                  "audioUrl": "el_secreto_del_jardín_p9_s3_b8_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w94",
+                      "text": "¡Escucha!",
+                      "meaning": "listen",
+                      "baseForm": "escuchar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1120,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/escucha",
+                      "baseFormAudioUrl": "words/escuchar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_secreto_del_jardn-page-10",
+      "pageNumber": 11,
+      "masterImage": "el_secreto_del_jardn_p10",
+      "noTextImage": "el_secreto_del_jardn_p10_no_text",
+      "panels": [
+        {
+          "id": "el_secreto_del_jardn-panel-10-1",
+          "artworkImage": "el_secreto_del_jardn_p10_s1",
+          "noTextImage": "el_secreto_del_jardn_p10_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.48,
+            "height": 0.4866666666666667
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-10-1-32",
+              "type": "speech",
+              "position": {
+                "x": 0.08750000000000002,
+                "y": 0.02083333333333333,
+                "width": 0.27249999999999996,
+                "height": 0.08666666666666667
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s32",
+                  "text": "Hola... ¿Qué está pasando aquí?!",
+                  "translation": "Hello... What is happening here? ",
+                  "audioUrl": "el_secreto_del_jardín_p10_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w95",
+                      "text": "Hola...",
+                      "meaning": "hello",
+                      "baseForm": "hola",
+                      "startTimeMs": 0,
+                      "endTimeMs": 398,
+                      "wordAudioUrl": "words/hola",
+                      "baseFormAudioUrl": "words/hola"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w96",
+                      "text": "¿Qué",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 918,
+                      "endTimeMs": 1558,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w97",
+                      "text": "está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 1582,
+                      "endTimeMs": 1678,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w98",
+                      "text": "pasando",
+                      "meaning": "happening",
+                      "baseForm": "pasar",
+                      "startTimeMs": 1718,
+                      "endTimeMs": 1998,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/pasando",
+                      "baseFormAudioUrl": "words/pasar"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w99",
+                      "text": "aquí?",
+                      "meaning": "here",
+                      "baseForm": "aquí",
+                      "startTimeMs": 2062,
+                      "endTimeMs": 2478,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/aquí",
+                      "baseFormAudioUrl": "words/aquí"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-10-2",
+          "artworkImage": "el_secreto_del_jardn_p10_s2",
+          "noTextImage": "el_secreto_del_jardn_p10_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.48,
+            "y": 0,
+            "width": 0.52,
+            "height": 0.4866666666666667
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-10-2-33",
+              "type": "speech",
+              "position": {
+                "x": 0.6174999999999999,
+                "y": 0.32916666666666666,
+                "width": 0.21999999999999997,
+                "height": 0.1383333333333333
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s33",
+                  "text": "Nada. Solo trabajar en el jardín.",
+                  "translation": "Nothing. Just work in the garden...",
+                  "audioUrl": "el_secreto_del_jardín_p10_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w100",
+                      "text": "Nada.",
+                      "meaning": "nothing",
+                      "baseForm": "nada",
+                      "startTimeMs": 0,
+                      "endTimeMs": 319,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/nada",
+                      "baseFormAudioUrl": "words/nada"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w101",
+                      "text": "Solo",
+                      "meaning": "just",
+                      "baseForm": "solo",
+                      "startTimeMs": 599,
+                      "endTimeMs": 1116,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/solo",
+                      "baseFormAudioUrl": "words/solo"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w102",
+                      "text": "trabajar",
+                      "meaning": "to work",
+                      "baseForm": "trabajar",
+                      "startTimeMs": 1178,
+                      "endTimeMs": 1674,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/trabajar",
+                      "baseFormAudioUrl": "words/trabajar"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w103",
+                      "text": "en",
+                      "meaning": "in",
+                      "baseForm": "en",
+                      "startTimeMs": 1700,
+                      "endTimeMs": 1752,
+                      "wordAudioUrl": "words/en",
+                      "baseFormAudioUrl": "words/en"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w104",
+                      "text": "el",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 1805,
+                      "endTimeMs": 1911,
+                      "wordAudioUrl": "words/el",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w105",
+                      "text": "jardín.",
+                      "meaning": "garden",
+                      "baseForm": "jardín",
+                      "startTimeMs": 1951,
+                      "endTimeMs": 2471,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/jardín",
+                      "baseFormAudioUrl": "words/jardín"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-10-3",
+          "artworkImage": "el_secreto_del_jardn_p10_s3",
+          "noTextImage": "el_secreto_del_jardn_p10_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.4866666666666667,
+            "width": 0.48,
+            "height": 0.5133333333333333
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-10-3-34",
+              "type": "speech",
+              "position": {
+                "x": 0.022499999999999992,
+                "y": 0.48916666666666675,
+                "width": 0.1775,
+                "height": 0.1283333333333333
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s34",
+                  "text": "Eso es nuevo...",
+                  "translation": "That's new...",
+                  "audioUrl": "el_secreto_del_jardín_p10_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w106",
+                      "text": "Eso",
+                      "meaning": "that",
+                      "baseForm": "eso",
+                      "startTimeMs": 0,
+                      "endTimeMs": 234,
+                      "wordAudioUrl": "words/eso",
+                      "baseFormAudioUrl": "words/eso"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w107",
+                      "text": "es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 287,
+                      "endTimeMs": 393,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w108",
+                      "text": "nuevo...",
+                      "meaning": "new",
+                      "baseForm": "nuevo",
+                      "startTimeMs": 486,
+                      "endTimeMs": 2391,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/nuevo",
+                      "baseFormAudioUrl": "words/nuevo"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-10-4",
+          "artworkImage": "el_secreto_del_jardn_p10_s4",
+          "noTextImage": "el_secreto_del_jardn_p10_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.48,
+            "y": 0.4866666666666667,
+            "width": 0.52,
+            "height": 0.5133333333333333
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-10-4-35",
+              "type": "speech",
+              "position": {
+                "x": 0.5175000000000001,
+                "y": 0.8108333333333334,
+                "width": 0.18499999999999994,
+                "height": 0.16999999999999993
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s35",
+                  "text": "Sí. Queremos un cobertizo nuevo.",
+                  "translation": "Yes. We want a new shed...",
+                  "audioUrl": "el_secreto_del_jardín_p10_s4_b4_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w109",
+                      "text": "Sí.",
+                      "meaning": "yes",
+                      "baseForm": "sí",
+                      "startTimeMs": 0,
+                      "endTimeMs": 320,
+                      "wordAudioUrl": "words/sí",
+                      "baseFormAudioUrl": "words/sí"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w110",
+                      "text": "Queremos",
+                      "meaning": "we want",
+                      "baseForm": "querer",
+                      "startTimeMs": 640,
+                      "endTimeMs": 1520,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/queremos",
+                      "baseFormAudioUrl": "words/querer"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w111",
+                      "text": "un",
+                      "meaning": "a",
+                      "baseForm": "un",
+                      "startTimeMs": 1653,
+                      "endTimeMs": 1919,
+                      "wordAudioUrl": "words/un",
+                      "baseFormAudioUrl": "words/un"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w112",
+                      "text": "cobertizo",
+                      "meaning": "shed",
+                      "baseForm": "cobertizo",
+                      "startTimeMs": 1999,
+                      "endTimeMs": 2797,
+                      "wordAudioUrl": "words/cobertizo",
+                      "baseFormAudioUrl": "words/cobertizo"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w113",
+                      "text": "nuevo.",
+                      "meaning": "new",
+                      "baseForm": "nuevo",
+                      "startTimeMs": 2903,
+                      "endTimeMs": 6393,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/nuevo",
+                      "baseFormAudioUrl": "words/nuevo"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_secreto_del_jardn-page-11",
+      "pageNumber": 12,
+      "masterImage": "el_secreto_del_jardn_p11",
+      "noTextImage": "el_secreto_del_jardn_p11_no_text",
+      "panels": [
+        {
+          "id": "el_secreto_del_jardn-panel-11-1",
+          "artworkImage": "el_secreto_del_jardn_p11_s1",
+          "noTextImage": "el_secreto_del_jardn_p11_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.36
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-11-1-36",
+              "type": "speech",
+              "position": {
+                "x": 0.7275,
+                "y": 0.19916666666666666,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s36",
+                  "text": "Ya está hecho!",
+                  "translation": "It's done...",
+                  "audioUrl": "el_secreto_del_jardín_p11_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w114",
+                      "text": "Ya",
+                      "meaning": "already",
+                      "baseForm": "ya",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/ya",
+                      "baseFormAudioUrl": "words/ya"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w115",
+                      "text": "está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 208,
+                      "endTimeMs": 400,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w116",
+                      "text": "hecho!",
+                      "meaning": "done",
+                      "baseForm": "hecho",
+                      "startTimeMs": 493,
+                      "endTimeMs": 1438,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hecho",
+                      "baseFormAudioUrl": "words/hecho"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-11-2",
+          "artworkImage": "el_secreto_del_jardn_p11_s2",
+          "noTextImage": "el_secreto_del_jardn_p11_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.36,
+            "width": 1,
+            "height": 0.32333333333333336
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-11-2-37",
+              "type": "speech",
+              "position": {
+                "x": 0.31250000000000006,
+                "y": 0.3741666666666667,
+                "width": 0.2624999999999999,
+                "height": 0.0683333333333333
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s37",
+                  "text": "¡Muchas gracias!",
+                  "translation": "Thank you very much!",
+                  "audioUrl": "el_secreto_del_jardín_p11_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w117",
+                      "text": "¡Muchas",
+                      "meaning": "many",
+                      "baseForm": "mucho",
+                      "startTimeMs": 0,
+                      "endTimeMs": 880,
+                      "wordAudioUrl": "words/muchas",
+                      "baseFormAudioUrl": "words/mucho"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w118",
+                      "text": "gracias!",
+                      "meaning": "thanks",
+                      "baseForm": "gracia",
+                      "startTimeMs": 1010,
+                      "endTimeMs": 2080,
+                      "wordAudioUrl": "words/gracias",
+                      "baseFormAudioUrl": "words/gracia"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-11-3",
+          "artworkImage": "el_secreto_del_jardn_p11_s3",
+          "noTextImage": "el_secreto_del_jardn_p11_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6833333333333333,
+            "width": 1,
+            "height": 0.31666666666666665
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-11-3-38",
+              "type": "speech",
+              "position": {
+                "x": 0.48250000000000004,
+                "y": 0.77,
+                "width": 0.13500000000000012,
+                "height": 0.09666666666666668
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s38",
+                  "text": "De nada",
+                  "translation": "You're welcome",
+                  "audioUrl": "el_secreto_del_jardín_p11_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w119",
+                      "text": "De",
+                      "meaning": "of",
+                      "baseForm": "de",
+                      "startTimeMs": 0,
+                      "endTimeMs": 80,
+                      "wordAudioUrl": "words/de",
+                      "baseFormAudioUrl": "words/de"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w120",
+                      "text": "nada",
+                      "meaning": "nothing",
+                      "baseForm": "nada",
+                      "startTimeMs": 160,
+                      "endTimeMs": 960,
+                      "wordAudioUrl": "words/nada",
+                      "baseFormAudioUrl": "words/nada"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "el_secreto_del_jardn-page-12",
+      "pageNumber": 13,
+      "masterImage": "el_secreto_del_jardn_p12",
+      "noTextImage": "el_secreto_del_jardn_p12_no_text",
+      "panels": [
+        {
+          "id": "el_secreto_del_jardn-panel-12-1",
+          "artworkImage": "el_secreto_del_jardn_p12_s1",
+          "noTextImage": "el_secreto_del_jardn_p12_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.37916666666666665
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-12-1-39",
+              "type": "narration",
+              "isSoundEffect": true,
+              "position": {
+                "x": 0.205,
+                "y": 0.14083333333333334,
+                "width": 0.375,
+                "height": 0.11000000000000001
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s39",
+                  "text": "Toc Toc Toc...",
+                  "translation": "Tuk Tuk Tuk",
+                  "audioUrl": "",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w121",
+                      "text": "Toc",
+                      "meaning": "knock",
+                      "baseForm": "toc",
+                      "wordAudioUrl": "words/toc",
+                      "baseFormAudioUrl": "words/toc"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w122",
+                      "text": "Toc",
+                      "meaning": "knock",
+                      "baseForm": "toc",
+                      "wordAudioUrl": "words/toc",
+                      "baseFormAudioUrl": "words/toc"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w123",
+                      "text": "Toc",
+                      "meaning": "knock",
+                      "baseForm": "toc",
+                      "wordAudioUrl": "words/toc",
+                      "baseFormAudioUrl": "words/toc"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-12-2",
+          "artworkImage": "el_secreto_del_jardn_p12_s2",
+          "noTextImage": "el_secreto_del_jardn_p12_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.37916666666666665,
+            "width": 0.4125,
+            "height": 0.6208333333333333
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-12-2-40",
+              "type": "speech",
+              "position": {
+                "x": 0.2225,
+                "y": 0.6025,
+                "width": 0.145,
+                "height": 0.08833333333333326
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s40",
+                  "text": "Han vuelto",
+                  "translation": "They are back...",
+                  "audioUrl": "el_secreto_del_jardín_p12_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w124",
+                      "text": "Han",
+                      "meaning": "they have",
+                      "baseForm": "haber",
+                      "startTimeMs": 0,
+                      "endTimeMs": 159,
+                      "wordAudioUrl": "words/han",
+                      "baseFormAudioUrl": "words/haber"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w125",
+                      "text": "vuelto...",
+                      "meaning": "back",
+                      "baseForm": "volver",
+                      "startTimeMs": 223,
+                      "endTimeMs": 1277,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/vuelto",
+                      "baseFormAudioUrl": "words/volver"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "el_secreto_del_jardn-panel-12-3",
+          "artworkImage": "el_secreto_del_jardn_p12_s3",
+          "noTextImage": "el_secreto_del_jardn_p12_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.4125,
+            "y": 0.37916666666666665,
+            "width": 0.5875,
+            "height": 0.6208333333333333
+          },
+          "bubbles": [
+            {
+              "id": "el_secreto_del_jardn-bubble-12-3-41",
+              "type": "speech",
+              "position": {
+                "x": 0.685,
+                "y": 0.7175,
+                "width": 0.255,
+                "height": 0.08666666666666667
+              },
+              "sentences": [
+                {
+                  "id": "el_secreto_del_jardn-s41",
+                  "text": "¿Qué pasó aquí ayer...?",
+                  "translation": "What happened here yesterday...?",
+                  "audioUrl": "el_secreto_del_jardín_p12_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "el_secreto_del_jardn-w126",
+                      "text": "¿Qué",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 0,
+                      "endTimeMs": 79,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w127",
+                      "text": "pasó",
+                      "meaning": "happened",
+                      "baseForm": "pasar",
+                      "startTimeMs": 139,
+                      "endTimeMs": 519,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/pasó",
+                      "baseFormAudioUrl": "words/pasar"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w128",
+                      "text": "aquí",
+                      "meaning": "here",
+                      "baseForm": "aquí",
+                      "startTimeMs": 559,
+                      "endTimeMs": 719,
+                      "wordAudioUrl": "words/aquí",
+                      "baseFormAudioUrl": "words/aquí"
+                    },
+                    {
+                      "id": "el_secreto_del_jardn-w129",
+                      "text": "ayer...?",
+                      "meaning": "yesterday",
+                      "baseForm": "ayer",
+                      "startTimeMs": 905,
+                      "endTimeMs": 1836,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/ayer",
+                      "baseFormAudioUrl": "words/ayer"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "reviewWords": [
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w2",
+        "text": "secreto",
+        "meaning": "secret",
+        "baseForm": "secreto",
+        "wordAudioUrl": "words/secreto",
+        "baseFormAudioUrl": "words/secreto"
+      },
+      "panelId": "el_secreto_del_jardn-panel-cover",
+      "pageId": "el_secreto_del_jardn-page-cover"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w5",
+        "text": "jardín",
+        "meaning": "garden",
+        "baseForm": "jardín",
+        "wordAudioUrl": "words/jardín",
+        "baseFormAudioUrl": "words/jardín"
+      },
+      "panelId": "el_secreto_del_jardn-panel-cover",
+      "pageId": "el_secreto_del_jardn-page-cover"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w7",
+        "text": "digas",
+        "meaning": "say",
+        "baseForm": "decir",
+        "wordAudioUrl": "words/digas",
+        "baseFormAudioUrl": "words/decir"
+      },
+      "panelId": "el_secreto_del_jardn-panel-1-1",
+      "pageId": "el_secreto_del_jardn-page-1"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w8",
+        "text": "nada...!",
+        "meaning": "nothing",
+        "baseForm": "nada",
+        "wordAudioUrl": "words/nada",
+        "baseFormAudioUrl": "words/nada"
+      },
+      "panelId": "el_secreto_del_jardn-panel-1-1",
+      "pageId": "el_secreto_del_jardn-page-1"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w12",
+        "text": "Volverán...",
+        "meaning": "they will come back",
+        "baseForm": "volver",
+        "wordAudioUrl": "words/volverán",
+        "baseFormAudioUrl": "words/volver"
+      },
+      "panelId": "el_secreto_del_jardn-panel-1-3",
+      "pageId": "el_secreto_del_jardn-page-1"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w23",
+        "text": "verán...",
+        "meaning": "they will see",
+        "baseForm": "ver",
+        "wordAudioUrl": "words/verán",
+        "baseFormAudioUrl": "words/ver"
+      },
+      "panelId": "el_secreto_del_jardn-panel-3-1",
+      "pageId": "el_secreto_del_jardn-page-3"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w26",
+        "text": "mucho...",
+        "meaning": "very",
+        "baseForm": "mucho",
+        "wordAudioUrl": "words/mucho",
+        "baseFormAudioUrl": "words/mucho"
+      },
+      "panelId": "el_secreto_del_jardn-panel-3-2",
+      "pageId": "el_secreto_del_jardn-page-3"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w30",
+        "text": "podemos",
+        "meaning": "we can",
+        "baseForm": "poder",
+        "wordAudioUrl": "words/podemos",
+        "baseFormAudioUrl": "words/poder"
+      },
+      "panelId": "el_secreto_del_jardn-panel-4-1",
+      "pageId": "el_secreto_del_jardn-page-4"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w31",
+        "text": "dejarlo",
+        "meaning": "to leave it",
+        "baseForm": "dejar",
+        "wordAudioUrl": "words/dejarlo",
+        "baseFormAudioUrl": "words/dejar"
+      },
+      "panelId": "el_secreto_del_jardn-panel-4-1",
+      "pageId": "el_secreto_del_jardn-page-4"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w32",
+        "text": "ahí...",
+        "meaning": "there",
+        "baseForm": "ahí",
+        "wordAudioUrl": "words/ahí",
+        "baseFormAudioUrl": "words/ahí"
+      },
+      "panelId": "el_secreto_del_jardn-panel-4-1",
+      "pageId": "el_secreto_del_jardn-page-4"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w33",
+        "text": "¿Puedes",
+        "meaning": "can you",
+        "baseForm": "poder",
+        "wordAudioUrl": "words/puedes",
+        "baseFormAudioUrl": "words/poder"
+      },
+      "panelId": "el_secreto_del_jardn-panel-4-2",
+      "pageId": "el_secreto_del_jardn-page-4"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w34",
+        "text": "arreglarlo?",
+        "meaning": "to fix it",
+        "baseForm": "arreglar",
+        "wordAudioUrl": "words/arreglarlo",
+        "baseFormAudioUrl": "words/arreglar"
+      },
+      "panelId": "el_secreto_del_jardn-panel-4-2",
+      "pageId": "el_secreto_del_jardn-page-4"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w37",
+        "text": "hoy...",
+        "meaning": "today",
+        "baseForm": "hoy",
+        "wordAudioUrl": "words/hoy",
+        "baseFormAudioUrl": "words/hoy"
+      },
+      "panelId": "el_secreto_del_jardn-panel-4-3",
+      "pageId": "el_secreto_del_jardn-page-4"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w38",
+        "text": "Entonces",
+        "meaning": "then",
+        "baseForm": "entonces",
+        "wordAudioUrl": "words/entonces",
+        "baseFormAudioUrl": "words/entonces"
+      },
+      "panelId": "el_secreto_del_jardn-panel-4-4",
+      "pageId": "el_secreto_del_jardn-page-4"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w39",
+        "text": "tenemos",
+        "meaning": "we have",
+        "baseForm": "tener",
+        "wordAudioUrl": "words/tenemos",
+        "baseFormAudioUrl": "words/tener"
+      },
+      "panelId": "el_secreto_del_jardn-panel-4-4",
+      "pageId": "el_secreto_del_jardn-page-4"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w43",
+        "text": "demasiado",
+        "meaning": "too",
+        "baseForm": "demasiado",
+        "wordAudioUrl": "words/demasiado",
+        "baseFormAudioUrl": "words/demasiado"
+      },
+      "panelId": "el_secreto_del_jardn-panel-5-1",
+      "pageId": "el_secreto_del_jardn-page-5"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w44",
+        "text": "pesado...",
+        "meaning": "heavy",
+        "baseForm": "pesado",
+        "wordAudioUrl": "words/pesado",
+        "baseFormAudioUrl": "words/pesado"
+      },
+      "panelId": "el_secreto_del_jardn-panel-5-1",
+      "pageId": "el_secreto_del_jardn-page-5"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w45",
+        "text": "Podemos",
+        "meaning": "we can",
+        "baseForm": "poder",
+        "wordAudioUrl": "words/podemos",
+        "baseFormAudioUrl": "words/poder"
+      },
+      "panelId": "el_secreto_del_jardn-panel-5-2",
+      "pageId": "el_secreto_del_jardn-page-5"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w46",
+        "text": "ocultarlo...",
+        "meaning": "to hide it",
+        "baseForm": "ocultar",
+        "wordAudioUrl": "words/ocultarlo",
+        "baseFormAudioUrl": "words/ocultar"
+      },
+      "panelId": "el_secreto_del_jardn-panel-5-2",
+      "pageId": "el_secreto_del_jardn-page-5"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w50",
+        "text": "movemos...",
+        "meaning": "we move",
+        "baseForm": "mover",
+        "wordAudioUrl": "words/movemos",
+        "baseFormAudioUrl": "words/mover"
+      },
+      "panelId": "el_secreto_del_jardn-panel-6-1",
+      "pageId": "el_secreto_del_jardn-page-6"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w51",
+        "text": "Construimos",
+        "meaning": "we build",
+        "baseForm": "construir",
+        "wordAudioUrl": "words/construimos",
+        "baseFormAudioUrl": "words/construir"
+      },
+      "panelId": "el_secreto_del_jardn-panel-6-1",
+      "pageId": "el_secreto_del_jardn-page-6"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w52",
+        "text": "algo",
+        "meaning": "something",
+        "baseForm": "algo",
+        "wordAudioUrl": "words/algo",
+        "baseFormAudioUrl": "words/algo"
+      },
+      "panelId": "el_secreto_del_jardn-panel-6-1",
+      "pageId": "el_secreto_del_jardn-page-6"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w53",
+        "text": "alrededor...",
+        "meaning": "around",
+        "baseForm": "alrededor",
+        "wordAudioUrl": "words/alrededor",
+        "baseFormAudioUrl": "words/alrededor"
+      },
+      "panelId": "el_secreto_del_jardn-panel-6-1",
+      "pageId": "el_secreto_del_jardn-page-6"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w54",
+        "text": "¿Como",
+        "meaning": "like",
+        "baseForm": "como",
+        "wordAudioUrl": "words/como",
+        "baseFormAudioUrl": "words/como"
+      },
+      "panelId": "el_secreto_del_jardn-panel-6-2",
+      "pageId": "el_secreto_del_jardn-page-6"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w63",
+        "text": "jardín...",
+        "meaning": "garden",
+        "baseForm": "jardín",
+        "wordAudioUrl": "words/jardín",
+        "baseFormAudioUrl": "words/jardín"
+      },
+      "panelId": "el_secreto_del_jardn-panel-7-1",
+      "pageId": "el_secreto_del_jardn-page-7"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w64",
+        "text": "Dento",
+        "meaning": "inside",
+        "baseForm": "dento",
+        "wordAudioUrl": "words/dento",
+        "baseFormAudioUrl": "words/dento"
+      },
+      "panelId": "el_secreto_del_jardn-panel-7-3",
+      "pageId": "el_secreto_del_jardn-page-7"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w66",
+        "text": "Nave...",
+        "meaning": "ship",
+        "baseForm": "nave",
+        "wordAudioUrl": "words/nave",
+        "baseFormAudioUrl": "words/nave"
+      },
+      "panelId": "el_secreto_del_jardn-panel-7-3",
+      "pageId": "el_secreto_del_jardn-page-7"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w67",
+        "text": "Afuera",
+        "meaning": "outside",
+        "baseForm": "afuera",
+        "wordAudioUrl": "words/afuera",
+        "baseFormAudioUrl": "words/afuera"
+      },
+      "panelId": "el_secreto_del_jardn-panel-7-3",
+      "pageId": "el_secreto_del_jardn-page-7"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w69",
+        "text": "Cobertizo.",
+        "meaning": "shed",
+        "baseForm": "cobertizo",
+        "wordAudioUrl": "words/cobertizo",
+        "baseFormAudioUrl": "words/cobertizo"
+      },
+      "panelId": "el_secreto_del_jardn-panel-7-3",
+      "pageId": "el_secreto_del_jardn-page-7"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w70",
+        "text": "Rápido!!",
+        "meaning": "quick",
+        "baseForm": "rápido",
+        "wordAudioUrl": "words/rápido",
+        "baseFormAudioUrl": "words/rápido"
+      },
+      "panelId": "el_secreto_del_jardn-panel-8-1",
+      "pageId": "el_secreto_del_jardn-page-8"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w71",
+        "text": "Toma",
+        "meaning": "take",
+        "baseForm": "tomar",
+        "wordAudioUrl": "words/toma",
+        "baseFormAudioUrl": "words/tomar"
+      },
+      "panelId": "el_secreto_del_jardn-panel-8-2",
+      "pageId": "el_secreto_del_jardn-page-8"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w73",
+        "text": "Tú...",
+        "meaning": "you",
+        "baseForm": "tú",
+        "wordAudioUrl": "words/tú",
+        "baseFormAudioUrl": "words/tú"
+      },
+      "panelId": "el_secreto_del_jardn-panel-8-3",
+      "pageId": "el_secreto_del_jardn-page-8"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w74",
+        "text": "aquí...",
+        "meaning": "here",
+        "baseForm": "aquí",
+        "wordAudioUrl": "words/aquí",
+        "baseFormAudioUrl": "words/aquí"
+      },
+      "panelId": "el_secreto_del_jardn-panel-8-3",
+      "pageId": "el_secreto_del_jardn-page-8"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w75",
+        "text": "conmigo.",
+        "meaning": "with me",
+        "baseForm": "conmigo",
+        "wordAudioUrl": "words/conmigo",
+        "baseFormAudioUrl": "words/conmigo"
+      },
+      "panelId": "el_secreto_del_jardn-panel-8-3",
+      "pageId": "el_secreto_del_jardn-page-8"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w77",
+        "text": "ayudo.",
+        "meaning": "I help",
+        "baseForm": "ayudar",
+        "wordAudioUrl": "words/ayudo",
+        "baseFormAudioUrl": "words/ayudar"
+      },
+      "panelId": "el_secreto_del_jardn-panel-8-3",
+      "pageId": "el_secreto_del_jardn-page-8"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w81",
+        "text": "plan:",
+        "meaning": "plan",
+        "baseForm": "plan",
+        "wordAudioUrl": "words/plan",
+        "baseFormAudioUrl": "words/plan"
+      },
+      "panelId": "el_secreto_del_jardn-panel-9-1",
+      "pageId": "el_secreto_del_jardn-page-9"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w82",
+        "text": "uno,",
+        "meaning": "one",
+        "baseForm": "uno",
+        "wordAudioUrl": "words/uno",
+        "baseFormAudioUrl": "words/uno"
+      },
+      "panelId": "el_secreto_del_jardn-panel-9-1",
+      "pageId": "el_secreto_del_jardn-page-9"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w83",
+        "text": "dos,",
+        "meaning": "two",
+        "baseForm": "dos",
+        "wordAudioUrl": "words/dos",
+        "baseFormAudioUrl": "words/dos"
+      },
+      "panelId": "el_secreto_del_jardn-panel-9-1",
+      "pageId": "el_secreto_del_jardn-page-9"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w84",
+        "text": "tres,",
+        "meaning": "three",
+        "baseForm": "tres",
+        "wordAudioUrl": "words/tres",
+        "baseFormAudioUrl": "words/tres"
+      },
+      "panelId": "el_secreto_del_jardn-panel-9-1",
+      "pageId": "el_secreto_del_jardn-page-9"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w85",
+        "text": "cuatro,",
+        "meaning": "four",
+        "baseForm": "cuatro",
+        "wordAudioUrl": "words/cuatro",
+        "baseFormAudioUrl": "words/cuatro"
+      },
+      "panelId": "el_secreto_del_jardn-panel-9-1",
+      "pageId": "el_secreto_del_jardn-page-9"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w86",
+        "text": "cinco,",
+        "meaning": "five",
+        "baseForm": "cinco",
+        "wordAudioUrl": "words/cinco",
+        "baseFormAudioUrl": "words/cinco"
+      },
+      "panelId": "el_secreto_del_jardn-panel-9-1",
+      "pageId": "el_secreto_del_jardn-page-9"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w87",
+        "text": "seis,",
+        "meaning": "six",
+        "baseForm": "seis",
+        "wordAudioUrl": "words/seis",
+        "baseFormAudioUrl": "words/seis"
+      },
+      "panelId": "el_secreto_del_jardn-panel-9-1",
+      "pageId": "el_secreto_del_jardn-page-9"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w88",
+        "text": "siete,",
+        "meaning": "seven",
+        "baseForm": "siete",
+        "wordAudioUrl": "words/siete",
+        "baseFormAudioUrl": "words/siete"
+      },
+      "panelId": "el_secreto_del_jardn-panel-9-1",
+      "pageId": "el_secreto_del_jardn-page-9"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w89",
+        "text": "ocho,",
+        "meaning": "eight",
+        "baseForm": "ocho",
+        "wordAudioUrl": "words/ocho",
+        "baseFormAudioUrl": "words/ocho"
+      },
+      "panelId": "el_secreto_del_jardn-panel-9-1",
+      "pageId": "el_secreto_del_jardn-page-9"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w90",
+        "text": "nueve,",
+        "meaning": "nine",
+        "baseForm": "nueve",
+        "wordAudioUrl": "words/nueve",
+        "baseFormAudioUrl": "words/nueve"
+      },
+      "panelId": "el_secreto_del_jardn-panel-9-1",
+      "pageId": "el_secreto_del_jardn-page-9"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w91",
+        "text": "diez",
+        "meaning": "ten",
+        "baseForm": "diez",
+        "wordAudioUrl": "words/diez",
+        "baseFormAudioUrl": "words/diez"
+      },
+      "panelId": "el_secreto_del_jardn-panel-9-1",
+      "pageId": "el_secreto_del_jardn-page-9"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w92",
+        "text": "Trabajamos",
+        "meaning": "we work",
+        "baseForm": "trabajar",
+        "wordAudioUrl": "words/trabajamos",
+        "baseFormAudioUrl": "words/trabajar"
+      },
+      "panelId": "el_secreto_del_jardn-panel-9-2",
+      "pageId": "el_secreto_del_jardn-page-9"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w93",
+        "text": "juntos!",
+        "meaning": "together",
+        "baseForm": "juntos",
+        "wordAudioUrl": "words/juntos",
+        "baseFormAudioUrl": "words/juntos"
+      },
+      "panelId": "el_secreto_del_jardn-panel-9-2",
+      "pageId": "el_secreto_del_jardn-page-9"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w94",
+        "text": "¡Escucha!",
+        "meaning": "listen",
+        "baseForm": "escuchar",
+        "wordAudioUrl": "words/escucha",
+        "baseFormAudioUrl": "words/escuchar"
+      },
+      "panelId": "el_secreto_del_jardn-panel-9-3",
+      "pageId": "el_secreto_del_jardn-page-9"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w98",
+        "text": "pasando",
+        "meaning": "happening",
+        "baseForm": "pasar",
+        "wordAudioUrl": "words/pasando",
+        "baseFormAudioUrl": "words/pasar"
+      },
+      "panelId": "el_secreto_del_jardn-panel-10-1",
+      "pageId": "el_secreto_del_jardn-page-10"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w99",
+        "text": "aquí?",
+        "meaning": "here",
+        "baseForm": "aquí",
+        "wordAudioUrl": "words/aquí",
+        "baseFormAudioUrl": "words/aquí"
+      },
+      "panelId": "el_secreto_del_jardn-panel-10-1",
+      "pageId": "el_secreto_del_jardn-page-10"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w100",
+        "text": "Nada.",
+        "meaning": "nothing",
+        "baseForm": "nada",
+        "wordAudioUrl": "words/nada",
+        "baseFormAudioUrl": "words/nada"
+      },
+      "panelId": "el_secreto_del_jardn-panel-10-2",
+      "pageId": "el_secreto_del_jardn-page-10"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w101",
+        "text": "Solo",
+        "meaning": "just",
+        "baseForm": "solo",
+        "wordAudioUrl": "words/solo",
+        "baseFormAudioUrl": "words/solo"
+      },
+      "panelId": "el_secreto_del_jardn-panel-10-2",
+      "pageId": "el_secreto_del_jardn-page-10"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w102",
+        "text": "trabajar",
+        "meaning": "to work",
+        "baseForm": "trabajar",
+        "wordAudioUrl": "words/trabajar",
+        "baseFormAudioUrl": "words/trabajar"
+      },
+      "panelId": "el_secreto_del_jardn-panel-10-2",
+      "pageId": "el_secreto_del_jardn-page-10"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w105",
+        "text": "jardín.",
+        "meaning": "garden",
+        "baseForm": "jardín",
+        "wordAudioUrl": "words/jardín",
+        "baseFormAudioUrl": "words/jardín"
+      },
+      "panelId": "el_secreto_del_jardn-panel-10-2",
+      "pageId": "el_secreto_del_jardn-page-10"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w108",
+        "text": "nuevo...",
+        "meaning": "new",
+        "baseForm": "nuevo",
+        "wordAudioUrl": "words/nuevo",
+        "baseFormAudioUrl": "words/nuevo"
+      },
+      "panelId": "el_secreto_del_jardn-panel-10-3",
+      "pageId": "el_secreto_del_jardn-page-10"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w110",
+        "text": "Queremos",
+        "meaning": "we want",
+        "baseForm": "querer",
+        "wordAudioUrl": "words/queremos",
+        "baseFormAudioUrl": "words/querer"
+      },
+      "panelId": "el_secreto_del_jardn-panel-10-4",
+      "pageId": "el_secreto_del_jardn-page-10"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w113",
+        "text": "nuevo.",
+        "meaning": "new",
+        "baseForm": "nuevo",
+        "wordAudioUrl": "words/nuevo",
+        "baseFormAudioUrl": "words/nuevo"
+      },
+      "panelId": "el_secreto_del_jardn-panel-10-4",
+      "pageId": "el_secreto_del_jardn-page-10"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w115",
+        "text": "está",
+        "meaning": "is",
+        "baseForm": "estar",
+        "wordAudioUrl": "words/está",
+        "baseFormAudioUrl": "words/estar"
+      },
+      "panelId": "el_secreto_del_jardn-panel-11-1",
+      "pageId": "el_secreto_del_jardn-page-11"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w116",
+        "text": "hecho!",
+        "meaning": "done",
+        "baseForm": "hecho",
+        "wordAudioUrl": "words/hecho",
+        "baseFormAudioUrl": "words/hecho"
+      },
+      "panelId": "el_secreto_del_jardn-panel-11-1",
+      "pageId": "el_secreto_del_jardn-page-11"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w125",
+        "text": "vuelto...",
+        "meaning": "back",
+        "baseForm": "volver",
+        "wordAudioUrl": "words/vuelto",
+        "baseFormAudioUrl": "words/volver"
+      },
+      "panelId": "el_secreto_del_jardn-panel-12-2",
+      "pageId": "el_secreto_del_jardn-page-12"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w127",
+        "text": "pasó",
+        "meaning": "happened",
+        "baseForm": "pasar",
+        "wordAudioUrl": "words/pasó",
+        "baseFormAudioUrl": "words/pasar"
+      },
+      "panelId": "el_secreto_del_jardn-panel-12-3",
+      "pageId": "el_secreto_del_jardn-page-12"
+    },
+    {
+      "word": {
+        "id": "el_secreto_del_jardn-w129",
+        "text": "ayer...?",
+        "meaning": "yesterday",
+        "baseForm": "ayer",
+        "wordAudioUrl": "words/ayer",
+        "baseFormAudioUrl": "words/ayer"
+      },
+      "panelId": "el_secreto_del_jardn-panel-12-3",
+      "pageId": "el_secreto_del_jardn-page-12"
+    }
+  ],
+  "wordAudioMap": {
+    "el": "words/el",
+    "secreto": "words/secreto",
+    "en": "words/en",
+    "jardín": "words/jardín",
+    "no": "words/no",
+    "digas": "words/digas",
+    "decir": "words/decir",
+    "nada": "words/nada",
+    "se": "words/se",
+    "están": "words/están",
+    "estar": "words/estar",
+    "yendo": "words/yendo",
+    "ir": "words/ir",
+    "volverán": "words/volverán",
+    "volver": "words/volver",
+    "por": "words/por",
+    "qué": "words/qué",
+    "han": "words/han",
+    "haber": "words/haber",
+    "venido": "words/venido",
+    "venir": "words/venir",
+    "quizá": "words/quizá",
+    "ruido": "words/ruido",
+    "barco": "words/barco",
+    "lo": "words/lo",
+    "verán": "words/verán",
+    "ver": "words/ver",
+    "siento": "words/siento",
+    "sentir": "words/sentir",
+    "mucho": "words/mucho",
+    "está": "words/está",
+    "bien": "words/bien",
+    "podemos": "words/podemos",
+    "poder": "words/poder",
+    "dejarlo": "words/dejarlo",
+    "dejar": "words/dejar",
+    "ahí": "words/ahí",
+    "puedes": "words/puedes",
+    "arreglarlo": "words/arreglarlo",
+    "arreglar": "words/arreglar",
+    "hoy": "words/hoy",
+    "entonces": "words/entonces",
+    "tenemos": "words/tenemos",
+    "tener": "words/tener",
+    "un": "words/un",
+    "problema": "words/problema",
+    "es": "words/es",
+    "ser": "words/ser",
+    "demasiado": "words/demasiado",
+    "pesado": "words/pesado",
+    "ocultarlo": "words/ocultarlo",
+    "ocultar": "words/ocultar",
+    "sí": "words/sí",
+    "movemos": "words/movemos",
+    "mover": "words/mover",
+    "construimos": "words/construimos",
+    "construir": "words/construir",
+    "algo": "words/algo",
+    "alrededor": "words/alrededor",
+    "como": "words/como",
+    "cobertizo": "words/cobertizo",
+    "dento": "words/dento",
+    "-": "words/-",
+    "nave": "words/nave",
+    "afuera": "words/afuera",
+    "rápido": "words/rápido",
+    "toma": "words/toma",
+    "tomar": "words/tomar",
+    "esto": "words/esto",
+    "tú": "words/tú",
+    "aquí": "words/aquí",
+    "conmigo": "words/conmigo",
+    "ayudo": "words/ayudo",
+    "ayudar": "words/ayudar",
+    "plan": "words/plan",
+    "uno": "words/uno",
+    "dos": "words/dos",
+    "tres": "words/tres",
+    "cuatro": "words/cuatro",
+    "cinco": "words/cinco",
+    "seis": "words/seis",
+    "siete": "words/siete",
+    "ocho": "words/ocho",
+    "nueve": "words/nueve",
+    "diez": "words/diez",
+    "trabajamos": "words/trabajamos",
+    "trabajar": "words/trabajar",
+    "juntos": "words/juntos",
+    "escucha": "words/escucha",
+    "escuchar": "words/escuchar",
+    "hola": "words/hola",
+    "pasando": "words/pasando",
+    "pasar": "words/pasar",
+    "solo": "words/solo",
+    "eso": "words/eso",
+    "nuevo": "words/nuevo",
+    "queremos": "words/queremos",
+    "querer": "words/querer",
+    "ya": "words/ya",
+    "hecho": "words/hecho",
+    "muchas": "words/muchas",
+    "gracias": "words/gracias",
+    "gracia": "words/gracia",
+    "de": "words/de",
+    "toc": "words/toc",
+    "vuelto": "words/vuelto",
+    "pasó": "words/pasó",
+    "ayer": "words/ayer"
+  }
+}

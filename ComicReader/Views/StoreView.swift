@@ -101,16 +101,31 @@ struct StoreComicCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 16) {
-                // Cover placeholder (in production, load from URL)
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(levelColor.opacity(0.2))
-                        .frame(width: 80, height: 120)
-
-                    Image(systemName: "book.closed.fill")
-                        .font(.largeTitle)
-                        .foregroundStyle(levelColor)
+                // Cover image from server
+                AsyncImage(url: URL(string: "\(Secrets.serverBaseURL)\(comic.coverThumbnailUrl)")) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 80, height: 120)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    case .failure:
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(levelColor.opacity(0.2))
+                            .frame(width: 80, height: 120)
+                            .overlay(
+                                Image(systemName: "photo")
+                                    .foregroundStyle(levelColor)
+                            )
+                    default:
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(levelColor.opacity(0.1))
+                            .frame(width: 80, height: 120)
+                            .overlay(ProgressView())
+                    }
                 }
+                .frame(width: 80, height: 120)
 
                 // Info
                 VStack(alignment: .leading, spacing: 8) {
@@ -217,6 +232,20 @@ struct StoreComicCard: View {
                 }
             }
             .padding(.vertical, 10)
+
+        case .hidden:
+            Button {
+                Task {
+                    await storeService.restoreComic(comic.id)
+                }
+            } label: {
+                Label("Restore to Library", systemImage: "arrow.uturn.backward.circle.fill")
+                    .font(.subheadline)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 8)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.orange)
 
         case .failed(let error):
             VStack(spacing: 8) {

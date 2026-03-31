@@ -1,0 +1,4239 @@
+{
+  "id": "comic-zik_desayuna",
+  "title": "ZIK DESAYUNA",
+  "description": "Aliens need to eat too...",
+  "coverImage": "zik_desayuna_cover",
+  "level": "beginner",
+  "totalPages": 13,
+  "estimatedMinutes": 26,
+  "language": "es",
+  "targetLanguage": "en",
+  "version": "1.0",
+  "collectionId": "el_visitante",
+  "collectionTitle": "EL VISITANTE",
+  "episodeNumber": 3,
+  "pages": [
+    {
+      "id": "zik_desayuna-page-cover",
+      "pageNumber": 1,
+      "masterImage": "zik_desayuna_cover",
+      "panels": [
+        {
+          "id": "zik_desayuna-panel-cover",
+          "artworkImage": "zik_desayuna_cover",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-cover-1",
+              "type": "narration",
+              "position": {
+                "x": 0.2400000000000001,
+                "y": 0.0049999999999999906,
+                "width": 0.68,
+                "height": 0.11833333333333332
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s1",
+                  "text": "Zik come desayuno",
+                  "translation": "Zik eats breakfest",
+                  "audioUrl": "zik_desayuna_p0_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w1",
+                      "text": "Zik",
+                      "meaning": "",
+                      "baseForm": "Zik",
+                      "wordAudioUrl": "words/zik",
+                      "baseFormAudioUrl": "words/zik"
+                    },
+                    {
+                      "id": "zik_desayuna-w2",
+                      "text": "come",
+                      "meaning": "eats",
+                      "baseForm": "comer",
+                      "startTimeMs": 336,
+                      "endTimeMs": 720,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/come",
+                      "baseFormAudioUrl": "words/comer"
+                    },
+                    {
+                      "id": "zik_desayuna-w3",
+                      "text": "desayuno",
+                      "meaning": "breakfast",
+                      "baseForm": "desayuno",
+                      "startTimeMs": 780,
+                      "endTimeMs": 1440,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/desayuno",
+                      "baseFormAudioUrl": "words/desayuno"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zik_desayuna-page-1",
+      "pageNumber": 2,
+      "masterImage": "zik_desayuna_p1",
+      "noTextImage": "zik_desayuna_p1_no_text",
+      "panels": [
+        {
+          "id": "zik_desayuna-panel-1-1",
+          "artworkImage": "zik_desayuna_p1_s1",
+          "noTextImage": "zik_desayuna_p1_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.3816666666666667
+          },
+          "bubbles": []
+        },
+        {
+          "id": "zik_desayuna-panel-1-2",
+          "artworkImage": "zik_desayuna_p1_s2",
+          "noTextImage": "zik_desayuna_p1_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3816666666666667,
+            "width": 0.515,
+            "height": 0.31333333333333324
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-1-2-2",
+              "type": "speech",
+              "position": {
+                "x": 0.019999999999999962,
+                "y": 0.5916666666666667,
+                "width": 0.19,
+                "height": 0.07416666666666671
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s2",
+                  "text": "Lo siento...",
+                  "translation": "Sorry...",
+                  "audioUrl": "zik_desayuna_p1_s2_b1_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w4",
+                      "text": "Lo",
+                      "meaning": "it",
+                      "baseForm": "lo",
+                      "startTimeMs": 0,
+                      "endTimeMs": 240,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/lo",
+                      "baseFormAudioUrl": "words/lo"
+                    },
+                    {
+                      "id": "zik_desayuna-w5",
+                      "text": "siento...",
+                      "meaning": "I feel",
+                      "baseForm": "sentir",
+                      "startTimeMs": 360,
+                      "endTimeMs": 1360,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/siento",
+                      "baseFormAudioUrl": "words/sentir"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-1-3",
+          "artworkImage": "zik_desayuna_p1_s3",
+          "noTextImage": "zik_desayuna_p1_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.695,
+            "width": 0.515,
+            "height": 0.30500000000000005
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-1-3-3",
+              "type": "speech",
+              "position": {
+                "x": 0.325,
+                "y": 0.8524999999999999,
+                "width": 0.15000000000000002,
+                "height": 0.1100000000000001
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s3",
+                  "text": "Está bien...",
+                  "translation": "It's ok!",
+                  "audioUrl": "zik_desayuna_p1_s3_b2_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w6",
+                      "text": "Está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 320,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "zik_desayuna-w7",
+                      "text": "bien...",
+                      "meaning": "ok",
+                      "baseForm": "bien",
+                      "startTimeMs": 416,
+                      "endTimeMs": 2480,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/bien",
+                      "baseFormAudioUrl": "words/bien"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-1-4",
+          "artworkImage": "zik_desayuna_p1_s4",
+          "noTextImage": "zik_desayuna_p1_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.515,
+            "y": 0.3816666666666667,
+            "width": 0.485,
+            "height": 0.6183333333333333
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-1-4-4",
+              "type": "speech",
+              "position": {
+                "x": 0.5399999999999999,
+                "y": 0.5975,
+                "width": 0.1975,
+                "height": 0.07166666666666677
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s4",
+                  "text": "Este es Zik...",
+                  "translation": "This is Zik...",
+                  "audioUrl": "zik_desayuna_p1_s4_b3_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w8",
+                      "text": "Este",
+                      "meaning": "this",
+                      "baseForm": "este",
+                      "startTimeMs": 0,
+                      "endTimeMs": 640,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/este",
+                      "baseFormAudioUrl": "words/este"
+                    },
+                    {
+                      "id": "zik_desayuna-w9",
+                      "text": "es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 773,
+                      "endTimeMs": 1039,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "zik_desayuna-w10",
+                      "text": "Zik...",
+                      "meaning": "Zik",
+                      "baseForm": "zik",
+                      "startTimeMs": 1159,
+                      "endTimeMs": 1679,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/zik",
+                      "baseFormAudioUrl": "words/zik"
+                    }
+                  ]
+                },
+                {
+                  "id": "zik_desayuna-s5",
+                  "text": "",
+                  "translation": "",
+                  "audioUrl": "",
+                  "words": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zik_desayuna-page-2",
+      "pageNumber": 3,
+      "masterImage": "zik_desayuna_p2",
+      "noTextImage": "zik_desayuna_p2_no_text",
+      "panels": [
+        {
+          "id": "zik_desayuna-panel-2-1",
+          "artworkImage": "zik_desayuna_p2_s1",
+          "noTextImage": "zik_desayuna_p2_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.355
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-2-1-5",
+              "type": "speech",
+              "position": {
+                "x": 0.22750000000000004,
+                "y": 0.2375,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s6",
+                  "text": "Ella es mi mamá.",
+                  "translation": "She is my mum.",
+                  "audioUrl": "zik_desayuna_p2_s1_b1_t1",
+                  "alternativeTexts": [
+                    "Ella es mi madre."
+                  ],
+                  "alternativeAudioUrls": [
+                    "zik_desayuna_p2_s1_b1_alt1"
+                  ],
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w11",
+                      "text": "Ella",
+                      "meaning": "she",
+                      "baseForm": "ella",
+                      "startTimeMs": 0,
+                      "endTimeMs": 320,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/ella",
+                      "baseFormAudioUrl": "words/ella"
+                    },
+                    {
+                      "id": "zik_desayuna-w12",
+                      "text": "es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 426,
+                      "endTimeMs": 638,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "zik_desayuna-w13",
+                      "text": "mi",
+                      "meaning": "my",
+                      "baseForm": "mi",
+                      "startTimeMs": 744,
+                      "endTimeMs": 956,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mi",
+                      "baseFormAudioUrl": "words/mi"
+                    },
+                    {
+                      "id": "zik_desayuna-w14",
+                      "text": "mamá.",
+                      "meaning": "mum",
+                      "baseForm": "mamá",
+                      "startTimeMs": 1016,
+                      "endTimeMs": 1436,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mamá",
+                      "baseFormAudioUrl": "words/mamá"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-2-2",
+          "artworkImage": "zik_desayuna_p2_s2",
+          "noTextImage": "zik_desayuna_p2_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.355,
+            "width": 1,
+            "height": 0.3491666666666666
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-2-2-6",
+              "type": "speech",
+              "position": {
+                "x": 0.4175,
+                "y": 0.5591666666666667,
+                "width": 0.22999999999999998,
+                "height": 0.07499999999999996
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s7",
+                  "text": "Él es mi papá.",
+                  "translation": "He is my dad.",
+                  "audioUrl": "zik_desayuna_p2_s2_b2_t1",
+                  "alternativeTexts": [
+                    "Él es mi padre."
+                  ],
+                  "alternativeAudioUrls": [
+                    "zik_desayuna_p2_s1_b2_alt1"
+                  ],
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w15",
+                      "text": "Él",
+                      "meaning": "he",
+                      "baseForm": "él",
+                      "startTimeMs": 0,
+                      "endTimeMs": 320,
+                      "wordAudioUrl": "words/él",
+                      "baseFormAudioUrl": "words/él"
+                    },
+                    {
+                      "id": "zik_desayuna-w16",
+                      "text": "es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 346,
+                      "endTimeMs": 398,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "zik_desayuna-w17",
+                      "text": "mi",
+                      "meaning": "my",
+                      "baseForm": "mi",
+                      "startTimeMs": 451,
+                      "endTimeMs": 557,
+                      "wordAudioUrl": "words/mi",
+                      "baseFormAudioUrl": "words/mi"
+                    },
+                    {
+                      "id": "zik_desayuna-w18",
+                      "text": "papá.",
+                      "meaning": "dad",
+                      "baseForm": "papá",
+                      "startTimeMs": 637,
+                      "endTimeMs": 2557,
+                      "wordAudioUrl": "words/papá",
+                      "baseFormAudioUrl": "words/papá"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-2-3",
+          "artworkImage": "zik_desayuna_p2_s3",
+          "noTextImage": "zik_desayuna_p2_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.7041666666666666,
+            "width": 1,
+            "height": 0.2958333333333334
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-2-3-7",
+              "type": "speech",
+              "position": {
+                "x": 0.11749999999999997,
+                "y": 0.8758333333333334,
+                "width": 0.17250000000000001,
+                "height": 0.07666666666666666
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s8",
+                  "text": "Soy Mía...",
+                  "translation": "I am Mía...",
+                  "audioUrl": "zik_desayuna_p2_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w19",
+                      "text": "Soy",
+                      "meaning": "I am",
+                      "baseForm": "ser",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/soy",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "zik_desayuna-w20",
+                      "text": "Mía...",
+                      "meaning": "mine",
+                      "baseForm": "mío",
+                      "startTimeMs": 240,
+                      "endTimeMs": 959,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mía",
+                      "baseFormAudioUrl": "words/mío"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zik_desayuna-page-3",
+      "pageNumber": 4,
+      "masterImage": "zik_desayuna_p3",
+      "noTextImage": "zik_desayuna_p3_no_text",
+      "panels": [
+        {
+          "id": "zik_desayuna-panel-3-1",
+          "artworkImage": "zik_desayuna_p3_s1",
+          "noTextImage": "zik_desayuna_p3_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.46,
+            "height": 0.46499999999999997
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-3-1-8",
+              "type": "speech",
+              "position": {
+                "x": 0.17499999999999996,
+                "y": 0.027499999999999983,
+                "width": 0.16000000000000003,
+                "height": 0.06500000000000002
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s9",
+                  "text": "Él es Zik...",
+                  "translation": "He is Zik",
+                  "audioUrl": "zik_desayuna_p3_s1_b4_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w21",
+                      "text": "Él",
+                      "meaning": "he",
+                      "baseForm": "él",
+                      "startTimeMs": 0,
+                      "endTimeMs": 200,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/él",
+                      "baseFormAudioUrl": "words/él"
+                    },
+                    {
+                      "id": "zik_desayuna-w22",
+                      "text": "es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 240,
+                      "endTimeMs": 320,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "zik_desayuna-w23",
+                      "text": "Zik...",
+                      "meaning": "",
+                      "baseForm": "Zik...",
+                      "startTimeMs": 360,
+                      "endTimeMs": 878,
+                      "wordAudioUrl": "words/zik",
+                      "baseFormAudioUrl": "words/zik"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-3-2",
+          "artworkImage": "zik_desayuna_p3_s2",
+          "noTextImage": "zik_desayuna_p3_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.46,
+            "y": 0,
+            "width": 0.54,
+            "height": 0.46499999999999997
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-3-2-9",
+              "type": "speech",
+              "position": {
+                "x": 0.6375,
+                "y": 0.2975,
+                "width": 0.21250000000000002,
+                "height": 0.08166666666666667
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s10",
+                  "text": "¿Eres un niño?",
+                  "translation": "Are you a boy? ",
+                  "audioUrl": "zik_desayuna_p3_s2_b1_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w24",
+                      "text": "¿Eres",
+                      "meaning": "are you",
+                      "baseForm": "ser",
+                      "startTimeMs": 0,
+                      "endTimeMs": 320,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/eres",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "zik_desayuna-w25",
+                      "text": "un",
+                      "meaning": "a",
+                      "baseForm": "un",
+                      "startTimeMs": 373,
+                      "endTimeMs": 479,
+                      "wordAudioUrl": "words/un",
+                      "baseFormAudioUrl": "words/un"
+                    },
+                    {
+                      "id": "zik_desayuna-w26",
+                      "text": "niño?",
+                      "meaning": "boy",
+                      "baseForm": "niño",
+                      "startTimeMs": 585,
+                      "endTimeMs": 1197,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/niño",
+                      "baseFormAudioUrl": "words/niño"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-3-3",
+          "artworkImage": "zik_desayuna_p3_s3",
+          "noTextImage": "zik_desayuna_p3_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.46499999999999997,
+            "width": 0.53,
+            "height": 0.535
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-3-3-10",
+              "type": "speech",
+              "position": {
+                "x": 0.05750000000000002,
+                "y": 0.5041666666666667,
+                "width": 0.175,
+                "height": 0.050000000000000044
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s11",
+                  "text": "¿Qué...?",
+                  "translation": "What...?",
+                  "audioUrl": "zik_desayuna_p3_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w27",
+                      "text": "¿Qué...?",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 0,
+                      "endTimeMs": 956,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-3-4",
+          "artworkImage": "zik_desayuna_p3_s4",
+          "noTextImage": "zik_desayuna_p3_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.53,
+            "y": 0.46499999999999997,
+            "width": 0.47,
+            "height": 0.535
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-3-4-11",
+              "type": "speech",
+              "position": {
+                "x": 0.5799999999999998,
+                "y": 0.6874999999999999,
+                "width": 0.18000000000000005,
+                "height": 0.06333333333333335
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s12",
+                  "text": "¿Persona?",
+                  "translation": "Person?",
+                  "audioUrl": "zik_desayuna_p3_s4_b4_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w28",
+                      "text": "¿Persona?",
+                      "meaning": "person",
+                      "baseForm": "persona",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1036,
+                      "wordAudioUrl": "words/persona",
+                      "baseFormAudioUrl": "words/persona"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-3-4-12",
+              "type": "speech",
+              "position": {
+                "x": 0.7274999999999999,
+                "y": 0.8208333333333334,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s13",
+                  "text": "No... no una persona...",
+                  "translation": "No... not a person...",
+                  "audioUrl": "zik_desayuna_p3_s4_b5_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w29",
+                      "text": "No...",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1275,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "zik_desayuna-w30",
+                      "text": "no",
+                      "meaning": "not",
+                      "baseForm": "no",
+                      "startTimeMs": 1355,
+                      "endTimeMs": 1515,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "zik_desayuna-w31",
+                      "text": "una",
+                      "meaning": "a",
+                      "baseForm": "un",
+                      "startTimeMs": 1615,
+                      "endTimeMs": 1915,
+                      "wordAudioUrl": "words/una",
+                      "baseFormAudioUrl": "words/un"
+                    },
+                    {
+                      "id": "zik_desayuna-w32",
+                      "text": "persona...",
+                      "meaning": "person",
+                      "baseForm": "persona",
+                      "startTimeMs": 2005,
+                      "endTimeMs": 2875,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/persona",
+                      "baseFormAudioUrl": "words/persona"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zik_desayuna-page-4",
+      "pageNumber": 5,
+      "masterImage": "zik_desayuna_p4",
+      "noTextImage": "zik_desayuna_p4_no_text",
+      "panels": [
+        {
+          "id": "zik_desayuna-panel-4-1",
+          "artworkImage": "zik_desayuna_p4_s1",
+          "noTextImage": "zik_desayuna_p4_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.38
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-4-1-13",
+              "type": "speech",
+              "position": {
+                "x": 0.06250000000000003,
+                "y": 0.16583333333333333,
+                "width": 0.16499999999999992,
+                "height": 0.05000000000000002
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s14",
+                  "text": "Ven...",
+                  "translation": "Come...",
+                  "audioUrl": "zik_desayuna_p4_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w33",
+                      "text": "Ven...",
+                      "meaning": "come",
+                      "baseForm": "venir",
+                      "startTimeMs": 0,
+                      "endTimeMs": 717,
+                      "wordAudioUrl": "words/ven",
+                      "baseFormAudioUrl": "words/venir"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-4-1-14",
+              "type": "speech",
+              "position": {
+                "x": 0.235,
+                "y": 0.21750000000000003,
+                "width": 0.1825,
+                "height": 0.07166666666666666
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s15",
+                  "text": "Vamos a la cocina",
+                  "translation": "Let's go to the kitcher",
+                  "audioUrl": "zik_desayuna_p4_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w34",
+                      "text": "Vamos",
+                      "meaning": "lets go",
+                      "baseForm": "ir",
+                      "startTimeMs": 0,
+                      "endTimeMs": 480,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/vamos",
+                      "baseFormAudioUrl": "words/ir"
+                    },
+                    {
+                      "id": "zik_desayuna-w35",
+                      "text": "a",
+                      "meaning": "to",
+                      "baseForm": "a",
+                      "startTimeMs": 560,
+                      "endTimeMs": 640,
+                      "wordAudioUrl": "words/a",
+                      "baseFormAudioUrl": "words/a"
+                    },
+                    {
+                      "id": "zik_desayuna-w36",
+                      "text": "la",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 693,
+                      "endTimeMs": 799,
+                      "wordAudioUrl": "words/la",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "zik_desayuna-w37",
+                      "text": "cocina",
+                      "meaning": "kitchen",
+                      "baseForm": "cocina",
+                      "startTimeMs": 879,
+                      "endTimeMs": 1439,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/cocina",
+                      "baseFormAudioUrl": "words/cocina"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-4-2",
+          "artworkImage": "zik_desayuna_p4_s2",
+          "noTextImage": "zik_desayuna_p4_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.38,
+            "width": 0.375,
+            "height": 0.2875
+          },
+          "bubbles": []
+        },
+        {
+          "id": "zik_desayuna-panel-4-3",
+          "artworkImage": "zik_desayuna_p4_s3",
+          "noTextImage": "zik_desayuna_p4_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.375,
+            "y": 0.38,
+            "width": 0.625,
+            "height": 0.2875
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-4-3-15",
+              "type": "speech",
+              "position": {
+                "x": 0.7199999999999999,
+                "y": 0.5866666666666667,
+                "width": 0.21750000000000003,
+                "height": 0.04999999999999999
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s16",
+                  "text": "Sentémonos",
+                  "translation": "Let's sit...",
+                  "audioUrl": "zik_desayuna_p4_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w38",
+                      "text": "Sentémonos",
+                      "meaning": "lets sit",
+                      "baseForm": "sentar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1039,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/sentémonos",
+                      "baseFormAudioUrl": "words/sentar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-4-4",
+          "artworkImage": "zik_desayuna_p4_s4",
+          "noTextImage": "zik_desayuna_p4_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6675,
+            "width": 1,
+            "height": 0.3325
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-4-4-16",
+              "type": "speech",
+              "position": {
+                "x": 0.22749999999999987,
+                "y": 0.6724999999999999,
+                "width": 0.3200000000000001,
+                "height": 0.06666666666666676
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s17",
+                  "text": "¿Qué estamos haciendo?",
+                  "translation": "What are we doing? ",
+                  "audioUrl": "zik_desayuna_p4_s4_b4_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w39",
+                      "text": "¿Qué",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 0,
+                      "endTimeMs": 159,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    },
+                    {
+                      "id": "zik_desayuna-w40",
+                      "text": "estamos",
+                      "meaning": "we are",
+                      "baseForm": "estar",
+                      "startTimeMs": 239,
+                      "endTimeMs": 799,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/estamos",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "zik_desayuna-w41",
+                      "text": "haciendo?",
+                      "meaning": "doing",
+                      "baseForm": "hacer",
+                      "startTimeMs": 905,
+                      "endTimeMs": 2233,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/haciendo",
+                      "baseFormAudioUrl": "words/hacer"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-4-4-17",
+              "type": "speech",
+              "position": {
+                "x": 0.03250000000000006,
+                "y": 0.8541666666666666,
+                "width": 0.25249999999999995,
+                "height": 0.07333333333333336
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s18",
+                  "text": "Desayuno...",
+                  "translation": "Breakfest",
+                  "audioUrl": "zik_desayuna_p4_s4_b5_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w42",
+                      "text": "Desayuno...",
+                      "meaning": "breakfast",
+                      "baseForm": "desayuno",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1439,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/desayuno",
+                      "baseFormAudioUrl": "words/desayuno"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-4-4-18",
+              "type": "speech",
+              "position": {
+                "x": 0.28250000000000003,
+                "y": 0.9158333333333334,
+                "width": 0.38499999999999995,
+                "height": 0.06499999999999995
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s19",
+                  "text": "¿Desayuno? ¿Qué es eso?",
+                  "translation": "Breakfest? What is that? ",
+                  "audioUrl": "zik_desayuna_p4_s4_b6_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w43",
+                      "text": "¿Desayuno?",
+                      "meaning": "breakfast",
+                      "baseForm": "desayuno",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1038,
+                      "wordAudioUrl": "words/desayuno",
+                      "baseFormAudioUrl": "words/desayuno"
+                    },
+                    {
+                      "id": "zik_desayuna-w44",
+                      "text": "¿Qué",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 1118,
+                      "endTimeMs": 1357,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    },
+                    {
+                      "id": "zik_desayuna-w45",
+                      "text": "es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 1437,
+                      "endTimeMs": 1597,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "zik_desayuna-w46",
+                      "text": "eso?",
+                      "meaning": "that",
+                      "baseForm": "eso",
+                      "startTimeMs": 1677,
+                      "endTimeMs": 2157,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/eso",
+                      "baseFormAudioUrl": "words/eso"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zik_desayuna-page-5",
+      "pageNumber": 6,
+      "masterImage": "zik_desayuna_p5",
+      "noTextImage": "zik_desayuna_p5_no_text",
+      "panels": [
+        {
+          "id": "zik_desayuna-panel-5-1",
+          "artworkImage": "zik_desayuna_p5_s1",
+          "noTextImage": "zik_desayuna_p5_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.4375,
+            "height": 0.3308333333333333
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-5-1-19",
+              "type": "speech",
+              "position": {
+                "x": 0.195,
+                "y": 0.018333333333333333,
+                "width": 0.10749999999999998,
+                "height": 0.07916666666666666
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s20",
+                  "text": "Silla",
+                  "translation": "Chair...",
+                  "audioUrl": "zik_desayuna_p5_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w47",
+                      "text": "Silla",
+                      "meaning": "chair",
+                      "baseForm": "silla",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1040,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/silla",
+                      "baseFormAudioUrl": "words/silla"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-5-2",
+          "artworkImage": "zik_desayuna_p5_s2",
+          "noTextImage": "zik_desayuna_p5_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.4375,
+            "y": 0,
+            "width": 0.5625,
+            "height": 0.3308333333333333
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-5-2-20",
+              "type": "speech",
+              "position": {
+                "x": 0.4774999999999999,
+                "y": 0.020000000000000004,
+                "width": 0.1150000000000001,
+                "height": 0.057499999999999996
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s21",
+                  "text": "Mesa",
+                  "translation": "Table...",
+                  "audioUrl": "zik_desayuna_p5_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w48",
+                      "text": "Mesa",
+                      "meaning": "table",
+                      "baseForm": "mesa",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1194,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mesa",
+                      "baseFormAudioUrl": "words/mesa"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-5-3",
+          "artworkImage": "zik_desayuna_p5_s3",
+          "noTextImage": "zik_desayuna_p5_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3308333333333333,
+            "width": 0.5249999999999999,
+            "height": 0.35
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-5-3-21",
+              "type": "speech",
+              "position": {
+                "x": 0.32249999999999995,
+                "y": 0.3575,
+                "width": 0.16749999999999998,
+                "height": 0.10166666666666674
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s22",
+                  "text": "Come... comida...",
+                  "translation": "Eat... food...",
+                  "audioUrl": "zik_desayuna_p5_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w49",
+                      "text": "Come...",
+                      "meaning": "eat",
+                      "baseForm": "comer",
+                      "startTimeMs": 0,
+                      "endTimeMs": 879,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/come",
+                      "baseFormAudioUrl": "words/comer"
+                    },
+                    {
+                      "id": "zik_desayuna-w50",
+                      "text": "comida...",
+                      "meaning": "food",
+                      "baseForm": "comida",
+                      "startTimeMs": 981,
+                      "endTimeMs": 1911,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/comida",
+                      "baseFormAudioUrl": "words/comida"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-5-4",
+          "artworkImage": "zik_desayuna_p5_s4",
+          "noTextImage": "zik_desayuna_p5_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.5249999999999999,
+            "y": 0.3308333333333333,
+            "width": 0.4750000000000001,
+            "height": 0.35
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-5-4-22",
+              "type": "speech",
+              "position": {
+                "x": 0.765,
+                "y": 0.35083333333333333,
+                "width": 0.13249999999999995,
+                "height": 0.08500000000000002
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s23",
+                  "text": "Bebe...",
+                  "translation": "Drink...",
+                  "audioUrl": "zik_desayuna_p5_s4_b4_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w51",
+                      "text": "Bebe...",
+                      "meaning": "drink",
+                      "baseForm": "beber",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1359,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/bebe",
+                      "baseFormAudioUrl": "words/beber"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-5-4-23",
+              "type": "speech",
+              "position": {
+                "x": 0.6375,
+                "y": 0.5858333333333333,
+                "width": 0.20000000000000007,
+                "height": 0.07166666666666666
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s24",
+                  "text": "¿Entiendes?",
+                  "translation": "Understand? ",
+                  "audioUrl": "zik_desayuna_p5_s4_b7_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w52",
+                      "text": "¿Entiendes?",
+                      "meaning": "understand",
+                      "baseForm": "entender",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1280,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/entiendes",
+                      "baseFormAudioUrl": "words/entender"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-5-5",
+          "artworkImage": "zik_desayuna_p5_s5",
+          "noTextImage": "zik_desayuna_p5_s5_no_text",
+          "panelOrder": 5,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6808333333333333,
+            "width": 0.4375,
+            "height": 0.3191666666666667
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-5-5-24",
+              "type": "speech",
+              "position": {
+                "x": 0.04500000000000001,
+                "y": 0.6908333333333333,
+                "width": 0.17250000000000001,
+                "height": 0.07333333333333336
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s25",
+                  "text": "Sí... entiendo",
+                  "translation": "Yes... understand...",
+                  "audioUrl": "zik_desayuna_p5_s5_b8_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w53",
+                      "text": "Sí...",
+                      "meaning": "yes",
+                      "baseForm": "sí",
+                      "startTimeMs": 0,
+                      "endTimeMs": 719,
+                      "wordAudioUrl": "words/sí",
+                      "baseFormAudioUrl": "words/sí"
+                    },
+                    {
+                      "id": "zik_desayuna-w54",
+                      "text": "entiendo",
+                      "meaning": "understand",
+                      "baseForm": "entender",
+                      "startTimeMs": 799,
+                      "endTimeMs": 1757,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/entiendo",
+                      "baseFormAudioUrl": "words/entender"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-5-5-25",
+              "type": "speech",
+              "position": {
+                "x": 0.10250000000000004,
+                "y": 0.8991666666666668,
+                "width": 0.18249999999999994,
+                "height": 0.07499999999999984
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s26",
+                  "text": "Gracias...",
+                  "translation": "Thank you",
+                  "audioUrl": "zik_desayuna_p5_s5_b5_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w55",
+                      "text": "Gracias...",
+                      "meaning": "thank you",
+                      "baseForm": "gracia",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1438,
+                      "wordAudioUrl": "words/gracias",
+                      "baseFormAudioUrl": "words/gracia"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-5-6",
+          "artworkImage": "zik_desayuna_p5_s6",
+          "noTextImage": "zik_desayuna_p5_s6_no_text",
+          "panelOrder": 6,
+          "tapZone": {
+            "x": 0.4375,
+            "y": 0.6808333333333333,
+            "width": 0.5625,
+            "height": 0.3191666666666667
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-5-6-26",
+              "type": "speech",
+              "position": {
+                "x": 0.4600000000000001,
+                "y": 0.7725,
+                "width": 0.12249999999999994,
+                "height": 0.08999999999999997
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s27",
+                  "text": "De nada",
+                  "translation": "You're welcome...",
+                  "audioUrl": "zik_desayuna_p5_s6_b6_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w56",
+                      "text": "De",
+                      "meaning": "of",
+                      "baseForm": "de",
+                      "startTimeMs": 0,
+                      "endTimeMs": 236,
+                      "wordAudioUrl": "words/de",
+                      "baseFormAudioUrl": "words/de"
+                    },
+                    {
+                      "id": "zik_desayuna-w57",
+                      "text": "nada",
+                      "meaning": "nothing",
+                      "baseForm": "nada",
+                      "startTimeMs": 364,
+                      "endTimeMs": 1755,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/nada",
+                      "baseFormAudioUrl": "words/nada"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zik_desayuna-page-6",
+      "pageNumber": 7,
+      "masterImage": "zik_desayuna_p6",
+      "noTextImage": "zik_desayuna_p6_no_text",
+      "panels": [
+        {
+          "id": "zik_desayuna-panel-6-1",
+          "artworkImage": "zik_desayuna_p6_s1",
+          "noTextImage": "zik_desayuna_p6_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.3566666666666667
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-6-1-27",
+              "type": "speech",
+              "position": {
+                "x": 0.31250000000000006,
+                "y": 0.027499999999999997,
+                "width": 0.18749999999999994,
+                "height": 0.06666666666666667
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s28",
+                  "text": "¿Números?",
+                  "translation": "Numbers?",
+                  "audioUrl": "zik_desayuna_p6_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w58",
+                      "text": "¿Números?",
+                      "meaning": "numbers",
+                      "baseForm": "número",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1118,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/números",
+                      "baseFormAudioUrl": "words/número"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-6-1-28",
+              "type": "speech",
+              "position": {
+                "x": 0.7425,
+                "y": 0.22749999999999998,
+                "width": 0.11249999999999993,
+                "height": 0.09000000000000002
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s29",
+                  "text": "No...",
+                  "translation": "No...",
+                  "audioUrl": "zik_desayuna_p6_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w59",
+                      "text": "No...",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 877,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-6-2",
+          "artworkImage": "zik_desayuna_p6_s2",
+          "noTextImage": "zik_desayuna_p6_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3566666666666667,
+            "width": 0.37375,
+            "height": 0.29999999999999993
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-6-2-29",
+              "type": "speech",
+              "position": {
+                "x": 0.017499999999999988,
+                "y": 0.3658333333333333,
+                "width": 0.14750000000000002,
+                "height": 0.1166666666666667
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s30",
+                  "text": "Vale, escucha",
+                  "translation": "OK, listen...",
+                  "audioUrl": "zik_desayuna_p6_s2_b3_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w60",
+                      "text": "Vale,",
+                      "meaning": "OK",
+                      "baseForm": "valer",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1200,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/vale",
+                      "baseFormAudioUrl": "words/valer"
+                    },
+                    {
+                      "id": "zik_desayuna-w61",
+                      "text": "escucha",
+                      "meaning": "listen",
+                      "baseForm": "escuchar",
+                      "startTimeMs": 1220,
+                      "endTimeMs": 1917,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/escucha",
+                      "baseFormAudioUrl": "words/escuchar"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-6-2-30",
+              "type": "speech",
+              "position": {
+                "x": 0.22499999999999998,
+                "y": 0.5575,
+                "width": 0.1175,
+                "height": 0.07166666666666666
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s31",
+                  "text": "Uno",
+                  "translation": "One...",
+                  "audioUrl": "zik_desayuna_p6_s2_b4_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w62",
+                      "text": "Uno",
+                      "meaning": "one",
+                      "baseForm": "uno",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1596,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/uno",
+                      "baseFormAudioUrl": "words/uno"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-6-3",
+          "artworkImage": "zik_desayuna_p6_s3",
+          "noTextImage": "zik_desayuna_p6_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.37375,
+            "y": 0.3566666666666667,
+            "width": 0.32875,
+            "height": 0.29999999999999993
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-6-3-31",
+              "type": "speech",
+              "position": {
+                "x": 0.39249999999999996,
+                "y": 0.3725,
+                "width": 0.10250000000000004,
+                "height": 0.04999999999999999
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s32",
+                  "text": "Dos",
+                  "translation": "Two...",
+                  "audioUrl": "zik_desayuna_p6_s3_b5_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w63",
+                      "text": "Dos",
+                      "meaning": "two",
+                      "baseForm": "dos",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1035,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/dos",
+                      "baseFormAudioUrl": "words/dos"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-6-4",
+          "artworkImage": "zik_desayuna_p6_s4",
+          "noTextImage": "zik_desayuna_p6_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.7025,
+            "y": 0.3566666666666667,
+            "width": 0.2975,
+            "height": 0.29999999999999993
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-6-4-32",
+              "type": "speech",
+              "position": {
+                "x": 0.735,
+                "y": 0.36916666666666675,
+                "width": 0.10499999999999998,
+                "height": 0.05166666666666658
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s33",
+                  "text": "Tres",
+                  "translation": "Three...",
+                  "audioUrl": "zik_desayuna_p6_s4_b6_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w64",
+                      "text": "Tres",
+                      "meaning": "three",
+                      "baseForm": "tres",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1916,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/tres",
+                      "baseFormAudioUrl": "words/tres"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-6-5",
+          "artworkImage": "zik_desayuna_p6_s5",
+          "noTextImage": "zik_desayuna_p6_s5_no_text",
+          "panelOrder": 5,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6566666666666666,
+            "width": 0.30374999999999996,
+            "height": 0.3433333333333334
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-6-5-33",
+              "type": "speech",
+              "position": {
+                "x": 0.05,
+                "y": 0.6941666666666667,
+                "width": 0.14250000000000002,
+                "height": 0.05666666666666664
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s34",
+                  "text": "Cuatro",
+                  "translation": "Four...",
+                  "audioUrl": "zik_desayuna_p6_s5_b7_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w65",
+                      "text": "Cuatro",
+                      "meaning": "four",
+                      "baseForm": "cuatro",
+                      "startTimeMs": 0,
+                      "endTimeMs": 956,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/cuatro",
+                      "baseFormAudioUrl": "words/cuatro"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-6-6",
+          "artworkImage": "zik_desayuna_p6_s6",
+          "noTextImage": "zik_desayuna_p6_s6_no_text",
+          "panelOrder": 6,
+          "tapZone": {
+            "x": 0.30374999999999996,
+            "y": 0.6566666666666666,
+            "width": 0.33499999999999996,
+            "height": 0.3433333333333334
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-6-6-34",
+              "type": "speech",
+              "position": {
+                "x": 0.34500000000000003,
+                "y": 0.6775,
+                "width": 0.1225,
+                "height": 0.06500000000000006
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s35",
+                  "text": "Cinco",
+                  "translation": "Five...",
+                  "audioUrl": "zik_desayuna_p6_s6_b8_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w66",
+                      "text": "Cinco",
+                      "meaning": "five",
+                      "baseForm": "cinco",
+                      "startTimeMs": 0,
+                      "endTimeMs": 960,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/cinco",
+                      "baseFormAudioUrl": "words/cinco"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-6-7",
+          "artworkImage": "zik_desayuna_p6_s7",
+          "noTextImage": "zik_desayuna_p6_s7_no_text",
+          "panelOrder": 7,
+          "tapZone": {
+            "x": 0.6387499999999999,
+            "y": 0.6566666666666666,
+            "width": 0.36125000000000007,
+            "height": 0.3433333333333334
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-6-7-35",
+              "type": "narration",
+              "position": {
+                "x": 0.6825,
+                "y": 0.6875000000000001,
+                "width": 0.26249999999999996,
+                "height": 0.10499999999999987
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s36",
+                  "text": "Uno, dos, tres, cuatro, cinco",
+                  "translation": "One, two, three, four, five",
+                  "audioUrl": "zik_desayuna_p6_s7_b9_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w67",
+                      "text": "Uno,",
+                      "meaning": "one",
+                      "baseForm": "uno",
+                      "startTimeMs": 0,
+                      "endTimeMs": 320,
+                      "wordAudioUrl": "words/uno",
+                      "baseFormAudioUrl": "words/uno"
+                    },
+                    {
+                      "id": "zik_desayuna-w68",
+                      "text": "dos,",
+                      "meaning": "two",
+                      "baseForm": "dos",
+                      "startTimeMs": 600,
+                      "endTimeMs": 2320,
+                      "wordAudioUrl": "words/dos",
+                      "baseFormAudioUrl": "words/dos"
+                    },
+                    {
+                      "id": "zik_desayuna-w69",
+                      "text": "tres,",
+                      "meaning": "three",
+                      "baseForm": "tres",
+                      "startTimeMs": 2400,
+                      "endTimeMs": 3760,
+                      "wordAudioUrl": "words/tres",
+                      "baseFormAudioUrl": "words/tres"
+                    },
+                    {
+                      "id": "zik_desayuna-w70",
+                      "text": "cuatro,",
+                      "meaning": "four",
+                      "baseForm": "cuatro",
+                      "startTimeMs": 3828,
+                      "endTimeMs": 5036,
+                      "wordAudioUrl": "words/cuatro",
+                      "baseFormAudioUrl": "words/cuatro"
+                    },
+                    {
+                      "id": "zik_desayuna-w71",
+                      "text": "cinco",
+                      "meaning": "five",
+                      "baseForm": "cinco",
+                      "startTimeMs": 5129,
+                      "endTimeMs": 6872,
+                      "wordAudioUrl": "words/cinco",
+                      "baseFormAudioUrl": "words/cinco"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zik_desayuna-page-7",
+      "pageNumber": 8,
+      "masterImage": "zik_desayuna_p7",
+      "noTextImage": "zik_desayuna_p7_no_text",
+      "panels": [
+        {
+          "id": "zik_desayuna-panel-7-1",
+          "artworkImage": "zik_desayuna_p7_s1",
+          "noTextImage": "zik_desayuna_p7_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.32083333333333336
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-7-1-36",
+              "type": "speech",
+              "position": {
+                "x": 0.21749999999999997,
+                "y": 0.1525,
+                "width": 0.135,
+                "height": 0.07166666666666668
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s37",
+                  "text": "Grande",
+                  "translation": "Big...",
+                  "audioUrl": "zik_desayuna_p7_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w72",
+                      "text": "Grande",
+                      "meaning": "big",
+                      "baseForm": "grande",
+                      "startTimeMs": 0,
+                      "endTimeMs": 958,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/grande",
+                      "baseFormAudioUrl": "words/grande"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-7-1-37",
+              "type": "speech",
+              "position": {
+                "x": 0.74,
+                "y": 0.20916666666666667,
+                "width": 0.18000000000000005,
+                "height": 0.05499999999999999
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s38",
+                  "text": "Pequeño",
+                  "translation": "Small...",
+                  "audioUrl": "zik_desayuna_p7_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w73",
+                      "text": "Pequeño",
+                      "meaning": "small",
+                      "baseForm": "pequeño",
+                      "startTimeMs": 0,
+                      "endTimeMs": 956,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/pequeño",
+                      "baseFormAudioUrl": "words/pequeño"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-7-2",
+          "artworkImage": "zik_desayuna_p7_s2",
+          "noTextImage": "zik_desayuna_p7_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.32083333333333336,
+            "width": 1,
+            "height": 0.3466666666666666
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-7-2-38",
+              "type": "speech",
+              "position": {
+                "x": 0.25,
+                "y": 0.47916666666666674,
+                "width": 0.17249999999999993,
+                "height": 0.07499999999999996
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s39",
+                  "text": "Muchos",
+                  "translation": "Many...",
+                  "audioUrl": "zik_desayuna_p7_s2_b3_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w74",
+                      "text": "Muchos",
+                      "meaning": "many",
+                      "baseForm": "mucho",
+                      "startTimeMs": 0,
+                      "endTimeMs": 880,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/muchos",
+                      "baseFormAudioUrl": "words/mucho"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-7-2-39",
+              "type": "speech",
+              "position": {
+                "x": 0.6150000000000001,
+                "y": 0.4758333333333334,
+                "width": 0.11749999999999983,
+                "height": 0.07166666666666671
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s40",
+                  "text": "Pocos",
+                  "translation": "Few...",
+                  "audioUrl": "zik_desayuna_p7_s2_b4_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w75",
+                      "text": "Pocos",
+                      "meaning": "few",
+                      "baseForm": "poco",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1038,
+                      "wordAudioUrl": "words/pocos",
+                      "baseFormAudioUrl": "words/poco"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-7-3",
+          "artworkImage": "zik_desayuna_p7_s3",
+          "noTextImage": "zik_desayuna_p7_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6675,
+            "width": 1,
+            "height": 0.3325
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-7-3-40",
+              "type": "speech",
+              "position": {
+                "x": 0.5999999999999999,
+                "y": 0.7958333333333334,
+                "width": 0.12500000000000006,
+                "height": 0.08333333333333337
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s41",
+                  "text": "Mucho",
+                  "translation": "Much...",
+                  "audioUrl": "zik_desayuna_p7_s3_b5_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w76",
+                      "text": "Mucho",
+                      "meaning": "much",
+                      "baseForm": "mucho",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1278,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mucho",
+                      "baseFormAudioUrl": "words/mucho"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-7-3-41",
+              "type": "speech",
+              "position": {
+                "x": 0.31,
+                "y": 0.8341666666666666,
+                "width": 0.10999999999999999,
+                "height": 0.08166666666666678
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s42",
+                  "text": "Poco",
+                  "translation": "Little (as in not much)",
+                  "audioUrl": "zik_desayuna_p7_s3_b6_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w77",
+                      "text": "Poco",
+                      "meaning": "little (as in not much)",
+                      "baseForm": "poco",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1037,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/poco",
+                      "baseFormAudioUrl": "words/poco"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zik_desayuna-page-8",
+      "pageNumber": 9,
+      "masterImage": "zik_desayuna_p8",
+      "noTextImage": "zik_desayuna_p8_no_text",
+      "panels": [
+        {
+          "id": "zik_desayuna-panel-8-1",
+          "artworkImage": "zik_desayuna_p8_s1",
+          "noTextImage": "zik_desayuna_p8_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.3258333333333333
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-8-1-42",
+              "type": "narration",
+              "position": {
+                "x": 0.03750000000000003,
+                "y": 0.0175,
+                "width": 0.26,
+                "height": 0.08499999999999999
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s43",
+                  "text": "Mientras tanto...",
+                  "translation": "Meanwhile...",
+                  "audioUrl": "zik_desayuna_p8_s1_b5_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w78",
+                      "text": "Mientras",
+                      "meaning": "while",
+                      "baseForm": "mientras",
+                      "startTimeMs": 0,
+                      "endTimeMs": 559,
+                      "wordAudioUrl": "words/mientras",
+                      "baseFormAudioUrl": "words/mientras"
+                    },
+                    {
+                      "id": "zik_desayuna-w79",
+                      "text": "tanto...",
+                      "meaning": "so much",
+                      "baseForm": "tanto",
+                      "startTimeMs": 639,
+                      "endTimeMs": 1198,
+                      "wordAudioUrl": "words/tanto",
+                      "baseFormAudioUrl": "words/tanto"
+                    },
+                    {
+                      "id": "zik_desayuna-w80",
+                      "text": "Mientras tanto...",
+                      "meaning": "Meanwhile...",
+                      "baseForm": "mientras tanto",
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mientras_tanto",
+                      "baseFormAudioUrl": "words/mientras_tanto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-8-1-43",
+              "type": "speech",
+              "position": {
+                "x": 0.39999999999999997,
+                "y": 0.024166666666666642,
+                "width": 0.13500000000000012,
+                "height": 0.09666666666666668
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s44",
+                  "text": "Es nuevo...",
+                  "translation": "This is new...",
+                  "audioUrl": "zik_desayuna_p8_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w81",
+                      "text": "Es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "zik_desayuna-w82",
+                      "text": "nuevo...",
+                      "meaning": "new",
+                      "baseForm": "nuevo",
+                      "startTimeMs": 253,
+                      "endTimeMs": 958,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/nuevo",
+                      "baseFormAudioUrl": "words/nuevo"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-8-1-44",
+              "type": "speech",
+              "position": {
+                "x": 0.37999999999999995,
+                "y": 0.20249999999999993,
+                "width": 0.1775,
+                "height": 0.10166666666666666
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s45",
+                  "text": "¿Qué hacemos?",
+                  "translation": "What do we do? ",
+                  "audioUrl": "zik_desayuna_p8_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w83",
+                      "text": "¿Qué",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 0,
+                      "endTimeMs": 206,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    },
+                    {
+                      "id": "zik_desayuna-w84",
+                      "text": "hacemos?",
+                      "meaning": "we do",
+                      "baseForm": "hacer",
+                      "startTimeMs": 212,
+                      "endTimeMs": 1270,
+                      "wordAudioUrl": "words/hacemos",
+                      "baseFormAudioUrl": "words/hacer"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-8-2",
+          "artworkImage": "zik_desayuna_p8_s2",
+          "noTextImage": "zik_desayuna_p8_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3258333333333333,
+            "width": 0.48250000000000004,
+            "height": 0.3258333333333333
+          },
+          "bubbles": []
+        },
+        {
+          "id": "zik_desayuna-panel-8-3",
+          "artworkImage": "zik_desayuna_p8_s3",
+          "noTextImage": "zik_desayuna_p8_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6516666666666666,
+            "width": 0.48250000000000004,
+            "height": 0.3483333333333334
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-8-3-45",
+              "type": "speech",
+              "position": {
+                "x": 0.022499999999999992,
+                "y": 0.8491666666666665,
+                "width": 0.185,
+                "height": 0.1066666666666668
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s46",
+                  "text": "Somos una familia...",
+                  "translation": "We are a family...",
+                  "audioUrl": "zik_desayuna_p8_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w85",
+                      "text": "Somos",
+                      "meaning": "we are",
+                      "baseForm": "ser",
+                      "startTimeMs": 0,
+                      "endTimeMs": 399,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/somos",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "zik_desayuna-w86",
+                      "text": "una",
+                      "meaning": "a",
+                      "baseForm": "uno",
+                      "startTimeMs": 459,
+                      "endTimeMs": 639,
+                      "wordAudioUrl": "words/una",
+                      "baseFormAudioUrl": "words/uno"
+                    },
+                    {
+                      "id": "zik_desayuna-w87",
+                      "text": "familia...",
+                      "meaning": "family",
+                      "baseForm": "familia",
+                      "startTimeMs": 749,
+                      "endTimeMs": 3358,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/familia",
+                      "baseFormAudioUrl": "words/familia"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-8-4",
+          "artworkImage": "zik_desayuna_p8_s4",
+          "noTextImage": "zik_desayuna_p8_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.48250000000000004,
+            "y": 0.3258333333333333,
+            "width": 0.5175,
+            "height": 0.6741666666666667
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-8-4-46",
+              "type": "speech",
+              "position": {
+                "x": 0.5300000000000001,
+                "y": 0.3575,
+                "width": 0.22499999999999998,
+                "height": 0.08999999999999997
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s47",
+                  "text": "Sí... Tenemos que ayudar...",
+                  "translation": "Yes... We have to help...",
+                  "audioUrl": "zik_desayuna_p8_s4_b4_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w88",
+                      "text": "Sí...",
+                      "meaning": "yes",
+                      "baseForm": "sí",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1359,
+                      "wordAudioUrl": "words/sí",
+                      "baseFormAudioUrl": "words/sí"
+                    },
+                    {
+                      "id": "zik_desayuna-w89",
+                      "text": "Tenemos",
+                      "meaning": "we have",
+                      "baseForm": "tener",
+                      "startTimeMs": 1375,
+                      "endTimeMs": 1837,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/tenemos",
+                      "baseFormAudioUrl": "words/tener"
+                    },
+                    {
+                      "id": "zik_desayuna-w90",
+                      "text": "que",
+                      "meaning": "that",
+                      "baseForm": "que",
+                      "startTimeMs": 1877,
+                      "endTimeMs": 1997,
+                      "wordAudioUrl": "words/que",
+                      "baseFormAudioUrl": "words/que"
+                    },
+                    {
+                      "id": "zik_desayuna-w91",
+                      "text": "ayudar...",
+                      "meaning": "to help",
+                      "baseForm": "ayudar",
+                      "startTimeMs": 2045,
+                      "endTimeMs": 2555,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/ayudar",
+                      "baseFormAudioUrl": "words/ayudar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zik_desayuna-page-9",
+      "pageNumber": 10,
+      "masterImage": "zik_desayuna_p9",
+      "noTextImage": "zik_desayuna_p9_no_text",
+      "panels": [
+        {
+          "id": "zik_desayuna-panel-9-1",
+          "artworkImage": "zik_desayuna_p9_s1",
+          "noTextImage": "zik_desayuna_p9_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.3433333333333334
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-9-1-47",
+              "type": "speech",
+              "position": {
+                "x": 0.3525,
+                "y": 0.0775,
+                "width": 0.16499999999999998,
+                "height": 0.115
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s48",
+                  "text": "Él puede quedarse",
+                  "translation": "He can stay...",
+                  "audioUrl": "zik_desayuna_p9_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w92",
+                      "text": "Él",
+                      "meaning": "he",
+                      "baseForm": "él",
+                      "startTimeMs": 0,
+                      "endTimeMs": 238,
+                      "wordAudioUrl": "words/él",
+                      "baseFormAudioUrl": "words/él"
+                    },
+                    {
+                      "id": "zik_desayuna-w93",
+                      "text": "puede",
+                      "meaning": "can",
+                      "baseForm": "poder",
+                      "startTimeMs": 304,
+                      "endTimeMs": 634,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/puede",
+                      "baseFormAudioUrl": "words/poder"
+                    },
+                    {
+                      "id": "zik_desayuna-w94",
+                      "text": "quedarse",
+                      "meaning": "to stay",
+                      "baseForm": "quedarse",
+                      "startTimeMs": 698,
+                      "endTimeMs": 2232,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/quedarse",
+                      "baseFormAudioUrl": "words/quedarse"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-9-2",
+          "artworkImage": "zik_desayuna_p9_s2",
+          "noTextImage": "zik_desayuna_p9_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3433333333333334,
+            "width": 1,
+            "height": 0.3583333333333333
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-9-2-48",
+              "type": "speech",
+              "position": {
+                "x": 0.463125,
+                "y": 0.5458333333333334,
+                "width": 0.16500000000000004,
+                "height": 0.09666666666666673
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s49",
+                  "text": "¡Gracias, mamá!",
+                  "translation": "Than you mum!",
+                  "audioUrl": "zik_desayuna_p9_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w95",
+                      "text": "¡Gracias,",
+                      "meaning": "thank you",
+                      "baseForm": "gracia",
+                      "startTimeMs": 0,
+                      "endTimeMs": 720,
+                      "wordAudioUrl": "words/gracias",
+                      "baseFormAudioUrl": "words/gracia"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-9-3",
+          "artworkImage": "zik_desayuna_p9_s3",
+          "noTextImage": "zik_desayuna_p9_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.7016666666666667,
+            "width": 1,
+            "height": 0.29833333333333334
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-9-3-49",
+              "type": "speech",
+              "position": {
+                "x": 0.15312499999999998,
+                "y": 0.7025,
+                "width": 0.19500000000000003,
+                "height": 0.15833333333333333
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s50",
+                  "text": "Tendrá que aprender...!",
+                  "translation": "He'll need to learn...",
+                  "audioUrl": "zik_desayuna_p9_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w96",
+                      "text": "Tendrá",
+                      "meaning": "he will have",
+                      "baseForm": "tener",
+                      "startTimeMs": 0,
+                      "endTimeMs": 634,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/tendrá",
+                      "baseFormAudioUrl": "words/tener"
+                    },
+                    {
+                      "id": "zik_desayuna-w97",
+                      "text": "que",
+                      "meaning": "that",
+                      "baseForm": "que",
+                      "startTimeMs": 694,
+                      "endTimeMs": 874,
+                      "wordAudioUrl": "words/que",
+                      "baseFormAudioUrl": "words/que"
+                    },
+                    {
+                      "id": "zik_desayuna-w98",
+                      "text": "aprender",
+                      "meaning": "to learn",
+                      "baseForm": "aprender",
+                      "startTimeMs": 989,
+                      "endTimeMs": 2467,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/aprender",
+                      "baseFormAudioUrl": "words/aprender"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zik_desayuna-page-10",
+      "pageNumber": 11,
+      "masterImage": "zik_desayuna_p10",
+      "noTextImage": "zik_desayuna_p10_no_text",
+      "panels": [
+        {
+          "id": "zik_desayuna-panel-10-1",
+          "artworkImage": "zik_desayuna_p10_s1",
+          "noTextImage": "zik_desayuna_p10_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.3041666666666667
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-10-1-50",
+              "type": "speech",
+              "position": {
+                "x": 0.03250000000000003,
+                "y": 0.1725,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s51",
+                  "text": "Mira el libro...",
+                  "translation": "Look at the book...",
+                  "audioUrl": "zik_desayuna_p10_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w99",
+                      "text": "Mira",
+                      "meaning": "look",
+                      "baseForm": "mirar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 395,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mira",
+                      "baseFormAudioUrl": "words/mirar"
+                    },
+                    {
+                      "id": "zik_desayuna-w100",
+                      "text": "el",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 555,
+                      "endTimeMs": 875,
+                      "wordAudioUrl": "words/el",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "zik_desayuna-w101",
+                      "text": "libro...",
+                      "meaning": "book",
+                      "baseForm": "libro",
+                      "startTimeMs": 968,
+                      "endTimeMs": 2951,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/libro",
+                      "baseFormAudioUrl": "words/libro"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-10-2",
+          "artworkImage": "zik_desayuna_p10_s2",
+          "noTextImage": "zik_desayuna_p10_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3041666666666667,
+            "width": 0.49375,
+            "height": 0.3416666666666667
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-10-2-51",
+              "type": "speech",
+              "position": {
+                "x": 0.024999999999999994,
+                "y": 0.5325000000000001,
+                "width": 0.14250000000000002,
+                "height": 0.07666666666666666
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s52",
+                  "text": "Chico",
+                  "translation": "Boy",
+                  "audioUrl": "zik_desayuna_p10_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w102",
+                      "text": "Chico",
+                      "meaning": "Boy",
+                      "baseForm": "chico",
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/chico",
+                      "baseFormAudioUrl": "words/chico"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-10-3",
+          "artworkImage": "zik_desayuna_p10_s3",
+          "noTextImage": "zik_desayuna_p10_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.49375,
+            "y": 0.3041666666666667,
+            "width": 0.50625,
+            "height": 0.3416666666666667
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-10-3-52",
+              "type": "speech",
+              "position": {
+                "x": 0.7450000000000001,
+                "y": 0.5525,
+                "width": 0.13249999999999984,
+                "height": 0.06666666666666665
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s53",
+                  "text": "Chica",
+                  "translation": "Girl",
+                  "audioUrl": "zik_desayuna_p10_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w103",
+                      "text": "Chica",
+                      "meaning": "girl",
+                      "baseForm": "chica",
+                      "startTimeMs": 0,
+                      "endTimeMs": 878,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/chica",
+                      "baseFormAudioUrl": "words/chica"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-10-4",
+          "artworkImage": "zik_desayuna_p10_s4",
+          "noTextImage": "zik_desayuna_p10_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6458333333333334,
+            "width": 0.4475,
+            "height": 0.35416666666666663
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-10-4-53",
+              "type": "speech",
+              "position": {
+                "x": 0.12999999999999998,
+                "y": 0.6525,
+                "width": 0.1475,
+                "height": 0.07499999999999996
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s54",
+                  "text": "Hombre",
+                  "translation": "Man",
+                  "audioUrl": "zik_desayuna_p10_s4_b4_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w104",
+                      "text": "Hombre",
+                      "meaning": "man",
+                      "baseForm": "hombre",
+                      "startTimeMs": 0,
+                      "endTimeMs": 880,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hombre",
+                      "baseFormAudioUrl": "words/hombre"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-10-5",
+          "artworkImage": "zik_desayuna_p10_s5",
+          "noTextImage": "zik_desayuna_p10_s5_no_text",
+          "panelOrder": 5,
+          "tapZone": {
+            "x": 0.4475,
+            "y": 0.6458333333333334,
+            "width": 0.5525,
+            "height": 0.35416666666666663
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-10-5-54",
+              "type": "speech",
+              "position": {
+                "x": 0.7074999999999999,
+                "y": 0.6658333333333334,
+                "width": 0.14,
+                "height": 0.06333333333333335
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s55",
+                  "text": "Mujer",
+                  "translation": "Woman",
+                  "audioUrl": "zik_desayuna_p10_s5_b5_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w105",
+                      "text": "Mujer",
+                      "meaning": "woman",
+                      "baseForm": "mujer",
+                      "startTimeMs": 0,
+                      "endTimeMs": 958,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mujer",
+                      "baseFormAudioUrl": "words/mujer"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zik_desayuna-page-11",
+      "pageNumber": 12,
+      "masterImage": "zik_desayuna_p11",
+      "noTextImage": "zik_desayuna_p11_no_text",
+      "panels": [
+        {
+          "id": "zik_desayuna-panel-11-1",
+          "artworkImage": "zik_desayuna_p11_s1",
+          "noTextImage": "zik_desayuna_p11_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.4966666666666667
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-11-1-55",
+              "type": "narration",
+              "position": {
+                "x": 0.06,
+                "y": 0.027499999999999997,
+                "width": 0.3375,
+                "height": 0.14333333333333334
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s56",
+                  "text": "De repente...",
+                  "translation": "Suddenly...",
+                  "audioUrl": "zik_desayuna_p11_s1_b3_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w106",
+                      "text": "De",
+                      "meaning": "of",
+                      "baseForm": "de",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/de",
+                      "baseFormAudioUrl": "words/de"
+                    },
+                    {
+                      "id": "zik_desayuna-w107",
+                      "text": "repente...",
+                      "meaning": "suddenness",
+                      "baseForm": "repente",
+                      "startTimeMs": 220,
+                      "endTimeMs": 959,
+                      "wordAudioUrl": "words/repente",
+                      "baseFormAudioUrl": "words/repente"
+                    },
+                    {
+                      "id": "zik_desayuna-w108",
+                      "text": "De repente",
+                      "meaning": "Suddenly",
+                      "baseForm": "de repente",
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/de_repente",
+                      "baseFormAudioUrl": "words/de_repente"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-11-1-56",
+              "type": "narration",
+              "isSoundEffect": true,
+              "position": {
+                "x": 0.44500000000000006,
+                "y": 0.20416666666666666,
+                "width": 0.29499999999999993,
+                "height": 0.12333333333333335
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s57",
+                  "text": "Toc toc ! ! !",
+                  "translation": "Knock knock",
+                  "audioUrl": "",
+                  "words": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-11-2",
+          "artworkImage": "zik_desayuna_p11_s2",
+          "noTextImage": "zik_desayuna_p11_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.4966666666666667,
+            "width": 1,
+            "height": 0.5033333333333333
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-11-2-57",
+              "type": "thought",
+              "isSoundEffect": true,
+              "position": {
+                "x": 0.765,
+                "y": 0.5108333333333334,
+                "width": 0.12250000000000005,
+                "height": 0.07333333333333336
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s58",
+                  "text": "!",
+                  "translation": "!",
+                  "audioUrl": "",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w109",
+                      "text": "!",
+                      "meaning": "",
+                      "baseForm": "!"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-11-2-58",
+              "type": "speech",
+              "position": {
+                "x": 0.06000000000000005,
+                "y": 0.5425,
+                "width": 0.33249999999999996,
+                "height": 0.06000000000000005
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s59",
+                  "text": "Shhhh... No hables...",
+                  "translation": "Shhhh... Don't speak...",
+                  "audioUrl": "zik_desayuna_p11_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w110",
+                      "text": "Shhhh...",
+                      "meaning": "a sound indicating silence",
+                      "baseForm": "shhhh",
+                      "startTimeMs": 0,
+                      "endTimeMs": 872,
+                      "wordAudioUrl": "words/shhhh",
+                      "baseFormAudioUrl": "words/shhhh"
+                    },
+                    {
+                      "id": "zik_desayuna-w111",
+                      "text": "No",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 925,
+                      "endTimeMs": 1031,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "zik_desayuna-w112",
+                      "text": "hables...",
+                      "meaning": "dont speak",
+                      "baseForm": "hablar",
+                      "startTimeMs": 1111,
+                      "endTimeMs": 1750,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hables",
+                      "baseFormAudioUrl": "words/hablar"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-11-2-59",
+              "type": "thought",
+              "isSoundEffect": true,
+              "position": {
+                "x": 0.785,
+                "y": 0.8108333333333333,
+                "width": 0.15000000000000002,
+                "height": 0.08666666666666667
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s60",
+                  "text": "!",
+                  "translation": "!",
+                  "audioUrl": "",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w113",
+                      "text": "!",
+                      "meaning": "",
+                      "baseForm": "!"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zik_desayuna-page-12",
+      "pageNumber": 13,
+      "masterImage": "zik_desayuna_p12",
+      "noTextImage": "zik_desayuna_p12_no_text",
+      "panels": [
+        {
+          "id": "zik_desayuna-panel-12-1",
+          "artworkImage": "zik_desayuna_p12_s1",
+          "noTextImage": "zik_desayuna_p12_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.47750000000000004
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-12-1-60",
+              "type": "speech",
+              "position": {
+                "x": 0.18000000000000002,
+                "y": 0.11166666666666669,
+                "width": 0.17749999999999996,
+                "height": 0.08916666666666664
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s61",
+                  "text": "¡Policía...!",
+                  "translation": "Police...!",
+                  "audioUrl": "zik_desayuna_p12_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w114",
+                      "text": "Policía",
+                      "meaning": "police",
+                      "baseForm": "policía",
+                      "startTimeMs": 0,
+                      "endTimeMs": 879,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/policía",
+                      "baseFormAudioUrl": "words/policía"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-12-1-61",
+              "type": "speech",
+              "position": {
+                "x": 0.665,
+                "y": 0.14416666666666667,
+                "width": 0.15749999999999997,
+                "height": 0.09333333333333335
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s62",
+                  "text": "¡¡Abre!!",
+                  "translation": "Open up!!",
+                  "audioUrl": "zik_desayuna_p12_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w115",
+                      "text": "¡¡Abre!!",
+                      "meaning": "open up",
+                      "baseForm": "abrir",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1920,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/abre",
+                      "baseFormAudioUrl": "words/abrir"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-12-1-62",
+              "type": "narration",
+              "isSoundEffect": true,
+              "position": {
+                "x": 0.12999999999999995,
+                "y": 0.29583333333333334,
+                "width": 0.29000000000000004,
+                "height": 0.12666666666666665
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s63",
+                  "text": "Toc toc!!!",
+                  "translation": "Knock knock",
+                  "audioUrl": "",
+                  "words": []
+                }
+              ]
+            },
+            {
+              "id": "zik_desayuna-bubble-12-1-63",
+              "type": "narration",
+              "isSoundEffect": true,
+              "position": {
+                "x": 0.44500000000000006,
+                "y": 0.29583333333333334,
+                "width": 0.49250000000000005,
+                "height": 0.14666666666666667
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s64",
+                  "text": "¡Toc toc toc ! ! !",
+                  "translation": "Knock knock knock!!!",
+                  "audioUrl": "",
+                  "words": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zik_desayuna-panel-12-2",
+          "artworkImage": "zik_desayuna_p12_s2",
+          "noTextImage": "zik_desayuna_p12_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.47750000000000004,
+            "width": 1,
+            "height": 0.5225
+          },
+          "bubbles": [
+            {
+              "id": "zik_desayuna-bubble-12-2-64",
+              "type": "narration",
+              "position": {
+                "x": 0.47,
+                "y": 0.8591666666666666,
+                "width": 0.47250000000000003,
+                "height": 0.10499999999999998
+              },
+              "sentences": [
+                {
+                  "id": "zik_desayuna-s65",
+                  "text": "Continuará...",
+                  "translation": "To Be Continued...",
+                  "audioUrl": "zik_desayuna_p12_s2_b5_t1",
+                  "words": [
+                    {
+                      "id": "zik_desayuna-w116",
+                      "text": "Continuará...",
+                      "meaning": "will continue",
+                      "baseForm": "continuar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1119,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/continuará",
+                      "baseFormAudioUrl": "words/continuar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "reviewWords": [
+    {
+      "word": {
+        "id": "zik_desayuna-w2",
+        "text": "come",
+        "meaning": "eats",
+        "baseForm": "comer",
+        "wordAudioUrl": "words/come",
+        "baseFormAudioUrl": "words/comer"
+      },
+      "panelId": "zik_desayuna-panel-cover",
+      "pageId": "zik_desayuna-page-cover"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w3",
+        "text": "desayuno",
+        "meaning": "breakfast",
+        "baseForm": "desayuno",
+        "wordAudioUrl": "words/desayuno",
+        "baseFormAudioUrl": "words/desayuno"
+      },
+      "panelId": "zik_desayuna-panel-cover",
+      "pageId": "zik_desayuna-page-cover"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w4",
+        "text": "Lo",
+        "meaning": "it",
+        "baseForm": "lo",
+        "wordAudioUrl": "words/lo",
+        "baseFormAudioUrl": "words/lo"
+      },
+      "panelId": "zik_desayuna-panel-1-2",
+      "pageId": "zik_desayuna-page-1"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w5",
+        "text": "siento...",
+        "meaning": "I feel",
+        "baseForm": "sentir",
+        "wordAudioUrl": "words/siento",
+        "baseFormAudioUrl": "words/sentir"
+      },
+      "panelId": "zik_desayuna-panel-1-2",
+      "pageId": "zik_desayuna-page-1"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w6",
+        "text": "Está",
+        "meaning": "is",
+        "baseForm": "estar",
+        "wordAudioUrl": "words/está",
+        "baseFormAudioUrl": "words/estar"
+      },
+      "panelId": "zik_desayuna-panel-1-3",
+      "pageId": "zik_desayuna-page-1"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w7",
+        "text": "bien...",
+        "meaning": "ok",
+        "baseForm": "bien",
+        "wordAudioUrl": "words/bien",
+        "baseFormAudioUrl": "words/bien"
+      },
+      "panelId": "zik_desayuna-panel-1-3",
+      "pageId": "zik_desayuna-page-1"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w8",
+        "text": "Este",
+        "meaning": "this",
+        "baseForm": "este",
+        "wordAudioUrl": "words/este",
+        "baseFormAudioUrl": "words/este"
+      },
+      "panelId": "zik_desayuna-panel-1-4",
+      "pageId": "zik_desayuna-page-1"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w9",
+        "text": "es",
+        "meaning": "is",
+        "baseForm": "ser",
+        "wordAudioUrl": "words/es",
+        "baseFormAudioUrl": "words/ser"
+      },
+      "panelId": "zik_desayuna-panel-1-4",
+      "pageId": "zik_desayuna-page-1"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w10",
+        "text": "Zik...",
+        "meaning": "Zik",
+        "baseForm": "zik",
+        "wordAudioUrl": "words/zik",
+        "baseFormAudioUrl": "words/zik"
+      },
+      "panelId": "zik_desayuna-panel-1-4",
+      "pageId": "zik_desayuna-page-1"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w11",
+        "text": "Ella",
+        "meaning": "she",
+        "baseForm": "ella",
+        "wordAudioUrl": "words/ella",
+        "baseFormAudioUrl": "words/ella"
+      },
+      "panelId": "zik_desayuna-panel-2-1",
+      "pageId": "zik_desayuna-page-2"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w12",
+        "text": "es",
+        "meaning": "is",
+        "baseForm": "ser",
+        "wordAudioUrl": "words/es",
+        "baseFormAudioUrl": "words/ser"
+      },
+      "panelId": "zik_desayuna-panel-2-1",
+      "pageId": "zik_desayuna-page-2"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w13",
+        "text": "mi",
+        "meaning": "my",
+        "baseForm": "mi",
+        "wordAudioUrl": "words/mi",
+        "baseFormAudioUrl": "words/mi"
+      },
+      "panelId": "zik_desayuna-panel-2-1",
+      "pageId": "zik_desayuna-page-2"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w14",
+        "text": "mamá.",
+        "meaning": "mum",
+        "baseForm": "mamá",
+        "wordAudioUrl": "words/mamá",
+        "baseFormAudioUrl": "words/mamá"
+      },
+      "panelId": "zik_desayuna-panel-2-1",
+      "pageId": "zik_desayuna-page-2"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w19",
+        "text": "Soy",
+        "meaning": "I am",
+        "baseForm": "ser",
+        "wordAudioUrl": "words/soy",
+        "baseFormAudioUrl": "words/ser"
+      },
+      "panelId": "zik_desayuna-panel-2-3",
+      "pageId": "zik_desayuna-page-2"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w20",
+        "text": "Mía...",
+        "meaning": "mine",
+        "baseForm": "mío",
+        "wordAudioUrl": "words/mía",
+        "baseFormAudioUrl": "words/mío"
+      },
+      "panelId": "zik_desayuna-panel-2-3",
+      "pageId": "zik_desayuna-page-2"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w21",
+        "text": "Él",
+        "meaning": "he",
+        "baseForm": "él",
+        "wordAudioUrl": "words/él",
+        "baseFormAudioUrl": "words/él"
+      },
+      "panelId": "zik_desayuna-panel-3-1",
+      "pageId": "zik_desayuna-page-3"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w22",
+        "text": "es",
+        "meaning": "is",
+        "baseForm": "ser",
+        "wordAudioUrl": "words/es",
+        "baseFormAudioUrl": "words/ser"
+      },
+      "panelId": "zik_desayuna-panel-3-1",
+      "pageId": "zik_desayuna-page-3"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w24",
+        "text": "¿Eres",
+        "meaning": "are you",
+        "baseForm": "ser",
+        "wordAudioUrl": "words/eres",
+        "baseFormAudioUrl": "words/ser"
+      },
+      "panelId": "zik_desayuna-panel-3-2",
+      "pageId": "zik_desayuna-page-3"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w26",
+        "text": "niño?",
+        "meaning": "boy",
+        "baseForm": "niño",
+        "wordAudioUrl": "words/niño",
+        "baseFormAudioUrl": "words/niño"
+      },
+      "panelId": "zik_desayuna-panel-3-2",
+      "pageId": "zik_desayuna-page-3"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w32",
+        "text": "persona...",
+        "meaning": "person",
+        "baseForm": "persona",
+        "wordAudioUrl": "words/persona",
+        "baseFormAudioUrl": "words/persona"
+      },
+      "panelId": "zik_desayuna-panel-3-4",
+      "pageId": "zik_desayuna-page-3"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w34",
+        "text": "Vamos",
+        "meaning": "lets go",
+        "baseForm": "ir",
+        "wordAudioUrl": "words/vamos",
+        "baseFormAudioUrl": "words/ir"
+      },
+      "panelId": "zik_desayuna-panel-4-1",
+      "pageId": "zik_desayuna-page-4"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w37",
+        "text": "cocina",
+        "meaning": "kitchen",
+        "baseForm": "cocina",
+        "wordAudioUrl": "words/cocina",
+        "baseFormAudioUrl": "words/cocina"
+      },
+      "panelId": "zik_desayuna-panel-4-1",
+      "pageId": "zik_desayuna-page-4"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w38",
+        "text": "Sentémonos",
+        "meaning": "lets sit",
+        "baseForm": "sentar",
+        "wordAudioUrl": "words/sentémonos",
+        "baseFormAudioUrl": "words/sentar"
+      },
+      "panelId": "zik_desayuna-panel-4-3",
+      "pageId": "zik_desayuna-page-4"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w40",
+        "text": "estamos",
+        "meaning": "we are",
+        "baseForm": "estar",
+        "wordAudioUrl": "words/estamos",
+        "baseFormAudioUrl": "words/estar"
+      },
+      "panelId": "zik_desayuna-panel-4-4",
+      "pageId": "zik_desayuna-page-4"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w41",
+        "text": "haciendo?",
+        "meaning": "doing",
+        "baseForm": "hacer",
+        "wordAudioUrl": "words/haciendo",
+        "baseFormAudioUrl": "words/hacer"
+      },
+      "panelId": "zik_desayuna-panel-4-4",
+      "pageId": "zik_desayuna-page-4"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w42",
+        "text": "Desayuno...",
+        "meaning": "breakfast",
+        "baseForm": "desayuno",
+        "wordAudioUrl": "words/desayuno",
+        "baseFormAudioUrl": "words/desayuno"
+      },
+      "panelId": "zik_desayuna-panel-4-4",
+      "pageId": "zik_desayuna-page-4"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w46",
+        "text": "eso?",
+        "meaning": "that",
+        "baseForm": "eso",
+        "wordAudioUrl": "words/eso",
+        "baseFormAudioUrl": "words/eso"
+      },
+      "panelId": "zik_desayuna-panel-4-4",
+      "pageId": "zik_desayuna-page-4"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w47",
+        "text": "Silla",
+        "meaning": "chair",
+        "baseForm": "silla",
+        "wordAudioUrl": "words/silla",
+        "baseFormAudioUrl": "words/silla"
+      },
+      "panelId": "zik_desayuna-panel-5-1",
+      "pageId": "zik_desayuna-page-5"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w48",
+        "text": "Mesa",
+        "meaning": "table",
+        "baseForm": "mesa",
+        "wordAudioUrl": "words/mesa",
+        "baseFormAudioUrl": "words/mesa"
+      },
+      "panelId": "zik_desayuna-panel-5-2",
+      "pageId": "zik_desayuna-page-5"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w49",
+        "text": "Come...",
+        "meaning": "eat",
+        "baseForm": "comer",
+        "wordAudioUrl": "words/come",
+        "baseFormAudioUrl": "words/comer"
+      },
+      "panelId": "zik_desayuna-panel-5-3",
+      "pageId": "zik_desayuna-page-5"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w50",
+        "text": "comida...",
+        "meaning": "food",
+        "baseForm": "comida",
+        "wordAudioUrl": "words/comida",
+        "baseFormAudioUrl": "words/comida"
+      },
+      "panelId": "zik_desayuna-panel-5-3",
+      "pageId": "zik_desayuna-page-5"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w51",
+        "text": "Bebe...",
+        "meaning": "drink",
+        "baseForm": "beber",
+        "wordAudioUrl": "words/bebe",
+        "baseFormAudioUrl": "words/beber"
+      },
+      "panelId": "zik_desayuna-panel-5-4",
+      "pageId": "zik_desayuna-page-5"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w52",
+        "text": "¿Entiendes?",
+        "meaning": "understand",
+        "baseForm": "entender",
+        "wordAudioUrl": "words/entiendes",
+        "baseFormAudioUrl": "words/entender"
+      },
+      "panelId": "zik_desayuna-panel-5-4",
+      "pageId": "zik_desayuna-page-5"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w54",
+        "text": "entiendo",
+        "meaning": "understand",
+        "baseForm": "entender",
+        "wordAudioUrl": "words/entiendo",
+        "baseFormAudioUrl": "words/entender"
+      },
+      "panelId": "zik_desayuna-panel-5-5",
+      "pageId": "zik_desayuna-page-5"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w57",
+        "text": "nada",
+        "meaning": "nothing",
+        "baseForm": "nada",
+        "wordAudioUrl": "words/nada",
+        "baseFormAudioUrl": "words/nada"
+      },
+      "panelId": "zik_desayuna-panel-5-6",
+      "pageId": "zik_desayuna-page-5"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w58",
+        "text": "¿Números?",
+        "meaning": "numbers",
+        "baseForm": "número",
+        "wordAudioUrl": "words/números",
+        "baseFormAudioUrl": "words/número"
+      },
+      "panelId": "zik_desayuna-panel-6-1",
+      "pageId": "zik_desayuna-page-6"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w60",
+        "text": "Vale,",
+        "meaning": "OK",
+        "baseForm": "valer",
+        "wordAudioUrl": "words/vale",
+        "baseFormAudioUrl": "words/valer"
+      },
+      "panelId": "zik_desayuna-panel-6-2",
+      "pageId": "zik_desayuna-page-6"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w61",
+        "text": "escucha",
+        "meaning": "listen",
+        "baseForm": "escuchar",
+        "wordAudioUrl": "words/escucha",
+        "baseFormAudioUrl": "words/escuchar"
+      },
+      "panelId": "zik_desayuna-panel-6-2",
+      "pageId": "zik_desayuna-page-6"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w62",
+        "text": "Uno",
+        "meaning": "one",
+        "baseForm": "uno",
+        "wordAudioUrl": "words/uno",
+        "baseFormAudioUrl": "words/uno"
+      },
+      "panelId": "zik_desayuna-panel-6-2",
+      "pageId": "zik_desayuna-page-6"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w63",
+        "text": "Dos",
+        "meaning": "two",
+        "baseForm": "dos",
+        "wordAudioUrl": "words/dos",
+        "baseFormAudioUrl": "words/dos"
+      },
+      "panelId": "zik_desayuna-panel-6-3",
+      "pageId": "zik_desayuna-page-6"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w64",
+        "text": "Tres",
+        "meaning": "three",
+        "baseForm": "tres",
+        "wordAudioUrl": "words/tres",
+        "baseFormAudioUrl": "words/tres"
+      },
+      "panelId": "zik_desayuna-panel-6-4",
+      "pageId": "zik_desayuna-page-6"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w65",
+        "text": "Cuatro",
+        "meaning": "four",
+        "baseForm": "cuatro",
+        "wordAudioUrl": "words/cuatro",
+        "baseFormAudioUrl": "words/cuatro"
+      },
+      "panelId": "zik_desayuna-panel-6-5",
+      "pageId": "zik_desayuna-page-6"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w66",
+        "text": "Cinco",
+        "meaning": "five",
+        "baseForm": "cinco",
+        "wordAudioUrl": "words/cinco",
+        "baseFormAudioUrl": "words/cinco"
+      },
+      "panelId": "zik_desayuna-panel-6-6",
+      "pageId": "zik_desayuna-page-6"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w72",
+        "text": "Grande",
+        "meaning": "big",
+        "baseForm": "grande",
+        "wordAudioUrl": "words/grande",
+        "baseFormAudioUrl": "words/grande"
+      },
+      "panelId": "zik_desayuna-panel-7-1",
+      "pageId": "zik_desayuna-page-7"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w73",
+        "text": "Pequeño",
+        "meaning": "small",
+        "baseForm": "pequeño",
+        "wordAudioUrl": "words/pequeño",
+        "baseFormAudioUrl": "words/pequeño"
+      },
+      "panelId": "zik_desayuna-panel-7-1",
+      "pageId": "zik_desayuna-page-7"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w74",
+        "text": "Muchos",
+        "meaning": "many",
+        "baseForm": "mucho",
+        "wordAudioUrl": "words/muchos",
+        "baseFormAudioUrl": "words/mucho"
+      },
+      "panelId": "zik_desayuna-panel-7-2",
+      "pageId": "zik_desayuna-page-7"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w76",
+        "text": "Mucho",
+        "meaning": "much",
+        "baseForm": "mucho",
+        "wordAudioUrl": "words/mucho",
+        "baseFormAudioUrl": "words/mucho"
+      },
+      "panelId": "zik_desayuna-panel-7-3",
+      "pageId": "zik_desayuna-page-7"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w77",
+        "text": "Poco",
+        "meaning": "little (as in not much)",
+        "baseForm": "poco",
+        "wordAudioUrl": "words/poco",
+        "baseFormAudioUrl": "words/poco"
+      },
+      "panelId": "zik_desayuna-panel-7-3",
+      "pageId": "zik_desayuna-page-7"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w80",
+        "text": "Mientras tanto...",
+        "meaning": "Meanwhile...",
+        "baseForm": "mientras tanto",
+        "wordAudioUrl": "words/mientras_tanto",
+        "baseFormAudioUrl": "words/mientras_tanto"
+      },
+      "panelId": "zik_desayuna-panel-8-1",
+      "pageId": "zik_desayuna-page-8"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w82",
+        "text": "nuevo...",
+        "meaning": "new",
+        "baseForm": "nuevo",
+        "wordAudioUrl": "words/nuevo",
+        "baseFormAudioUrl": "words/nuevo"
+      },
+      "panelId": "zik_desayuna-panel-8-1",
+      "pageId": "zik_desayuna-page-8"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w85",
+        "text": "Somos",
+        "meaning": "we are",
+        "baseForm": "ser",
+        "wordAudioUrl": "words/somos",
+        "baseFormAudioUrl": "words/ser"
+      },
+      "panelId": "zik_desayuna-panel-8-3",
+      "pageId": "zik_desayuna-page-8"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w87",
+        "text": "familia...",
+        "meaning": "family",
+        "baseForm": "familia",
+        "wordAudioUrl": "words/familia",
+        "baseFormAudioUrl": "words/familia"
+      },
+      "panelId": "zik_desayuna-panel-8-3",
+      "pageId": "zik_desayuna-page-8"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w89",
+        "text": "Tenemos",
+        "meaning": "we have",
+        "baseForm": "tener",
+        "wordAudioUrl": "words/tenemos",
+        "baseFormAudioUrl": "words/tener"
+      },
+      "panelId": "zik_desayuna-panel-8-4",
+      "pageId": "zik_desayuna-page-8"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w91",
+        "text": "ayudar...",
+        "meaning": "to help",
+        "baseForm": "ayudar",
+        "wordAudioUrl": "words/ayudar",
+        "baseFormAudioUrl": "words/ayudar"
+      },
+      "panelId": "zik_desayuna-panel-8-4",
+      "pageId": "zik_desayuna-page-8"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w93",
+        "text": "puede",
+        "meaning": "can",
+        "baseForm": "poder",
+        "wordAudioUrl": "words/puede",
+        "baseFormAudioUrl": "words/poder"
+      },
+      "panelId": "zik_desayuna-panel-9-1",
+      "pageId": "zik_desayuna-page-9"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w94",
+        "text": "quedarse",
+        "meaning": "to stay",
+        "baseForm": "quedarse",
+        "wordAudioUrl": "words/quedarse",
+        "baseFormAudioUrl": "words/quedarse"
+      },
+      "panelId": "zik_desayuna-panel-9-1",
+      "pageId": "zik_desayuna-page-9"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w96",
+        "text": "Tendrá",
+        "meaning": "he will have",
+        "baseForm": "tener",
+        "wordAudioUrl": "words/tendrá",
+        "baseFormAudioUrl": "words/tener"
+      },
+      "panelId": "zik_desayuna-panel-9-3",
+      "pageId": "zik_desayuna-page-9"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w98",
+        "text": "aprender",
+        "meaning": "to learn",
+        "baseForm": "aprender",
+        "wordAudioUrl": "words/aprender",
+        "baseFormAudioUrl": "words/aprender"
+      },
+      "panelId": "zik_desayuna-panel-9-3",
+      "pageId": "zik_desayuna-page-9"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w99",
+        "text": "Mira",
+        "meaning": "look",
+        "baseForm": "mirar",
+        "wordAudioUrl": "words/mira",
+        "baseFormAudioUrl": "words/mirar"
+      },
+      "panelId": "zik_desayuna-panel-10-1",
+      "pageId": "zik_desayuna-page-10"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w101",
+        "text": "libro...",
+        "meaning": "book",
+        "baseForm": "libro",
+        "wordAudioUrl": "words/libro",
+        "baseFormAudioUrl": "words/libro"
+      },
+      "panelId": "zik_desayuna-panel-10-1",
+      "pageId": "zik_desayuna-page-10"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w102",
+        "text": "Chico",
+        "meaning": "Boy",
+        "baseForm": "chico",
+        "wordAudioUrl": "words/chico",
+        "baseFormAudioUrl": "words/chico"
+      },
+      "panelId": "zik_desayuna-panel-10-2",
+      "pageId": "zik_desayuna-page-10"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w103",
+        "text": "Chica",
+        "meaning": "girl",
+        "baseForm": "chica",
+        "wordAudioUrl": "words/chica",
+        "baseFormAudioUrl": "words/chica"
+      },
+      "panelId": "zik_desayuna-panel-10-3",
+      "pageId": "zik_desayuna-page-10"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w104",
+        "text": "Hombre",
+        "meaning": "man",
+        "baseForm": "hombre",
+        "wordAudioUrl": "words/hombre",
+        "baseFormAudioUrl": "words/hombre"
+      },
+      "panelId": "zik_desayuna-panel-10-4",
+      "pageId": "zik_desayuna-page-10"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w105",
+        "text": "Mujer",
+        "meaning": "woman",
+        "baseForm": "mujer",
+        "wordAudioUrl": "words/mujer",
+        "baseFormAudioUrl": "words/mujer"
+      },
+      "panelId": "zik_desayuna-panel-10-5",
+      "pageId": "zik_desayuna-page-10"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w108",
+        "text": "De repente",
+        "meaning": "Suddenly",
+        "baseForm": "de repente",
+        "wordAudioUrl": "words/de_repente",
+        "baseFormAudioUrl": "words/de_repente"
+      },
+      "panelId": "zik_desayuna-panel-11-1",
+      "pageId": "zik_desayuna-page-11"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w112",
+        "text": "hables...",
+        "meaning": "dont speak",
+        "baseForm": "hablar",
+        "wordAudioUrl": "words/hables",
+        "baseFormAudioUrl": "words/hablar"
+      },
+      "panelId": "zik_desayuna-panel-11-2",
+      "pageId": "zik_desayuna-page-11"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w114",
+        "text": "Policía",
+        "meaning": "police",
+        "baseForm": "policía",
+        "wordAudioUrl": "words/policía",
+        "baseFormAudioUrl": "words/policía"
+      },
+      "panelId": "zik_desayuna-panel-12-1",
+      "pageId": "zik_desayuna-page-12"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w115",
+        "text": "¡¡Abre!!",
+        "meaning": "open up",
+        "baseForm": "abrir",
+        "wordAudioUrl": "words/abre",
+        "baseFormAudioUrl": "words/abrir"
+      },
+      "panelId": "zik_desayuna-panel-12-1",
+      "pageId": "zik_desayuna-page-12"
+    },
+    {
+      "word": {
+        "id": "zik_desayuna-w116",
+        "text": "Continuará...",
+        "meaning": "will continue",
+        "baseForm": "continuar",
+        "wordAudioUrl": "words/continuará",
+        "baseFormAudioUrl": "words/continuar"
+      },
+      "panelId": "zik_desayuna-panel-12-2",
+      "pageId": "zik_desayuna-page-12"
+    }
+  ],
+  "wordAudioMap": {
+    "zik": "words/zik",
+    "come": "words/come",
+    "comer": "words/comer",
+    "desayuno": "words/desayuno",
+    "lo": "words/lo",
+    "siento": "words/siento",
+    "sentir": "words/sentir",
+    "está": "words/está",
+    "estar": "words/estar",
+    "bien": "words/bien",
+    "este": "words/este",
+    "es": "words/es",
+    "ser": "words/ser",
+    "ella": "words/ella",
+    "mi": "words/mi",
+    "mamá": "words/mamá",
+    "él": "words/él",
+    "papá": "words/papá",
+    "soy": "words/soy",
+    "mía": "words/mía",
+    "mío": "words/mío",
+    "eres": "words/eres",
+    "un": "words/un",
+    "niño": "words/niño",
+    "qué": "words/qué",
+    "persona": "words/persona",
+    "no": "words/no",
+    "una": "words/una",
+    "ven": "words/ven",
+    "venir": "words/venir",
+    "vamos": "words/vamos",
+    "ir": "words/ir",
+    "a": "words/a",
+    "la": "words/la",
+    "el": "words/el",
+    "cocina": "words/cocina",
+    "sentémonos": "words/sentémonos",
+    "sentar": "words/sentar",
+    "estamos": "words/estamos",
+    "haciendo": "words/haciendo",
+    "hacer": "words/hacer",
+    "eso": "words/eso",
+    "silla": "words/silla",
+    "mesa": "words/mesa",
+    "comida": "words/comida",
+    "bebe": "words/bebe",
+    "beber": "words/beber",
+    "entiendes": "words/entiendes",
+    "entender": "words/entender",
+    "sí": "words/sí",
+    "entiendo": "words/entiendo",
+    "gracias": "words/gracias",
+    "gracia": "words/gracia",
+    "de": "words/de",
+    "nada": "words/nada",
+    "números": "words/números",
+    "número": "words/número",
+    "vale": "words/vale",
+    "valer": "words/valer",
+    "escucha": "words/escucha",
+    "escuchar": "words/escuchar",
+    "uno": "words/uno",
+    "dos": "words/dos",
+    "tres": "words/tres",
+    "cuatro": "words/cuatro",
+    "cinco": "words/cinco",
+    "grande": "words/grande",
+    "pequeño": "words/pequeño",
+    "muchos": "words/muchos",
+    "mucho": "words/mucho",
+    "pocos": "words/pocos",
+    "poco": "words/poco",
+    "mientras": "words/mientras",
+    "tanto": "words/tanto",
+    "mientras_tanto": "words/mientras_tanto",
+    "nuevo": "words/nuevo",
+    "hacemos": "words/hacemos",
+    "somos": "words/somos",
+    "familia": "words/familia",
+    "tenemos": "words/tenemos",
+    "tener": "words/tener",
+    "que": "words/que",
+    "ayudar": "words/ayudar",
+    "puede": "words/puede",
+    "poder": "words/poder",
+    "quedarse": "words/quedarse",
+    "tendrá": "words/tendrá",
+    "aprender": "words/aprender",
+    "mira": "words/mira",
+    "mirar": "words/mirar",
+    "libro": "words/libro",
+    "chico": "words/chico",
+    "chica": "words/chica",
+    "hombre": "words/hombre",
+    "mujer": "words/mujer",
+    "repente": "words/repente",
+    "de_repente": "words/de_repente",
+    "shhhh": "words/shhhh",
+    "hables": "words/hables",
+    "hablar": "words/hablar",
+    "policía": "words/policía",
+    "abre": "words/abre",
+    "abrir": "words/abrir",
+    "continuará": "words/continuará",
+    "continuar": "words/continuar"
+  }
+}

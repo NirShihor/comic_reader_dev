@@ -1,0 +1,2016 @@
+{
+  "id": "comic-la_llegada",
+  "title": "LA LLEGADA",
+  "description": "A little girl has an encounter with a very unexpected guest",
+  "coverImage": "la_llegada_cover",
+  "level": "beginner",
+  "totalPages": 9,
+  "estimatedMinutes": 18,
+  "language": "es",
+  "targetLanguage": "en",
+  "version": "1.0",
+  "collectionId": "el_visitante",
+  "collectionTitle": "EL VISITANTE",
+  "episodeNumber": 1,
+  "pages": [
+    {
+      "id": "la_llegada-page-cover",
+      "pageNumber": 1,
+      "masterImage": "la_llegada_cover",
+      "panels": [
+        {
+          "id": "la_llegada-panel-cover",
+          "artworkImage": "la_llegada_cover",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-cover-1",
+              "type": "narration",
+              "position": {
+                "x": 0.0675,
+                "y": 0.04583333333333332,
+                "width": 0.43749999999999994,
+                "height": 0.13833333333333336
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s1",
+                  "text": "El visitante",
+                  "translation": "The Visitor",
+                  "audioUrl": "el_visitante_p0_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w1",
+                      "text": "El",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/el",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "la_llegada-w2",
+                      "text": "visitante",
+                      "meaning": "visitor",
+                      "baseForm": "visitante",
+                      "startTimeMs": 226,
+                      "endTimeMs": 1116,
+                      "wordAudioUrl": "words/visitante",
+                      "baseFormAudioUrl": "words/visitante"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "la_llegada-page-1",
+      "pageNumber": 2,
+      "masterImage": "la_llegada_p1",
+      "noTextImage": "la_llegada_p1_no_text",
+      "panels": [
+        {
+          "id": "la_llegada-panel-1-1",
+          "artworkImage": "la_llegada_p1_s1",
+          "noTextImage": "la_llegada_p1_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.3516666666666667
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-1-1-2",
+              "type": "narration",
+              "position": {
+                "x": 0.6525,
+                "y": 0.01666666666666669,
+                "width": 0.31500000000000006,
+                "height": 0.10333333333333332
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s2",
+                  "text": "Una noche, muy tarde...",
+                  "translation": "Late one night...",
+                  "audioUrl": "el_visitante_p1_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w3",
+                      "text": "Una",
+                      "meaning": "a",
+                      "baseForm": "uno",
+                      "startTimeMs": 0,
+                      "endTimeMs": 236,
+                      "wordAudioUrl": "words/una",
+                      "baseFormAudioUrl": "words/uno"
+                    },
+                    {
+                      "id": "la_llegada-w4",
+                      "text": "noche...",
+                      "meaning": "night",
+                      "baseForm": "noche",
+                      "startTimeMs": 316,
+                      "endTimeMs": 1156,
+                      "wordAudioUrl": "words/noche",
+                      "baseFormAudioUrl": "words/noche"
+                    },
+                    {
+                      "id": "la_llegada-w5",
+                      "text": "muy",
+                      "meaning": "very",
+                      "baseForm": "muy",
+                      "startTimeMs": 1266,
+                      "endTimeMs": 1596,
+                      "wordAudioUrl": "words/muy",
+                      "baseFormAudioUrl": "words/muy"
+                    },
+                    {
+                      "id": "la_llegada-w6",
+                      "text": "tarde...",
+                      "meaning": "late",
+                      "baseForm": "tarde",
+                      "startTimeMs": 1689,
+                      "endTimeMs": 4152,
+                      "wordAudioUrl": "words/tarde",
+                      "baseFormAudioUrl": "words/tarde"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-1-2",
+          "artworkImage": "la_llegada_p1_s2",
+          "noTextImage": "la_llegada_p1_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3516666666666667,
+            "width": 0.43000000000000005,
+            "height": 0.6483333333333333
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-1-2-3",
+              "type": "thought",
+              "position": {
+                "x": 0.024999999999999897,
+                "y": 0.5591666666666666,
+                "width": 0.1675000000000001,
+                "height": 0.07500000000000007
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s3",
+                  "text": "¿Qué...?",
+                  "translation": "What...?",
+                  "audioUrl": "el_visitante_p1_s2_b3_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w7",
+                      "text": "¿Qué...?",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 0,
+                      "endTimeMs": 877,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    }
+                  ]
+                },
+                {
+                  "id": "la_llegada-s4",
+                  "text": "",
+                  "translation": "",
+                  "audioUrl": "",
+                  "words": []
+                }
+              ]
+            },
+            {
+              "id": "la_llegada-bubble-1-2-4",
+              "type": "narration",
+              "isSoundEffect": true,
+              "position": {
+                "x": 0.04000000000000001,
+                "y": 0.805,
+                "width": 0.37749999999999995,
+                "height": 0.1875
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s5",
+                  "text": "¡¡¡BOOOOMMM!!!",
+                  "translation": "BOOOOMMM!!!",
+                  "audioUrl": "",
+                  "words": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-1-3",
+          "artworkImage": "la_llegada_p1_s3",
+          "noTextImage": "la_llegada_p1_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.43000000000000005,
+            "y": 0.3516666666666667,
+            "width": 0.57,
+            "height": 0.6483333333333333
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-1-3-5",
+              "type": "thought",
+              "position": {
+                "x": 0.73,
+                "y": 0.4441666666666667,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s6",
+                  "text": "¿Qué es eso...?",
+                  "translation": "What is that...?",
+                  "audioUrl": "el_visitante_p1_s3",
+                  "words": [
+                    {
+                      "id": "la_llegada-w8",
+                      "text": "¿Qué",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 0,
+                      "endTimeMs": 158,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    },
+                    {
+                      "id": "la_llegada-w9",
+                      "text": "es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 211,
+                      "endTimeMs": 317,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "la_llegada-w10",
+                      "text": "eso...?",
+                      "meaning": "that",
+                      "baseForm": "eso",
+                      "startTimeMs": 437,
+                      "endTimeMs": 1277,
+                      "wordAudioUrl": "words/eso",
+                      "baseFormAudioUrl": "words/eso"
+                    },
+                    {
+                      "id": "la_llegada-w11",
+                      "text": "¿Qué es eso?",
+                      "meaning": "What is that? ",
+                      "baseForm": "¿Qué es eso?",
+                      "wordAudioUrl": "words/qué_es_eso",
+                      "baseFormAudioUrl": "words/qué_es_eso"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "la_llegada-page-2",
+      "pageNumber": 3,
+      "masterImage": "la_llegada_p2",
+      "noTextImage": "la_llegada_p2_no_text",
+      "panels": [
+        {
+          "id": "la_llegada-panel-2-1",
+          "artworkImage": "la_llegada_p2_s1",
+          "noTextImage": "la_llegada_p2_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.3825
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-2-1-6",
+              "type": "speech",
+              "position": {
+                "x": 0.4149999999999999,
+                "y": 0.01583333333333333,
+                "width": 0.15250000000000002,
+                "height": 0.095
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s7",
+                  "text": "¿Hola...?",
+                  "translation": "Hello...?",
+                  "audioUrl": "el_visitante_p2_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w12",
+                      "text": "¿Hola...?",
+                      "meaning": "hello",
+                      "baseForm": "hola",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1671,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hola",
+                      "baseFormAudioUrl": "words/hola"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "la_llegada-bubble-2-1-7",
+              "type": "speech",
+              "position": {
+                "x": 0.04750000000000004,
+                "y": 0.24416666666666667,
+                "width": 0.17999999999999997,
+                "height": 0.08833333333333335
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s8",
+                  "text": "¿Quién...?",
+                  "translation": "Who...?",
+                  "audioUrl": "el_visitante_p2_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w13",
+                      "text": "¿Quién...?",
+                      "meaning": "who",
+                      "baseForm": "quién",
+                      "startTimeMs": 0,
+                      "endTimeMs": 717,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/quién",
+                      "baseFormAudioUrl": "words/quién"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-2-2",
+          "artworkImage": "la_llegada_p2_s2",
+          "noTextImage": "la_llegada_p2_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3825,
+            "width": 1,
+            "height": 0.2983333333333334
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-2-2-8",
+              "type": "speech",
+              "position": {
+                "x": 0.46250000000000013,
+                "y": 0.4025,
+                "width": 0.12249999999999994,
+                "height": 0.08833333333333332
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s9",
+                  "text": "Hola...",
+                  "translation": "Hello...",
+                  "audioUrl": "el_visitante_p2_s2_b3_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w14",
+                      "text": "Hola...",
+                      "meaning": "hello",
+                      "baseForm": "hola",
+                      "startTimeMs": 0,
+                      "endTimeMs": 960,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hola",
+                      "baseFormAudioUrl": "words/hola"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "la_llegada-bubble-2-2-9",
+              "type": "speech",
+              "position": {
+                "x": 0.2925,
+                "y": 0.5508333333333333,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s10",
+                  "text": "Hola...",
+                  "translation": "Hello",
+                  "audioUrl": "el_visitante_p2_s2_b4_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w15",
+                      "text": "Hola...",
+                      "meaning": "hello",
+                      "baseForm": "hola",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1039,
+                      "wordAudioUrl": "words/hola",
+                      "baseFormAudioUrl": "words/hola"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-2-3",
+          "artworkImage": "la_llegada_p2_s3",
+          "noTextImage": "la_llegada_p2_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6808333333333334,
+            "width": 1,
+            "height": 0.3191666666666666
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-2-3-10",
+              "type": "speech",
+              "position": {
+                "x": 0.375,
+                "y": 0.7041666666666667,
+                "width": 0.16999999999999998,
+                "height": 0.08833333333333326
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s11",
+                  "text": "¿Hablas español?",
+                  "translation": "Do you speak Spanish?",
+                  "audioUrl": "el_visitante_p2_s3_b6_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w16",
+                      "text": "¿Hablas",
+                      "meaning": "you speak",
+                      "baseForm": "hablar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 479,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hablas",
+                      "baseFormAudioUrl": "words/hablar"
+                    },
+                    {
+                      "id": "la_llegada-w17",
+                      "text": "español?",
+                      "meaning": "Spanish",
+                      "baseForm": "español",
+                      "startTimeMs": 559,
+                      "endTimeMs": 1359,
+                      "wordAudioUrl": "words/español",
+                      "baseFormAudioUrl": "words/español"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "la_llegada-bubble-2-3-11",
+              "type": "speech",
+              "position": {
+                "x": 0.7625000000000001,
+                "y": 0.8183333333333335,
+                "width": 0.19499999999999995,
+                "height": 0.06666666666666654
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s12",
+                  "text": "Un poco...",
+                  "translation": "A little...",
+                  "audioUrl": "el_visitante_p2_s3_b5_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w18",
+                      "text": "Un",
+                      "meaning": "a",
+                      "baseForm": "un",
+                      "startTimeMs": 0,
+                      "endTimeMs": 158,
+                      "wordAudioUrl": "words/un",
+                      "baseFormAudioUrl": "words/un"
+                    },
+                    {
+                      "id": "la_llegada-w19",
+                      "text": "poco...",
+                      "meaning": "little",
+                      "baseForm": "poco",
+                      "startTimeMs": 302,
+                      "endTimeMs": 1118,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/poco",
+                      "baseFormAudioUrl": "words/poco"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "la_llegada-page-3",
+      "pageNumber": 4,
+      "masterImage": "la_llegada_p3",
+      "noTextImage": "la_llegada_p3_no_text",
+      "panels": [
+        {
+          "id": "la_llegada-panel-3-1",
+          "artworkImage": "la_llegada_p3_s1",
+          "noTextImage": "la_llegada_p3_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.5016666666666667
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-3-1-12",
+              "type": "speech",
+              "position": {
+                "x": 0.3449999999999999,
+                "y": 0.06583333333333334,
+                "width": 0.18500000000000005,
+                "height": 0.08166666666666669
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s13",
+                  "text": "Soy una chica",
+                  "translation": "I am a girl.",
+                  "audioUrl": "el_visitante_p3_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w20",
+                      "text": "Soy",
+                      "meaning": "I am",
+                      "baseForm": "ser",
+                      "startTimeMs": 0,
+                      "endTimeMs": 316,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/soy",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "la_llegada-w21",
+                      "text": "una",
+                      "meaning": "a",
+                      "baseForm": "uno",
+                      "startTimeMs": 396,
+                      "endTimeMs": 636,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/una",
+                      "baseFormAudioUrl": "words/uno"
+                    },
+                    {
+                      "id": "la_llegada-w22",
+                      "text": "chica",
+                      "meaning": "girl",
+                      "baseForm": "chica",
+                      "startTimeMs": 716,
+                      "endTimeMs": 1276,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/chica",
+                      "baseFormAudioUrl": "words/chica"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "la_llegada-bubble-3-1-13",
+              "type": "speech",
+              "position": {
+                "x": 0.30749999999999983,
+                "y": 0.22083333333333333,
+                "width": 0.22750000000000015,
+                "height": 0.07499999999999996
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s14",
+                  "text": "Soy Mía.",
+                  "translation": "I am Mía.",
+                  "audioUrl": "el_visitante_p3_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w23",
+                      "text": "Soy",
+                      "meaning": "I am",
+                      "baseForm": "ser",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/soy",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "la_llegada-w24",
+                      "text": "Mía",
+                      "meaning": "Mia",
+                      "baseForm": "Mía",
+                      "startTimeMs": 240,
+                      "endTimeMs": 1040,
+                      "wordAudioUrl": "words/mía",
+                      "baseFormAudioUrl": "words/mía"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "la_llegada-bubble-3-1-14",
+              "type": "speech",
+              "position": {
+                "x": 0.2775,
+                "y": 0.3675,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s15",
+                  "text": "Mi nombre es Mía.",
+                  "translation": "My name is Mía.",
+                  "audioUrl": "el_visitante_p3_s1_b6_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w25",
+                      "text": "Mi",
+                      "meaning": "my",
+                      "baseForm": "mi",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mi",
+                      "baseFormAudioUrl": "words/mi"
+                    },
+                    {
+                      "id": "la_llegada-w26",
+                      "text": "nombre",
+                      "meaning": "name",
+                      "baseForm": "nombre",
+                      "startTimeMs": 251,
+                      "endTimeMs": 797,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/nombre",
+                      "baseFormAudioUrl": "words/nombre"
+                    },
+                    {
+                      "id": "la_llegada-w27",
+                      "text": "es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 1010,
+                      "endTimeMs": 1436,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "la_llegada-w28",
+                      "text": "Mía.",
+                      "meaning": "mine",
+                      "baseForm": "mío",
+                      "startTimeMs": 1716,
+                      "endTimeMs": 2396,
+                      "wordAudioUrl": "words/mía",
+                      "baseFormAudioUrl": "words/mío"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-3-2",
+          "artworkImage": "la_llegada_p3_s2",
+          "noTextImage": "la_llegada_p3_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.5016666666666667,
+            "width": 0.475,
+            "height": 0.4983333333333333
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-3-2-15",
+              "type": "speech",
+              "position": {
+                "x": 0.17750000000000002,
+                "y": 0.8650000000000001,
+                "width": 0.26,
+                "height": 0.08666666666666667
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s16",
+                  "text": "Me llamo Zik.",
+                  "translation": "My name is Zik.",
+                  "audioUrl": "el_visitante_p3_s2_b3_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w29",
+                      "text": "Me",
+                      "meaning": "me",
+                      "baseForm": "me",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/me",
+                      "baseFormAudioUrl": "words/me"
+                    },
+                    {
+                      "id": "la_llegada-w30",
+                      "text": "llamo",
+                      "meaning": "I call",
+                      "baseForm": "llamar",
+                      "startTimeMs": 213,
+                      "endTimeMs": 559,
+                      "wordAudioUrl": "words/llamo",
+                      "baseFormAudioUrl": "words/llamar"
+                    },
+                    {
+                      "id": "la_llegada-w31",
+                      "text": "Zik",
+                      "meaning": "Zik (name)",
+                      "baseForm": "Zik",
+                      "wordAudioUrl": "words/zik",
+                      "baseFormAudioUrl": "words/zik"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-3-3",
+          "artworkImage": "la_llegada_p3_s3",
+          "noTextImage": "la_llegada_p3_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.475,
+            "y": 0.5016666666666667,
+            "width": 0.525,
+            "height": 0.4983333333333333
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-3-3-16",
+              "type": "speech",
+              "position": {
+                "x": 0.5575,
+                "y": 0.7208333333333333,
+                "width": 0.19499999999999995,
+                "height": 0.07333333333333336
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s17",
+                  "text": "Mal…",
+                  "translation": "Bad…",
+                  "audioUrl": "el_visitante_p3_s3_b5_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w32",
+                      "text": "Mal…",
+                      "meaning": "bad",
+                      "baseForm": "mal",
+                      "startTimeMs": 0,
+                      "endTimeMs": 714,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mal",
+                      "baseFormAudioUrl": "words/mal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "la_llegada-bubble-3-3-17",
+              "type": "speech",
+              "position": {
+                "x": 0.665,
+                "y": 0.8075,
+                "width": 0.2599999999999999,
+                "height": 0.05666666666666664
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s18",
+                  "text": "Muy mal...",
+                  "translation": "Very bad...",
+                  "audioUrl": "el_visitante_p3_s3_b4_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w33",
+                      "text": "Muy",
+                      "meaning": "very",
+                      "baseForm": "muy",
+                      "startTimeMs": 0,
+                      "endTimeMs": 476,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/muy",
+                      "baseFormAudioUrl": "words/muy"
+                    },
+                    {
+                      "id": "la_llegada-w34",
+                      "text": "mal...",
+                      "meaning": "bad",
+                      "baseForm": "mal",
+                      "startTimeMs": 696,
+                      "endTimeMs": 1515,
+                      "wordAudioUrl": "words/mal",
+                      "baseFormAudioUrl": "words/mal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "la_llegada-page-4",
+      "pageNumber": 5,
+      "masterImage": "la_llegada_p4",
+      "noTextImage": "la_llegada_p4_no_text",
+      "panels": [
+        {
+          "id": "la_llegada-panel-4-1",
+          "artworkImage": "la_llegada_p4_s1",
+          "noTextImage": "la_llegada_p4_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.43374999999999997,
+            "height": 0.5166666666666667
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-4-1-18",
+              "type": "speech",
+              "position": {
+                "x": 0.19499999999999998,
+                "y": 0.18416666666666667,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s19",
+                  "text": "¿Problema?",
+                  "translation": "Problem?",
+                  "audioUrl": "el_visitante_p4_s1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w35",
+                      "text": "¿Problema?",
+                      "meaning": "problem",
+                      "baseForm": "problema",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1439,
+                      "wordAudioUrl": "words/problema",
+                      "baseFormAudioUrl": "words/problema"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "la_llegada-bubble-4-1-19",
+              "type": "speech",
+              "position": {
+                "x": 0.1875,
+                "y": 0.5158333333333335,
+                "width": 0.125,
+                "height": 0.11833333333333318
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s20",
+                  "text": "Lo siento...",
+                  "translation": "I'm sorry...",
+                  "audioUrl": "el_visitante_p4_s3",
+                  "words": [
+                    {
+                      "id": "la_llegada-w36",
+                      "text": "Lo",
+                      "meaning": "it",
+                      "baseForm": "lo",
+                      "startTimeMs": 0,
+                      "endTimeMs": 280,
+                      "wordAudioUrl": "words/lo",
+                      "baseFormAudioUrl": "words/lo"
+                    },
+                    {
+                      "id": "la_llegada-w37",
+                      "text": "siento...",
+                      "meaning": "I feel",
+                      "baseForm": "sentir",
+                      "startTimeMs": 300,
+                      "endTimeMs": 800,
+                      "wordAudioUrl": "words/siento",
+                      "baseFormAudioUrl": "words/sentir"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-4-2",
+          "artworkImage": "la_llegada_p4_s2",
+          "noTextImage": "la_llegada_p4_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.43374999999999997,
+            "y": 0,
+            "width": 0.56625,
+            "height": 0.5166666666666667
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-4-2-20",
+              "type": "speech",
+              "position": {
+                "x": 0.77,
+                "y": 0.31583333333333335,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s21",
+                  "text": "Sí… problema.",
+                  "translation": "Yes… problem.",
+                  "audioUrl": "el_visitante_p4_s2",
+                  "words": [
+                    {
+                      "id": "la_llegada-w38",
+                      "text": "Sí…",
+                      "meaning": "yes",
+                      "baseForm": "sí",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1118,
+                      "wordAudioUrl": "words/sí",
+                      "baseFormAudioUrl": "words/sí"
+                    },
+                    {
+                      "id": "la_llegada-w39",
+                      "text": "problema.",
+                      "meaning": "problem",
+                      "baseForm": "problema",
+                      "startTimeMs": 1215,
+                      "endTimeMs": 2311,
+                      "wordAudioUrl": "words/problema",
+                      "baseFormAudioUrl": "words/problema"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-4-3",
+          "artworkImage": "la_llegada_p4_s3",
+          "noTextImage": "la_llegada_p4_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.5166666666666667,
+            "width": 0.50625,
+            "height": 0.4833333333333333
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-4-3-21",
+              "type": "speech",
+              "position": {
+                "x": 0.1875,
+                "y": 0.5158333333333335,
+                "width": 0.125,
+                "height": 0.11833333333333318
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s22",
+                  "text": "Lo siento...",
+                  "translation": "I'm sorry...",
+                  "audioUrl": "el_visitante_p4_s3",
+                  "words": [
+                    {
+                      "id": "la_llegada-w40",
+                      "text": "Lo",
+                      "meaning": "it",
+                      "baseForm": "lo",
+                      "startTimeMs": 0,
+                      "endTimeMs": 280,
+                      "wordAudioUrl": "words/lo",
+                      "baseFormAudioUrl": "words/lo"
+                    },
+                    {
+                      "id": "la_llegada-w41",
+                      "text": "siento...",
+                      "meaning": "I feel",
+                      "baseForm": "sentir",
+                      "startTimeMs": 300,
+                      "endTimeMs": 800,
+                      "wordAudioUrl": "words/siento",
+                      "baseFormAudioUrl": "words/sentir"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-4-4",
+          "artworkImage": "la_llegada_p4_s4",
+          "noTextImage": "la_llegada_p4_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.50625,
+            "y": 0.5166666666666667,
+            "width": 0.49375,
+            "height": 0.4833333333333333
+          },
+          "bubbles": []
+        }
+      ]
+    },
+    {
+      "id": "la_llegada-page-5",
+      "pageNumber": 6,
+      "masterImage": "la_llegada_p5",
+      "noTextImage": "la_llegada_p5_no_text",
+      "panels": [
+        {
+          "id": "la_llegada-panel-5-1",
+          "artworkImage": "la_llegada_p5_s1",
+          "noTextImage": "la_llegada_p5_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.36
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-5-1-22",
+              "type": "speech",
+              "position": {
+                "x": 0.7475,
+                "y": 0.1375,
+                "width": 0.17750000000000005,
+                "height": 0.07
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s23",
+                  "text": "Agua…",
+                  "translation": "Water…",
+                  "audioUrl": "el_visitante_p5_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w42",
+                      "text": "Agua…",
+                      "meaning": "water",
+                      "baseForm": "agua",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1120,
+                      "wordAudioUrl": "words/agua",
+                      "baseFormAudioUrl": "words/agua"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "la_llegada-bubble-5-1-23",
+              "type": "speech",
+              "position": {
+                "x": 0.05249999999999999,
+                "y": 0.18916666666666668,
+                "width": 0.19,
+                "height": 0.08833333333333332
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s24",
+                  "text": "¿Agua...?",
+                  "translation": "Water...?",
+                  "audioUrl": "el_visitante_p5_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w43",
+                      "text": "¿Agua...?",
+                      "meaning": "water",
+                      "baseForm": "agua",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1040,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/agua",
+                      "baseFormAudioUrl": "words/agua"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-5-2",
+          "artworkImage": "la_llegada_p5_s2",
+          "noTextImage": "la_llegada_p5_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.36,
+            "width": 1,
+            "height": 0.3408333333333333
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-5-2-24",
+              "type": "speech",
+              "position": {
+                "x": 0.08999999999999997,
+                "y": 0.5508333333333333,
+                "width": 0.14,
+                "height": 0.08500000000000002
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s25",
+                  "text": "Casa...",
+                  "translation": "House...",
+                  "audioUrl": "el_visitante_p5_s2_b4_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w44",
+                      "text": "Casa...",
+                      "meaning": "house",
+                      "baseForm": "casa",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1037,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/casa",
+                      "baseFormAudioUrl": "words/casa"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "la_llegada-bubble-5-2-25",
+              "type": "speech",
+              "position": {
+                "x": 0.7725000000000001,
+                "y": 0.5791666666666666,
+                "width": 0.14749999999999996,
+                "height": 0.07333333333333336
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s26",
+                  "text": "Sí...",
+                  "translation": "Yes...",
+                  "audioUrl": "el_visitante_p5_s2_b3_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w45",
+                      "text": "Sí...",
+                      "meaning": "yes",
+                      "baseForm": "sí",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1199,
+                      "wordAudioUrl": "words/sí",
+                      "baseFormAudioUrl": "words/sí"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-5-3",
+          "artworkImage": "la_llegada_p5_s3",
+          "noTextImage": "la_llegada_p5_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.7008333333333333,
+            "width": 1,
+            "height": 0.2991666666666667
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-5-3-26",
+              "type": "speech",
+              "position": {
+                "x": 0.30750000000000005,
+                "y": 0.8325,
+                "width": 0.18499999999999994,
+                "height": 0.09333333333333327
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s27",
+                  "text": "Yo... Agua...",
+                  "translation": "Me... Water...",
+                  "audioUrl": "el_visitante_p5_s3",
+                  "words": [
+                    {
+                      "id": "la_llegada-w46",
+                      "text": "Yo...",
+                      "meaning": "I",
+                      "baseForm": "yo",
+                      "startTimeMs": 0,
+                      "endTimeMs": 634,
+                      "wordAudioUrl": "words/yo",
+                      "baseFormAudioUrl": "words/yo"
+                    },
+                    {
+                      "id": "la_llegada-w47",
+                      "text": "Agua...",
+                      "meaning": "water",
+                      "baseForm": "agua",
+                      "startTimeMs": 954,
+                      "endTimeMs": 2788,
+                      "wordAudioUrl": "words/agua",
+                      "baseFormAudioUrl": "words/agua"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "la_llegada-page-6",
+      "pageNumber": 7,
+      "masterImage": "la_llegada_p6",
+      "noTextImage": "la_llegada_p6_no_text",
+      "panels": [
+        {
+          "id": "la_llegada-panel-6-1",
+          "artworkImage": "la_llegada_p6_s1",
+          "noTextImage": "la_llegada_p6_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.36833333333333335
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-6-1-27",
+              "type": "speech",
+              "position": {
+                "x": 0.36,
+                "y": 0.05416666666666664,
+                "width": 0.24250000000000005,
+                "height": 0.10833333333333336
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s28",
+                  "text": "No… no mamá… no papá…",
+                  "translation": "No… no mum… no dad…",
+                  "audioUrl": "el_visitante_p6_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w48",
+                      "text": "No…",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 960,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "la_llegada-w49",
+                      "text": "No…",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 1146,
+                      "endTimeMs": 1518,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "la_llegada-w50",
+                      "text": "mamá…",
+                      "meaning": "mum",
+                      "baseForm": "mamá",
+                      "startTimeMs": 1598,
+                      "endTimeMs": 2318,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mamá",
+                      "baseFormAudioUrl": "words/mamá"
+                    },
+                    {
+                      "id": "la_llegada-w51",
+                      "text": "No…",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 2451,
+                      "endTimeMs": 2717,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "la_llegada-w52",
+                      "text": "papá…",
+                      "meaning": "dad",
+                      "baseForm": "papá",
+                      "startTimeMs": 2777,
+                      "endTimeMs": 3597,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/papá",
+                      "baseFormAudioUrl": "words/papá"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "la_llegada-bubble-6-1-28",
+              "type": "speech",
+              "position": {
+                "x": 0.07499999999999998,
+                "y": 0.20249999999999999,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s29",
+                  "text": "Amigo...",
+                  "translation": "Friend...",
+                  "audioUrl": "el_visitante_p6_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w53",
+                      "text": "Amigo...",
+                      "meaning": "friend",
+                      "baseForm": "amigo",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1760,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/amigo",
+                      "baseFormAudioUrl": "words/amigo"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-6-2",
+          "artworkImage": "la_llegada_p6_s2",
+          "noTextImage": "la_llegada_p6_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.36833333333333335,
+            "width": 0.49375,
+            "height": 0.6316666666666666
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-6-2-29",
+              "type": "speech",
+              "position": {
+                "x": 0.04749999999999999,
+                "y": 0.8308333333333334,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s30",
+                  "text": "¿Amiga...?",
+                  "translation": "Friend...?",
+                  "audioUrl": "el_visitante_p6_s2_b3_t1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w54",
+                      "text": "¿Amiga...?",
+                      "meaning": "friend",
+                      "baseForm": "amigo",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1036,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/amiga",
+                      "baseFormAudioUrl": "words/amigo"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-6-3",
+          "artworkImage": "la_llegada_p6_s3",
+          "noTextImage": "la_llegada_p6_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.49375,
+            "y": 0.36833333333333335,
+            "width": 0.50625,
+            "height": 0.6316666666666666
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-6-3-30",
+              "type": "speech",
+              "position": {
+                "x": 0.7825,
+                "y": 0.44416666666666665,
+                "width": 0.15000000000000013,
+                "height": 0.12333333333333335
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s31",
+                  "text": "Sí. Amiga",
+                  "translation": "Yes, friend...",
+                  "audioUrl": "el_visitante_p6_s3",
+                  "words": [
+                    {
+                      "id": "la_llegada-w55",
+                      "text": "Sí.",
+                      "meaning": "yes",
+                      "baseForm": "sí",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1000,
+                      "wordAudioUrl": "words/sí",
+                      "baseFormAudioUrl": "words/sí"
+                    },
+                    {
+                      "id": "la_llegada-w56",
+                      "text": "Amiga",
+                      "meaning": "friend",
+                      "baseForm": "amigo",
+                      "startTimeMs": 1300,
+                      "endTimeMs": 3279,
+                      "wordAudioUrl": "words/amiga",
+                      "baseFormAudioUrl": "words/amigo"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "la_llegada-page-7",
+      "pageNumber": 8,
+      "masterImage": "la_llegada_p7",
+      "noTextImage": "la_llegada_p7_no_text",
+      "panels": [
+        {
+          "id": "la_llegada-panel-7-1",
+          "artworkImage": "la_llegada_p7_s1",
+          "noTextImage": "la_llegada_p7_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.4325
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-7-1-31",
+              "type": "speech",
+              "position": {
+                "x": 0.40499999999999997,
+                "y": 0.05416666666666667,
+                "width": 0.12500000000000006,
+                "height": 0.08666666666666667
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s32",
+                  "text": "Ven",
+                  "translation": "Come.",
+                  "audioUrl": "el_visitante_p7_s1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w57",
+                      "text": "Ven",
+                      "meaning": "come",
+                      "baseForm": "venir",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1517,
+                      "wordAudioUrl": "words/ven",
+                      "baseFormAudioUrl": "words/venir"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-7-2",
+          "artworkImage": "la_llegada_p7_s2",
+          "noTextImage": "la_llegada_p7_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.4325,
+            "width": 0.47875,
+            "height": 0.5675
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-7-2-32",
+              "type": "speech",
+              "position": {
+                "x": 0.12000000000000005,
+                "y": 0.4458333333333333,
+                "width": 0.26249999999999996,
+                "height": 0.09999999999999998
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s33",
+                  "text": "Está bien. Todo está bien.",
+                  "translation": "Okay. Everything is okay.",
+                  "audioUrl": "el_visitante_p7_s2",
+                  "words": [
+                    {
+                      "id": "la_llegada-w58",
+                      "text": "Está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 318,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "la_llegada-w59",
+                      "text": "bien.",
+                      "meaning": "okay",
+                      "baseForm": "bien",
+                      "startTimeMs": 414,
+                      "endTimeMs": 1558,
+                      "wordAudioUrl": "words/bien",
+                      "baseFormAudioUrl": "words/bien"
+                    },
+                    {
+                      "id": "la_llegada-w60",
+                      "text": "Todo",
+                      "meaning": "everything",
+                      "baseForm": "todo",
+                      "startTimeMs": 1938,
+                      "endTimeMs": 2555,
+                      "wordAudioUrl": "words/todo",
+                      "baseFormAudioUrl": "words/todo"
+                    },
+                    {
+                      "id": "la_llegada-w61",
+                      "text": "está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 2619,
+                      "endTimeMs": 2875,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "la_llegada-w62",
+                      "text": "bien.",
+                      "meaning": "okay",
+                      "baseForm": "bien",
+                      "startTimeMs": 2987,
+                      "endTimeMs": 4555,
+                      "wordAudioUrl": "words/bien",
+                      "baseFormAudioUrl": "words/bien"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "la_llegada-panel-7-3",
+          "artworkImage": "la_llegada_p7_s3",
+          "noTextImage": "la_llegada_p7_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.47875,
+            "y": 0.4325,
+            "width": 0.52125,
+            "height": 0.5675
+          },
+          "bubbles": []
+        }
+      ]
+    },
+    {
+      "id": "la_llegada-page-8",
+      "pageNumber": 9,
+      "masterImage": "la_llegada_p8",
+      "noTextImage": "la_llegada_p8_no_text",
+      "panels": [
+        {
+          "id": "la_llegada-panel-8-1",
+          "artworkImage": "la_llegada_p8_s1",
+          "noTextImage": "la_llegada_p8_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          },
+          "bubbles": [
+            {
+              "id": "la_llegada-bubble-8-1-33",
+              "type": "narration",
+              "position": {
+                "x": 0.04624999999999996,
+                "y": 0.7408333333333333,
+                "width": 0.45375000000000004,
+                "height": 0.1283333333333333
+              },
+              "sentences": [
+                {
+                  "id": "la_llegada-s34",
+                  "text": "continuará...",
+                  "translation": "to be continued...",
+                  "audioUrl": "el_visitante_p8_s1",
+                  "words": [
+                    {
+                      "id": "la_llegada-w63",
+                      "text": "continuará...",
+                      "meaning": "will continue",
+                      "baseForm": "continuar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 954,
+                      "wordAudioUrl": "words/continuará",
+                      "baseFormAudioUrl": "words/continuar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "reviewWords": [
+    {
+      "word": {
+        "id": "la_llegada-w7",
+        "text": "¿Qué...?",
+        "meaning": "what",
+        "baseForm": "qué",
+        "wordAudioUrl": "words/qué",
+        "baseFormAudioUrl": "words/qué"
+      },
+      "panelId": "la_llegada-panel-1-2",
+      "pageId": "la_llegada-page-1"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w12",
+        "text": "¿Hola...?",
+        "meaning": "hello",
+        "baseForm": "hola",
+        "wordAudioUrl": "words/hola",
+        "baseFormAudioUrl": "words/hola"
+      },
+      "panelId": "la_llegada-panel-2-1",
+      "pageId": "la_llegada-page-2"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w13",
+        "text": "¿Quién...?",
+        "meaning": "who",
+        "baseForm": "quién",
+        "wordAudioUrl": "words/quién",
+        "baseFormAudioUrl": "words/quién"
+      },
+      "panelId": "la_llegada-panel-2-1",
+      "pageId": "la_llegada-page-2"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w14",
+        "text": "Hola...",
+        "meaning": "hello",
+        "baseForm": "hola",
+        "wordAudioUrl": "words/hola",
+        "baseFormAudioUrl": "words/hola"
+      },
+      "panelId": "la_llegada-panel-2-2",
+      "pageId": "la_llegada-page-2"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w16",
+        "text": "¿Hablas",
+        "meaning": "you speak",
+        "baseForm": "hablar",
+        "wordAudioUrl": "words/hablas",
+        "baseFormAudioUrl": "words/hablar"
+      },
+      "panelId": "la_llegada-panel-2-3",
+      "pageId": "la_llegada-page-2"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w19",
+        "text": "poco...",
+        "meaning": "little",
+        "baseForm": "poco",
+        "wordAudioUrl": "words/poco",
+        "baseFormAudioUrl": "words/poco"
+      },
+      "panelId": "la_llegada-panel-2-3",
+      "pageId": "la_llegada-page-2"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w20",
+        "text": "Soy",
+        "meaning": "I am",
+        "baseForm": "ser",
+        "wordAudioUrl": "words/soy",
+        "baseFormAudioUrl": "words/ser"
+      },
+      "panelId": "la_llegada-panel-3-1",
+      "pageId": "la_llegada-page-3"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w21",
+        "text": "una",
+        "meaning": "a",
+        "baseForm": "uno",
+        "wordAudioUrl": "words/una",
+        "baseFormAudioUrl": "words/uno"
+      },
+      "panelId": "la_llegada-panel-3-1",
+      "pageId": "la_llegada-page-3"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w22",
+        "text": "chica",
+        "meaning": "girl",
+        "baseForm": "chica",
+        "wordAudioUrl": "words/chica",
+        "baseFormAudioUrl": "words/chica"
+      },
+      "panelId": "la_llegada-panel-3-1",
+      "pageId": "la_llegada-page-3"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w25",
+        "text": "Mi",
+        "meaning": "my",
+        "baseForm": "mi",
+        "wordAudioUrl": "words/mi",
+        "baseFormAudioUrl": "words/mi"
+      },
+      "panelId": "la_llegada-panel-3-1",
+      "pageId": "la_llegada-page-3"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w26",
+        "text": "nombre",
+        "meaning": "name",
+        "baseForm": "nombre",
+        "wordAudioUrl": "words/nombre",
+        "baseFormAudioUrl": "words/nombre"
+      },
+      "panelId": "la_llegada-panel-3-1",
+      "pageId": "la_llegada-page-3"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w32",
+        "text": "Mal…",
+        "meaning": "bad",
+        "baseForm": "mal",
+        "wordAudioUrl": "words/mal",
+        "baseFormAudioUrl": "words/mal"
+      },
+      "panelId": "la_llegada-panel-3-3",
+      "pageId": "la_llegada-page-3"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w33",
+        "text": "Muy",
+        "meaning": "very",
+        "baseForm": "muy",
+        "wordAudioUrl": "words/muy",
+        "baseFormAudioUrl": "words/muy"
+      },
+      "panelId": "la_llegada-panel-3-3",
+      "pageId": "la_llegada-page-3"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w43",
+        "text": "¿Agua...?",
+        "meaning": "water",
+        "baseForm": "agua",
+        "wordAudioUrl": "words/agua",
+        "baseFormAudioUrl": "words/agua"
+      },
+      "panelId": "la_llegada-panel-5-1",
+      "pageId": "la_llegada-page-5"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w44",
+        "text": "Casa...",
+        "meaning": "house",
+        "baseForm": "casa",
+        "wordAudioUrl": "words/casa",
+        "baseFormAudioUrl": "words/casa"
+      },
+      "panelId": "la_llegada-panel-5-2",
+      "pageId": "la_llegada-page-5"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w50",
+        "text": "mamá…",
+        "meaning": "mum",
+        "baseForm": "mamá",
+        "wordAudioUrl": "words/mamá",
+        "baseFormAudioUrl": "words/mamá"
+      },
+      "panelId": "la_llegada-panel-6-1",
+      "pageId": "la_llegada-page-6"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w52",
+        "text": "papá…",
+        "meaning": "dad",
+        "baseForm": "papá",
+        "wordAudioUrl": "words/papá",
+        "baseFormAudioUrl": "words/papá"
+      },
+      "panelId": "la_llegada-panel-6-1",
+      "pageId": "la_llegada-page-6"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w53",
+        "text": "Amigo...",
+        "meaning": "friend",
+        "baseForm": "amigo",
+        "wordAudioUrl": "words/amigo",
+        "baseFormAudioUrl": "words/amigo"
+      },
+      "panelId": "la_llegada-panel-6-1",
+      "pageId": "la_llegada-page-6"
+    },
+    {
+      "word": {
+        "id": "la_llegada-w54",
+        "text": "¿Amiga...?",
+        "meaning": "friend",
+        "baseForm": "amigo",
+        "wordAudioUrl": "words/amiga",
+        "baseFormAudioUrl": "words/amigo"
+      },
+      "panelId": "la_llegada-panel-6-2",
+      "pageId": "la_llegada-page-6"
+    }
+  ],
+  "wordAudioMap": {
+    "el": "words/el",
+    "visitante": "words/visitante",
+    "una": "words/una",
+    "uno": "words/uno",
+    "noche": "words/noche",
+    "muy": "words/muy",
+    "tarde": "words/tarde",
+    "qué": "words/qué",
+    "es": "words/es",
+    "ser": "words/ser",
+    "eso": "words/eso",
+    "qué_es_eso": "words/qué_es_eso",
+    "hola": "words/hola",
+    "quién": "words/quién",
+    "hablas": "words/hablas",
+    "hablar": "words/hablar",
+    "español": "words/español",
+    "un": "words/un",
+    "poco": "words/poco",
+    "soy": "words/soy",
+    "chica": "words/chica",
+    "mía": "words/mía",
+    "mi": "words/mi",
+    "nombre": "words/nombre",
+    "mío": "words/mío",
+    "me": "words/me",
+    "llamo": "words/llamo",
+    "llamar": "words/llamar",
+    "zik": "words/zik",
+    "mal": "words/mal",
+    "problema": "words/problema",
+    "lo": "words/lo",
+    "siento": "words/siento",
+    "sentir": "words/sentir",
+    "sí": "words/sí",
+    "agua": "words/agua",
+    "casa": "words/casa",
+    "yo": "words/yo",
+    "no": "words/no",
+    "mamá": "words/mamá",
+    "papá": "words/papá",
+    "amigo": "words/amigo",
+    "amiga": "words/amiga",
+    "ven": "words/ven",
+    "venir": "words/venir",
+    "está": "words/está",
+    "estar": "words/estar",
+    "bien": "words/bien",
+    "todo": "words/todo",
+    "continuará": "words/continuará",
+    "continuar": "words/continuar"
+  }
+}

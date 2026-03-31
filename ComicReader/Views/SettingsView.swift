@@ -5,25 +5,6 @@ struct SettingsView: View {
 
     var body: some View {
         List {
-            // Practice Section
-            Section {
-                Toggle(isOn: $settingsManager.speakingPracticeMode) {
-                    Label {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Speaking Practice Mode")
-                            Text("Show English text in comic bubbles and practice speaking Spanish")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    } icon: {
-                        Image(systemName: "mic.fill")
-                            .foregroundStyle(.blue)
-                    }
-                }
-            } header: {
-                Text("Practice")
-            }
-
             // Reading Section
             Section {
                 Toggle(isOn: $settingsManager.autoPlayAudio) {

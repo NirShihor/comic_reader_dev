@@ -50,12 +50,19 @@ class AudioManager: ObservableObject {
             url = findAudioFile(named: filename, in: bundledComicsURL)
         }
 
-        // 2. Try Dictionary folder (word pronunciations - shared across comics)
+        // 2. Try Documents/Comics folder (downloaded comics)
+        if url == nil {
+            let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let comicsDir = documents.appendingPathComponent("Comics")
+            url = findAudioFile(named: filename, in: comicsDir)
+        }
+
+        // 3. Try Dictionary folder (word pronunciations - shared across comics)
         if url == nil, let dictionaryURL = Bundle.main.url(forResource: "Dictionary", withExtension: nil) {
             url = findAudioFile(named: filename, in: dictionaryURL)
         }
 
-        // 3. Fall back to root bundle (old architecture / direct bundle resources)
+        // 4. Fall back to root bundle (old architecture / direct bundle resources)
         if url == nil {
             url = Bundle.main.url(forResource: filename, withExtension: "mp3")
         }
@@ -235,11 +242,21 @@ class AudioManager: ObservableObject {
     /// Recursively search for an audio file in a directory
     private func findAudioFile(named filename: String, in directory: URL) -> URL? {
         let fm = FileManager.default
+
+        // If filename contains path components (e.g. "words/el"), try direct path first
+        let directPath = directory.appendingPathComponent("\(filename).mp3")
+        if fm.fileExists(atPath: directPath.path) {
+            return directPath
+        }
+
+        // Fall back to recursive search by last path component
         guard let enumerator = fm.enumerator(at: directory, includingPropertiesForKeys: [.isDirectoryKey]) else {
             return nil
         }
 
-        let targetFilename = "\(filename).mp3"
+        // Use just the final component for matching (e.g. "words/el" -> "el.mp3")
+        let baseName = (filename as NSString).lastPathComponent
+        let targetFilename = "\(baseName).mp3"
 
         for case let fileURL as URL in enumerator {
             if fileURL.lastPathComponent == targetFilename {

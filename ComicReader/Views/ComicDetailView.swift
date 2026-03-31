@@ -9,6 +9,7 @@ struct ComicDetailView: View {
     let comic: Comic
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var progressManager: ReadingProgressManager
+    @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var localStorage = LocalComicStorage.shared
 
     @State private var practiceDestination: PracticeDestination?
@@ -85,9 +86,16 @@ struct ComicDetailView: View {
                                 Label("Speaking", systemImage: "mic.fill")
                             }
                         }
+
+                        Section {
+                            Toggle(isOn: $settingsManager.speakingPracticeMode) {
+                                Label("Speaking Practice Mode", systemImage: "bubble.left.and.text.bubble.right")
+                            }
+                        }
                     } label: {
                         Image(systemName: "graduationcap.fill")
                             .font(.body)
+                            .foregroundStyle(settingsManager.speakingPracticeMode ? .green : .accentColor)
                     }
 
                     Button(role: .destructive) {
@@ -103,7 +111,7 @@ struct ComicDetailView: View {
         .alert("Delete Comic", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
-                try? localStorage.deleteComic(comic.id)
+                localStorage.deleteComic(comic.id)
                 progressManager.clearProgress(for: comic.id)
                 dismiss()
             }

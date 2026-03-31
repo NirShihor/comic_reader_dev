@@ -1,0 +1,3468 @@
+{
+  "id": "comic-conocer_a_los_padres",
+  "title": "CONOCER A LOS PADRES",
+  "description": "Zik is meeting other people",
+  "coverImage": "conocer_a_los_padres_cover",
+  "level": "beginner",
+  "totalPages": 10,
+  "estimatedMinutes": 20,
+  "language": "es",
+  "targetLanguage": "en",
+  "version": "1.0",
+  "collectionId": "el_visitante",
+  "collectionTitle": "EL VISITANTE",
+  "episodeNumber": 2,
+  "pages": [
+    {
+      "id": "conocer_a_los_padres-page-cover",
+      "pageNumber": 1,
+      "masterImage": "conocer_a_los_padres_cover",
+      "panels": [
+        {
+          "id": "conocer_a_los_padres-panel-cover",
+          "artworkImage": "conocer_a_los_padres_cover",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-cover-1",
+              "type": "narration",
+              "position": {
+                "x": 0.02999999999999997,
+                "y": 0,
+                "width": 0.5800000000000001,
+                "height": 0.16499999999999998
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s1",
+                  "text": "Conocer a los padres",
+                  "translation": "Meeting the parents",
+                  "audioUrl": "zik_está_haciendo_amigos_p0_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w1",
+                      "text": "Conocer",
+                      "meaning": "to meet",
+                      "baseForm": "conocer",
+                      "startTimeMs": 0,
+                      "endTimeMs": 719,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/conocer",
+                      "baseFormAudioUrl": "words/conocer"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w2",
+                      "text": "a",
+                      "meaning": "to",
+                      "baseForm": "a",
+                      "startTimeMs": 879,
+                      "endTimeMs": 1039,
+                      "wordAudioUrl": "words/a",
+                      "baseFormAudioUrl": "words/a"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w3",
+                      "text": "los",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 1079,
+                      "endTimeMs": 1199,
+                      "wordAudioUrl": "words/los",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w4",
+                      "text": "padres",
+                      "meaning": "parents",
+                      "baseForm": "padre",
+                      "startTimeMs": 1279,
+                      "endTimeMs": 1917,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/padres",
+                      "baseFormAudioUrl": "words/padre"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conocer_a_los_padres-page-1",
+      "pageNumber": 2,
+      "masterImage": "conocer_a_los_padres_p1",
+      "noTextImage": "conocer_a_los_padres_p1_no_text",
+      "panels": [
+        {
+          "id": "conocer_a_los_padres-panel-1-1",
+          "artworkImage": "conocer_a_los_padres_p1_s1",
+          "noTextImage": "conocer_a_los_padres_p1_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.56875,
+            "height": 0.505
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-1-1-2",
+              "type": "narration",
+              "position": {
+                "x": 0.057499999999999996,
+                "y": 0.034166666666666665,
+                "width": 0.32499999999999996,
+                "height": 0.06666666666666668
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s2",
+                  "text": "Es de día",
+                  "translation": "It is daytime",
+                  "audioUrl": "zik_está_haciendo_amigos_p1_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w5",
+                      "text": "Es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 0,
+                      "endTimeMs": 236,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w6",
+                      "text": "de",
+                      "meaning": "of",
+                      "baseForm": "de",
+                      "startTimeMs": 289,
+                      "endTimeMs": 395,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/de",
+                      "baseFormAudioUrl": "words/de"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w7",
+                      "text": "día",
+                      "meaning": "daytime",
+                      "baseForm": "día",
+                      "startTimeMs": 495,
+                      "endTimeMs": 1115,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/día",
+                      "baseFormAudioUrl": "words/día"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-1-2",
+          "artworkImage": "conocer_a_los_padres_p1_s2",
+          "noTextImage": "conocer_a_los_padres_p1_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.56875,
+            "y": 0,
+            "width": 0.43125,
+            "height": 0.505
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-1-2-3",
+              "type": "thought",
+              "position": {
+                "x": 0.6049999999999999,
+                "y": 0.3625000000000001,
+                "width": 0.15250000000000008,
+                "height": 0.07833333333333325
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s3",
+                  "text": "¿Qué...?",
+                  "translation": "What...?",
+                  "audioUrl": "zik_está_haciendo_amigos_p1_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w8",
+                      "text": "¿Qué...?",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 0,
+                      "endTimeMs": 717,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-1-3",
+          "artworkImage": "conocer_a_los_padres_p1_s3",
+          "noTextImage": "conocer_a_los_padres_p1_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.505,
+            "width": 0.38875000000000004,
+            "height": 0.495
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-1-3-4",
+              "type": "speech",
+              "position": {
+                "x": 0.09249999999999997,
+                "y": 0.8658333333333333,
+                "width": 0.19,
+                "height": 0.07499999999999996
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s4",
+                  "text": "¡La nave!",
+                  "translation": "The craft!",
+                  "audioUrl": "zik_está_haciendo_amigos_p1_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w9",
+                      "text": "¡La",
+                      "meaning": "the",
+                      "baseForm": "la",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/la",
+                      "baseFormAudioUrl": "words/la"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w10",
+                      "text": "nave!",
+                      "meaning": "craft",
+                      "baseForm": "nave",
+                      "startTimeMs": 272,
+                      "endTimeMs": 1040,
+                      "wordAudioUrl": "words/nave",
+                      "baseFormAudioUrl": "words/nave"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-1-4",
+          "artworkImage": "conocer_a_los_padres_p1_s4",
+          "noTextImage": "conocer_a_los_padres_p1_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.38875000000000004,
+            "y": 0.505,
+            "width": 0.61125,
+            "height": 0.495
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-1-4-5",
+              "type": "speech",
+              "position": {
+                "x": 0.745,
+                "y": 0.7908333333333332,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s5",
+                  "text": "¿Dónde está Zik???",
+                  "translation": "Where is Zik? ",
+                  "audioUrl": "conocer_a_los_padres_p1_s4_b4_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w11",
+                      "text": "¿Dónde",
+                      "meaning": "where",
+                      "baseForm": "dónde",
+                      "startTimeMs": 0,
+                      "endTimeMs": 315,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/dónde",
+                      "baseFormAudioUrl": "words/dónde"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w12",
+                      "text": "está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 379,
+                      "endTimeMs": 635,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w13",
+                      "text": "Zik?",
+                      "meaning": "Zik",
+                      "baseForm": "Zik?",
+                      "startTimeMs": 755,
+                      "endTimeMs": 1274,
+                      "wordAudioUrl": "words/zik",
+                      "baseFormAudioUrl": "words/zik"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conocer_a_los_padres-page-2",
+      "pageNumber": 3,
+      "masterImage": "conocer_a_los_padres_p2",
+      "noTextImage": "conocer_a_los_padres_p2_no_text",
+      "panels": [
+        {
+          "id": "conocer_a_los_padres-panel-2-1",
+          "artworkImage": "conocer_a_los_padres_p2_s1",
+          "noTextImage": "conocer_a_los_padres_p2_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.41125,
+            "height": 0.345
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-2-1-6",
+              "type": "thought",
+              "position": {
+                "x": 0.037500000000000006,
+                "y": 0.22333333333333336,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s6",
+                  "text": "¿Fue un sueño...?",
+                  "translation": "Was it a dream...?",
+                  "audioUrl": "zik_está_haciendo_amigos_p2_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w14",
+                      "text": "¿Fue",
+                      "meaning": "was",
+                      "baseForm": "ser",
+                      "startTimeMs": 0,
+                      "endTimeMs": 240,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/fue",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w15",
+                      "text": "un",
+                      "meaning": "a",
+                      "baseForm": "un",
+                      "startTimeMs": 320,
+                      "endTimeMs": 480,
+                      "wordAudioUrl": "words/un",
+                      "baseFormAudioUrl": "words/un"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w16",
+                      "text": "sueño...?",
+                      "meaning": "dream",
+                      "baseForm": "sueño",
+                      "startTimeMs": 620,
+                      "endTimeMs": 1358,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/sueño",
+                      "baseFormAudioUrl": "words/sueño"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-2-2",
+          "artworkImage": "conocer_a_los_padres_p2_s2",
+          "noTextImage": "conocer_a_los_padres_p2_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.41125,
+            "y": 0,
+            "width": 0.58875,
+            "height": 0.345
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-2-2-7",
+              "type": "narration",
+              "isSoundEffect": true,
+              "position": {
+                "x": 0.7024999999999999,
+                "y": 0.2283333333333333,
+                "width": 0.3474999999999999,
+                "height": 0.07000000000000003
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s7",
+                  "text": "RAS... RAS...",
+                  "translation": "SCRATCH... SCRATCH...",
+                  "audioUrl": "zik_está_haciendo_amigos_p2_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w17",
+                      "text": "RAS...",
+                      "meaning": "scratch",
+                      "baseForm": "ras",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1359,
+                      "wordAudioUrl": "words/ras",
+                      "baseFormAudioUrl": "words/ras"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w18",
+                      "text": "RAS...",
+                      "meaning": "scratch",
+                      "baseForm": "ras",
+                      "startTimeMs": 1679,
+                      "endTimeMs": 2638,
+                      "wordAudioUrl": "words/ras",
+                      "baseFormAudioUrl": "words/ras"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-2-3",
+          "artworkImage": "conocer_a_los_padres_p2_s3",
+          "noTextImage": "conocer_a_los_padres_p2_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.345,
+            "width": 0.495,
+            "height": 0.655
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-2-3-8",
+              "type": "speech",
+              "position": {
+                "x": 0.24999999999999994,
+                "y": 0.8683333333333333,
+                "width": 0.16750000000000004,
+                "height": 0.08000000000000007
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s8",
+                  "text": "Hola...",
+                  "translation": "Hello...",
+                  "audioUrl": "zik_está_haciendo_amigos_p2_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w19",
+                      "text": "¡Hola...!",
+                      "meaning": "hello",
+                      "baseForm": "hola",
+                      "startTimeMs": 0,
+                      "endTimeMs": 720,
+                      "wordAudioUrl": "words/hola",
+                      "baseFormAudioUrl": "words/hola"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-2-4",
+          "artworkImage": "conocer_a_los_padres_p2_s4",
+          "noTextImage": "conocer_a_los_padres_p2_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.495,
+            "y": 0.345,
+            "width": 0.505,
+            "height": 0.655
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-2-4-9",
+              "type": "speech",
+              "position": {
+                "x": 0.6775,
+                "y": 0.7416666666666667,
+                "width": 0.20999999999999996,
+                "height": 0.09333333333333327
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s9",
+                  "text": "¡Hola! ¡Estás aquí!",
+                  "translation": "Hello! You're here!",
+                  "audioUrl": "zik_está_haciendo_amigos_p2_s4_b4_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w20",
+                      "text": "¡Hola!",
+                      "meaning": "hello",
+                      "baseForm": "hola",
+                      "startTimeMs": 0,
+                      "endTimeMs": 760,
+                      "wordAudioUrl": "words/hola",
+                      "baseFormAudioUrl": "words/hola"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w21",
+                      "text": "¡Estás",
+                      "meaning": "you are",
+                      "baseForm": "estar",
+                      "startTimeMs": 900,
+                      "endTimeMs": 1279,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/estás",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w22",
+                      "text": "aquí!",
+                      "meaning": "here",
+                      "baseForm": "aquí",
+                      "startTimeMs": 1359,
+                      "endTimeMs": 1919,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/aquí",
+                      "baseFormAudioUrl": "words/aquí"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conocer_a_los_padres-page-3",
+      "pageNumber": 4,
+      "masterImage": "conocer_a_los_padres_p3",
+      "noTextImage": "conocer_a_los_padres_p3_no_text",
+      "panels": [
+        {
+          "id": "conocer_a_los_padres-panel-3-1",
+          "artworkImage": "conocer_a_los_padres_p3_s1",
+          "noTextImage": "conocer_a_los_padres_p3_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.30583333333333335
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-3-1-10",
+              "type": "speech",
+              "position": {
+                "x": 0.3850000000000001,
+                "y": 0.1875,
+                "width": 0.13249999999999995,
+                "height": 0.09333333333333334
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s10",
+                  "text": "¡Aquí tienes!",
+                  "translation": "Here you are!",
+                  "audioUrl": "zik_está_haciendo_amigos_p3_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w23",
+                      "text": "¡Aquí",
+                      "meaning": "here",
+                      "baseForm": "aquí",
+                      "startTimeMs": 245,
+                      "endTimeMs": 634,
+                      "wordAudioUrl": "words/aquí",
+                      "baseFormAudioUrl": "words/aquí"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w24",
+                      "text": "tienes!",
+                      "meaning": "you have",
+                      "baseForm": "tener",
+                      "startTimeMs": 679,
+                      "endTimeMs": 1108,
+                      "wordAudioUrl": "words/tienes",
+                      "baseFormAudioUrl": "words/tener"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-3-2",
+          "artworkImage": "conocer_a_los_padres_p3_s2",
+          "noTextImage": "conocer_a_los_padres_p3_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.30583333333333335,
+            "width": 1,
+            "height": 0.32083333333333336
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-3-2-11",
+              "type": "speech",
+              "position": {
+                "x": 0.7275,
+                "y": 0.41083333333333333,
+                "width": 0.16249999999999998,
+                "height": 0.09666666666666662
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s11",
+                  "text": "¡Buenos días!",
+                  "translation": "Good morning!",
+                  "audioUrl": "zik_está_haciendo_amigos_p3_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w25",
+                      "text": "¡Buenos",
+                      "meaning": "good",
+                      "baseForm": "bueno",
+                      "startTimeMs": 0,
+                      "endTimeMs": 799,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/buenos",
+                      "baseFormAudioUrl": "words/bueno"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w26",
+                      "text": "días!",
+                      "meaning": "days",
+                      "baseForm": "día",
+                      "startTimeMs": 975,
+                      "endTimeMs": 1839,
+                      "wordAudioUrl": "words/días",
+                      "baseFormAudioUrl": "words/día"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w27",
+                      "text": "Buenos días",
+                      "meaning": "Good morning",
+                      "baseForm": "Buenos días",
+                      "vocabQuiz": true,
+                      "manual": true,
+                      "wordAudioUrl": "words/buenos_días",
+                      "baseFormAudioUrl": "words/buenos_días"
+                    }
+                  ]
+                },
+                {
+                  "id": "conocer_a_los_padres-s12",
+                  "text": "",
+                  "translation": "",
+                  "audioUrl": "",
+                  "words": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-3-3",
+          "artworkImage": "conocer_a_los_padres_p3_s3",
+          "noTextImage": "conocer_a_los_padres_p3_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6266666666666667,
+            "width": 0.53,
+            "height": 0.3733333333333333
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-3-3-12",
+              "type": "speech",
+              "position": {
+                "x": 0.065,
+                "y": 0.8775,
+                "width": 0.1825,
+                "height": 0.06999999999999995
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s13",
+                  "text": "Buenos días",
+                  "translation": "Good morning",
+                  "audioUrl": "zik_está_haciendo_amigos_p3_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w28",
+                      "text": "Buenos",
+                      "meaning": "good",
+                      "baseForm": "bueno",
+                      "startTimeMs": 0,
+                      "endTimeMs": 716,
+                      "wordAudioUrl": "words/buenos",
+                      "baseFormAudioUrl": "words/bueno"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w29",
+                      "text": "días",
+                      "meaning": "days",
+                      "baseForm": "día",
+                      "startTimeMs": 940,
+                      "endTimeMs": 3356,
+                      "wordAudioUrl": "words/días",
+                      "baseFormAudioUrl": "words/día"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-3-4",
+          "artworkImage": "conocer_a_los_padres_p3_s4",
+          "noTextImage": "conocer_a_los_padres_p3_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.53,
+            "y": 0.6266666666666667,
+            "width": 0.47,
+            "height": 0.3733333333333333
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-3-4-13",
+              "type": "speech",
+              "position": {
+                "x": 0.5574999999999999,
+                "y": 0.6491666666666668,
+                "width": 0.1625000000000001,
+                "height": 0.09499999999999997
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s14",
+                  "text": "¡Mía! ¡Buenos días!",
+                  "translation": "¡Mía! Good morning!",
+                  "audioUrl": "zik_está_haciendo_amigos_p3_s4_b4_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w30",
+                      "text": "¡Mía!",
+                      "meaning": "mine",
+                      "baseForm": "mío",
+                      "startTimeMs": 0,
+                      "endTimeMs": 640,
+                      "wordAudioUrl": "words/mía",
+                      "baseFormAudioUrl": "words/mío"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w31",
+                      "text": "¡Buenos",
+                      "meaning": "good",
+                      "baseForm": "bueno",
+                      "startTimeMs": 680,
+                      "endTimeMs": 1038,
+                      "wordAudioUrl": "words/buenos",
+                      "baseFormAudioUrl": "words/bueno"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w32",
+                      "text": "días!",
+                      "meaning": "days",
+                      "baseForm": "día",
+                      "startTimeMs": 1166,
+                      "endTimeMs": 4078,
+                      "wordAudioUrl": "words/días",
+                      "baseFormAudioUrl": "words/día"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "conocer_a_los_padres-bubble-3-4-14",
+              "type": "speech",
+              "position": {
+                "x": 0.7375,
+                "y": 0.8775,
+                "width": 0.2024999999999999,
+                "height": 0.09499999999999997
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s15",
+                  "text": "¡Ven a desayunar...!!",
+                  "translation": "Come and have breakfast!",
+                  "audioUrl": "conocer_a_los_padres_p3_s4_b5_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w33",
+                      "text": "¡Ven",
+                      "meaning": "come",
+                      "baseForm": "venir",
+                      "startTimeMs": 0,
+                      "endTimeMs": 238,
+                      "wordAudioUrl": "words/ven",
+                      "baseFormAudioUrl": "words/venir"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w34",
+                      "text": "a",
+                      "meaning": "to",
+                      "baseForm": "a",
+                      "startTimeMs": 318,
+                      "endTimeMs": 398,
+                      "wordAudioUrl": "words/a",
+                      "baseFormAudioUrl": "words/a"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w35",
+                      "text": "desayunar!",
+                      "meaning": "to have breakfast",
+                      "baseForm": "desayunar",
+                      "startTimeMs": 438,
+                      "endTimeMs": 2157,
+                      "wordAudioUrl": "words/desayunar",
+                      "baseFormAudioUrl": "words/desayunar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conocer_a_los_padres-page-4",
+      "pageNumber": 5,
+      "masterImage": "conocer_a_los_padres_p4",
+      "noTextImage": "conocer_a_los_padres_p4_no_text",
+      "panels": [
+        {
+          "id": "conocer_a_los_padres-panel-4-1",
+          "artworkImage": "conocer_a_los_padres_p4_s1",
+          "noTextImage": "conocer_a_los_padres_p4_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.3466666666666667
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-4-1-15",
+              "type": "speech",
+              "position": {
+                "x": 0.6300000000000001,
+                "y": 0.024999999999999994,
+                "width": 0.1449999999999999,
+                "height": 0.09833333333333334
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s16",
+                  "text": "Mamá...",
+                  "translation": "Mum...",
+                  "audioUrl": "zik_está_haciendo_amigos_p4_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w36",
+                      "text": "Mamá...",
+                      "meaning": "mum",
+                      "baseForm": "mamá",
+                      "startTimeMs": 0,
+                      "endTimeMs": 879,
+                      "wordAudioUrl": "words/mamá",
+                      "baseFormAudioUrl": "words/mamá"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-4-2",
+          "artworkImage": "conocer_a_los_padres_p4_s2",
+          "noTextImage": "conocer_a_los_padres_p4_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3466666666666667,
+            "width": 0.48124999999999996,
+            "height": 0.3191666666666666
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-4-2-16",
+              "type": "speech",
+              "position": {
+                "x": 0.3175,
+                "y": 0.5449999999999999,
+                "width": 0.1175,
+                "height": 0.07750000000000001
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s17",
+                  "text": "¡Tú!...",
+                  "translation": "You!",
+                  "audioUrl": "zik_está_haciendo_amigos_p4_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w37",
+                      "text": "¡Tú!...",
+                      "meaning": "you",
+                      "baseForm": "tú",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1040,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/tú",
+                      "baseFormAudioUrl": "words/tú"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-4-3",
+          "artworkImage": "conocer_a_los_padres_p4_s3",
+          "noTextImage": "conocer_a_los_padres_p4_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.48124999999999996,
+            "y": 0.3466666666666667,
+            "width": 0.51875,
+            "height": 0.3191666666666666
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-4-3-17",
+              "type": "speech",
+              "position": {
+                "x": 0.6725,
+                "y": 0.5775000000000001,
+                "width": 0.1825,
+                "height": 0.06666666666666654
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s18",
+                  "text": "...¡aquí!",
+                  "translation": "...here!",
+                  "audioUrl": "zik_está_haciendo_amigos_p4_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w38",
+                      "text": "...¡aquí!",
+                      "meaning": "here",
+                      "baseForm": "aquí",
+                      "startTimeMs": 0,
+                      "endTimeMs": 959,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/aquí",
+                      "baseFormAudioUrl": "words/aquí"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-4-4",
+          "artworkImage": "conocer_a_los_padres_p4_s4",
+          "noTextImage": "conocer_a_los_padres_p4_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6658333333333333,
+            "width": 0.5625,
+            "height": 0.3341666666666667
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-4-4-18",
+              "type": "narration",
+              "isSoundEffect": true,
+              "position": {
+                "x": 0.03250000000000003,
+                "y": 0.6908333333333334,
+                "width": 0.22499999999999998,
+                "height": 0.05499999999999994
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s19",
+                  "text": "Shhhhh...",
+                  "translation": "Shhhhh...",
+                  "audioUrl": "",
+                  "words": []
+                }
+              ]
+            },
+            {
+              "id": "conocer_a_los_padres-bubble-4-4-19",
+              "type": "speech",
+              "position": {
+                "x": 0.33,
+                "y": 0.8891666666666667,
+                "width": 0.18749999999999994,
+                "height": 0.07333333333333336
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s20",
+                  "text": "No hables...",
+                  "translation": "Don't speak...",
+                  "audioUrl": "zik_está_haciendo_amigos_p4_s4_b5_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w39",
+                      "text": "No",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 80,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w40",
+                      "text": "hables...",
+                      "meaning": "speak",
+                      "baseForm": "hablar",
+                      "startTimeMs": 160,
+                      "endTimeMs": 878,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hables",
+                      "baseFormAudioUrl": "words/hablar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-4-5",
+          "artworkImage": "conocer_a_los_padres_p4_s5",
+          "noTextImage": "conocer_a_los_padres_p4_s5_no_text",
+          "panelOrder": 5,
+          "tapZone": {
+            "x": 0.5625,
+            "y": 0.6658333333333333,
+            "width": 0.4375,
+            "height": 0.3341666666666667
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-4-5-20",
+              "type": "speech",
+              "position": {
+                "x": 0.5850000000000001,
+                "y": 0.8841666666666668,
+                "width": 0.16499999999999992,
+                "height": 0.06333333333333324
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s21",
+                  "text": "Comida...",
+                  "translation": "Food...",
+                  "audioUrl": "zik_está_haciendo_amigos_p4_s5_b6_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w41",
+                      "text": "Comida...",
+                      "meaning": "food",
+                      "baseForm": "comida",
+                      "startTimeMs": 0,
+                      "endTimeMs": 957,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/comida",
+                      "baseFormAudioUrl": "words/comida"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "conocer_a_los_padres-bubble-4-5-21",
+              "type": "speech",
+              "position": {
+                "x": 0.79,
+                "y": 0.8758333333333332,
+                "width": 0.14749999999999996,
+                "height": 0.10000000000000009
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s22",
+                  "text": "¿Tienes hambre?",
+                  "translation": "Are you hungry? ",
+                  "audioUrl": "zik_está_haciendo_amigos_p4_s5_b7_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w42",
+                      "text": "¿Tienes",
+                      "meaning": "you have",
+                      "baseForm": "tener",
+                      "startTimeMs": 0,
+                      "endTimeMs": 393,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/tienes",
+                      "baseFormAudioUrl": "words/tener"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w43",
+                      "text": "hambre?",
+                      "meaning": "hunger",
+                      "baseForm": "hambre",
+                      "startTimeMs": 433,
+                      "endTimeMs": 2713,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hambre",
+                      "baseFormAudioUrl": "words/hambre"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w44",
+                      "text": "¿Tienes hambre?",
+                      "meaning": "Are you hungry (do you have hunger)?",
+                      "baseForm": "¿Tienes hambre?",
+                      "vocabQuiz": true,
+                      "manual": true,
+                      "wordAudioUrl": "words/tienes_hambre",
+                      "baseFormAudioUrl": "words/tienes_hambre"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conocer_a_los_padres-page-5",
+      "pageNumber": 6,
+      "masterImage": "conocer_a_los_padres_p5",
+      "noTextImage": "conocer_a_los_padres_p5_no_text",
+      "panels": [
+        {
+          "id": "conocer_a_los_padres-panel-5-1",
+          "artworkImage": "conocer_a_los_padres_p5_s1",
+          "noTextImage": "conocer_a_los_padres_p5_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.3225
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-5-1-22",
+              "type": "speech",
+              "position": {
+                "x": 0.40000000000000013,
+                "y": 0.019166666666666665,
+                "width": 0.1874999999999999,
+                "height": 0.11499999999999999
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s23",
+                  "text": "Buenos días, Mia...",
+                  "translation": "Good morning Mia...",
+                  "audioUrl": "conocer_a_los_padres_p5_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w45",
+                      "text": "Buenos",
+                      "meaning": "good",
+                      "baseForm": "bueno",
+                      "startTimeMs": 0,
+                      "endTimeMs": 238,
+                      "wordAudioUrl": "words/buenos",
+                      "baseFormAudioUrl": "words/bueno"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w46",
+                      "text": "días,",
+                      "meaning": "days",
+                      "baseForm": "día",
+                      "startTimeMs": 318,
+                      "endTimeMs": 718,
+                      "wordAudioUrl": "words/días",
+                      "baseFormAudioUrl": "words/día"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w47",
+                      "text": "Mia...",
+                      "meaning": "Mia",
+                      "baseForm": "mia",
+                      "startTimeMs": 818,
+                      "endTimeMs": 3437,
+                      "wordAudioUrl": "words/mia",
+                      "baseFormAudioUrl": "words/mia"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-5-2",
+          "artworkImage": "conocer_a_los_padres_p5_s2",
+          "noTextImage": "conocer_a_los_padres_p5_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3225,
+            "width": 1,
+            "height": 0.2716666666666667
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-5-2-23",
+              "type": "thought",
+              "position": {
+                "x": 0.8124999999999999,
+                "y": 0.3408333333333333,
+                "width": 0.14,
+                "height": 0.07666666666666666
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s24",
+                  "text": "!!!",
+                  "translation": "",
+                  "audioUrl": "",
+                  "words": []
+                }
+              ]
+            },
+            {
+              "id": "conocer_a_los_padres-bubble-5-2-24",
+              "type": "speech",
+              "position": {
+                "x": 0.1275,
+                "y": 0.45250000000000007,
+                "width": 0.15000000000000002,
+                "height": 0.12666666666666665
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s25",
+                  "text": "¿Qué es eso...?!!",
+                  "translation": "What is that...?",
+                  "audioUrl": "zik_está_haciendo_amigos_p5_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w48",
+                      "text": "¿Qué",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 0,
+                      "endTimeMs": 75,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w49",
+                      "text": "es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 155,
+                      "endTimeMs": 315,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w50",
+                      "text": "eso...?!!",
+                      "meaning": "that",
+                      "baseForm": "eso",
+                      "startTimeMs": 455,
+                      "endTimeMs": 1434,
+                      "wordAudioUrl": "words/eso",
+                      "baseFormAudioUrl": "words/eso"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-5-3",
+          "artworkImage": "conocer_a_los_padres_p5_s3",
+          "noTextImage": "conocer_a_los_padres_p5_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.5941666666666667,
+            "width": 0.40625,
+            "height": 0.40583333333333327
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-5-3-25",
+              "type": "speech",
+              "position": {
+                "x": 0.037500000000000006,
+                "y": 0.7808333333333334,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s26",
+                  "text": "¿Qué está pasando???",
+                  "translation": "What's happening???",
+                  "audioUrl": "zik_está_haciendo_amigos_p5_s3_b4_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w51",
+                      "text": "¿Qué",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 0,
+                      "endTimeMs": 200,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w52",
+                      "text": "está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 224,
+                      "endTimeMs": 320,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w53",
+                      "text": "pasando???",
+                      "meaning": "happening",
+                      "baseForm": "pasar",
+                      "startTimeMs": 420,
+                      "endTimeMs": 3598,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/pasando",
+                      "baseFormAudioUrl": "words/pasar"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w54",
+                      "text": "¿Qué está pasando?",
+                      "meaning": "What is happening? ",
+                      "baseForm": "¿Qué está pasando?",
+                      "vocabQuiz": true,
+                      "manual": true,
+                      "wordAudioUrl": "words/qué_está_pasando",
+                      "baseFormAudioUrl": "words/qué_está_pasando"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-5-4",
+          "artworkImage": "conocer_a_los_padres_p5_s4",
+          "noTextImage": "conocer_a_los_padres_p5_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.40625,
+            "y": 0.5941666666666667,
+            "width": 0.59375,
+            "height": 0.40583333333333327
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-5-4-26",
+              "type": "speech",
+              "position": {
+                "x": 0.46499999999999997,
+                "y": 0.8608333333333333,
+                "width": 0.1875,
+                "height": 0.05999999999999994
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s27",
+                  "text": "No lo sé...",
+                  "translation": "I don't know...",
+                  "audioUrl": "zik_está_haciendo_amigos_p5_s4_b5_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w55",
+                      "text": "No",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 316,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w56",
+                      "text": "lo",
+                      "meaning": "it",
+                      "baseForm": "lo",
+                      "startTimeMs": 369,
+                      "endTimeMs": 475,
+                      "wordAudioUrl": "words/lo",
+                      "baseFormAudioUrl": "words/lo"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w57",
+                      "text": "sé...",
+                      "meaning": "I know",
+                      "baseForm": "saber",
+                      "startTimeMs": 635,
+                      "endTimeMs": 1435,
+                      "wordAudioUrl": "words/sé",
+                      "baseFormAudioUrl": "words/saber"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conocer_a_los_padres-page-6",
+      "pageNumber": 7,
+      "masterImage": "conocer_a_los_padres_p6",
+      "noTextImage": "conocer_a_los_padres_p6_no_text",
+      "panels": [
+        {
+          "id": "conocer_a_los_padres-panel-6-1",
+          "artworkImage": "conocer_a_los_padres_p6_s1",
+          "noTextImage": "conocer_a_los_padres_p6_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.3283333333333333
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-6-1-27",
+              "type": "speech",
+              "position": {
+                "x": 0.46499999999999997,
+                "y": 0.02166666666666668,
+                "width": 0.1825,
+                "height": 0.13999999999999999
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s28",
+                  "text": "¡Voy a llamar a la policía...!",
+                  "translation": "I'm going to call the police...!",
+                  "audioUrl": "zik_está_haciendo_amigos_p6_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w58",
+                      "text": "¡Voy",
+                      "meaning": "I go",
+                      "baseForm": "ir",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/voy",
+                      "baseFormAudioUrl": "words/ir"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w59",
+                      "text": "a",
+                      "meaning": "to",
+                      "baseForm": "a",
+                      "startTimeMs": 200,
+                      "endTimeMs": 240,
+                      "wordAudioUrl": "words/a",
+                      "baseFormAudioUrl": "words/a"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w60",
+                      "text": "llamar",
+                      "meaning": "to call",
+                      "baseForm": "llamar",
+                      "startTimeMs": 293,
+                      "endTimeMs": 559,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/llamar",
+                      "baseFormAudioUrl": "words/llamar"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w61",
+                      "text": "a",
+                      "meaning": "to",
+                      "baseForm": "a",
+                      "startTimeMs": 599,
+                      "endTimeMs": 639,
+                      "wordAudioUrl": "words/a",
+                      "baseFormAudioUrl": "words/a"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w62",
+                      "text": "la",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 692,
+                      "endTimeMs": 798,
+                      "wordAudioUrl": "words/la",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w63",
+                      "text": "policía...!",
+                      "meaning": "police",
+                      "baseForm": "policía",
+                      "startTimeMs": 864,
+                      "endTimeMs": 1513,
+                      "wordAudioUrl": "words/policía",
+                      "baseFormAudioUrl": "words/policía"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "conocer_a_los_padres-bubble-6-1-28",
+              "type": "speech",
+              "position": {
+                "x": 0.4,
+                "y": 0.19666666666666666,
+                "width": 0.13,
+                "height": 0.10666666666666669
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s29",
+                  "text": "¡¡No!!",
+                  "translation": "No!!",
+                  "audioUrl": "conocer_a_los_padres_p6_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w64",
+                      "text": "¡¡No!!",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 880,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-6-2",
+          "artworkImage": "conocer_a_los_padres_p6_s2",
+          "noTextImage": "conocer_a_los_padres_p6_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3283333333333333,
+            "width": 1,
+            "height": 0.3525000000000001
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-6-2-29",
+              "type": "speech",
+              "position": {
+                "x": 0.3449999999999999,
+                "y": 0.3491666666666667,
+                "width": 0.1800000000000001,
+                "height": 0.10500000000000004
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s30",
+                  "text": "¿No? ¿Por qué... no?",
+                  "translation": "No? Why Not? ",
+                  "audioUrl": "zik_está_haciendo_amigos_p6_s2_b3_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w65",
+                      "text": "¿No?",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 600,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w66",
+                      "text": "¿Por",
+                      "meaning": "for",
+                      "baseForm": "por",
+                      "startTimeMs": 700,
+                      "endTimeMs": 878,
+                      "wordAudioUrl": "words/por",
+                      "baseFormAudioUrl": "words/por"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w67",
+                      "text": "qué...",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 958,
+                      "endTimeMs": 1756,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w68",
+                      "text": "no?",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 1836,
+                      "endTimeMs": 3356,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w69",
+                      "text": "¿Por no?",
+                      "meaning": "Why not?",
+                      "baseForm": "¿Por no?",
+                      "vocabQuiz": true,
+                      "manual": true,
+                      "wordAudioUrl": "words/por_no",
+                      "baseFormAudioUrl": "words/por_no"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-6-3",
+          "artworkImage": "conocer_a_los_padres_p6_s3",
+          "noTextImage": "conocer_a_los_padres_p6_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6808333333333334,
+            "width": 1,
+            "height": 0.3191666666666666
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-6-3-30",
+              "type": "speech",
+              "position": {
+                "x": 0.04249999999999998,
+                "y": 0.7175,
+                "width": 0.18750000000000003,
+                "height": 0.09666666666666668
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s31",
+                  "text": "Por favor... no...",
+                  "translation": "Please... no...",
+                  "audioUrl": "zik_está_haciendo_amigos_p6_s3_b4_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w70",
+                      "text": "Por",
+                      "meaning": "for",
+                      "baseForm": "por",
+                      "startTimeMs": 0,
+                      "endTimeMs": 159,
+                      "wordAudioUrl": "words/por",
+                      "baseFormAudioUrl": "words/por"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w71",
+                      "text": "favor...",
+                      "meaning": "favor",
+                      "baseForm": "favor",
+                      "startTimeMs": 279,
+                      "endTimeMs": 1197,
+                      "wordAudioUrl": "words/favor",
+                      "baseFormAudioUrl": "words/favor"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w72",
+                      "text": "no...",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 1383,
+                      "endTimeMs": 2154,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "conocer_a_los_padres-bubble-6-3-31",
+              "type": "speech",
+              "position": {
+                "x": 0.705,
+                "y": 0.8425,
+                "width": 0.15750000000000008,
+                "height": 0.1466666666666666
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s32",
+                  "text": "Hay... un amigo...",
+                  "translation": "There is... a friend...",
+                  "audioUrl": "zik_está_haciendo_amigos_p6_s3_b5_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w73",
+                      "text": "Hay...",
+                      "meaning": "there is",
+                      "baseForm": "haber",
+                      "startTimeMs": 0,
+                      "endTimeMs": 957,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hay",
+                      "baseFormAudioUrl": "words/haber"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w74",
+                      "text": "un",
+                      "meaning": "a",
+                      "baseForm": "uno",
+                      "startTimeMs": 1063,
+                      "endTimeMs": 1275,
+                      "wordAudioUrl": "words/un",
+                      "baseFormAudioUrl": "words/uno"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w75",
+                      "text": "amigo...",
+                      "meaning": "friend",
+                      "baseForm": "amigo",
+                      "startTimeMs": 1368,
+                      "endTimeMs": 2313,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/amigo",
+                      "baseFormAudioUrl": "words/amigo"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conocer_a_los_padres-page-7",
+      "pageNumber": 8,
+      "masterImage": "conocer_a_los_padres_p7",
+      "noTextImage": "conocer_a_los_padres_p7_no_text",
+      "panels": [
+        {
+          "id": "conocer_a_los_padres-panel-7-1",
+          "artworkImage": "conocer_a_los_padres_p7_s1",
+          "noTextImage": "conocer_a_los_padres_p7_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.30333333333333334
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-7-1-32",
+              "type": "speech",
+              "position": {
+                "x": 0.8,
+                "y": 0.026666666666666686,
+                "width": 0.16000000000000003,
+                "height": 0.11000000000000001
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s33",
+                  "text": "¿Un amigo?",
+                  "translation": "A friend? ",
+                  "audioUrl": "conocer_a_los_padres_p7_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w76",
+                      "text": "¿Un",
+                      "meaning": "a",
+                      "baseForm": "un",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/un",
+                      "baseFormAudioUrl": "words/un"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w77",
+                      "text": "amigo?",
+                      "meaning": "friend",
+                      "baseForm": "amigo",
+                      "startTimeMs": 253,
+                      "endTimeMs": 3198,
+                      "wordAudioUrl": "words/amigo",
+                      "baseFormAudioUrl": "words/amigo"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-7-2",
+          "artworkImage": "conocer_a_los_padres_p7_s2",
+          "noTextImage": "conocer_a_los_padres_p7_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.30333333333333334,
+            "width": 0.41000000000000003,
+            "height": 0.3583333333333333
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-7-2-33",
+              "type": "speech",
+              "position": {
+                "x": 0.024999999999999994,
+                "y": 0.5366666666666666,
+                "width": 0.23999999999999988,
+                "height": 0.09999999999999998
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s34",
+                  "text": "Sí... Un pequeño amigo",
+                  "translation": "Yes... A small friend",
+                  "audioUrl": "conocer_a_los_padres_p7_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w78",
+                      "text": "Sí...",
+                      "meaning": "yes",
+                      "baseForm": "sí",
+                      "startTimeMs": 0,
+                      "endTimeMs": 918,
+                      "wordAudioUrl": "words/sí",
+                      "baseFormAudioUrl": "words/sí"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w79",
+                      "text": "Un",
+                      "meaning": "a",
+                      "baseForm": "un",
+                      "startTimeMs": 1064,
+                      "endTimeMs": 1356,
+                      "wordAudioUrl": "words/un",
+                      "baseFormAudioUrl": "words/un"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w80",
+                      "text": "pequeño",
+                      "meaning": "small",
+                      "baseForm": "pequeño",
+                      "startTimeMs": 1422,
+                      "endTimeMs": 1832,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/pequeño",
+                      "baseFormAudioUrl": "words/pequeño"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w81",
+                      "text": "amigo",
+                      "meaning": "friend",
+                      "baseForm": "amigo",
+                      "startTimeMs": 1912,
+                      "endTimeMs": 2472,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/amigo",
+                      "baseFormAudioUrl": "words/amigo"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-7-3",
+          "artworkImage": "conocer_a_los_padres_p7_s3",
+          "noTextImage": "conocer_a_los_padres_p7_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.41000000000000003,
+            "y": 0.30333333333333334,
+            "width": 0.59,
+            "height": 0.3583333333333333
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-7-3-34",
+              "type": "speech",
+              "position": {
+                "x": 0.7575,
+                "y": 0.5250000000000001,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s35",
+                  "text": "¿En la casa...???",
+                  "translation": "In the house...?",
+                  "audioUrl": "zik_está_haciendo_amigos_p7_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w82",
+                      "text": "¿En",
+                      "meaning": "in",
+                      "baseForm": "en",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/en",
+                      "baseFormAudioUrl": "words/en"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w83",
+                      "text": "la",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 266,
+                      "endTimeMs": 478,
+                      "wordAudioUrl": "words/la",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w84",
+                      "text": "casa...???",
+                      "meaning": "house",
+                      "baseForm": "casa",
+                      "startTimeMs": 654,
+                      "endTimeMs": 3116,
+                      "wordAudioUrl": "words/casa",
+                      "baseFormAudioUrl": "words/casa"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w85",
+                      "text": "¿En la casa?",
+                      "meaning": "In the house? ",
+                      "baseForm": "¿En la casa?",
+                      "vocabQuiz": true,
+                      "manual": true,
+                      "wordAudioUrl": "words/en_la_casa",
+                      "baseFormAudioUrl": "words/en_la_casa"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-7-4",
+          "artworkImage": "conocer_a_los_padres_p7_s4",
+          "noTextImage": "conocer_a_los_padres_p7_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6616666666666666,
+            "width": 0.48375,
+            "height": 0.3383333333333334
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-7-4-35",
+              "type": "speech",
+              "position": {
+                "x": 0.195,
+                "y": 0.8491666666666667,
+                "width": 0.24,
+                "height": 0.10666666666666658
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s36",
+                  "text": "Mia... ¿Qué has hecho...???",
+                  "translation": "Mia... What have you done...?",
+                  "audioUrl": "zik_está_haciendo_amigos_p7_s4_b4_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w86",
+                      "text": "Mia...",
+                      "meaning": "my",
+                      "baseForm": "mío",
+                      "startTimeMs": 0,
+                      "endTimeMs": 545,
+                      "wordAudioUrl": "words/mia",
+                      "baseFormAudioUrl": "words/mío"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w87",
+                      "text": "¿Qué",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 905,
+                      "endTimeMs": 1343,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w88",
+                      "text": "has",
+                      "meaning": "have",
+                      "baseForm": "haber",
+                      "startTimeMs": 1423,
+                      "endTimeMs": 1663,
+                      "wordAudioUrl": "words/has",
+                      "baseFormAudioUrl": "words/haber"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w89",
+                      "text": "hecho...???",
+                      "meaning": "done",
+                      "baseForm": "hacer",
+                      "startTimeMs": 1743,
+                      "endTimeMs": 3982,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hecho",
+                      "baseFormAudioUrl": "words/hacer"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w90",
+                      "text": "¿Qué has hecho? ",
+                      "meaning": "What have you done?",
+                      "baseForm": "¿Qué has hecho? ",
+                      "vocabQuiz": true,
+                      "manual": true,
+                      "wordAudioUrl": "words/qué_has_hecho",
+                      "baseFormAudioUrl": "words/qué_has_hecho"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-7-5",
+          "artworkImage": "conocer_a_los_padres_p7_s5",
+          "noTextImage": "conocer_a_los_padres_p7_s5_no_text",
+          "panelOrder": 5,
+          "tapZone": {
+            "x": 0.48375,
+            "y": 0.6616666666666666,
+            "width": 0.51625,
+            "height": 0.3383333333333334
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-7-5-36",
+              "type": "speech",
+              "position": {
+                "x": 0.8049999999999999,
+                "y": 0.6741666666666666,
+                "width": 0.16500000000000004,
+                "height": 0.07333333333333336
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s37",
+                  "text": "No es malo...",
+                  "translation": "He isn't bad...",
+                  "audioUrl": "zik_está_haciendo_amigos_p7_s5_b5_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w91",
+                      "text": "No",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 238,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w92",
+                      "text": "es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 318,
+                      "endTimeMs": 478,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w93",
+                      "text": "malo...",
+                      "meaning": "bad",
+                      "baseForm": "malo",
+                      "startTimeMs": 578,
+                      "endTimeMs": 1197,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/malo",
+                      "baseFormAudioUrl": "words/malo"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "conocer_a_los_padres-bubble-7-5-37",
+              "type": "speech",
+              "position": {
+                "x": 0.5025000000000001,
+                "y": 0.8825000000000001,
+                "width": 0.2024999999999999,
+                "height": 0.08999999999999997
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s38",
+                  "text": "Su nombre es Zik...",
+                  "translation": "His name is Zik...",
+                  "audioUrl": "zik_está_haciendo_amigos_p7_s5_b6_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w94",
+                      "text": "Su",
+                      "meaning": "his/her",
+                      "baseForm": "su",
+                      "startTimeMs": 0,
+                      "endTimeMs": 158,
+                      "wordAudioUrl": "words/su",
+                      "baseFormAudioUrl": "words/su"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w95",
+                      "text": "nombre",
+                      "meaning": "name",
+                      "baseForm": "nombre",
+                      "startTimeMs": 238,
+                      "endTimeMs": 718,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/nombre",
+                      "baseFormAudioUrl": "words/nombre"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w96",
+                      "text": "es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 851,
+                      "endTimeMs": 1117,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w97",
+                      "text": "Zik...",
+                      "meaning": "Zik...",
+                      "baseForm": "zik",
+                      "wordAudioUrl": "words/zik",
+                      "baseFormAudioUrl": "words/zik"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w98",
+                      "text": "Su nombre es Zik",
+                      "meaning": "His name is Zik",
+                      "baseForm": "Su nombre es Zik",
+                      "vocabQuiz": true,
+                      "manual": true,
+                      "wordAudioUrl": "words/su_nombre_es_zik",
+                      "baseFormAudioUrl": "words/su_nombre_es_zik"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conocer_a_los_padres-page-8",
+      "pageNumber": 9,
+      "masterImage": "conocer_a_los_padres_p8",
+      "noTextImage": "conocer_a_los_padres_p8_no_text",
+      "panels": [
+        {
+          "id": "conocer_a_los_padres-panel-8-1",
+          "artworkImage": "conocer_a_los_padres_p8_s1",
+          "noTextImage": "conocer_a_los_padres_p8_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.30083333333333334
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-8-1-38",
+              "type": "speech",
+              "position": {
+                "x": 0.145,
+                "y": 0.03666666666666668,
+                "width": 0.1775,
+                "height": 0.08666666666666666
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s39",
+                  "text": "Él es pequeño...",
+                  "translation": "He is small...",
+                  "audioUrl": "zik_está_haciendo_amigos_p8_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w99",
+                      "text": "Él",
+                      "meaning": "he",
+                      "baseForm": "él",
+                      "startTimeMs": 0,
+                      "endTimeMs": 238,
+                      "wordAudioUrl": "words/él",
+                      "baseFormAudioUrl": "words/él"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w100",
+                      "text": "es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 344,
+                      "endTimeMs": 556,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w101",
+                      "text": "pequeño...",
+                      "meaning": "small",
+                      "baseForm": "pequeño",
+                      "startTimeMs": 662,
+                      "endTimeMs": 2470,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/pequeño",
+                      "baseFormAudioUrl": "words/pequeño"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w102",
+                      "text": "Él es pequeño.",
+                      "meaning": "He is small",
+                      "baseForm": "Él es pequeño.",
+                      "vocabQuiz": true,
+                      "manual": true,
+                      "wordAudioUrl": "words/él_es_pequeño",
+                      "baseFormAudioUrl": "words/él_es_pequeño"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "conocer_a_los_padres-bubble-8-1-39",
+              "type": "speech",
+              "position": {
+                "x": 0.0475,
+                "y": 0.14749999999999996,
+                "width": 0.1675,
+                "height": 0.12833333333333333
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s40",
+                  "text": "...y tiene miedo",
+                  "translation": "...and he's afraid",
+                  "audioUrl": "zik_está_haciendo_amigos_p8_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w103",
+                      "text": "...y",
+                      "meaning": "and",
+                      "baseForm": "y",
+                      "startTimeMs": 0,
+                      "endTimeMs": 159,
+                      "wordAudioUrl": "words/y",
+                      "baseFormAudioUrl": "words/y"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w104",
+                      "text": "tiene",
+                      "meaning": "has",
+                      "baseForm": "tener",
+                      "startTimeMs": 239,
+                      "endTimeMs": 639,
+                      "wordAudioUrl": "words/tiene",
+                      "baseFormAudioUrl": "words/tener"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w105",
+                      "text": "miedo",
+                      "meaning": "fear",
+                      "baseForm": "miedo",
+                      "startTimeMs": 719,
+                      "endTimeMs": 1359,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/miedo",
+                      "baseFormAudioUrl": "words/miedo"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w106",
+                      "text": "Y teine miedo",
+                      "meaning": "He's afraid (He has fear)",
+                      "baseForm": "Y teine miedo",
+                      "vocabQuiz": true,
+                      "manual": true,
+                      "wordAudioUrl": "words/y_teine_miedo",
+                      "baseFormAudioUrl": "words/y_teine_miedo"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-8-2",
+          "artworkImage": "conocer_a_los_padres_p8_s2",
+          "noTextImage": "conocer_a_los_padres_p8_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.30083333333333334,
+            "width": 1,
+            "height": 0.35833333333333334
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-8-2-40",
+              "type": "speech",
+              "position": {
+                "x": 0.33,
+                "y": 0.31416666666666665,
+                "width": 0.1975,
+                "height": 0.06000000000000005
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s41",
+                  "text": "Está bien...",
+                  "translation": "It's okay...",
+                  "audioUrl": "zik_está_haciendo_amigos_p8_s2_b3_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w107",
+                      "text": "Está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 680,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w108",
+                      "text": "bien...",
+                      "meaning": "okay",
+                      "baseForm": "bien",
+                      "startTimeMs": 736,
+                      "endTimeMs": 1119,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/bien",
+                      "baseFormAudioUrl": "words/bien"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w109",
+                      "text": "Está bien.",
+                      "meaning": "It's okay.",
+                      "baseForm": "Está bien.",
+                      "vocabQuiz": true,
+                      "manual": true,
+                      "wordAudioUrl": "words/está_bien",
+                      "baseFormAudioUrl": "words/está_bien"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-8-3",
+          "artworkImage": "conocer_a_los_padres_p8_s3",
+          "noTextImage": "conocer_a_los_padres_p8_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6591666666666667,
+            "width": 0.48124999999999996,
+            "height": 0.3408333333333333
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-8-3-41",
+              "type": "speech",
+              "position": {
+                "x": 0.1025,
+                "y": 0.6758333333333333,
+                "width": 0.1275,
+                "height": 0.050000000000000044
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s42",
+                  "text": "Hola...",
+                  "translation": "Hello...",
+                  "audioUrl": "zik_está_haciendo_amigos_p8_s3_b4_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w110",
+                      "text": "Hola...",
+                      "meaning": "hello",
+                      "baseForm": "hola",
+                      "startTimeMs": 0,
+                      "endTimeMs": 879,
+                      "wordAudioUrl": "words/hola",
+                      "baseFormAudioUrl": "words/hola"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-8-4",
+          "artworkImage": "conocer_a_los_padres_p8_s4",
+          "noTextImage": "conocer_a_los_padres_p8_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.48124999999999996,
+            "y": 0.6591666666666667,
+            "width": 0.51875,
+            "height": 0.3408333333333333
+          },
+          "bubbles": []
+        }
+      ]
+    },
+    {
+      "id": "conocer_a_los_padres-page-9",
+      "pageNumber": 10,
+      "masterImage": "conocer_a_los_padres_p9",
+      "noTextImage": "conocer_a_los_padres_p9_no_text",
+      "panels": [
+        {
+          "id": "conocer_a_los_padres-panel-9-1",
+          "artworkImage": "conocer_a_los_padres_p9_s1",
+          "noTextImage": "conocer_a_los_padres_p9_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.49875,
+            "height": 0.43000000000000005
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-9-1-42",
+              "type": "speech",
+              "position": {
+                "x": 0.13999999999999999,
+                "y": 0.14999999999999994,
+                "width": 0.14750000000000005,
+                "height": 0.08583333333333337
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s43",
+                  "text": "Yo, amiga...",
+                  "translation": "Me, friend",
+                  "audioUrl": "zik_está_haciendo_amigos_p9_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w111",
+                      "text": "Yo,",
+                      "meaning": "I",
+                      "baseForm": "yo",
+                      "startTimeMs": 0,
+                      "endTimeMs": 760,
+                      "wordAudioUrl": "words/yo",
+                      "baseFormAudioUrl": "words/yo"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w112",
+                      "text": "amiga...",
+                      "meaning": "friend",
+                      "baseForm": "amigo",
+                      "startTimeMs": 853,
+                      "endTimeMs": 1435,
+                      "wordAudioUrl": "words/amiga",
+                      "baseFormAudioUrl": "words/amigo"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "conocer_a_los_padres-bubble-9-1-43",
+              "type": "speech",
+              "position": {
+                "x": 0.14499999999999996,
+                "y": 0.29583333333333334,
+                "width": 0.15250000000000002,
+                "height": 0.08166666666666672
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s44",
+                  "text": "Zik, amigo",
+                  "translation": "Zik, friend",
+                  "audioUrl": "zik_está_haciendo_amigos_p9_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w113",
+                      "text": "Zik,",
+                      "meaning": "Zik,",
+                      "baseForm": "zik",
+                      "wordAudioUrl": "words/zik",
+                      "baseFormAudioUrl": "words/zik"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w114",
+                      "text": "amigo.",
+                      "meaning": "friend",
+                      "baseForm": "amigo",
+                      "manual": true,
+                      "wordAudioUrl": "words/amigo",
+                      "baseFormAudioUrl": "words/amigo"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-9-2",
+          "artworkImage": "conocer_a_los_padres_p9_s2",
+          "noTextImage": "conocer_a_los_padres_p9_s2_no_text",
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.49875,
+            "y": 0,
+            "width": 0.50125,
+            "height": 0.43000000000000005
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-9-2-44",
+              "type": "speech",
+              "position": {
+                "x": 0.5175,
+                "y": 0.28250000000000003,
+                "width": 0.15000000000000002,
+                "height": 0.08999999999999997
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s45",
+                  "text": "Mamá... Papá...",
+                  "translation": "Mum... Dad...",
+                  "audioUrl": "zik_está_haciendo_amigos_p9_s2_b3_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w115",
+                      "text": "Mamá...",
+                      "meaning": "mum",
+                      "baseForm": "mamá",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1638,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mamá",
+                      "baseFormAudioUrl": "words/mamá"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w116",
+                      "text": "Papá...",
+                      "meaning": "dad",
+                      "baseForm": "papá",
+                      "startTimeMs": 1808,
+                      "endTimeMs": 3036,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/papá",
+                      "baseFormAudioUrl": "words/papá"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-9-3",
+          "artworkImage": "conocer_a_los_padres_p9_s3",
+          "noTextImage": "conocer_a_los_padres_p9_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.43000000000000005,
+            "width": 0.35125,
+            "height": 0.57
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-9-3-45",
+              "type": "speech",
+              "position": {
+                "x": 0.017500000000000016,
+                "y": 0.47750000000000004,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s46",
+                  "text": "¿Puede hablar???",
+                  "translation": "Can he speak? ",
+                  "audioUrl": "zik_está_haciendo_amigos_p9_s3_b4_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w117",
+                      "text": "¿Puede",
+                      "meaning": "can",
+                      "baseForm": "poder",
+                      "startTimeMs": 0,
+                      "endTimeMs": 396,
+                      "wordAudioUrl": "words/puede",
+                      "baseFormAudioUrl": "words/poder"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w118",
+                      "text": "hablar???",
+                      "meaning": "to speak",
+                      "baseForm": "hablar",
+                      "startTimeMs": 487,
+                      "endTimeMs": 1993,
+                      "wordAudioUrl": "words/hablar",
+                      "baseFormAudioUrl": "words/hablar"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w119",
+                      "text": "¿Puede hablar?",
+                      "meaning": "Can he speak? ",
+                      "baseForm": "¿Puede hablar?",
+                      "vocabQuiz": true,
+                      "manual": true,
+                      "wordAudioUrl": "words/puede_hablar",
+                      "baseFormAudioUrl": "words/puede_hablar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "conocer_a_los_padres-panel-9-4",
+          "artworkImage": "conocer_a_los_padres_p9_s4",
+          "noTextImage": "conocer_a_los_padres_p9_s4_no_text",
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.35125,
+            "y": 0.43000000000000005,
+            "width": 0.6487499999999999,
+            "height": 0.57
+          },
+          "bubbles": [
+            {
+              "id": "conocer_a_los_padres-bubble-9-4-46",
+              "type": "speech",
+              "position": {
+                "x": 0.42000000000000004,
+                "y": 0.6491666666666667,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s47",
+                  "text": "Un poco...",
+                  "translation": "A little...",
+                  "audioUrl": "zik_está_haciendo_amigos_p9_s4_b5_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w120",
+                      "text": "Un",
+                      "meaning": "a",
+                      "baseForm": "un",
+                      "startTimeMs": 0,
+                      "endTimeMs": 317,
+                      "wordAudioUrl": "words/un",
+                      "baseFormAudioUrl": "words/un"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w121",
+                      "text": "poco...",
+                      "meaning": "little",
+                      "baseForm": "poco",
+                      "startTimeMs": 509,
+                      "endTimeMs": 1517,
+                      "wordAudioUrl": "words/poco",
+                      "baseFormAudioUrl": "words/poco"
+                    },
+                    {
+                      "id": "conocer_a_los_padres-w122",
+                      "text": "Un poco.",
+                      "meaning": "A little",
+                      "baseForm": "Un poco.",
+                      "vocabQuiz": true,
+                      "manual": true,
+                      "wordAudioUrl": "words/un_poco",
+                      "baseFormAudioUrl": "words/un_poco"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "conocer_a_los_padres-bubble-9-4-47",
+              "type": "narration",
+              "position": {
+                "x": 0.5275,
+                "y": 0.8525,
+                "width": 0.42499999999999993,
+                "height": 0.08333333333333326
+              },
+              "sentences": [
+                {
+                  "id": "conocer_a_los_padres-s48",
+                  "text": "Continuará...",
+                  "translation": "To be continued",
+                  "audioUrl": "zik_está_haciendo_amigos_p9_s4_b6_t1",
+                  "words": [
+                    {
+                      "id": "conocer_a_los_padres-w123",
+                      "text": "Continuará...",
+                      "meaning": "will continue",
+                      "baseForm": "continuar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1031,
+                      "wordAudioUrl": "words/continuará",
+                      "baseFormAudioUrl": "words/continuar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "reviewWords": [
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w1",
+        "text": "Conocer",
+        "meaning": "to meet",
+        "baseForm": "conocer",
+        "wordAudioUrl": "words/conocer",
+        "baseFormAudioUrl": "words/conocer"
+      },
+      "panelId": "conocer_a_los_padres-panel-cover",
+      "pageId": "conocer_a_los_padres-page-cover"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w4",
+        "text": "padres",
+        "meaning": "parents",
+        "baseForm": "padre",
+        "wordAudioUrl": "words/padres",
+        "baseFormAudioUrl": "words/padre"
+      },
+      "panelId": "conocer_a_los_padres-panel-cover",
+      "pageId": "conocer_a_los_padres-page-cover"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w6",
+        "text": "de",
+        "meaning": "of",
+        "baseForm": "de",
+        "wordAudioUrl": "words/de",
+        "baseFormAudioUrl": "words/de"
+      },
+      "panelId": "conocer_a_los_padres-panel-1-1",
+      "pageId": "conocer_a_los_padres-page-1"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w7",
+        "text": "día",
+        "meaning": "daytime",
+        "baseForm": "día",
+        "wordAudioUrl": "words/día",
+        "baseFormAudioUrl": "words/día"
+      },
+      "panelId": "conocer_a_los_padres-panel-1-1",
+      "pageId": "conocer_a_los_padres-page-1"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w8",
+        "text": "¿Qué...?",
+        "meaning": "what",
+        "baseForm": "qué",
+        "wordAudioUrl": "words/qué",
+        "baseFormAudioUrl": "words/qué"
+      },
+      "panelId": "conocer_a_los_padres-panel-1-2",
+      "pageId": "conocer_a_los_padres-page-1"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w11",
+        "text": "¿Dónde",
+        "meaning": "where",
+        "baseForm": "dónde",
+        "wordAudioUrl": "words/dónde",
+        "baseFormAudioUrl": "words/dónde"
+      },
+      "panelId": "conocer_a_los_padres-panel-1-4",
+      "pageId": "conocer_a_los_padres-page-1"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w12",
+        "text": "está",
+        "meaning": "is",
+        "baseForm": "estar",
+        "wordAudioUrl": "words/está",
+        "baseFormAudioUrl": "words/estar"
+      },
+      "panelId": "conocer_a_los_padres-panel-1-4",
+      "pageId": "conocer_a_los_padres-page-1"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w14",
+        "text": "¿Fue",
+        "meaning": "was",
+        "baseForm": "ser",
+        "wordAudioUrl": "words/fue",
+        "baseFormAudioUrl": "words/ser"
+      },
+      "panelId": "conocer_a_los_padres-panel-2-1",
+      "pageId": "conocer_a_los_padres-page-2"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w16",
+        "text": "sueño...?",
+        "meaning": "dream",
+        "baseForm": "sueño",
+        "wordAudioUrl": "words/sueño",
+        "baseFormAudioUrl": "words/sueño"
+      },
+      "panelId": "conocer_a_los_padres-panel-2-1",
+      "pageId": "conocer_a_los_padres-page-2"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w21",
+        "text": "¡Estás",
+        "meaning": "you are",
+        "baseForm": "estar",
+        "wordAudioUrl": "words/estás",
+        "baseFormAudioUrl": "words/estar"
+      },
+      "panelId": "conocer_a_los_padres-panel-2-4",
+      "pageId": "conocer_a_los_padres-page-2"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w22",
+        "text": "aquí!",
+        "meaning": "here",
+        "baseForm": "aquí",
+        "wordAudioUrl": "words/aquí",
+        "baseFormAudioUrl": "words/aquí"
+      },
+      "panelId": "conocer_a_los_padres-panel-2-4",
+      "pageId": "conocer_a_los_padres-page-2"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w25",
+        "text": "¡Buenos",
+        "meaning": "good",
+        "baseForm": "bueno",
+        "wordAudioUrl": "words/buenos",
+        "baseFormAudioUrl": "words/bueno"
+      },
+      "panelId": "conocer_a_los_padres-panel-3-2",
+      "pageId": "conocer_a_los_padres-page-3"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w27",
+        "text": "Buenos días",
+        "meaning": "Good morning",
+        "baseForm": "Buenos días",
+        "wordAudioUrl": "words/buenos_días",
+        "baseFormAudioUrl": "words/buenos_días"
+      },
+      "panelId": "conocer_a_los_padres-panel-3-2",
+      "pageId": "conocer_a_los_padres-page-3"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w37",
+        "text": "¡Tú!...",
+        "meaning": "you",
+        "baseForm": "tú",
+        "wordAudioUrl": "words/tú",
+        "baseFormAudioUrl": "words/tú"
+      },
+      "panelId": "conocer_a_los_padres-panel-4-2",
+      "pageId": "conocer_a_los_padres-page-4"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w38",
+        "text": "...¡aquí!",
+        "meaning": "here",
+        "baseForm": "aquí",
+        "wordAudioUrl": "words/aquí",
+        "baseFormAudioUrl": "words/aquí"
+      },
+      "panelId": "conocer_a_los_padres-panel-4-3",
+      "pageId": "conocer_a_los_padres-page-4"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w40",
+        "text": "hables...",
+        "meaning": "speak",
+        "baseForm": "hablar",
+        "wordAudioUrl": "words/hables",
+        "baseFormAudioUrl": "words/hablar"
+      },
+      "panelId": "conocer_a_los_padres-panel-4-4",
+      "pageId": "conocer_a_los_padres-page-4"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w41",
+        "text": "Comida...",
+        "meaning": "food",
+        "baseForm": "comida",
+        "wordAudioUrl": "words/comida",
+        "baseFormAudioUrl": "words/comida"
+      },
+      "panelId": "conocer_a_los_padres-panel-4-5",
+      "pageId": "conocer_a_los_padres-page-4"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w42",
+        "text": "¿Tienes",
+        "meaning": "you have",
+        "baseForm": "tener",
+        "wordAudioUrl": "words/tienes",
+        "baseFormAudioUrl": "words/tener"
+      },
+      "panelId": "conocer_a_los_padres-panel-4-5",
+      "pageId": "conocer_a_los_padres-page-4"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w43",
+        "text": "hambre?",
+        "meaning": "hunger",
+        "baseForm": "hambre",
+        "wordAudioUrl": "words/hambre",
+        "baseFormAudioUrl": "words/hambre"
+      },
+      "panelId": "conocer_a_los_padres-panel-4-5",
+      "pageId": "conocer_a_los_padres-page-4"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w44",
+        "text": "¿Tienes hambre?",
+        "meaning": "Are you hungry (do you have hunger)?",
+        "baseForm": "¿Tienes hambre?",
+        "wordAudioUrl": "words/tienes_hambre",
+        "baseFormAudioUrl": "words/tienes_hambre"
+      },
+      "panelId": "conocer_a_los_padres-panel-4-5",
+      "pageId": "conocer_a_los_padres-page-4"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w53",
+        "text": "pasando???",
+        "meaning": "happening",
+        "baseForm": "pasar",
+        "wordAudioUrl": "words/pasando",
+        "baseFormAudioUrl": "words/pasar"
+      },
+      "panelId": "conocer_a_los_padres-panel-5-3",
+      "pageId": "conocer_a_los_padres-page-5"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w54",
+        "text": "¿Qué está pasando?",
+        "meaning": "What is happening? ",
+        "baseForm": "¿Qué está pasando?",
+        "wordAudioUrl": "words/qué_está_pasando",
+        "baseFormAudioUrl": "words/qué_está_pasando"
+      },
+      "panelId": "conocer_a_los_padres-panel-5-3",
+      "pageId": "conocer_a_los_padres-page-5"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w58",
+        "text": "¡Voy",
+        "meaning": "I go",
+        "baseForm": "ir",
+        "wordAudioUrl": "words/voy",
+        "baseFormAudioUrl": "words/ir"
+      },
+      "panelId": "conocer_a_los_padres-panel-6-1",
+      "pageId": "conocer_a_los_padres-page-6"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w60",
+        "text": "llamar",
+        "meaning": "to call",
+        "baseForm": "llamar",
+        "wordAudioUrl": "words/llamar",
+        "baseFormAudioUrl": "words/llamar"
+      },
+      "panelId": "conocer_a_los_padres-panel-6-1",
+      "pageId": "conocer_a_los_padres-page-6"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w69",
+        "text": "¿Por no?",
+        "meaning": "Why not?",
+        "baseForm": "¿Por no?",
+        "wordAudioUrl": "words/por_no",
+        "baseFormAudioUrl": "words/por_no"
+      },
+      "panelId": "conocer_a_los_padres-panel-6-2",
+      "pageId": "conocer_a_los_padres-page-6"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w73",
+        "text": "Hay...",
+        "meaning": "there is",
+        "baseForm": "haber",
+        "wordAudioUrl": "words/hay",
+        "baseFormAudioUrl": "words/haber"
+      },
+      "panelId": "conocer_a_los_padres-panel-6-3",
+      "pageId": "conocer_a_los_padres-page-6"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w75",
+        "text": "amigo...",
+        "meaning": "friend",
+        "baseForm": "amigo",
+        "wordAudioUrl": "words/amigo",
+        "baseFormAudioUrl": "words/amigo"
+      },
+      "panelId": "conocer_a_los_padres-panel-6-3",
+      "pageId": "conocer_a_los_padres-page-6"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w80",
+        "text": "pequeño",
+        "meaning": "small",
+        "baseForm": "pequeño",
+        "wordAudioUrl": "words/pequeño",
+        "baseFormAudioUrl": "words/pequeño"
+      },
+      "panelId": "conocer_a_los_padres-panel-7-2",
+      "pageId": "conocer_a_los_padres-page-7"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w81",
+        "text": "amigo",
+        "meaning": "friend",
+        "baseForm": "amigo",
+        "wordAudioUrl": "words/amigo",
+        "baseFormAudioUrl": "words/amigo"
+      },
+      "panelId": "conocer_a_los_padres-panel-7-2",
+      "pageId": "conocer_a_los_padres-page-7"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w85",
+        "text": "¿En la casa?",
+        "meaning": "In the house? ",
+        "baseForm": "¿En la casa?",
+        "wordAudioUrl": "words/en_la_casa",
+        "baseFormAudioUrl": "words/en_la_casa"
+      },
+      "panelId": "conocer_a_los_padres-panel-7-3",
+      "pageId": "conocer_a_los_padres-page-7"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w89",
+        "text": "hecho...???",
+        "meaning": "done",
+        "baseForm": "hacer",
+        "wordAudioUrl": "words/hecho",
+        "baseFormAudioUrl": "words/hacer"
+      },
+      "panelId": "conocer_a_los_padres-panel-7-4",
+      "pageId": "conocer_a_los_padres-page-7"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w90",
+        "text": "¿Qué has hecho? ",
+        "meaning": "What have you done?",
+        "baseForm": "¿Qué has hecho? ",
+        "wordAudioUrl": "words/qué_has_hecho",
+        "baseFormAudioUrl": "words/qué_has_hecho"
+      },
+      "panelId": "conocer_a_los_padres-panel-7-4",
+      "pageId": "conocer_a_los_padres-page-7"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w93",
+        "text": "malo...",
+        "meaning": "bad",
+        "baseForm": "malo",
+        "wordAudioUrl": "words/malo",
+        "baseFormAudioUrl": "words/malo"
+      },
+      "panelId": "conocer_a_los_padres-panel-7-5",
+      "pageId": "conocer_a_los_padres-page-7"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w95",
+        "text": "nombre",
+        "meaning": "name",
+        "baseForm": "nombre",
+        "wordAudioUrl": "words/nombre",
+        "baseFormAudioUrl": "words/nombre"
+      },
+      "panelId": "conocer_a_los_padres-panel-7-5",
+      "pageId": "conocer_a_los_padres-page-7"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w98",
+        "text": "Su nombre es Zik",
+        "meaning": "His name is Zik",
+        "baseForm": "Su nombre es Zik",
+        "wordAudioUrl": "words/su_nombre_es_zik",
+        "baseFormAudioUrl": "words/su_nombre_es_zik"
+      },
+      "panelId": "conocer_a_los_padres-panel-7-5",
+      "pageId": "conocer_a_los_padres-page-7"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w101",
+        "text": "pequeño...",
+        "meaning": "small",
+        "baseForm": "pequeño",
+        "wordAudioUrl": "words/pequeño",
+        "baseFormAudioUrl": "words/pequeño"
+      },
+      "panelId": "conocer_a_los_padres-panel-8-1",
+      "pageId": "conocer_a_los_padres-page-8"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w102",
+        "text": "Él es pequeño.",
+        "meaning": "He is small",
+        "baseForm": "Él es pequeño.",
+        "wordAudioUrl": "words/él_es_pequeño",
+        "baseFormAudioUrl": "words/él_es_pequeño"
+      },
+      "panelId": "conocer_a_los_padres-panel-8-1",
+      "pageId": "conocer_a_los_padres-page-8"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w105",
+        "text": "miedo",
+        "meaning": "fear",
+        "baseForm": "miedo",
+        "wordAudioUrl": "words/miedo",
+        "baseFormAudioUrl": "words/miedo"
+      },
+      "panelId": "conocer_a_los_padres-panel-8-1",
+      "pageId": "conocer_a_los_padres-page-8"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w106",
+        "text": "Y teine miedo",
+        "meaning": "He's afraid (He has fear)",
+        "baseForm": "Y teine miedo",
+        "wordAudioUrl": "words/y_teine_miedo",
+        "baseFormAudioUrl": "words/y_teine_miedo"
+      },
+      "panelId": "conocer_a_los_padres-panel-8-1",
+      "pageId": "conocer_a_los_padres-page-8"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w108",
+        "text": "bien...",
+        "meaning": "okay",
+        "baseForm": "bien",
+        "wordAudioUrl": "words/bien",
+        "baseFormAudioUrl": "words/bien"
+      },
+      "panelId": "conocer_a_los_padres-panel-8-2",
+      "pageId": "conocer_a_los_padres-page-8"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w109",
+        "text": "Está bien.",
+        "meaning": "It's okay.",
+        "baseForm": "Está bien.",
+        "wordAudioUrl": "words/está_bien",
+        "baseFormAudioUrl": "words/está_bien"
+      },
+      "panelId": "conocer_a_los_padres-panel-8-2",
+      "pageId": "conocer_a_los_padres-page-8"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w115",
+        "text": "Mamá...",
+        "meaning": "mum",
+        "baseForm": "mamá",
+        "wordAudioUrl": "words/mamá",
+        "baseFormAudioUrl": "words/mamá"
+      },
+      "panelId": "conocer_a_los_padres-panel-9-2",
+      "pageId": "conocer_a_los_padres-page-9"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w116",
+        "text": "Papá...",
+        "meaning": "dad",
+        "baseForm": "papá",
+        "wordAudioUrl": "words/papá",
+        "baseFormAudioUrl": "words/papá"
+      },
+      "panelId": "conocer_a_los_padres-panel-9-2",
+      "pageId": "conocer_a_los_padres-page-9"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w119",
+        "text": "¿Puede hablar?",
+        "meaning": "Can he speak? ",
+        "baseForm": "¿Puede hablar?",
+        "wordAudioUrl": "words/puede_hablar",
+        "baseFormAudioUrl": "words/puede_hablar"
+      },
+      "panelId": "conocer_a_los_padres-panel-9-3",
+      "pageId": "conocer_a_los_padres-page-9"
+    },
+    {
+      "word": {
+        "id": "conocer_a_los_padres-w122",
+        "text": "Un poco.",
+        "meaning": "A little",
+        "baseForm": "Un poco.",
+        "wordAudioUrl": "words/un_poco",
+        "baseFormAudioUrl": "words/un_poco"
+      },
+      "panelId": "conocer_a_los_padres-panel-9-4",
+      "pageId": "conocer_a_los_padres-page-9"
+    }
+  ],
+  "wordAudioMap": {
+    "conocer": "words/conocer",
+    "a": "words/a",
+    "los": "words/los",
+    "el": "words/el",
+    "padres": "words/padres",
+    "padre": "words/padre",
+    "es": "words/es",
+    "ser": "words/ser",
+    "de": "words/de",
+    "día": "words/día",
+    "qué": "words/qué",
+    "la": "words/la",
+    "nave": "words/nave",
+    "dónde": "words/dónde",
+    "está": "words/está",
+    "estar": "words/estar",
+    "zik": "words/zik",
+    "fue": "words/fue",
+    "un": "words/un",
+    "sueño": "words/sueño",
+    "ras": "words/ras",
+    "hola": "words/hola",
+    "estás": "words/estás",
+    "aquí": "words/aquí",
+    "tienes": "words/tienes",
+    "tener": "words/tener",
+    "buenos": "words/buenos",
+    "bueno": "words/bueno",
+    "días": "words/días",
+    "buenos_días": "words/buenos_días",
+    "mía": "words/mía",
+    "mío": "words/mío",
+    "ven": "words/ven",
+    "venir": "words/venir",
+    "desayunar": "words/desayunar",
+    "mamá": "words/mamá",
+    "tú": "words/tú",
+    "no": "words/no",
+    "hables": "words/hables",
+    "hablar": "words/hablar",
+    "comida": "words/comida",
+    "hambre": "words/hambre",
+    "tienes_hambre": "words/tienes_hambre",
+    "mia": "words/mia",
+    "eso": "words/eso",
+    "pasando": "words/pasando",
+    "pasar": "words/pasar",
+    "qué_está_pasando": "words/qué_está_pasando",
+    "lo": "words/lo",
+    "sé": "words/sé",
+    "saber": "words/saber",
+    "voy": "words/voy",
+    "ir": "words/ir",
+    "llamar": "words/llamar",
+    "policía": "words/policía",
+    "por": "words/por",
+    "por_no": "words/por_no",
+    "favor": "words/favor",
+    "hay": "words/hay",
+    "haber": "words/haber",
+    "uno": "words/uno",
+    "amigo": "words/amigo",
+    "sí": "words/sí",
+    "pequeño": "words/pequeño",
+    "en": "words/en",
+    "casa": "words/casa",
+    "en_la_casa": "words/en_la_casa",
+    "has": "words/has",
+    "hecho": "words/hecho",
+    "hacer": "words/hacer",
+    "qué_has_hecho": "words/qué_has_hecho",
+    "malo": "words/malo",
+    "su": "words/su",
+    "nombre": "words/nombre",
+    "su_nombre_es_zik": "words/su_nombre_es_zik",
+    "él": "words/él",
+    "él_es_pequeño": "words/él_es_pequeño",
+    "y": "words/y",
+    "tiene": "words/tiene",
+    "miedo": "words/miedo",
+    "y_teine_miedo": "words/y_teine_miedo",
+    "bien": "words/bien",
+    "está_bien": "words/está_bien",
+    "yo": "words/yo",
+    "amiga": "words/amiga",
+    "papá": "words/papá",
+    "puede": "words/puede",
+    "poder": "words/poder",
+    "puede_hablar": "words/puede_hablar",
+    "poco": "words/poco",
+    "un_poco": "words/un_poco",
+    "continuará": "words/continuará",
+    "continuar": "words/continuar"
+  }
+}

@@ -108,13 +108,13 @@ struct LibraryView: View {
     }
 
     private func deleteComic(_ comic: Comic) {
-        try? localStorage.deleteComic(comic.id)
+        localStorage.deleteComic(comic.id)
         progressManager.clearProgress(for: comic.id)
     }
 
     private func deleteCollection(_ collection: ComicCollection) {
         for comic in collection.comics {
-            try? localStorage.deleteComic(comic.id)
+            localStorage.deleteComic(comic.id)
             progressManager.clearProgress(for: comic.id)
         }
     }

@@ -12,6 +12,8 @@ class WhisperService: ObservableObject {
 
     private var audioRecorder: AVAudioRecorder?
     private var recordingURL: URL?
+    private var meteringTimer: Timer?
+    private var peakPower: Float = -160
 
     private let apiURL = URL(string: "https://api.openai.com/v1/audio/transcriptions")!
 
@@ -57,22 +59,46 @@ class WhisperService: ObservableObject {
 
         do {
             audioRecorder = try AVAudioRecorder(url: url, settings: settings)
+            audioRecorder?.isMeteringEnabled = true
             audioRecorder?.record()
             isRecording = true
+            peakPower = -160
+
+            // Poll audio levels to detect speech
+            meteringTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+                Task { @MainActor in
+                    guard let self = self, let recorder = self.audioRecorder else { return }
+                    recorder.updateMeters()
+                    let power = recorder.averagePower(forChannel: 0)
+                    if power > self.peakPower {
+                        self.peakPower = power
+                    }
+                }
+            }
         } catch {
             self.error = "Failed to start recording: \(error.localizedDescription)"
         }
     }
 
     /// Stop recording and transcribe with Whisper
-    func stopRecording() async -> String {
+    func stopRecording(expectedText: String? = nil) async -> String {
         guard let recorder = audioRecorder, recorder.isRecording else {
             return ""
         }
 
         recorder.stop()
         isRecording = false
+        meteringTimer?.invalidate()
+        meteringTimer = nil
         isProcessing = true
+
+        // Skip transcription if no speech detected (peak power below threshold)
+        // -40 dB is roughly the threshold for ambient silence vs actual speech
+        if peakPower < -40 {
+            print("[Whisper] No speech detected (peak power: \(peakPower) dB), skipping transcription")
+            isProcessing = false
+            return ""
+        }
 
         defer {
             // Cleanup
@@ -101,7 +127,7 @@ class WhisperService: ObservableObject {
         }
 
         do {
-            let transcription = try await transcribeWithWhisper(audioURL: url)
+            let transcription = try await transcribeWithWhisper(audioURL: url, prompt: expectedText)
             transcribedText = transcription
             isProcessing = false
             return transcription
@@ -117,6 +143,8 @@ class WhisperService: ObservableObject {
         audioRecorder?.stop()
         audioRecorder = nil
         isRecording = false
+        meteringTimer?.invalidate()
+        meteringTimer = nil
 
         if let url = recordingURL {
             try? FileManager.default.removeItem(at: url)
@@ -125,7 +153,7 @@ class WhisperService: ObservableObject {
     }
 
     /// Send audio to Whisper API for transcription
-    private func transcribeWithWhisper(audioURL: URL) async throws -> String {
+    private func transcribeWithWhisper(audioURL: URL, prompt: String? = nil) async throws -> String {
         let apiKey = Secrets.openAIAPIKey
 
         guard apiKey != "YOUR_OPENAI_API_KEY_HERE" else {
@@ -153,6 +181,13 @@ class WhisperService: ObservableObject {
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
         body.append("Content-Disposition: form-data; name=\"language\"\r\n\r\n".data(using: .utf8)!)
         body.append("es\r\n".data(using: .utf8)!)
+
+        // Add prompt hint to reduce hallucination on short audio
+        if let prompt = prompt, !prompt.isEmpty {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"prompt\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(prompt)\r\n".data(using: .utf8)!)
+        }
 
         // Add audio file
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
@@ -199,24 +234,42 @@ class WhisperService: ObservableObject {
         let spokenWords = spokenClean.split(separator: " ").map { String($0) }
         let expectedWords = expectedClean.split(separator: " ").map { String($0) }
 
+        // Identify proper nouns from the original text (capitalized, not first word)
+        let originalWords = expected
+            .replacingOccurrences(of: "¿", with: "").replacingOccurrences(of: "¡", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .split(separator: " ").map { String($0) }
+        let properNounIndices: Set<Int> = Set(originalWords.indices.filter { idx in
+            guard idx > 0, let first = originalWords[idx].first else { return false }
+            return first.isUppercase
+        })
+
         guard !expectedWords.isEmpty else { return (true, 1.0) }
 
         var matchedCount = 0
         var usedSpokenIndices = Set<Int>()
 
-        for expectedWord in expectedWords {
+        for (wordIdx, expectedWord) in expectedWords.enumerated() {
             // Try exact match first
             if let idx = spokenWords.indices.first(where: { !usedSpokenIndices.contains($0) && spokenWords[$0] == expectedWord }) {
                 matchedCount += 1
                 usedSpokenIndices.insert(idx)
             } else {
-                // Fuzzy match: accept if edit distance is small relative to word length
-                // This handles Whisper transcribing names/sounds differently (e.g. "zik" vs "zeke")
+                let isProperNoun = properNounIndices.contains(wordIdx)
+                // Fuzzy match: lenient for names (up to 50%), strict for regular words (1 edit only)
                 for (idx, spokenWord) in spokenWords.enumerated() where !usedSpokenIndices.contains(idx) {
-                    let maxLen = max(expectedWord.count, spokenWord.count)
                     let distance = levenshteinDistance(expectedWord, spokenWord)
-                    // Allow up to ~50% character difference (handles name variations like "zik"/"zeke")
-                    if maxLen > 0 && Double(distance) / Double(maxLen) <= 0.5 {
+                    let maxLen = max(expectedWord.count, spokenWord.count)
+                    let matches: Bool
+                    if isProperNoun {
+                        // Names: allow up to 50% difference (handles "Zik"/"Zeke", "Mía"/"Mia")
+                        matches = maxLen > 0 && Double(distance) / Double(maxLen) <= 0.5
+                    } else {
+                        // Regular words: only allow 1 insertion/deletion (different lengths),
+                        // not substitutions — Spanish endings matter (problema/problemo, esta/esto)
+                        matches = distance == 1 && expectedWord.count != spokenWord.count
+                    }
+                    if matches {
                         matchedCount += 1
                         usedSpokenIndices.insert(idx)
                         break
@@ -227,8 +280,13 @@ class WhisperService: ObservableObject {
 
         let score = Double(matchedCount) / Double(expectedWords.count)
 
-        // Pass if 70% of words match
-        return (score >= 0.7, score)
+        // Word count must match exactly
+        if spokenWords.count != expectedWords.count {
+            return (false, score * 0.5)
+        }
+
+        // Require all words to match
+        return (score >= 1.0, score)
     }
 
     /// Levenshtein edit distance between two strings

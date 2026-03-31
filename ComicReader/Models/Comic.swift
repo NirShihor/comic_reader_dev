@@ -20,6 +20,8 @@ struct Sentence: Identifiable, Codable, Hashable {
     let text: String
     var translation: String?
     var audioUrl: String?
+    var alternativeTexts: [String]?
+    var alternativeAudioUrls: [String]?
     let words: [Word]
 }
 
@@ -28,6 +30,7 @@ struct Bubble: Identifiable, Codable, Hashable {
     let id: String
     let type: BubbleType
     var isSoundEffect: Bool?
+    var imageUrl: String?
     let positionX: Double  // percentage 0-1
     let positionY: Double
     let width: Double
@@ -38,7 +41,14 @@ struct Bubble: Identifiable, Codable, Hashable {
         case speech
         case narration
         case thought
+        case image
     }
+}
+
+// MARK: - CornerPoint
+struct CornerPoint: Codable, Hashable {
+    let x: Double
+    let y: Double
 }
 
 // MARK: - Panel
@@ -46,6 +56,8 @@ struct Panel: Identifiable, Codable, Hashable {
     let id: String
     let artworkImage: String
     var noTextImage: String?
+    let floating: Bool
+    var corners: [CornerPoint]?
     let panelOrder: Int
     // Tap zone coordinates for master page (percentage 0-1)
     let tapZoneX: Double
