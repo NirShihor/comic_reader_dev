@@ -106,11 +106,9 @@ struct PageView: View {
                                         let normalizedY = location.y / imageGeometry.size.height
 
                                         // Find which panel was tapped
-                                        // Check floating panels first (higher z-order), then regular panels
-                                        let sortedPanels = currentPage.panels.sorted { p1, p2 in
-                                            if p1.floating != p2.floating { return p1.floating }
-                                            return p1.panelOrder < p2.panelOrder
-                                        }
+                                        // Skip floating panels — they appear in reading order during scroll, not via tap
+                                        let nonFloatingPanels = currentPage.panels.filter { !$0.floating }
+                                        let sortedPanels = nonFloatingPanels.sorted { $0.panelOrder < $1.panelOrder }
                                         for panel in sortedPanels {
                                             let inXRange = normalizedX >= panel.tapZoneX &&
                                                           normalizedX <= (panel.tapZoneX + panel.tapZoneWidth)
@@ -162,7 +160,7 @@ struct PageView: View {
                     }
                     .disabled(currentPageIndex == 0)
 
-                    Text("Page \(currentPage.pageNumber)")
+                    Text("\(currentPage.pageNumber) / \(sortedPages.count)")
                         .foregroundStyle(.white)
 
                     Button {

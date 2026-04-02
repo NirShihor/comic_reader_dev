@@ -89,9 +89,7 @@ struct PanelView: View {
                     // All bubbles displayed vertically
                     ForEach(currentPanel.bubbles) { bubble in
                         if bubble.isSoundEffect == true {
-                            if !settingsManager.speakingPracticeMode {
-                                soundEffectCard(bubble)
-                            }
+                            // Sound effects are only shown in the panel artwork
                         } else {
                             bubbleCard(bubble)
                         }

@@ -20,6 +20,9 @@ enum ComicData {
                     Panel(
                         id: "preview-panel-1",
                         artworkImage: "sample_cover",
+                        noTextImage: nil,
+                        floating: false,
+                        corners: nil,
                         panelOrder: 1,
                         tapZoneX: 0,
                         tapZoneY: 0,

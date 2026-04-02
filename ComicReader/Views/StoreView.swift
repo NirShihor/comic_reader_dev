@@ -161,14 +161,15 @@ struct StoreComicCard: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .fixedSize()
-
-                        // Size
-                        Text("\(String(format: "%.1f", comic.fileSizeMB)) MB")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                            .fixedSize()
                     }
                 }
+            }
+
+            // File size
+            if comic.fileSizeMB > 0 {
+                Text("\(String(format: "%.1f", comic.fileSizeMB)) MB")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
             }
 
             // Download button / status
