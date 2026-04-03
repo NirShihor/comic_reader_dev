@@ -37,7 +37,7 @@ struct ComicDetailView: View {
                     .font(.subheadline)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(Color.accentColor)
+                    .background(.green)
                     .foregroundStyle(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .contentShape(Rectangle())
@@ -50,7 +50,7 @@ struct ComicDetailView: View {
                             .font(.subheadline)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
-                            .background(Color(.systemGray5))
+                            .background(Color(.secondarySystemGroupedBackground))
                             .foregroundStyle(.primary)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                             .contentShape(Rectangle())
@@ -229,7 +229,7 @@ struct PageThumbnail: View {
                 .clipped()
                 .overlay(
                     Rectangle()
-                        .stroke(isCurrentPage ? Color.accentColor : Color.clear, lineWidth: 3)
+                        .stroke(isCurrentPage ? .green : Color.clear, lineWidth: 3)
                 )
 
             HStack {
@@ -240,7 +240,7 @@ struct PageThumbnail: View {
                 if isCurrentPage {
                     Image(systemName: "bookmark.fill")
                         .font(.caption)
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(.green)
                 }
             }
         }

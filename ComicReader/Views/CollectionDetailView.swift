@@ -58,7 +58,7 @@ struct CollectionDetailView: View {
             Spacer()
         }
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .padding(.horizontal)
     }
@@ -107,7 +107,7 @@ struct EpisodeCard: View {
                 if progress != nil {
                     Label("In Progress", systemImage: "book.fill")
                         .font(.caption2)
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(.green)
                 }
             }
 
@@ -117,8 +117,7 @@ struct EpisodeCard: View {
                 .foregroundStyle(.tertiary)
         }
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
     }
 }

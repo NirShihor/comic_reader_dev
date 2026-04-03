@@ -222,7 +222,7 @@ struct CollectionCard: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Color.accentColor)
+                        .background(.green)
                         .clipShape(Capsule())
                         .padding(4),
                     alignment: .topTrailing
