@@ -14,10 +14,13 @@ struct StoreComic: Identifiable, Codable {
     let fileSizeMB: Double
     let version: String
     let downloadUrl: String
+    let collectionTitle: String?
+    let episodeNumber: Int?
 
     enum CodingKeys: String, CodingKey {
         case id, title, description, coverThumbnailUrl, level
         case totalPages, estimatedMinutes, language, fileSizeMB, version, downloadUrl
+        case collectionTitle, episodeNumber
     }
 
     init(from decoder: Decoder) throws {
@@ -33,11 +36,14 @@ struct StoreComic: Identifiable, Codable {
         fileSizeMB = try container.decodeIfPresent(Double.self, forKey: .fileSizeMB) ?? 0
         version = try container.decodeIfPresent(String.self, forKey: .version) ?? "1.0"
         downloadUrl = try container.decodeIfPresent(String.self, forKey: .downloadUrl) ?? ""
+        collectionTitle = try container.decodeIfPresent(String.self, forKey: .collectionTitle)
+        episodeNumber = try container.decodeIfPresent(Int.self, forKey: .episodeNumber)
     }
 
     init(id: String, title: String, description: String, coverThumbnailUrl: String,
          level: String, totalPages: Int, estimatedMinutes: Int, language: String,
-         fileSizeMB: Double, version: String, downloadUrl: String) {
+         fileSizeMB: Double, version: String, downloadUrl: String,
+         collectionTitle: String? = nil, episodeNumber: Int? = nil) {
         self.id = id
         self.title = title
         self.description = description
@@ -49,6 +55,8 @@ struct StoreComic: Identifiable, Codable {
         self.fileSizeMB = fileSizeMB
         self.version = version
         self.downloadUrl = downloadUrl
+        self.collectionTitle = collectionTitle
+        self.episodeNumber = episodeNumber
     }
 }
 

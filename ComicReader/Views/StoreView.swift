@@ -133,6 +133,19 @@ struct StoreComicCard: View {
                         .font(.headline)
                         .foregroundStyle(.primary)
 
+                    if let collection = comic.collectionTitle {
+                        HStack(spacing: 4) {
+                            Text(collection)
+                                .font(.caption)
+                                .foregroundStyle(.green)
+                            if let episode = comic.episodeNumber, episode > 0 {
+                                Text("· Episode \(episode)")
+                                    .font(.caption)
+                                    .foregroundStyle(.green.opacity(0.7))
+                            }
+                        }
+                    }
+
                     Text(comic.description)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -195,6 +208,7 @@ struct StoreComicCard: View {
                     .padding(.vertical, 8)
             }
             .buttonStyle(.borderedProminent)
+            .tint(.green)
 
         case .downloading(let progress):
             VStack(spacing: 8) {
