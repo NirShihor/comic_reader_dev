@@ -2,16 +2,20 @@ import SwiftUI
 
 struct StoreView: View {
     @StateObject private var storeService = ComicStoreService.shared
+    @StateObject private var localStorage = LocalComicStorage.shared
     @State private var searchText = ""
     @State private var selectedLevel: String? = nil
+    var onOpenComic: ((Comic) -> Void)?
 
-    var filteredComics: [StoreComic] {
+    /// Items to display: standalone comics + collection groups
+    var storeItems: [StoreItem] {
         var comics = storeService.catalog
 
         if !searchText.isEmpty {
             comics = comics.filter {
                 $0.title.localizedCaseInsensitiveContains(searchText) ||
-                $0.description.localizedCaseInsensitiveContains(searchText)
+                $0.description.localizedCaseInsensitiveContains(searchText) ||
+                ($0.collectionTitle ?? "").localizedCaseInsensitiveContains(searchText)
             }
         }
 
@@ -19,7 +23,43 @@ struct StoreView: View {
             comics = comics.filter { $0.level == level }
         }
 
-        return comics
+        // Group by collection
+        var items: [StoreItem] = []
+        var collectionMap: [String: [StoreComic]] = [:]
+        var collectionOrder: [String] = []
+
+        for comic in comics {
+            if let collectionTitle = comic.collectionTitle {
+                if collectionMap[collectionTitle] == nil {
+                    collectionOrder.append(collectionTitle)
+                }
+                collectionMap[collectionTitle, default: []].append(comic)
+            } else {
+                items.append(.standalone(comic))
+            }
+        }
+
+        // Add collections in order they appeared
+        for title in collectionOrder {
+            if let episodes = collectionMap[title] {
+                let sorted = episodes.sorted { ($0.episodeNumber ?? 0) < ($1.episodeNumber ?? 0) }
+                items.append(.collection(title: title, comics: sorted))
+            }
+        }
+
+        return items
+    }
+
+    enum StoreItem: Identifiable {
+        case standalone(StoreComic)
+        case collection(title: String, comics: [StoreComic])
+
+        var id: String {
+            switch self {
+            case .standalone(let comic): return comic.id
+            case .collection(let title, _): return "collection-\(title)"
+            }
+        }
     }
 
     var body: some View {
@@ -74,12 +114,22 @@ struct StoreView: View {
 
     private var catalogList: some View {
         ScrollView {
-            LazyVStack(spacing: 16) {
-                if filteredComics.isEmpty {
+            LazyVStack(spacing: 20) {
+                if storeItems.isEmpty {
                     ContentUnavailableView.search(text: searchText)
                 } else {
-                    ForEach(filteredComics) { comic in
-                        StoreComicCard(comic: comic)
+                    ForEach(storeItems) { item in
+                        switch item {
+                        case .standalone(let comic):
+                            StoreComicCard(comic: comic, onOpenComic: onOpenComic)
+
+                        case .collection(let title, let comics):
+                            StoreCollectionGroup(
+                                title: title,
+                                comics: comics,
+                                onOpenComic: onOpenComic
+                            )
+                        }
                     }
                 }
             }
@@ -92,15 +142,23 @@ struct StoreView: View {
 // MARK: - Store Comic Card
 struct StoreComicCard: View {
     let comic: StoreComic
+    var onOpenComic: ((Comic) -> Void)?
+    var compact: Bool = false
+    var episodeLabel: String? = nil
     @StateObject private var storeService = ComicStoreService.shared
+    @StateObject private var localStorage = LocalComicStorage.shared
 
     var downloadState: DownloadState {
         storeService.downloadState(for: comic.id)
     }
 
+    private var coverSize: (width: CGFloat, height: CGFloat) {
+        compact ? (60, 90) : (80, 120)
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 16) {
+        VStack(alignment: .leading, spacing: compact ? 8 : 12) {
+            HStack(spacing: compact ? 12 : 16) {
                 // Cover image from server
                 AsyncImage(url: URL(string: "\(Secrets.serverBaseURL)\(comic.coverThumbnailUrl)")) { phase in
                     switch phase {
@@ -108,32 +166,41 @@ struct StoreComicCard: View {
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(width: 80, height: 120)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .frame(width: coverSize.width, height: coverSize.height)
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
                     case .failure:
-                        RoundedRectangle(cornerRadius: 8)
+                        RoundedRectangle(cornerRadius: 6)
                             .fill(levelColor.opacity(0.2))
-                            .frame(width: 80, height: 120)
+                            .frame(width: coverSize.width, height: coverSize.height)
                             .overlay(
                                 Image(systemName: "photo")
                                     .foregroundStyle(levelColor)
                             )
                     default:
-                        RoundedRectangle(cornerRadius: 8)
+                        RoundedRectangle(cornerRadius: 6)
                             .fill(levelColor.opacity(0.1))
-                            .frame(width: 80, height: 120)
+                            .frame(width: coverSize.width, height: coverSize.height)
                             .overlay(ProgressView())
                     }
                 }
-                .frame(width: 80, height: 120)
+                .frame(width: coverSize.width, height: coverSize.height)
 
                 // Info
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(comic.title)
-                        .font(.headline)
-                        .foregroundStyle(.primary)
+                VStack(alignment: .leading, spacing: compact ? 4 : 8) {
+                    HStack {
+                        if let ep = episodeLabel {
+                            Text(ep)
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.green)
+                        }
+                        Text(comic.title)
+                            .font(compact ? .subheadline.weight(.semibold) : .headline)
+                            .foregroundStyle(.primary)
+                    }
 
-                    if let collection = comic.collectionTitle {
+                    // Show collection info only for standalone cards (not inside a group)
+                    if !compact, let collection = comic.collectionTitle {
                         HStack(spacing: 4) {
                             Text(collection)
                                 .font(.caption)
@@ -147,21 +214,23 @@ struct StoreComicCard: View {
                     }
 
                     Text(comic.description)
-                        .font(.subheadline)
+                        .font(compact ? .caption : .subheadline)
                         .foregroundStyle(.secondary)
-                        .lineLimit(2)
+                        .lineLimit(compact ? 1 : 2)
 
                     HStack(spacing: 8) {
-                        // Level badge (color-coded)
-                        Text(comic.level.capitalized)
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(levelColor)
-                            .foregroundStyle(.white)
-                            .clipShape(Capsule())
-                            .fixedSize()
+                        if !compact {
+                            // Level badge (color-coded)
+                            Text(comic.level.capitalized)
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(levelColor)
+                                .foregroundStyle(.white)
+                                .clipShape(Capsule())
+                                .fixedSize()
+                        }
 
                         // Pages count
                         Label("\(comic.totalPages)", systemImage: "book.pages")
@@ -174,12 +243,19 @@ struct StoreComicCard: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .fixedSize()
+
+                        if compact, comic.fileSizeMB > 0 {
+                            Text("· \(String(format: "%.0f", comic.fileSizeMB)) MB")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                                .fixedSize()
+                        }
                     }
                 }
             }
 
-            // File size
-            if comic.fileSizeMB > 0 {
+            // File size (standalone only)
+            if !compact, comic.fileSizeMB > 0 {
                 Text("\(String(format: "%.1f", comic.fileSizeMB)) MB")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
@@ -188,9 +264,9 @@ struct StoreComicCard: View {
             // Download button / status
             downloadButton
         }
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(compact ? 12 : 16)
+        .background(compact ? Color.clear : Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: compact ? 0 : 12))
     }
 
     @ViewBuilder
@@ -232,8 +308,18 @@ struct StoreComicCard: View {
 
         case .downloaded:
             HStack {
-                Label("Downloaded", systemImage: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
+                Button {
+                    if let downloadedComic = localStorage.downloadedComics.first(where: { $0.id == comic.id }) {
+                        onOpenComic?(downloadedComic)
+                    }
+                } label: {
+                    Label("Open in Library", systemImage: "book.fill")
+                        .font(.subheadline)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
 
                 Spacer()
 
@@ -245,7 +331,7 @@ struct StoreComicCard: View {
                         .foregroundStyle(.red)
                 }
             }
-            .padding(.vertical, 10)
+            .padding(.vertical, 4)
 
         case .hidden:
             Button {
@@ -291,8 +377,72 @@ struct StoreComicCard: View {
     }
 }
 
+// MARK: - Store Collection Group
+struct StoreCollectionGroup: View {
+    let title: String
+    let comics: [StoreComic]
+    var onOpenComic: ((Comic) -> Void)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Collection header
+            HStack(spacing: 10) {
+                Image(systemName: "books.vertical.fill")
+                    .font(.title3)
+                    .foregroundStyle(.green)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
+                    Text("\(comics.count) episode\(comics.count == 1 ? "" : "s")")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(
+                .rect(topLeadingRadius: 12, topTrailingRadius: 12)
+            )
+
+            // Divider
+            Rectangle()
+                .fill(Color(.separator).opacity(0.3))
+                .frame(height: 1)
+
+            // Episode cards
+            VStack(spacing: 0) {
+                ForEach(Array(comics.enumerated()), id: \.element.id) { index, comic in
+                    StoreComicCard(
+                        comic: comic,
+                        onOpenComic: onOpenComic,
+                        compact: true,
+                        episodeLabel: "Ep. \(comic.episodeNumber ?? (index + 1))"
+                    )
+
+                    if index < comics.count - 1 {
+                        Rectangle()
+                            .fill(Color(.separator).opacity(0.3))
+                            .frame(height: 1)
+                            .padding(.leading, 16)
+                    }
+                }
+            }
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(
+                .rect(bottomLeadingRadius: 12, bottomTrailingRadius: 12)
+            )
+        }
+    }
+}
+
 #Preview {
     NavigationStack {
-        StoreView()
+        StoreView(onOpenComic: nil)
     }
 }

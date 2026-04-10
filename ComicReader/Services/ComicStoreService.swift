@@ -153,78 +153,88 @@ class ComicStoreService: ObservableObject {
 
     // MARK: - Downloads
 
-    /// Download a comic from the store
+    /// Download a comic from the store as a single ZIP bundle
     func downloadComic(_ comic: StoreComic) async {
         downloadStates[comic.id] = .downloading(progress: 0)
 
         do {
-            // 1. Fetch comic data + asset manifest
-            guard let detailUrl = URL(string: "\(baseURL)\(comic.downloadUrl)") else {
+            // 1. Build the bundle URL
+            guard let bundleUrl = URL(string: "\(baseURL)\(comic.downloadUrl)/bundle") else {
                 downloadStates[comic.id] = .failed(error: "Invalid download URL")
                 return
             }
 
-            let (detailData, _) = try await URLSession.shared.data(from: detailUrl)
-            let response = try JSONDecoder().decode(ComicDownloadResponse.self, from: detailData)
+            // 2. Download ZIP with progress tracking
+            let estimatedBytes = Int64(comic.fileSizeMB * 1024 * 1024)
+            let (zipFileURL, _) = try await downloadWithProgress(
+                url: bundleUrl,
+                comicId: comic.id,
+                downloadPhaseWeight: 0.8, // 80% of progress bar for download
+                estimatedSizeBytes: estimatedBytes
+            )
 
-            // 2. Create local directories using the comic.json id (e.g. "comic-conocer_a_los_padres")
-            // This matches what ComicImageLoader expects when looking in Documents/Comics/
-            let folderName = response.comic.id
-            let comicDir = localStorage.comicsDirectory.appendingPathComponent(folderName)
-            let imagesDir = comicDir.appendingPathComponent("images")
-            let audioDir = comicDir.appendingPathComponent("audio")
-            let wordsDir = audioDir.appendingPathComponent("words")
+            // 3. Unzip to a temp directory first, then determine comic ID from comic.json
+            downloadStates[comic.id] = .downloading(progress: 0.85)
 
             let fm = FileManager.default
-            try fm.createDirectory(at: imagesDir, withIntermediateDirectories: true)
-            try fm.createDirectory(at: wordsDir, withIntermediateDirectories: true)
+            let tempDir = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            try fm.createDirectory(at: tempDir, withIntermediateDirectories: true)
 
-            // 3. Write comic.json
-            let comicJsonData = try JSONEncoder().encode(response.comic)
-            try comicJsonData.write(to: comicDir.appendingPathComponent("comic.json"))
+            // Always clean up the zip file
+            defer { try? fm.removeItem(at: zipFileURL) }
 
-            // 4. Download all assets with progress tracking
-            let allAssets: [(serverPath: String, localUrl: URL)] =
-                response.assets.images.map { ($0, imagesDir.appendingPathComponent(URL(string: $0)!.lastPathComponent)) } +
-                response.assets.audio.map { ($0, audioDir.appendingPathComponent(URL(string: $0)!.lastPathComponent)) } +
-                response.assets.wordAudio.map { ($0, wordsDir.appendingPathComponent(URL(string: $0)!.lastPathComponent)) }
+            try ZIPExtractor.extract(zipFileURL: zipFileURL, to: tempDir)
 
-            let totalFiles = allAssets.count
-            var completed = 0
+            downloadStates[comic.id] = .downloading(progress: 0.92)
 
-            // Download files with concurrency limit
-            let batchSize = 4
-            for batchStart in stride(from: 0, to: allAssets.count, by: batchSize) {
-                let batchEnd = min(batchStart + batchSize, allAssets.count)
-                let batch = allAssets[batchStart..<batchEnd]
+            // 4. Read comic.json to get the actual comic ID for the folder name
+            let comicJsonURL = tempDir.appendingPathComponent("comic.json")
+            let comicJsonData = try Data(contentsOf: comicJsonURL)
+            let comicJson = try JSONDecoder().decode(ComicJSON.self, from: comicJsonData)
+            let folderName = comicJson.id
 
-                try await withThrowingTaskGroup(of: Void.self) { group in
-                    for asset in batch {
-                        group.addTask {
-                            guard let fileUrl = URL(string: "\(self.baseURL)\(asset.serverPath)") else { return }
-                            let (fileData, _) = try await URLSession.shared.data(from: fileUrl)
-                            try fileData.write(to: asset.localUrl)
-                        }
-                    }
-                    try await group.waitForAll()
-                }
+            // 5. Move to final location in Documents/Comics/{comicId}/
+            let comicDir = localStorage.comicsDirectory.appendingPathComponent(folderName)
 
-                completed += batch.count
-                downloadStates[comic.id] = .downloading(progress: Double(completed) / Double(max(totalFiles, 1)))
+            // Remove existing if re-downloading
+            if fm.fileExists(atPath: comicDir.path) {
+                try fm.removeItem(at: comicDir)
             }
 
-            // 5. Done — unhide in case user previously deleted this comic
-            localStorage.unhideComic(response.comic.id)
+            try fm.moveItem(at: tempDir, to: comicDir)
+
+            downloadStates[comic.id] = .downloading(progress: 1.0)
+
+            // 6. Done — unhide in case user previously deleted this comic
+            localStorage.unhideComic(folderName)
             downloadStates[comic.id] = .downloaded
             await localStorage.loadDownloadedComics()
 
         } catch {
             downloadStates[comic.id] = .failed(error: error.localizedDescription)
-            // Clean up partial download
-            let folderName = comic.id
-            let comicDir = localStorage.comicsDirectory.appendingPathComponent(folderName)
-            try? FileManager.default.removeItem(at: comicDir)
         }
+    }
+
+    /// Download a file with progress tracking
+    private func downloadWithProgress(
+        url: URL,
+        comicId: String,
+        downloadPhaseWeight: Double,
+        estimatedSizeBytes: Int64 = 0
+    ) async throws -> (URL, URLResponse) {
+        let stableURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(comicId).zip")
+        if FileManager.default.fileExists(atPath: stableURL.path) {
+            try FileManager.default.removeItem(at: stableURL)
+        }
+
+        let downloadHelper = DownloadHelper(destinationURL: stableURL, estimatedSize: estimatedSizeBytes) { progress in
+            Task { @MainActor [weak self] in
+                self?.downloadStates[comicId] = .downloading(progress: progress * downloadPhaseWeight)
+            }
+        }
+
+        return try await downloadHelper.download(from: url)
     }
 
     /// Restore a hidden comic back to the library
@@ -239,6 +249,9 @@ class ComicStoreService: ObservableObject {
         activeDownloadTask?.cancel()
         activeDownloadTask = nil
         downloadStates[comicId] = .notDownloaded
+        // Clean up any temp zip file
+        let tempZip = FileManager.default.temporaryDirectory.appendingPathComponent("\(comicId).zip")
+        try? FileManager.default.removeItem(at: tempZip)
     }
 
     /// Delete a downloaded comic
@@ -247,3 +260,83 @@ class ComicStoreService: ObservableObject {
         downloadStates[comicId] = .notDownloaded
     }
 }
+
+// MARK: - Download Helper
+
+/// Handles file download with progress using URLSessionDownloadDelegate
+class DownloadHelper: NSObject, URLSessionDownloadDelegate {
+    private let destinationURL: URL
+    private let estimatedSize: Int64
+    private let onProgress: (Double) -> Void
+    private var continuation: CheckedContinuation<(URL, URLResponse), Error>?
+
+    init(destinationURL: URL, estimatedSize: Int64, onProgress: @escaping (Double) -> Void) {
+        self.destinationURL = destinationURL
+        self.estimatedSize = estimatedSize
+        self.onProgress = onProgress
+    }
+
+    func download(from url: URL) async throws -> (URL, URLResponse) {
+        return try await withCheckedThrowingContinuation { continuation in
+            self.continuation = continuation
+            let config = URLSessionConfiguration.default
+            let session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
+            let task = session.downloadTask(with: url)
+            task.resume()
+        }
+    }
+
+    // Called periodically with download progress
+    func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didWriteData bytesWritten: Int64,
+        totalBytesWritten: Int64,
+        totalBytesExpectedToWrite: Int64
+    ) {
+        let expected: Int64
+        if totalBytesExpectedToWrite > 0 {
+            expected = totalBytesExpectedToWrite
+        } else if estimatedSize > 0 {
+            expected = estimatedSize
+        } else {
+            return
+        }
+        let progress = min(Double(totalBytesWritten) / Double(expected), 0.99)
+        onProgress(progress)
+    }
+
+    // Called when download finishes — move temp file to destination
+    func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didFinishDownloadingTo location: URL
+    ) {
+        do {
+            let fm = FileManager.default
+            if fm.fileExists(atPath: destinationURL.path) {
+                try fm.removeItem(at: destinationURL)
+            }
+            try fm.moveItem(at: location, to: destinationURL)
+            if let response = downloadTask.response {
+                continuation?.resume(returning: (destinationURL, response))
+            } else {
+                continuation?.resume(throwing: URLError(.badServerResponse))
+            }
+        } catch {
+            continuation?.resume(throwing: error)
+        }
+        continuation = nil
+        session.invalidateAndCancel()
+    }
+
+    // Called on error
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        if let error = error {
+            continuation?.resume(throwing: error)
+            continuation = nil
+            session.invalidateAndCancel()
+        }
+    }
+}
+

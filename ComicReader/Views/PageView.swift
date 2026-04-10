@@ -14,6 +14,7 @@ struct PageView: View {
     @State private var showingVocabulary = false
     @State private var showingSettings = false
     @State private var showDebugZones = false
+    @State private var showEndOfEpisode = false
 
     // Pages sorted by pageNumber for consistent navigation
     private var sortedPages: [Page] {
@@ -34,7 +35,10 @@ struct PageView: View {
     }
 
     private func goToNextPage() {
-        guard currentPageIndex < sortedPages.count - 1 else { return }
+        guard currentPageIndex < sortedPages.count - 1 else {
+            showEndOfEpisode = true
+            return
+        }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
         withAnimation {
             currentPageIndex += 1
@@ -116,7 +120,17 @@ struct PageView: View {
                                                           normalizedY <= (panel.tapZoneY + panel.tapZoneHeight)
                                             if inXRange && inYRange {
                                                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                                selectedPanel = panel
+                                                // If tapped panel has no text content (e.g. background behind floating panels),
+                                                // select the first panel on the page that does have content instead.
+                                                let hasContent = panel.bubbles.contains { !$0.sentences.isEmpty }
+                                                if hasContent {
+                                                    selectedPanel = panel
+                                                } else {
+                                                    let firstContentPanel = currentPage.panels
+                                                        .sorted { $0.panelOrder < $1.panelOrder }
+                                                        .first { $0.bubbles.contains { !$0.sentences.isEmpty } }
+                                                    selectedPanel = firstContentPanel
+                                                }
                                                 break
                                             }
                                         }
@@ -253,6 +267,14 @@ struct PageView: View {
                         }
                     }
             }
+        }
+        .alert("End of Episode", isPresented: $showEndOfEpisode) {
+            Button("Back to Library") {
+                dismiss()
+            }
+            Button("Stay", role: .cancel) { }
+        } message: {
+            Text("You've reached the last page of this episode.")
         }
     }
 }

@@ -76,7 +76,7 @@ struct LibraryView: View {
                 ForEach(localStorage.libraryItems) { item in
                     switch item {
                     case .standalone(let comic):
-                        NavigationLink(destination: ComicDetailView(comic: comic)) {
+                        NavigationLink(value: comic) {
                             ComicCard(comic: comic, progress: progressManager.getProgress(for: comic.id))
                         }
                         .buttonStyle(.plain)

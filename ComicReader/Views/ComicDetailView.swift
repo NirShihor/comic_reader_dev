@@ -195,7 +195,7 @@ struct ComicDetailView: View {
     private var pagesGrid: some View {
         LazyVGrid(columns: columns, spacing: 12) {
             ForEach(comic.pages) { page in
-                PageThumbnail(page: page, comic: comic)
+                PageThumbnail(page: page, comic: comic, isCover: page.pageNumber <= 1)
                     .contentShape(Rectangle())
                     .onTapGesture {
                         selectedPage = page
@@ -219,14 +219,18 @@ struct ComicDetailView: View {
 struct PageThumbnail: View {
     let page: Page
     let comic: Comic
+    var isCover: Bool = false
     @EnvironmentObject var progressManager: ReadingProgressManager
 
     var body: some View {
         VStack(spacing: 8) {
-            ComicImage(imageName: page.masterImage, comicId: comic.id)
-                .aspectRatio(contentMode: .fill)
-                .frame(height: 180)
-                .clipped()
+            GeometryReader { geo in
+                ComicImage(imageName: page.masterImage, comicId: comic.id)
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: geo.size.width, height: geo.size.height, alignment: isCover ? .top : .center)
+            }
+            .frame(height: 180)
+            .clipped()
                 .overlay(
                     Rectangle()
                         .stroke(isCurrentPage ? .green : Color.clear, lineWidth: 3)

@@ -22,6 +22,7 @@ struct PanelView: View {
     @State private var currentPanelId: String
     @State private var showingError = false
     @State private var errorMessage = ""
+    @State private var showEndOfEpisode = false
 
     init(comic: Comic, page: Page, panel: Panel, navigateToPage: Binding<Int?>, dismissToHome: (() -> Void)? = nil) {
         self.comic = comic
@@ -40,9 +41,12 @@ struct PanelView: View {
         let expectedText: String
     }
 
-    // Panels sorted by panelOrder for consistent navigation
+    // Panels sorted by panelOrder for consistent navigation.
+    // Exclude panels with no text content (e.g. full-page background behind floating panels).
     var sortedPanels: [Panel] {
-        page.panels.sorted { $0.panelOrder < $1.panelOrder }
+        page.panels
+            .filter { panel in panel.bubbles.contains { !$0.sentences.isEmpty } }
+            .sorted { $0.panelOrder < $1.panelOrder }
     }
 
     // Find current panel by ID - always returns the correct panel
@@ -196,6 +200,15 @@ struct PanelView: View {
         } message: {
             Text(errorMessage)
         }
+        .alert("End of Episode", isPresented: $showEndOfEpisode) {
+            Button("Back to Library") {
+                dismiss()
+                dismissToHome?()
+            }
+            Button("Stay", role: .cancel) { }
+        } message: {
+            Text("You've reached the last panel of this episode.")
+        }
     }
 
     // MARK: - Navigation
@@ -210,6 +223,8 @@ struct PanelView: View {
             if hasNextPage {
                 navigateToPage = currentPageIndex + 1
                 dismiss()
+            } else {
+                showEndOfEpisode = true
             }
         } else {
             // Move to next panel by ID
@@ -254,6 +269,13 @@ struct PanelView: View {
         whisperService.cancelRecording()
     }
 
+    private var panelClipShape: AnyShape {
+        if let corners = currentPanel.corners, corners.count >= 3 {
+            return AnyShape(PanelClipShape(corners: corners))
+        }
+        return AnyShape(RoundedRectangle(cornerRadius: 12))
+    }
+
     // MARK: - Panel Image
     private var panelImage: some View {
         let imageName = settingsManager.speakingPracticeMode && !textRevealed
@@ -266,8 +288,8 @@ struct PanelView: View {
         return ZStack {
             ComicImage(imageName: imageName, comicId: comic.id)
                 .aspectRatio(contentMode: .fit)
+                .clipShape(panelClipShape)
                 .frame(maxWidth: .infinity, maxHeight: maxImageHeight)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
                 .shadow(radius: 4)
 
             // Only show "Tap to reveal" if panel has text content (bubbles with sentences)
@@ -744,6 +766,114 @@ struct FlowLayout: Layout {
         }
 
         return (CGSize(width: maxWidth, height: y + rowHeight), frames)
+    }
+}
+
+// MARK: - Panel Clip Shape
+/// Clips an image to the panel's actual quadrilateral shape using its corner points.
+/// Corners are in page-normalized coordinates (0-1); the image is the bounding-box crop,
+/// so corners are remapped to local image coordinates.
+struct PanelClipShape: Shape {
+    let corners: [CornerPoint]
+
+    func path(in rect: CGRect) -> Path {
+        guard corners.count >= 3 else {
+            return RoundedRectangle(cornerRadius: 12).path(in: rect)
+        }
+
+        // Compute the bounding box of the corners in normalized page space
+        let xs = corners.map { $0.x }
+        let ys = corners.map { $0.y }
+        let minX = xs.min()!
+        let minY = ys.min()!
+        let maxX = xs.max()!
+        let maxY = ys.max()!
+        let bboxW = maxX - minX
+        let bboxH = maxY - minY
+
+        guard bboxW > 0, bboxH > 0 else {
+            return RoundedRectangle(cornerRadius: 12).path(in: rect)
+        }
+
+        // Map each corner from page-normalized coords to local rect coords
+        let localPoints = corners.map { corner in
+            CGPoint(
+                x: rect.minX + ((corner.x - minX) / bboxW) * rect.width,
+                y: rect.minY + ((corner.y - minY) / bboxH) * rect.height
+            )
+        }
+
+        var path = Path()
+        path.move(to: localPoints[0])
+        for i in 1..<localPoints.count {
+            path.addLine(to: localPoints[i])
+        }
+        path.closeSubpath()
+        return path
+    }
+}
+
+/// A slightly irregular rectangle that mimics hand-drawn comic panel edges.
+/// Uses a seeded random wobble on each edge so the shape is deterministic per panel.
+struct HandDrawnRectShape: Shape {
+    let seed: Int
+
+    func path(in rect: CGRect) -> Path {
+        // Inset slightly to trim composite border pixels at edges
+        let inset: CGFloat = 4
+        let r = rect.insetBy(dx: inset, dy: inset)
+        let wobble: CGFloat = 3  // max wobble in points
+
+        // Simple seeded pseudo-random: hash-based, deterministic per seed + index
+        func wobbleOffset(_ index: Int) -> CGFloat {
+            var h = seed &* 2654435761 &+ index &* 2246822519
+            h = (h ^ (h >> 13)) &* 1274126177
+            h = h ^ (h >> 16)
+            let normalized = CGFloat(abs(h) % 1000) / 1000.0  // 0..1
+            return (normalized - 0.5) * 2 * wobble  // -wobble..+wobble
+        }
+
+        var path = Path()
+
+        // 4 corners with slight wobble
+        let tl = CGPoint(x: r.minX + wobbleOffset(0), y: r.minY + wobbleOffset(1))
+        let tr = CGPoint(x: r.maxX + wobbleOffset(2), y: r.minY + wobbleOffset(3))
+        let br = CGPoint(x: r.maxX + wobbleOffset(4), y: r.maxY + wobbleOffset(5))
+        let bl = CGPoint(x: r.minX + wobbleOffset(6), y: r.maxY + wobbleOffset(7))
+
+        // Draw edges with slight midpoint wobble for organic feel
+        path.move(to: tl)
+
+        // Top edge
+        let topMid = CGPoint(
+            x: (tl.x + tr.x) / 2 + wobbleOffset(8),
+            y: (tl.y + tr.y) / 2 + wobbleOffset(9)
+        )
+        path.addQuadCurve(to: tr, control: topMid)
+
+        // Right edge
+        let rightMid = CGPoint(
+            x: (tr.x + br.x) / 2 + wobbleOffset(10),
+            y: (tr.y + br.y) / 2 + wobbleOffset(11)
+        )
+        path.addQuadCurve(to: br, control: rightMid)
+
+        // Bottom edge
+        let bottomMid = CGPoint(
+            x: (br.x + bl.x) / 2 + wobbleOffset(12),
+            y: (br.y + bl.y) / 2 + wobbleOffset(13)
+        )
+        path.addQuadCurve(to: bl, control: bottomMid)
+
+        // Left edge
+        let leftMid = CGPoint(
+            x: (bl.x + tl.x) / 2 + wobbleOffset(14),
+            y: (bl.y + tl.y) / 2 + wobbleOffset(15)
+        )
+        path.addQuadCurve(to: tl, control: leftMid)
+
+        path.closeSubpath()
+        return path
     }
 }
 

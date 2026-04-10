@@ -2,6 +2,8 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectedTab: Tab = .library
+    @State private var comicToOpen: Comic?
+    @State private var libraryNavigationPath = NavigationPath()
 
     enum Tab {
         case library
@@ -12,8 +14,11 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            NavigationStack {
+            NavigationStack(path: $libraryNavigationPath) {
                 LibraryView()
+                    .navigationDestination(for: Comic.self) { comic in
+                        ComicDetailView(comic: comic)
+                    }
             }
             .tabItem {
                 Label("Library", systemImage: "books.vertical")
@@ -21,7 +26,13 @@ struct ContentView: View {
             .tag(Tab.library)
 
             NavigationStack {
-                StoreView()
+                StoreView(onOpenComic: { comic in
+                    libraryNavigationPath = NavigationPath()
+                    selectedTab = .library
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        libraryNavigationPath.append(comic)
+                    }
+                })
             }
             .tabItem {
                 Label("Store", systemImage: "bag.fill")
