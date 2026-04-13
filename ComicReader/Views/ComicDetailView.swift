@@ -221,11 +221,15 @@ struct PageThumbnail: View {
     let comic: Comic
     var isCover: Bool = false
     @EnvironmentObject var progressManager: ReadingProgressManager
+    @EnvironmentObject var settingsManager: SettingsManager
 
     var body: some View {
         VStack(spacing: 8) {
             GeometryReader { geo in
-                ComicImage(imageName: page.masterImage, comicId: comic.id)
+                let imageName = settingsManager.speakingPracticeMode
+                    ? (page.noTextImage ?? page.masterImage)
+                    : page.masterImage
+                ComicImage(imageName: imageName, comicId: comic.id)
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: geo.size.height, alignment: isCover ? .top : .center)
             }

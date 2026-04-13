@@ -102,6 +102,7 @@ class ComicStoreService: ObservableObject {
 
     private let localStorage = LocalComicStorage.shared
     private var activeDownloadTask: Task<Void, Never>?
+    private var activeDownloadHelper: DownloadHelper?
 
     init() {
         // Initialize download states for downloaded comics
@@ -157,62 +158,77 @@ class ComicStoreService: ObservableObject {
     func downloadComic(_ comic: StoreComic) async {
         downloadStates[comic.id] = .downloading(progress: 0)
 
-        do {
-            // 1. Build the bundle URL
-            guard let bundleUrl = URL(string: "\(baseURL)\(comic.downloadUrl)/bundle") else {
-                downloadStates[comic.id] = .failed(error: "Invalid download URL")
-                return
+        // Store the task so cancelDownload can cancel it
+        let task = Task {
+            do {
+                // 1. Build the bundle URL
+                guard let bundleUrl = URL(string: "\(baseURL)\(comic.downloadUrl)/bundle") else {
+                    downloadStates[comic.id] = .failed(error: "Invalid download URL")
+                    return
+                }
+
+                // 2. Download ZIP with progress tracking
+                let estimatedBytes = Int64(comic.fileSizeMB * 1024 * 1024)
+                let (zipFileURL, _) = try await downloadWithProgress(
+                    url: bundleUrl,
+                    comicId: comic.id,
+                    downloadPhaseWeight: 0.8, // 80% of progress bar for download
+                    estimatedSizeBytes: estimatedBytes
+                )
+
+                try Task.checkCancellation()
+
+                // 3. Unzip to a temp directory first, then determine comic ID from comic.json
+                downloadStates[comic.id] = .downloading(progress: 0.85)
+
+                let fm = FileManager.default
+                let tempDir = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+                try fm.createDirectory(at: tempDir, withIntermediateDirectories: true)
+
+                // Always clean up the zip file
+                defer { try? fm.removeItem(at: zipFileURL) }
+
+                try ZIPExtractor.extract(zipFileURL: zipFileURL, to: tempDir)
+
+                try Task.checkCancellation()
+
+                downloadStates[comic.id] = .downloading(progress: 0.92)
+
+                // 4. Read comic.json to get the actual comic ID for the folder name
+                let comicJsonURL = tempDir.appendingPathComponent("comic.json")
+                let comicJsonData = try Data(contentsOf: comicJsonURL)
+                let comicJson = try JSONDecoder().decode(ComicJSON.self, from: comicJsonData)
+                let folderName = comicJson.id
+
+                // 5. Move to final location in Documents/Comics/{comicId}/
+                let comicDir = localStorage.comicsDirectory.appendingPathComponent(folderName)
+
+                // Remove existing if re-downloading
+                if fm.fileExists(atPath: comicDir.path) {
+                    try fm.removeItem(at: comicDir)
+                }
+
+                try fm.moveItem(at: tempDir, to: comicDir)
+
+                downloadStates[comic.id] = .downloading(progress: 1.0)
+
+                // 6. Done — unhide in case user previously deleted this comic
+                localStorage.unhideComic(folderName)
+                downloadStates[comic.id] = .downloaded
+                await localStorage.loadDownloadedComics()
+
+            } catch is CancellationError {
+                // User cancelled — state already reset by cancelDownload
+            } catch {
+                if !Task.isCancelled {
+                    downloadStates[comic.id] = .failed(error: error.localizedDescription)
+                }
             }
-
-            // 2. Download ZIP with progress tracking
-            let estimatedBytes = Int64(comic.fileSizeMB * 1024 * 1024)
-            let (zipFileURL, _) = try await downloadWithProgress(
-                url: bundleUrl,
-                comicId: comic.id,
-                downloadPhaseWeight: 0.8, // 80% of progress bar for download
-                estimatedSizeBytes: estimatedBytes
-            )
-
-            // 3. Unzip to a temp directory first, then determine comic ID from comic.json
-            downloadStates[comic.id] = .downloading(progress: 0.85)
-
-            let fm = FileManager.default
-            let tempDir = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-            try fm.createDirectory(at: tempDir, withIntermediateDirectories: true)
-
-            // Always clean up the zip file
-            defer { try? fm.removeItem(at: zipFileURL) }
-
-            try ZIPExtractor.extract(zipFileURL: zipFileURL, to: tempDir)
-
-            downloadStates[comic.id] = .downloading(progress: 0.92)
-
-            // 4. Read comic.json to get the actual comic ID for the folder name
-            let comicJsonURL = tempDir.appendingPathComponent("comic.json")
-            let comicJsonData = try Data(contentsOf: comicJsonURL)
-            let comicJson = try JSONDecoder().decode(ComicJSON.self, from: comicJsonData)
-            let folderName = comicJson.id
-
-            // 5. Move to final location in Documents/Comics/{comicId}/
-            let comicDir = localStorage.comicsDirectory.appendingPathComponent(folderName)
-
-            // Remove existing if re-downloading
-            if fm.fileExists(atPath: comicDir.path) {
-                try fm.removeItem(at: comicDir)
-            }
-
-            try fm.moveItem(at: tempDir, to: comicDir)
-
-            downloadStates[comic.id] = .downloading(progress: 1.0)
-
-            // 6. Done — unhide in case user previously deleted this comic
-            localStorage.unhideComic(folderName)
-            downloadStates[comic.id] = .downloaded
-            await localStorage.loadDownloadedComics()
-
-        } catch {
-            downloadStates[comic.id] = .failed(error: error.localizedDescription)
         }
+        activeDownloadTask = task
+        await task.value
+        activeDownloadTask = nil
+        activeDownloadHelper = nil
     }
 
     /// Download a file with progress tracking
@@ -233,6 +249,7 @@ class ComicStoreService: ObservableObject {
                 self?.downloadStates[comicId] = .downloading(progress: progress * downloadPhaseWeight)
             }
         }
+        activeDownloadHelper = downloadHelper
 
         return try await downloadHelper.download(from: url)
     }
@@ -246,6 +263,8 @@ class ComicStoreService: ObservableObject {
 
     /// Cancel an in-progress download
     func cancelDownload(_ comicId: String) {
+        activeDownloadHelper?.cancel()
+        activeDownloadHelper = nil
         activeDownloadTask?.cancel()
         activeDownloadTask = nil
         downloadStates[comicId] = .notDownloaded
@@ -269,6 +288,7 @@ class DownloadHelper: NSObject, URLSessionDownloadDelegate {
     private let estimatedSize: Int64
     private let onProgress: (Double) -> Void
     private var continuation: CheckedContinuation<(URL, URLResponse), Error>?
+    private var downloadSession: URLSession?
 
     init(destinationURL: URL, estimatedSize: Int64, onProgress: @escaping (Double) -> Void) {
         self.destinationURL = destinationURL
@@ -281,9 +301,15 @@ class DownloadHelper: NSObject, URLSessionDownloadDelegate {
             self.continuation = continuation
             let config = URLSessionConfiguration.default
             let session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
+            self.downloadSession = session
             let task = session.downloadTask(with: url)
             task.resume()
         }
+    }
+
+    func cancel() {
+        downloadSession?.invalidateAndCancel()
+        downloadSession = nil
     }
 
     // Called periodically with download progress

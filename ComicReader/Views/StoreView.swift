@@ -238,12 +238,6 @@ struct StoreComicCard: View {
                             .foregroundStyle(.secondary)
                             .fixedSize()
 
-                        // Duration
-                        Label("\(comic.estimatedMinutes)m", systemImage: "clock")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .fixedSize()
-
                         if compact, comic.fileSizeMB > 0 {
                             Text("· \(String(format: "%.0f", comic.fileSizeMB)) MB")
                                 .font(.caption)

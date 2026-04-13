@@ -110,27 +110,19 @@ struct PageView: View {
                                         let normalizedY = location.y / imageGeometry.size.height
 
                                         // Find which panel was tapped
-                                        // Skip floating panels — they appear in reading order during scroll, not via tap
-                                        let nonFloatingPanels = currentPage.panels.filter { !$0.floating }
-                                        let sortedPanels = nonFloatingPanels.sorted { $0.panelOrder < $1.panelOrder }
-                                        for panel in sortedPanels {
+                                        // Check floating panels first (they render on top), then non-floating
+                                        let floatingPanels = currentPage.panels.filter { $0.floating }.sorted { $0.panelOrder < $1.panelOrder }
+                                        let nonFloatingPanels = currentPage.panels.filter { !$0.floating }.sorted { $0.panelOrder < $1.panelOrder }
+                                        let allPanelsInTapOrder = floatingPanels + nonFloatingPanels
+
+                                        for panel in allPanelsInTapOrder {
                                             let inXRange = normalizedX >= panel.tapZoneX &&
                                                           normalizedX <= (panel.tapZoneX + panel.tapZoneWidth)
                                             let inYRange = normalizedY >= panel.tapZoneY &&
                                                           normalizedY <= (panel.tapZoneY + panel.tapZoneHeight)
                                             if inXRange && inYRange {
                                                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                                // If tapped panel has no text content (e.g. background behind floating panels),
-                                                // select the first panel on the page that does have content instead.
-                                                let hasContent = panel.bubbles.contains { !$0.sentences.isEmpty }
-                                                if hasContent {
-                                                    selectedPanel = panel
-                                                } else {
-                                                    let firstContentPanel = currentPage.panels
-                                                        .sorted { $0.panelOrder < $1.panelOrder }
-                                                        .first { $0.bubbles.contains { !$0.sentences.isEmpty } }
-                                                    selectedPanel = firstContentPanel
-                                                }
+                                                selectedPanel = panel
                                                 break
                                             }
                                         }
@@ -269,7 +261,7 @@ struct PageView: View {
             }
         }
         .alert("End of Episode", isPresented: $showEndOfEpisode) {
-            Button("Back to Library") {
+            Button("Back to home page") {
                 dismiss()
             }
             Button("Stay", role: .cancel) { }

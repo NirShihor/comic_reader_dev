@@ -39,13 +39,16 @@ struct PanelView: View {
         let isCorrect: Bool
         let spokenText: String
         let expectedText: String
+        let words: [Word]
     }
 
     // Panels sorted by panelOrder for consistent navigation.
-    // Exclude panels with no text content (e.g. full-page background behind floating panels).
+    // Include floating panels (even without text) and non-floating panels that have text content.
     var sortedPanels: [Panel] {
         page.panels
-            .filter { panel in panel.bubbles.contains { !$0.sentences.isEmpty } }
+            .filter { panel in
+                panel.floating || panel.bubbles.contains { !$0.sentences.isEmpty }
+            }
             .sorted { $0.panelOrder < $1.panelOrder }
     }
 
@@ -201,7 +204,7 @@ struct PanelView: View {
             Text(errorMessage)
         }
         .alert("End of Episode", isPresented: $showEndOfEpisode) {
-            Button("Back to Library") {
+            Button("Back to home page") {
                 dismiss()
                 dismissToHome?()
             }
@@ -402,6 +405,31 @@ struct PanelView: View {
                                 }
                                 .disabled(processingSentenceId != nil || (recordingSentenceId != nil && !isThisRecording))
 
+                                // Listen button to hear the sentence before speaking
+                                Button {
+                                    if audioManager.isPlaying && playingSentenceId == sentence.id {
+                                        audioManager.stop()
+                                    } else {
+                                        playingSentenceId = sentence.id
+                                        playAudio(sentence.audioUrl)
+                                    }
+                                } label: {
+                                    Group {
+                                        if audioManager.isLoading && playingSentenceId == sentence.id {
+                                            ProgressView()
+                                                .tint(.white)
+                                                .controlSize(.small)
+                                        } else {
+                                            Image(systemName: audioManager.isPlaying && playingSentenceId == sentence.id ? "stop.fill" : "speaker.wave.2.fill")
+                                        }
+                                    }
+                                    .frame(width: 40, height: 40)
+                                    .background(audioManager.isPlaying && playingSentenceId == sentence.id ? Color.red : Color.green)
+                                    .clipShape(Circle())
+                                    .foregroundStyle(.white)
+                                }
+                                .disabled(isThisRecording || processingSentenceId != nil)
+
                                 if processingSentenceId == sentence.id {
                                     ProgressView()
                                         .padding(.leading, 8)
@@ -415,18 +443,28 @@ struct PanelView: View {
                                         playAudio(sentence.audioUrl)
                                     }
                                 } label: {
-                                    Label(
-                                        audioManager.isPlaying && playingSentenceId == sentence.id ? "Stop" : "Play",
-                                        systemImage: audioManager.isPlaying && playingSentenceId == sentence.id ? "stop.fill" : "play.fill"
-                                    )
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundStyle(.white)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 10)
-                                    .background(audioManager.isPlaying && playingSentenceId == sentence.id ? Color.red : Color.blue)
-                                    .clipShape(Capsule())
+                                    if audioManager.isLoading && playingSentenceId == sentence.id {
+                                        ProgressView()
+                                            .tint(.white)
+                                            .padding(.horizontal, 16)
+                                            .padding(.vertical, 10)
+                                            .background(Color.blue.opacity(0.6))
+                                            .clipShape(Capsule())
+                                    } else {
+                                        Label(
+                                            audioManager.isPlaying && playingSentenceId == sentence.id ? "Stop" : "Play",
+                                            systemImage: audioManager.isPlaying && playingSentenceId == sentence.id ? "stop.fill" : "play.fill"
+                                        )
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 10)
+                                        .background(audioManager.isPlaying && playingSentenceId == sentence.id ? Color.red : Color.blue)
+                                        .clipShape(Capsule())
+                                    }
                                 }
+                                .disabled(audioManager.isLoading && playingSentenceId == sentence.id)
                             }
 
                             Spacer()
@@ -448,12 +486,25 @@ struct PanelView: View {
                         }
                     }
 
-                    // Show Spanish text when revealed in practice mode
+                    // Show Spanish text when revealed in practice mode (with tappable words)
                     if settingsManager.speakingPracticeMode && textRevealed {
-                        Text(sentence.text)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .italic()
+                        let revealedWords = sentence.words.filter { word in
+                            if word.manual == true { return false }
+                            if word.startTimeMs == nil && word.text.contains(" ") { return false }
+                            return true
+                        }
+                        if revealedWords.isEmpty {
+                            Text(sentence.text)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .italic()
+                        } else {
+                            FlowLayout(spacing: 2) {
+                                ForEach(revealedWords) { word in
+                                    WordButton(word: word, isHighlighted: false)
+                                }
+                            }
+                        }
                     }
 
                     // Inline practice feedback for this sentence
@@ -509,24 +560,64 @@ struct PanelView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("You said: \"\(feedback.spokenText)\"")
                         .font(.subheadline)
-                    Text("Expected: \"\(feedback.expectedText)\"")
+
+                    Text("Expected:")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+
+                    let feedbackWords = feedback.words.filter { word in
+                        if word.manual == true { return false }
+                        if word.startTimeMs == nil && word.text.contains(" ") { return false }
+                        return true
+                    }
+                    if feedbackWords.isEmpty {
+                        Text(feedback.expectedText)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        FlowLayout(spacing: 2) {
+                            ForEach(feedbackWords) { word in
+                                WordButton(word: word, isHighlighted: false)
+                            }
+                        }
+                    }
                 }
             } else {
-                Text(feedback.expectedText)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                let feedbackWords = feedback.words.filter { word in
+                    if word.manual == true { return false }
+                    if word.startTimeMs == nil && word.text.contains(" ") { return false }
+                    return true
+                }
+                if feedbackWords.isEmpty {
+                    Text(feedback.expectedText)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else {
+                    FlowLayout(spacing: 2) {
+                        ForEach(feedbackWords) { word in
+                            WordButton(word: word, isHighlighted: false)
+                        }
+                    }
+                }
             }
 
             HStack {
                 Button {
                     playAudio(practiceSentence?.audioUrl)
                 } label: {
-                    Label("Listen", systemImage: "speaker.wave.2.fill")
-                        .font(.subheadline)
+                    if audioManager.isLoading {
+                        ProgressView()
+                            .controlSize(.small)
+                            .padding(.trailing, 4)
+                        Text("Loading...")
+                            .font(.subheadline)
+                    } else {
+                        Label("Listen", systemImage: "speaker.wave.2.fill")
+                            .font(.subheadline)
+                    }
                 }
                 .buttonStyle(.bordered)
+                .disabled(audioManager.isLoading)
 
                 Button {
                     practiceFeedback = nil
@@ -607,7 +698,8 @@ struct PanelView: View {
                 sentenceId: sentence.id,
                 isCorrect: isCorrect,
                 spokenText: spokenText.isEmpty ? "(no speech detected)" : spokenText,
-                expectedText: matchedText
+                expectedText: matchedText,
+                words: sentence.words
             )
             playingSentenceId = sentence.id
             playAudio(matchedAudio)
