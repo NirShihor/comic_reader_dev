@@ -26,31 +26,32 @@ class ComicImageLoader {
         }
 
         // Try loading from various locations
+        // Downloaded comics take priority over bundled ones (user may re-download updated versions)
         var image: UIImage?
 
-        // 1. Try BundledComics folder (for bundled sample comics)
-        if let bundledURL = Bundle.main.url(forResource: "BundledComics", withExtension: nil) {
-            let imagePath = bundledURL
-                .appendingPathComponent(comicId.replacingOccurrences(of: "comic-", with: ""))
-                .appendingPathComponent("images")
-                .appendingPathComponent("\(imageName).png")
+        // 1. Try Documents/Comics folder (downloaded comics — checked first for updates)
+        let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let downloadedPath = documents
+            .appendingPathComponent("Comics")
+            .appendingPathComponent(comicId)
+            .appendingPathComponent("images")
+            .appendingPathComponent("\(imageName).png")
 
-            if fileManager.fileExists(atPath: imagePath.path) {
-                image = UIImage(contentsOfFile: imagePath.path)
-            }
+        if fileManager.fileExists(atPath: downloadedPath.path) {
+            image = UIImage(contentsOfFile: downloadedPath.path)
         }
 
-        // 2. Try Documents/Comics folder (for downloaded comics)
+        // 2. Fallback to BundledComics folder (bundled sample comics)
         if image == nil {
-            let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            let downloadedPath = documents
-                .appendingPathComponent("Comics")
-                .appendingPathComponent(comicId)
-                .appendingPathComponent("images")
-                .appendingPathComponent("\(imageName).png")
+            if let bundledURL = Bundle.main.url(forResource: "BundledComics", withExtension: nil) {
+                let imagePath = bundledURL
+                    .appendingPathComponent(comicId.replacingOccurrences(of: "comic-", with: ""))
+                    .appendingPathComponent("images")
+                    .appendingPathComponent("\(imageName).png")
 
-            if fileManager.fileExists(atPath: downloadedPath.path) {
-                image = UIImage(contentsOfFile: downloadedPath.path)
+                if fileManager.fileExists(atPath: imagePath.path) {
+                    image = UIImage(contentsOfFile: imagePath.path)
+                }
             }
         }
 
@@ -67,8 +68,15 @@ class ComicImageLoader {
         return image
     }
 
-    /// Clear the image cache
+    /// Clear the entire image cache
     func clearCache() {
+        imageCache.removeAllObjects()
+    }
+
+    /// Clear cached images for a specific comic
+    func clearCache(forComic comicId: String) {
+        // NSCache doesn't support key enumeration, so we clear everything.
+        // This is safe — images will be reloaded from disk on next access.
         imageCache.removeAllObjects()
     }
 }

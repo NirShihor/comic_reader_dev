@@ -212,7 +212,9 @@ class ComicStoreService: ObservableObject {
 
                 downloadStates[comic.id] = .downloading(progress: 1.0)
 
-                // 6. Done — unhide in case user previously deleted this comic
+                // 6. Done — clear image cache, URL cache, and unhide
+                ComicImageLoader.shared.clearCache(forComic: folderName)
+                URLCache.shared.removeAllCachedResponses()
                 localStorage.unhideComic(folderName)
                 downloadStates[comic.id] = .downloaded
                 await localStorage.loadDownloadedComics()
@@ -255,10 +257,26 @@ class ComicStoreService: ObservableObject {
     }
 
     /// Restore a hidden comic back to the library
+    /// If the downloaded files were deleted, re-download from the server
     func restoreComic(_ comicId: String) async {
-        localStorage.unhideComic(comicId)
-        await localStorage.loadDownloadedComics()
-        downloadStates[comicId] = .downloaded
+        let comicFolder = localStorage.comicsDirectory.appendingPathComponent(comicId)
+        let hasDownloadedFiles = FileManager.default.fileExists(atPath: comicFolder.path)
+
+        if hasDownloadedFiles {
+            // Files still on disk — just unhide
+            localStorage.unhideComic(comicId)
+            await localStorage.loadDownloadedComics()
+            downloadStates[comicId] = .downloaded
+        } else if let storeComic = catalog.first(where: { $0.id == comicId }) {
+            // Files were deleted (e.g. deleteComic removed them) — re-download fresh
+            localStorage.unhideComic(comicId)
+            await downloadComic(storeComic)
+        } else {
+            // No server entry found — just unhide and hope bundled version exists
+            localStorage.unhideComic(comicId)
+            await localStorage.loadDownloadedComics()
+            downloadStates[comicId] = .downloaded
+        }
     }
 
     /// Cancel an in-progress download
@@ -284,11 +302,15 @@ class ComicStoreService: ObservableObject {
 
 /// Handles file download with progress using URLSessionDownloadDelegate
 class DownloadHelper: NSObject, URLSessionDownloadDelegate {
+    /// Background session completion handlers, keyed by session identifier
+    static var backgroundCompletionHandlers: [String: () -> Void] = [:]
+
     private let destinationURL: URL
     private let estimatedSize: Int64
     private let onProgress: (Double) -> Void
     private var continuation: CheckedContinuation<(URL, URLResponse), Error>?
     private var downloadSession: URLSession?
+    private var sessionIdentifier: String?
 
     init(destinationURL: URL, estimatedSize: Int64, onProgress: @escaping (Double) -> Void) {
         self.destinationURL = destinationURL
@@ -299,7 +321,11 @@ class DownloadHelper: NSObject, URLSessionDownloadDelegate {
     func download(from url: URL) async throws -> (URL, URLResponse) {
         return try await withCheckedThrowingContinuation { continuation in
             self.continuation = continuation
-            let config = URLSessionConfiguration.default
+            let identifier = "com.comicreader.download.\(UUID().uuidString)"
+            self.sessionIdentifier = identifier
+            let config = URLSessionConfiguration.background(withIdentifier: identifier)
+            config.isDiscretionary = false
+            config.sessionSendsLaunchEvents = true
             let session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
             self.downloadSession = session
             let task = session.downloadTask(with: url)
@@ -363,6 +389,13 @@ class DownloadHelper: NSObject, URLSessionDownloadDelegate {
             continuation = nil
             session.invalidateAndCancel()
         }
+    }
+
+    // Called when all background events have been delivered
+    func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
+        guard let id = sessionIdentifier,
+              let handler = DownloadHelper.backgroundCompletionHandlers.removeValue(forKey: id) else { return }
+        DispatchQueue.main.async { handler() }
     }
 }
 

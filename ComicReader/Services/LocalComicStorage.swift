@@ -137,6 +137,9 @@ class LocalComicStorage: ObservableObject {
             try? fileManager.removeItem(at: comicFolder)
         }
 
+        // Clear cached images so re-download shows fresh content
+        ComicImageLoader.shared.clearCache(forComic: comicId)
+
         // Mark as hidden so bundled comics don't reappear
         hiddenComicIds.insert(comicId)
 
