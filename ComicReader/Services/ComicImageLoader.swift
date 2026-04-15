@@ -27,30 +27,38 @@ class ComicImageLoader {
 
         // Try loading from various locations
         // Downloaded comics take priority over bundled ones (user may re-download updated versions)
+        // Try .jpg first (optimized exports), then .png (legacy/bundled)
         var image: UIImage?
+        let extensions = ["jpg", "png"]
 
         // 1. Try Documents/Comics folder (downloaded comics — checked first for updates)
         let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let downloadedPath = documents
+        let downloadedBase = documents
             .appendingPathComponent("Comics")
             .appendingPathComponent(comicId)
             .appendingPathComponent("images")
-            .appendingPathComponent("\(imageName).png")
 
-        if fileManager.fileExists(atPath: downloadedPath.path) {
-            image = UIImage(contentsOfFile: downloadedPath.path)
+        for ext in extensions {
+            let path = downloadedBase.appendingPathComponent("\(imageName).\(ext)")
+            if fileManager.fileExists(atPath: path.path) {
+                image = UIImage(contentsOfFile: path.path)
+                break
+            }
         }
 
         // 2. Fallback to BundledComics folder (bundled sample comics)
         if image == nil {
             if let bundledURL = Bundle.main.url(forResource: "BundledComics", withExtension: nil) {
-                let imagePath = bundledURL
+                let bundledBase = bundledURL
                     .appendingPathComponent(comicId.replacingOccurrences(of: "comic-", with: ""))
                     .appendingPathComponent("images")
-                    .appendingPathComponent("\(imageName).png")
 
-                if fileManager.fileExists(atPath: imagePath.path) {
-                    image = UIImage(contentsOfFile: imagePath.path)
+                for ext in extensions {
+                    let path = bundledBase.appendingPathComponent("\(imageName).\(ext)")
+                    if fileManager.fileExists(atPath: path.path) {
+                        image = UIImage(contentsOfFile: path.path)
+                        break
+                    }
                 }
             }
         }
