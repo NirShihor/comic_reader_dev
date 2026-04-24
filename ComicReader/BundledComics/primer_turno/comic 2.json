@@ -1,0 +1,4754 @@
+{
+  "id": "comic-primer_turno",
+  "title": "PRIMER TURNO",
+  "description": "A teenager embarks on a new path and finds himself in a complicated situation.",
+  "coverImage": "primer_turno_cover",
+  "level": "beginner",
+  "totalPages": 13,
+  "estimatedMinutes": 26,
+  "language": "es",
+  "targetLanguage": "en",
+  "version": "1.0",
+  "collectionId": "el_restaurante",
+  "collectionTitle": "EL RESTAURANTE",
+  "episodeNumber": 1,
+  "pages": [
+    {
+      "id": "primer_turno-page-cover",
+      "pageNumber": 1,
+      "masterImage": "primer_turno_cover",
+      "panels": [
+        {
+          "id": "primer_turno-panel-cover",
+          "artworkImage": "primer_turno_cover",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-cover-1",
+              "type": "narration",
+              "position": {
+                "x": 0.25750000000000006,
+                "y": 0,
+                "width": 0.47500000000000003,
+                "height": 0.16708333333333336
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s1",
+                  "text": "Primer turno",
+                  "translation": "First Shift",
+                  "audioUrl": "primer_turno_p0_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w1",
+                      "text": "Primer",
+                      "meaning": "first",
+                      "baseForm": "primer",
+                      "startTimeMs": 0,
+                      "endTimeMs": 480,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/primer",
+                      "baseFormAudioUrl": "words/primer"
+                    },
+                    {
+                      "id": "primer_turno-w2",
+                      "text": "turno",
+                      "meaning": "shift",
+                      "baseForm": "turno",
+                      "startTimeMs": 733,
+                      "endTimeMs": 1998,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/turno",
+                      "baseFormAudioUrl": "words/turno"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "primer_turno-page-1",
+      "pageNumber": 2,
+      "masterImage": "primer_turno_p1",
+      "noTextImage": "primer_turno_p1_no_text",
+      "panels": [
+        {
+          "id": "primer_turno-panel-1-1",
+          "artworkImage": "primer_turno_p1_s1",
+          "noTextImage": "primer_turno_p1_s1_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 0.48375,
+              "y": 0
+            },
+            {
+              "x": 0.48375,
+              "y": 0.5205083231608073
+            },
+            {
+              "x": 0,
+              "y": 0.4785833231608073
+            }
+          ],
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.48375,
+            "height": 0.4785833231608073
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-1-1-2",
+              "type": "thought",
+              "position": {
+                "x": 0.04999999999999999,
+                "y": 0.06358332316080728,
+                "width": 0.41000000000000003,
+                "height": 0.07533335367838542
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s2",
+                  "text": "No me gusta la escuela...",
+                  "translation": "I don't like school...",
+                  "audioUrl": "primer_turno_p1_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w3",
+                      "text": "No",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1276,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "primer_turno-w4",
+                      "text": "me",
+                      "meaning": "me",
+                      "baseForm": "me",
+                      "startTimeMs": 1329,
+                      "endTimeMs": 1435,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/me",
+                      "baseFormAudioUrl": "words/me"
+                    },
+                    {
+                      "id": "primer_turno-w5",
+                      "text": "gusta",
+                      "meaning": "like",
+                      "baseForm": "gustar",
+                      "startTimeMs": 1528,
+                      "endTimeMs": 1993,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/gusta",
+                      "baseFormAudioUrl": "words/gustar"
+                    },
+                    {
+                      "id": "primer_turno-w6",
+                      "text": "la",
+                      "meaning": "the (female)",
+                      "baseForm": "el",
+                      "startTimeMs": 2833,
+                      "endTimeMs": 3433,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/la",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "primer_turno-w7",
+                      "text": "escuela...",
+                      "meaning": "school",
+                      "baseForm": "escuela",
+                      "startTimeMs": 3453,
+                      "endTimeMs": 5191,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/escuela",
+                      "baseFormAudioUrl": "words/escuela"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-1-2",
+          "artworkImage": "primer_turno_p1_s2",
+          "noTextImage": "primer_turno_p1_s2_no_text",
+          "corners": [
+            {
+              "x": 0.48375,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0.565249989827474
+            },
+            {
+              "x": 0.48375,
+              "y": 0.5205083231608073
+            }
+          ],
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.48375,
+            "y": 0,
+            "width": 0.51625,
+            "height": 0.4785833231608073
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-1-2-3",
+              "type": "thought",
+              "position": {
+                "x": 0.7150000000000001,
+                "y": 0.023916676839192727,
+                "width": 0.245,
+                "height": 0.08333333333333331
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s3",
+                  "text": "No quiero estar aquí...",
+                  "translation": "I don't want to be here...",
+                  "audioUrl": "primer_turno_p1_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w8",
+                      "text": "No",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 240,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "primer_turno-w9",
+                      "text": "quiero",
+                      "meaning": "I want",
+                      "baseForm": "querer",
+                      "startTimeMs": 308,
+                      "endTimeMs": 716,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/quiero",
+                      "baseFormAudioUrl": "words/querer"
+                    },
+                    {
+                      "id": "primer_turno-w10",
+                      "text": "estar",
+                      "meaning": "to be",
+                      "baseForm": "estar",
+                      "startTimeMs": 796,
+                      "endTimeMs": 1196,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/estar",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "primer_turno-w11",
+                      "text": "aquí...",
+                      "meaning": "here",
+                      "baseForm": "aquí",
+                      "startTimeMs": 1292,
+                      "endTimeMs": 2714,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/aquí",
+                      "baseFormAudioUrl": "words/aquí"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-1-3",
+          "artworkImage": "primer_turno_p1_s3",
+          "noTextImage": "primer_turno_p1_s3_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0.4785833231608073
+            },
+            {
+              "x": 0.5449999999999999,
+              "y": 0.5258166564941407
+            },
+            {
+              "x": 0.5449999999999999,
+              "y": 1
+            },
+            {
+              "x": 0,
+              "y": 1
+            }
+          ],
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.4785833231608073,
+            "width": 0.5449999999999999,
+            "height": 0.5214166768391927
+          },
+          "bubbles": []
+        },
+        {
+          "id": "primer_turno-panel-1-4",
+          "artworkImage": "primer_turno_p1_s4",
+          "noTextImage": "primer_turno_p1_s4_no_text",
+          "corners": [
+            {
+              "x": 0.5449999999999999,
+              "y": 0.5258166564941407
+            },
+            {
+              "x": 1,
+              "y": 0.565249989827474
+            },
+            {
+              "x": 1,
+              "y": 1
+            },
+            {
+              "x": 0.5449999999999999,
+              "y": 1
+            }
+          ],
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.5449999999999999,
+            "y": 0.4785833231608073,
+            "width": 0.45500000000000007,
+            "height": 0.5214166768391927
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-1-4-4",
+              "type": "thought",
+              "position": {
+                "x": 0.5674999999999999,
+                "y": 0.830749994913737,
+                "width": 0.21750000000000003,
+                "height": 0.07833333333333325
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s4",
+                  "text": "Necesito un cambio...",
+                  "translation": "I need a change...",
+                  "audioUrl": "primer_turno_p1_s4_b3_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w12",
+                      "text": "Necesito",
+                      "meaning": "I need",
+                      "baseForm": "necesitar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 958,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/necesito",
+                      "baseFormAudioUrl": "words/necesitar"
+                    },
+                    {
+                      "id": "primer_turno-w13",
+                      "text": "un",
+                      "meaning": "a",
+                      "baseForm": "un",
+                      "startTimeMs": 1038,
+                      "endTimeMs": 1198,
+                      "wordAudioUrl": "words/un",
+                      "baseFormAudioUrl": "words/un"
+                    },
+                    {
+                      "id": "primer_turno-w14",
+                      "text": "cambio...",
+                      "meaning": "change",
+                      "baseForm": "cambio",
+                      "startTimeMs": 1312,
+                      "endTimeMs": 3034,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/cambio",
+                      "baseFormAudioUrl": "words/cambio"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "primer_turno-page-2",
+      "pageNumber": 3,
+      "masterImage": "primer_turno_p2",
+      "noTextImage": "primer_turno_p2_no_text",
+      "panels": [
+        {
+          "id": "primer_turno-panel-2-1",
+          "artworkImage": "primer_turno_p2_s1",
+          "noTextImage": "primer_turno_p2_s1_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0.3435833231608073
+            },
+            {
+              "x": 0,
+              "y": 0.4335833231608073
+            }
+          ],
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.4335833231608073
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-2-1-5",
+              "type": "speech",
+              "position": {
+                "x": 0.7725000000000001,
+                "y": 0.016916656494140606,
+                "width": 0.1924999999999999,
+                "height": 0.07833333333333335
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s5",
+                  "text": "¿Dejar la escuela?",
+                  "translation": "Leave school? ",
+                  "audioUrl": "primer_turno_p2_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w15",
+                      "text": "¿Dejar",
+                      "meaning": "to leave",
+                      "baseForm": "dejar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 399,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/dejar",
+                      "baseFormAudioUrl": "words/dejar"
+                    },
+                    {
+                      "id": "primer_turno-w16",
+                      "text": "la",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 452,
+                      "endTimeMs": 558,
+                      "wordAudioUrl": "words/la",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "primer_turno-w17",
+                      "text": "escuela?",
+                      "meaning": "school",
+                      "baseForm": "escuela",
+                      "startTimeMs": 638,
+                      "endTimeMs": 1358,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/escuela",
+                      "baseFormAudioUrl": "words/escuela"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-2-2",
+          "artworkImage": "primer_turno_p2_s2",
+          "noTextImage": "primer_turno_p2_s2_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0.4335833231608073
+            },
+            {
+              "x": 0.504446296992808,
+              "y": 0.3885833231608073
+            },
+            {
+              "x": 0.58,
+              "y": 1
+            },
+            {
+              "x": 0,
+              "y": 1
+            }
+          ],
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.4335833231608073,
+            "width": 0.5,
+            "height": 0.5664166768391927
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-2-2-6",
+              "type": "speech",
+              "position": {
+                "x": 0.012499999999999983,
+                "y": 0.48858332316080744,
+                "width": 0.1875,
+                "height": 0.10666666666666658
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s6",
+                  "text": "Eso no está bien...",
+                  "translation": "That's not good...",
+                  "audioUrl": "primer_turno_p3_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w18",
+                      "text": "Eso",
+                      "meaning": "that",
+                      "baseForm": "eso",
+                      "startTimeMs": 0,
+                      "endTimeMs": 480,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/eso",
+                      "baseFormAudioUrl": "words/eso"
+                    },
+                    {
+                      "id": "primer_turno-w19",
+                      "text": "no",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 533,
+                      "endTimeMs": 639,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "primer_turno-w20",
+                      "text": "está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 687,
+                      "endTimeMs": 879,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "primer_turno-w21",
+                      "text": "bien...",
+                      "meaning": "good",
+                      "baseForm": "bien",
+                      "startTimeMs": 943,
+                      "endTimeMs": 1277,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/bien",
+                      "baseFormAudioUrl": "words/bien"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-2-3",
+          "artworkImage": "primer_turno_p2_s3",
+          "noTextImage": "primer_turno_p2_s3_no_text",
+          "corners": [
+            {
+              "x": 0.504446296992808,
+              "y": 0.3885833231608073
+            },
+            {
+              "x": 1,
+              "y": 0.3435833231608073
+            },
+            {
+              "x": 1,
+              "y": 1
+            },
+            {
+              "x": 0.58,
+              "y": 1
+            }
+          ],
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.5,
+            "y": 0.4335833231608073,
+            "width": 0.5,
+            "height": 0.5664166768391927
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-2-3-7",
+              "type": "speech",
+              "position": {
+                "x": 0.61,
+                "y": 0.7290833536783854,
+                "width": 0.17999999999999994,
+                "height": 0.08166666666666661
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s7",
+                  "text": "Quiero trabajar.",
+                  "translation": "I want to work. ",
+                  "audioUrl": "primer_turno_p3_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w22",
+                      "text": "Quiero",
+                      "meaning": "I want",
+                      "baseForm": "querer",
+                      "startTimeMs": 0,
+                      "endTimeMs": 640,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/quiero",
+                      "baseFormAudioUrl": "words/querer"
+                    },
+                    {
+                      "id": "primer_turno-w23",
+                      "text": "trabajar.",
+                      "meaning": "to work",
+                      "baseForm": "trabajar",
+                      "startTimeMs": 1080,
+                      "endTimeMs": 2398,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/trabajar",
+                      "baseFormAudioUrl": "words/trabajar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "primer_turno-page-3",
+      "pageNumber": 4,
+      "masterImage": "primer_turno_p3",
+      "noTextImage": "primer_turno_p3_no_text",
+      "panels": [
+        {
+          "id": "primer_turno-panel-3-1",
+          "artworkImage": "primer_turno_p3_s1",
+          "noTextImage": "primer_turno_p3_s1_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0.3813333384195964
+            },
+            {
+              "x": 0,
+              "y": 0.46133333841959634
+            }
+          ],
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.46133333841959634
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-3-1-8",
+              "type": "thought",
+              "position": {
+                "x": 0.27,
+                "y": 0.01300000508626302,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s8",
+                  "text": "Debo encontrar trabajo...",
+                  "translation": "I must find work...",
+                  "audioUrl": "primer_turno_p3_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w24",
+                      "text": "Debo",
+                      "meaning": "I must",
+                      "baseForm": "deber",
+                      "startTimeMs": 0,
+                      "endTimeMs": 396,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/debo",
+                      "baseFormAudioUrl": "words/deber"
+                    },
+                    {
+                      "id": "primer_turno-w25",
+                      "text": "encontrar",
+                      "meaning": "to find",
+                      "baseForm": "encontrar",
+                      "startTimeMs": 452,
+                      "endTimeMs": 956,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/encontrar",
+                      "baseFormAudioUrl": "words/encontrar"
+                    },
+                    {
+                      "id": "primer_turno-w26",
+                      "text": "trabajo...",
+                      "meaning": "work",
+                      "baseForm": "trabajo",
+                      "startTimeMs": 1026,
+                      "endTimeMs": 2236,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/trabajo",
+                      "baseFormAudioUrl": "words/trabajo"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-3-2",
+          "artworkImage": "primer_turno_p3_s2",
+          "noTextImage": "primer_turno_p3_s2_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0.46133333841959634
+            },
+            {
+              "x": 0.5206268263894471,
+              "y": 0.41943333841959635
+            },
+            {
+              "x": 0.4675,
+              "y": 1
+            },
+            {
+              "x": 0,
+              "y": 1
+            }
+          ],
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.46133333841959634,
+            "width": 0.5237499999999999,
+            "height": 0.5386666615804037
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-3-2-9",
+              "type": "speech",
+              "position": {
+                "x": 0.14,
+                "y": 0.46633333841959645,
+                "width": 0.1925,
+                "height": 0.08058331807454422
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s9",
+                  "text": "No, lo siento...",
+                  "translation": "No, I'm sorry...",
+                  "audioUrl": "primer_turno_p3_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w27",
+                      "text": "No,",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 400,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "primer_turno-w28",
+                      "text": "lo",
+                      "meaning": "it",
+                      "baseForm": "lo",
+                      "startTimeMs": 453,
+                      "endTimeMs": 559,
+                      "wordAudioUrl": "words/lo",
+                      "baseFormAudioUrl": "words/lo"
+                    },
+                    {
+                      "id": "primer_turno-w29",
+                      "text": "siento...",
+                      "meaning": "I feel",
+                      "baseForm": "sentir",
+                      "startTimeMs": 599,
+                      "endTimeMs": 1199,
+                      "wordAudioUrl": "words/siento",
+                      "baseFormAudioUrl": "words/sentir"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-3-3",
+          "artworkImage": "primer_turno_p3_s3",
+          "noTextImage": "primer_turno_p3_s3_no_text",
+          "corners": [
+            {
+              "x": 0.5206268263894471,
+              "y": 0.41943333841959635
+            },
+            {
+              "x": 1,
+              "y": 0.3813333384195964
+            },
+            {
+              "x": 1,
+              "y": 1
+            },
+            {
+              "x": 0.4675,
+              "y": 1
+            }
+          ],
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.5237499999999999,
+            "y": 0.46133333841959634,
+            "width": 0.47625000000000006,
+            "height": 0.5386666615804037
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-3-3-10",
+              "type": "speech",
+              "position": {
+                "x": 0.6049999999999999,
+                "y": 0.46375,
+                "width": 0.2675000000000002,
+                "height": 0.07499999999999996
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s10",
+                  "text": "Me encantan los libros...",
+                  "translation": "I love books...",
+                  "audioUrl": "primer_turno_p3_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w30",
+                      "text": "Me",
+                      "meaning": "me",
+                      "baseForm": "me",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/me",
+                      "baseFormAudioUrl": "words/me"
+                    },
+                    {
+                      "id": "primer_turno-w31",
+                      "text": "encantan",
+                      "meaning": "love",
+                      "baseForm": "encantar",
+                      "startTimeMs": 260,
+                      "endTimeMs": 960,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/encantan",
+                      "baseFormAudioUrl": "words/encantar"
+                    },
+                    {
+                      "id": "primer_turno-w32",
+                      "text": "los",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 1000,
+                      "endTimeMs": 1120,
+                      "wordAudioUrl": "words/los",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "primer_turno-w33",
+                      "text": "libros...",
+                      "meaning": "books",
+                      "baseForm": "libro",
+                      "startTimeMs": 1188,
+                      "endTimeMs": 1674,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/libros",
+                      "baseFormAudioUrl": "words/libro"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "primer_turno-bubble-3-3-11",
+              "type": "speech",
+              "position": {
+                "x": 0.5774999999999999,
+                "y": 0.8304166666666666,
+                "width": 0.20750000000000013,
+                "height": 0.08399998982747403
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s11",
+                  "text": "No por el momento...",
+                  "translation": "Not at the moment...",
+                  "audioUrl": "primer_turno_p3_s3_b4_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w34",
+                      "text": "No",
+                      "meaning": "not",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 398,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "primer_turno-w35",
+                      "text": "por",
+                      "meaning": "for",
+                      "baseForm": "por",
+                      "startTimeMs": 478,
+                      "endTimeMs": 718,
+                      "wordAudioUrl": "words/por",
+                      "baseFormAudioUrl": "words/por"
+                    },
+                    {
+                      "id": "primer_turno-w36",
+                      "text": "el",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 771,
+                      "endTimeMs": 877,
+                      "wordAudioUrl": "words/el",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "primer_turno-w37",
+                      "text": "momento...",
+                      "meaning": "moment",
+                      "baseForm": "momento",
+                      "startTimeMs": 977,
+                      "endTimeMs": 1755,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/momento",
+                      "baseFormAudioUrl": "words/momento"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "primer_turno-page-4",
+      "pageNumber": 5,
+      "masterImage": "primer_turno_p4",
+      "noTextImage": "primer_turno_p4_no_text",
+      "panels": [
+        {
+          "id": "primer_turno-panel-4-1",
+          "artworkImage": "primer_turno_p4_s1",
+          "noTextImage": "primer_turno_p4_s1_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0.29024998982747396
+            },
+            {
+              "x": 0,
+              "y": 0.3319166564941406
+            }
+          ],
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.3319166564941406
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-4-1-12",
+              "type": "thought",
+              "position": {
+                "x": 0.1925,
+                "y": 0.05800000508626302,
+                "width": 0.21999999999999997,
+                "height": 0.08666666666666667
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s12",
+                  "text": "Se necesita camarero",
+                  "translation": "Waiter needed",
+                  "audioUrl": "primer_turno_p4_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w38",
+                      "text": "Se",
+                      "meaning": "reflexive pronoun",
+                      "baseForm": "se",
+                      "startTimeMs": 0,
+                      "endTimeMs": 740,
+                      "wordAudioUrl": "words/se",
+                      "baseFormAudioUrl": "words/se"
+                    },
+                    {
+                      "id": "primer_turno-w39",
+                      "text": "necesita",
+                      "meaning": "needs",
+                      "baseForm": "necesitar",
+                      "startTimeMs": 764,
+                      "endTimeMs": 956,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/necesita",
+                      "baseFormAudioUrl": "words/necesitar"
+                    },
+                    {
+                      "id": "primer_turno-w40",
+                      "text": "camarero",
+                      "meaning": "waiter",
+                      "baseForm": "camarero",
+                      "startTimeMs": 1436,
+                      "endTimeMs": 3114,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/camarero",
+                      "baseFormAudioUrl": "words/camarero"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-4-2",
+          "artworkImage": "primer_turno_p4_s2",
+          "noTextImage": "primer_turno_p4_s2_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0.3319166564941406
+            },
+            {
+              "x": 1,
+              "y": 0.29024998982747396
+            },
+            {
+              "x": 1,
+              "y": 0.7219166564941406
+            },
+            {
+              "x": 0,
+              "y": 0.6610833231608073
+            }
+          ],
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.3319166564941406,
+            "width": 1,
+            "height": 0.3291666666666667
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-4-2-13",
+              "type": "thought",
+              "position": {
+                "x": 0.3524999999999999,
+                "y": 0.34300000508626305,
+                "width": 0.25750000000000006,
+                "height": 0.07999999999999996
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s13",
+                  "text": "¿A quién le pregunto?",
+                  "translation": "Who do I ask?",
+                  "audioUrl": "primer_turno_p4_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w41",
+                      "text": "¿A",
+                      "meaning": "to",
+                      "baseForm": "a",
+                      "startTimeMs": 0,
+                      "endTimeMs": 238,
+                      "wordAudioUrl": "words/a",
+                      "baseFormAudioUrl": "words/a"
+                    },
+                    {
+                      "id": "primer_turno-w42",
+                      "text": "quién",
+                      "meaning": "who",
+                      "baseForm": "quién",
+                      "startTimeMs": 318,
+                      "endTimeMs": 1677,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/quién",
+                      "baseFormAudioUrl": "words/quién"
+                    },
+                    {
+                      "id": "primer_turno-w43",
+                      "text": "le",
+                      "meaning": "to him/her",
+                      "baseForm": "le",
+                      "startTimeMs": 1730,
+                      "endTimeMs": 1836,
+                      "wordAudioUrl": "words/le",
+                      "baseFormAudioUrl": "words/le"
+                    },
+                    {
+                      "id": "primer_turno-w44",
+                      "text": "pregunto?",
+                      "meaning": "I ask",
+                      "baseForm": "preguntar",
+                      "startTimeMs": 1916,
+                      "endTimeMs": 2956,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/pregunto",
+                      "baseFormAudioUrl": "words/preguntar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-4-3",
+          "artworkImage": "primer_turno_p4_s3",
+          "noTextImage": "primer_turno_p4_s3_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0.6610833231608073
+            },
+            {
+              "x": 1,
+              "y": 0.7219166564941406
+            },
+            {
+              "x": 1,
+              "y": 1
+            },
+            {
+              "x": 0,
+              "y": 1
+            }
+          ],
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.6610833231608073,
+            "width": 1,
+            "height": 0.3389166768391927
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-4-3-14",
+              "type": "speech",
+              "position": {
+                "x": 0.3725,
+                "y": 0.8946666717529296,
+                "width": 0.2225000000000001,
+                "height": 0.08083333333333342
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s14",
+                  "text": "¿Puedo ayudarte?",
+                  "translation": "Can I help you? ",
+                  "audioUrl": "primer_turno_p4_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w45",
+                      "text": "¿Puedo",
+                      "meaning": "I can",
+                      "baseForm": "poder",
+                      "startTimeMs": 0,
+                      "endTimeMs": 958,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/puedo",
+                      "baseFormAudioUrl": "words/poder"
+                    },
+                    {
+                      "id": "primer_turno-w46",
+                      "text": "ayudarte?",
+                      "meaning": "to help you",
+                      "baseForm": "ayudar",
+                      "startTimeMs": 1134,
+                      "endTimeMs": 3998,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/ayudarte",
+                      "baseFormAudioUrl": "words/ayudar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "primer_turno-page-5",
+      "pageNumber": 6,
+      "masterImage": "primer_turno_p5",
+      "noTextImage": "primer_turno_p5_no_text",
+      "panels": [
+        {
+          "id": "primer_turno-panel-5-1",
+          "artworkImage": "primer_turno_p5_s1",
+          "noTextImage": "primer_turno_p5_s1_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 0.56875,
+              "y": 0
+            },
+            {
+              "x": 0.46375,
+              "y": 0.4619166564941406
+            },
+            {
+              "x": 0,
+              "y": 0.4619166564941406
+            }
+          ],
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.46375,
+            "height": 0.4619166564941406
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-5-1-15",
+              "type": "speech",
+              "position": {
+                "x": 0.21749999999999997,
+                "y": 0.2585833231608073,
+                "width": 0.1975,
+                "height": 0.12416666666666665
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s15",
+                  "text": "Estoy buscando... trabajo.",
+                  "translation": "I am looking for work.",
+                  "audioUrl": "primer_turno_p5_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w47",
+                      "text": "Estoy",
+                      "meaning": "I am",
+                      "baseForm": "estar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 316,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/estoy",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "primer_turno-w48",
+                      "text": "buscando...",
+                      "meaning": "looking for",
+                      "baseForm": "buscar",
+                      "startTimeMs": 380,
+                      "endTimeMs": 1635,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/buscando",
+                      "baseFormAudioUrl": "words/buscar"
+                    },
+                    {
+                      "id": "primer_turno-w49",
+                      "text": "trabajo.",
+                      "meaning": "work",
+                      "baseForm": "trabajo",
+                      "startTimeMs": 1700,
+                      "endTimeMs": 3035,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/trabajo",
+                      "baseFormAudioUrl": "words/trabajo"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-5-2",
+          "artworkImage": "primer_turno_p5_s2",
+          "noTextImage": "primer_turno_p5_s2_no_text",
+          "corners": [
+            {
+              "x": 0.56875,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0.4619166564941406
+            },
+            {
+              "x": 0.46375,
+              "y": 0.4619166564941406
+            }
+          ],
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.46375,
+            "y": 0,
+            "width": 0.53625,
+            "height": 0.4619166564941406
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-5-2-16",
+              "type": "speech",
+              "position": {
+                "x": 0.5325,
+                "y": 0.30058334350585936,
+                "width": 0.22250000000000003,
+                "height": 0.08666666666666667
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s16",
+                  "text": "¿Tienes experiencia?",
+                  "translation": "Do you have experience? ",
+                  "audioUrl": "primer_turno_p5_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w50",
+                      "text": "¿Tienes",
+                      "meaning": "you have",
+                      "baseForm": "tener",
+                      "startTimeMs": 0,
+                      "endTimeMs": 560,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/tienes",
+                      "baseFormAudioUrl": "words/tener"
+                    },
+                    {
+                      "id": "primer_turno-w51",
+                      "text": "experiencia?",
+                      "meaning": "experience",
+                      "baseForm": "experiencia",
+                      "startTimeMs": 620,
+                      "endTimeMs": 2640,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/experiencia",
+                      "baseFormAudioUrl": "words/experiencia"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-5-3",
+          "artworkImage": "primer_turno_p5_s3",
+          "noTextImage": "primer_turno_p5_s3_no_text",
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.4619166564941406,
+            "width": 1,
+            "height": 0.5380833435058594
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-5-3-17",
+              "type": "speech",
+              "position": {
+                "x": 0.3925,
+                "y": 0.4789166768391927,
+                "width": 0.27999999999999997,
+                "height": 0.07999999999999996
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s17",
+                  "text": "No... No. Pero aprendo rápido.",
+                  "translation": "No... No. But I learn quickly.",
+                  "audioUrl": "primer_turno_p5_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w52",
+                      "text": "No...",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1039,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "primer_turno-w53",
+                      "text": "No.",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 1119,
+                      "endTimeMs": 1359,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "primer_turno-w54",
+                      "text": "Pero",
+                      "meaning": "but",
+                      "baseForm": "pero",
+                      "startTimeMs": 1759,
+                      "endTimeMs": 2315,
+                      "wordAudioUrl": "words/pero",
+                      "baseFormAudioUrl": "words/pero"
+                    },
+                    {
+                      "id": "primer_turno-w55",
+                      "text": "aprendo",
+                      "meaning": "I learn",
+                      "baseForm": "aprender",
+                      "startTimeMs": 2372,
+                      "endTimeMs": 2794,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/aprendo",
+                      "baseFormAudioUrl": "words/aprender"
+                    },
+                    {
+                      "id": "primer_turno-w56",
+                      "text": "rápido.",
+                      "meaning": "quickly",
+                      "baseForm": "rápido",
+                      "startTimeMs": 2862,
+                      "endTimeMs": 3510,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/rápido",
+                      "baseFormAudioUrl": "words/rápido"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "primer_turno-page-6",
+      "pageNumber": 7,
+      "masterImage": "primer_turno_p6",
+      "noTextImage": "primer_turno_p6_no_text",
+      "panels": [
+        {
+          "id": "primer_turno-panel-6-1",
+          "artworkImage": "primer_turno_p6_s1",
+          "noTextImage": "primer_turno_p6_s1_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0.5269166564941407
+            },
+            {
+              "x": 0,
+              "y": 0.4610833231608073
+            }
+          ],
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.4610833231608073
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-6-1-18",
+              "type": "speech",
+              "position": {
+                "x": 0.04250000000000004,
+                "y": 0.047166671752929684,
+                "width": 0.17999999999999997,
+                "height": 0.12
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s18",
+                  "text": "Empiezas ahora.",
+                  "translation": "You start now...",
+                  "audioUrl": "primer_turno_p6_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w57",
+                      "text": "Empiezas",
+                      "meaning": "you start",
+                      "baseForm": "empezar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 719,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/empiezas",
+                      "baseFormAudioUrl": "words/empezar"
+                    },
+                    {
+                      "id": "primer_turno-w58",
+                      "text": "ahora.",
+                      "meaning": "now",
+                      "baseForm": "ahora",
+                      "startTimeMs": 825,
+                      "endTimeMs": 1515,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/ahora",
+                      "baseFormAudioUrl": "words/ahora"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-6-2",
+          "artworkImage": "primer_turno_p6_s2",
+          "noTextImage": "primer_turno_p6_s2_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0.4610833231608073
+            },
+            {
+              "x": 1,
+              "y": 0.5269166564941407
+            },
+            {
+              "x": 1,
+              "y": 1
+            },
+            {
+              "x": 0,
+              "y": 1
+            }
+          ],
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.4610833231608073,
+            "width": 1,
+            "height": 0.5389166768391926
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-6-2-19",
+              "type": "speech",
+              "position": {
+                "x": 0.4675,
+                "y": 0.5589166768391925,
+                "width": 0.1825,
+                "height": 0.11333333333333351
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s19",
+                  "text": "¿Ahora? Gracias...",
+                  "translation": "Now? Thank you...",
+                  "audioUrl": "primer_turno_p6_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w59",
+                      "text": "¿Ahora?",
+                      "meaning": "now",
+                      "baseForm": "ahora",
+                      "startTimeMs": 0,
+                      "endTimeMs": 554,
+                      "wordAudioUrl": "words/ahora",
+                      "baseFormAudioUrl": "words/ahora"
+                    },
+                    {
+                      "id": "primer_turno-w60",
+                      "text": "Gracias...",
+                      "meaning": "thank you",
+                      "baseForm": "gracia",
+                      "startTimeMs": 1314,
+                      "endTimeMs": 6627,
+                      "wordAudioUrl": "words/gracias",
+                      "baseFormAudioUrl": "words/gracia"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "primer_turno-page-7",
+      "pageNumber": 8,
+      "masterImage": "primer_turno_p7",
+      "noTextImage": "primer_turno_p7_no_text",
+      "panels": [
+        {
+          "id": "primer_turno-panel-7-1",
+          "artworkImage": "primer_turno_p7_s1",
+          "noTextImage": "primer_turno_p7_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          },
+          "bubbles": []
+        },
+        {
+          "id": "primer_turno-panel-7-2",
+          "artworkImage": "primer_turno_p7_s2",
+          "noTextImage": "primer_turno_p7_s2_no_text",
+          "floating": true,
+          "corners": [
+            {
+              "x": 0.0225,
+              "y": 0.018583323160807293
+            },
+            {
+              "x": 0.495,
+              "y": 0.021166661580403645
+            },
+            {
+              "x": 0.395,
+              "y": 0.2935833231608073
+            },
+            {
+              "x": 0.0225,
+              "y": 0.2935833231608073
+            }
+          ],
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.0225,
+            "y": 0.018583323160807293,
+            "width": 0.4725,
+            "height": 0.275
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-7-2-20",
+              "type": "speech",
+              "position": {
+                "x": 0.08249999999999999,
+                "y": 0.03524998982747397,
+                "width": 0.32999999999999996,
+                "height": 0.045
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s20",
+                  "text": "¡Un café, por favor!",
+                  "translation": "A coffee, please!",
+                  "audioUrl": "primer_turno_p7_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w61",
+                      "text": "¡Un",
+                      "meaning": "a",
+                      "baseForm": "un",
+                      "startTimeMs": 0,
+                      "endTimeMs": 80,
+                      "wordAudioUrl": "words/un",
+                      "baseFormAudioUrl": "words/un"
+                    },
+                    {
+                      "id": "primer_turno-w62",
+                      "text": "café,",
+                      "meaning": "coffee",
+                      "baseForm": "café",
+                      "startTimeMs": 144,
+                      "endTimeMs": 520,
+                      "wordAudioUrl": "words/café",
+                      "baseFormAudioUrl": "words/café"
+                    },
+                    {
+                      "id": "primer_turno-w63",
+                      "text": "por",
+                      "meaning": "for",
+                      "baseForm": "por",
+                      "startTimeMs": 550,
+                      "endTimeMs": 640,
+                      "wordAudioUrl": "words/por",
+                      "baseFormAudioUrl": "words/por"
+                    },
+                    {
+                      "id": "primer_turno-w64",
+                      "text": "favor!",
+                      "meaning": "favor",
+                      "baseForm": "favor",
+                      "startTimeMs": 706,
+                      "endTimeMs": 1036,
+                      "wordAudioUrl": "words/favor",
+                      "baseFormAudioUrl": "words/favor"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-7-3",
+          "artworkImage": "primer_turno_p7_s3",
+          "noTextImage": "primer_turno_p7_s3_no_text",
+          "floating": true,
+          "corners": [
+            {
+              "x": 0.54,
+              "y": 0.021333338419596354
+            },
+            {
+              "x": 0.9725,
+              "y": 0.028000005086263022
+            },
+            {
+              "x": 0.9725,
+              "y": 0.30133333841959636
+            },
+            {
+              "x": 0.61,
+              "y": 0.29633333841959636
+            }
+          ],
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.54,
+            "y": 0.021333338419596354,
+            "width": 0.4325,
+            "height": 0.28
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-7-3-21",
+              "type": "speech",
+              "position": {
+                "x": 0.7774999999999999,
+                "y": 0.1780833435058594,
+                "width": 0.15000000000000002,
+                "height": 0.11116666158040361
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s21",
+                  "text": "¡Para mí, una sopa!",
+                  "translation": "For me, a soup!",
+                  "audioUrl": "primer_turno_p7_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w65",
+                      "text": "¡Para",
+                      "meaning": "for",
+                      "baseForm": "para",
+                      "startTimeMs": 0,
+                      "endTimeMs": 240,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/para",
+                      "baseFormAudioUrl": "words/para"
+                    },
+                    {
+                      "id": "primer_turno-w66",
+                      "text": "mí,",
+                      "meaning": "me",
+                      "baseForm": "yo",
+                      "startTimeMs": 293,
+                      "endTimeMs": 479,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mí",
+                      "baseFormAudioUrl": "words/yo"
+                    },
+                    {
+                      "id": "primer_turno-w67",
+                      "text": "una",
+                      "meaning": "a",
+                      "baseForm": "uno",
+                      "startTimeMs": 619,
+                      "endTimeMs": 1039,
+                      "wordAudioUrl": "words/una",
+                      "baseFormAudioUrl": "words/uno"
+                    },
+                    {
+                      "id": "primer_turno-w68",
+                      "text": "sopa!",
+                      "meaning": "soup",
+                      "baseForm": "sopa",
+                      "startTimeMs": 1119,
+                      "endTimeMs": 1758,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/sopa",
+                      "baseFormAudioUrl": "words/sopa"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-7-4",
+          "artworkImage": "primer_turno_p7_s4",
+          "noTextImage": "primer_turno_p7_s4_no_text",
+          "floating": true,
+          "corners": [
+            {
+              "x": 0.025,
+              "y": 0.655249989827474
+            },
+            {
+              "x": 0.395,
+              "y": 0.655249989827474
+            },
+            {
+              "x": 0.4825,
+              "y": 0.9819166564941406
+            },
+            {
+              "x": 0.025,
+              "y": 0.9819166564941406
+            }
+          ],
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.025,
+            "y": 0.655249989827474,
+            "width": 0.45749999999999996,
+            "height": 0.32666666666666666
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-7-4-22",
+              "type": "speech",
+              "position": {
+                "x": 0.16999999999999998,
+                "y": 0.6714166768391927,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s22",
+                  "text": "¡Agua con gas, por favor!",
+                  "translation": "Sparkling water please!",
+                  "audioUrl": "primer_turno_p7_s1_b3_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w69",
+                      "text": "agua",
+                      "meaning": "water",
+                      "baseForm": "agua",
+                      "startTimeMs": 0,
+                      "endTimeMs": 240,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/agua",
+                      "baseFormAudioUrl": "words/agua"
+                    },
+                    {
+                      "id": "primer_turno-w70",
+                      "text": "con",
+                      "meaning": "with",
+                      "baseForm": "con",
+                      "startTimeMs": 280,
+                      "endTimeMs": 400,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/con",
+                      "baseFormAudioUrl": "words/con"
+                    },
+                    {
+                      "id": "primer_turno-w71",
+                      "text": "gas,",
+                      "meaning": "gas",
+                      "baseForm": "gas",
+                      "startTimeMs": 460,
+                      "endTimeMs": 720,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/gas",
+                      "baseFormAudioUrl": "words/gas"
+                    },
+                    {
+                      "id": "primer_turno-w72",
+                      "text": "por",
+                      "meaning": "for",
+                      "baseForm": "por",
+                      "startTimeMs": 740,
+                      "endTimeMs": 800,
+                      "wordAudioUrl": "words/por",
+                      "baseFormAudioUrl": "words/por"
+                    },
+                    {
+                      "id": "primer_turno-w73",
+                      "text": "favor!",
+                      "meaning": "favor",
+                      "baseForm": "favor",
+                      "startTimeMs": 866,
+                      "endTimeMs": 1276,
+                      "wordAudioUrl": "words/favor",
+                      "baseFormAudioUrl": "words/favor"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-7-5",
+          "artworkImage": "primer_turno_p7_s5",
+          "noTextImage": "primer_turno_p7_s5_no_text",
+          "floating": true,
+          "corners": [
+            {
+              "x": 0.49249999999999994,
+              "y": 0.3585833231608073
+            },
+            {
+              "x": 0.9149999999999999,
+              "y": 0.385249989827474
+            },
+            {
+              "x": 0.945,
+              "y": 0.655249989827474
+            },
+            {
+              "x": 0.5425,
+              "y": 0.6419166564941406
+            }
+          ],
+          "panelOrder": 5,
+          "tapZone": {
+            "x": 0.49249999999999994,
+            "y": 0.3585833231608073,
+            "width": 0.4525,
+            "height": 0.29666666666666663
+          },
+          "bubbles": []
+        }
+      ]
+    },
+    {
+      "id": "primer_turno-page-8",
+      "pageNumber": 9,
+      "masterImage": "primer_turno_p8",
+      "noTextImage": "primer_turno_p8_no_text",
+      "panels": [
+        {
+          "id": "primer_turno-panel-8-1",
+          "artworkImage": "primer_turno_p8_s1",
+          "noTextImage": "primer_turno_p8_s1_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 0.50625,
+              "y": 0
+            },
+            {
+              "x": 0.585,
+              "y": 0.4560833231608073
+            },
+            {
+              "x": 0,
+              "y": 0.4560833231608073
+            }
+          ],
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.50625,
+            "height": 0.4560833231608073
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-8-1-23",
+              "type": "speech",
+              "position": {
+                "x": 0.04000000000000001,
+                "y": 0.019583333333333328,
+                "width": 0.16749999999999998,
+                "height": 0.11033332824707033
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s23",
+                  "text": "¿Qué te gustaría?",
+                  "translation": "What would you like? ",
+                  "audioUrl": "primer_turno_p8_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w74",
+                      "text": "¿Qué",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1279,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    },
+                    {
+                      "id": "primer_turno-w75",
+                      "text": "te",
+                      "meaning": "you",
+                      "baseForm": "tú",
+                      "startTimeMs": 1332,
+                      "endTimeMs": 1438,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/te",
+                      "baseFormAudioUrl": "words/tú"
+                    },
+                    {
+                      "id": "primer_turno-w76",
+                      "text": "gustaría?",
+                      "meaning": "would like",
+                      "baseForm": "gustar",
+                      "startTimeMs": 1486,
+                      "endTimeMs": 3118,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/gustaría",
+                      "baseFormAudioUrl": "words/gustar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-8-2",
+          "artworkImage": "primer_turno_p8_s2",
+          "noTextImage": "primer_turno_p8_s2_no_text",
+          "corners": [
+            {
+              "x": 0.50625,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0.4560833231608073
+            },
+            {
+              "x": 0.585,
+              "y": 0.4560833231608073
+            }
+          ],
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.50625,
+            "y": 0,
+            "width": 0.49375,
+            "height": 0.4560833231608073
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-8-2-24",
+              "type": "speech",
+              "position": {
+                "x": 0.5824999999999999,
+                "y": 0.03991666158040365,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s24",
+                  "text": "La ensalada y el pollo, por favor...",
+                  "translation": "The salad and the chicken please.",
+                  "audioUrl": "primer_turno_p8_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w77",
+                      "text": "La",
+                      "meaning": "the",
+                      "baseForm": "la",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/la",
+                      "baseFormAudioUrl": "words/la"
+                    },
+                    {
+                      "id": "primer_turno-w78",
+                      "text": "ensalada",
+                      "meaning": "salad",
+                      "baseForm": "ensalada",
+                      "startTimeMs": 240,
+                      "endTimeMs": 958,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/ensalada",
+                      "baseFormAudioUrl": "words/ensalada"
+                    },
+                    {
+                      "id": "primer_turno-w79",
+                      "text": "y",
+                      "meaning": "and",
+                      "baseForm": "y",
+                      "startTimeMs": 1118,
+                      "endTimeMs": 1278,
+                      "wordAudioUrl": "words/y",
+                      "baseFormAudioUrl": "words/y"
+                    },
+                    {
+                      "id": "primer_turno-w80",
+                      "text": "el",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 1331,
+                      "endTimeMs": 1437,
+                      "wordAudioUrl": "words/el",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "primer_turno-w81",
+                      "text": "pollo,",
+                      "meaning": "chicken",
+                      "baseForm": "pollo",
+                      "startTimeMs": 1537,
+                      "endTimeMs": 2317,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/pollo",
+                      "baseFormAudioUrl": "words/pollo"
+                    },
+                    {
+                      "id": "primer_turno-w82",
+                      "text": "por",
+                      "meaning": "for",
+                      "baseForm": "por",
+                      "startTimeMs": 2337,
+                      "endTimeMs": 2397,
+                      "wordAudioUrl": "words/por",
+                      "baseFormAudioUrl": "words/por"
+                    },
+                    {
+                      "id": "primer_turno-w83",
+                      "text": "favor.",
+                      "meaning": "please",
+                      "baseForm": "favor",
+                      "startTimeMs": 2490,
+                      "endTimeMs": 3195,
+                      "wordAudioUrl": "words/favor",
+                      "baseFormAudioUrl": "words/favor"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "primer_turno-bubble-8-2-25",
+              "type": "speech",
+              "position": {
+                "x": 0.6125000000000002,
+                "y": 0.36791666666666667,
+                "width": 0.2649999999999999,
+                "height": 0.07116666158040363
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s25",
+                  "text": "...y una copa de vino tinto.",
+                  "translation": "...and a glass of red wine.",
+                  "audioUrl": "primer_turno_p8_s2_b4_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w84",
+                      "text": "...y",
+                      "meaning": "and",
+                      "baseForm": "y",
+                      "startTimeMs": 0,
+                      "endTimeMs": 238,
+                      "wordAudioUrl": "words/y",
+                      "baseFormAudioUrl": "words/y"
+                    },
+                    {
+                      "id": "primer_turno-w85",
+                      "text": "una",
+                      "meaning": "a",
+                      "baseForm": "uno",
+                      "startTimeMs": 838,
+                      "endTimeMs": 1597,
+                      "wordAudioUrl": "words/una",
+                      "baseFormAudioUrl": "words/uno"
+                    },
+                    {
+                      "id": "primer_turno-w86",
+                      "text": "copa",
+                      "meaning": "glass",
+                      "baseForm": "copa",
+                      "startTimeMs": 1737,
+                      "endTimeMs": 2317,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/copa",
+                      "baseFormAudioUrl": "words/copa"
+                    },
+                    {
+                      "id": "primer_turno-w87",
+                      "text": "de",
+                      "meaning": "of",
+                      "baseForm": "de",
+                      "startTimeMs": 2503,
+                      "endTimeMs": 2875,
+                      "wordAudioUrl": "words/de",
+                      "baseFormAudioUrl": "words/de"
+                    },
+                    {
+                      "id": "primer_turno-w88",
+                      "text": "vino",
+                      "meaning": "wine",
+                      "baseForm": "vino",
+                      "startTimeMs": 2955,
+                      "endTimeMs": 3353,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/vino",
+                      "baseFormAudioUrl": "words/vino"
+                    },
+                    {
+                      "id": "primer_turno-w89",
+                      "text": "tinto.",
+                      "meaning": "red",
+                      "baseForm": "tinto",
+                      "startTimeMs": 3513,
+                      "endTimeMs": 4313,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/tinto",
+                      "baseFormAudioUrl": "words/tinto"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-8-3",
+          "artworkImage": "primer_turno_p8_s3",
+          "noTextImage": "primer_turno_p8_s3_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0.4560833231608073
+            },
+            {
+              "x": 0.4325,
+              "y": 0.4560833231608073
+            },
+            {
+              "x": 0.50625,
+              "y": 1
+            },
+            {
+              "x": 0,
+              "y": 1
+            }
+          ],
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.4560833231608073,
+            "width": 0.50625,
+            "height": 0.5439166768391928
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-8-3-26",
+              "type": "speech",
+              "position": {
+                "x": 0.012500000000000039,
+                "y": 0.8049166615804036,
+                "width": 0.29999999999999993,
+                "height": 0.10333333333333339
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s26",
+                  "text": "Y para mí, la hamburguesa... y las patatas fritas.",
+                  "translation": "And for me, the hamburger and chips.",
+                  "audioUrl": "primer_turno_p8_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w90",
+                      "text": "Y",
+                      "meaning": "and",
+                      "baseForm": "y",
+                      "startTimeMs": 0,
+                      "endTimeMs": 240,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/y",
+                      "baseFormAudioUrl": "words/y"
+                    },
+                    {
+                      "id": "primer_turno-w91",
+                      "text": "para",
+                      "meaning": "for",
+                      "baseForm": "para",
+                      "startTimeMs": 256,
+                      "endTimeMs": 320,
+                      "wordAudioUrl": "words/para",
+                      "baseFormAudioUrl": "words/para"
+                    },
+                    {
+                      "id": "primer_turno-w92",
+                      "text": "mí,",
+                      "meaning": "me",
+                      "baseForm": "yo",
+                      "startTimeMs": 666,
+                      "endTimeMs": 1570,
+                      "wordAudioUrl": "words/mí",
+                      "baseFormAudioUrl": "words/yo"
+                    },
+                    {
+                      "id": "primer_turno-w93",
+                      "text": "la",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 1578,
+                      "endTimeMs": 1594,
+                      "wordAudioUrl": "words/la",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "primer_turno-w94",
+                      "text": "hamburguesa...",
+                      "meaning": "hamburger",
+                      "baseForm": "hamburguesa",
+                      "startTimeMs": 1644,
+                      "endTimeMs": 3192,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/hamburguesa",
+                      "baseFormAudioUrl": "words/hamburguesa"
+                    },
+                    {
+                      "id": "primer_turno-w95",
+                      "text": "y",
+                      "meaning": "and",
+                      "baseForm": "y",
+                      "startTimeMs": 3232,
+                      "endTimeMs": 3272,
+                      "wordAudioUrl": "words/y",
+                      "baseFormAudioUrl": "words/y"
+                    },
+                    {
+                      "id": "primer_turno-w96",
+                      "text": "las",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 3332,
+                      "endTimeMs": 3512,
+                      "wordAudioUrl": "words/las",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "primer_turno-w97",
+                      "text": "patatas",
+                      "meaning": "chips",
+                      "baseForm": "patata",
+                      "startTimeMs": 3592,
+                      "endTimeMs": 4152,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/patatas",
+                      "baseFormAudioUrl": "words/patata"
+                    },
+                    {
+                      "id": "primer_turno-w98",
+                      "text": "fritas.",
+                      "meaning": "fried",
+                      "baseForm": "frito",
+                      "startTimeMs": 4192,
+                      "endTimeMs": 4870,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/fritas",
+                      "baseFormAudioUrl": "words/frito"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "primer_turno-bubble-8-3-27",
+              "type": "speech",
+              "position": {
+                "x": 0.195,
+                "y": 0.926750005086263,
+                "width": 0.2375,
+                "height": 0.053333333333333344
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s27",
+                  "text": "y una cerveza",
+                  "translation": "and a beer",
+                  "audioUrl": "primer_turno_p8_s3_b5_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w99",
+                      "text": "y",
+                      "meaning": "and",
+                      "baseForm": "y",
+                      "startTimeMs": 0,
+                      "endTimeMs": 316,
+                      "wordAudioUrl": "words/y",
+                      "baseFormAudioUrl": "words/y"
+                    },
+                    {
+                      "id": "primer_turno-w100",
+                      "text": "una",
+                      "meaning": "a",
+                      "baseForm": "uno",
+                      "startTimeMs": 356,
+                      "endTimeMs": 476,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/una",
+                      "baseFormAudioUrl": "words/uno"
+                    },
+                    {
+                      "id": "primer_turno-w101",
+                      "text": "cerveza",
+                      "meaning": "beer",
+                      "baseForm": "cerveza",
+                      "startTimeMs": 556,
+                      "endTimeMs": 1356,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/cerveza",
+                      "baseFormAudioUrl": "words/cerveza"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-8-4",
+          "artworkImage": "primer_turno_p8_s4",
+          "noTextImage": "primer_turno_p8_s4_no_text",
+          "corners": [
+            {
+              "x": 0.4325,
+              "y": 0.4560833231608073
+            },
+            {
+              "x": 1,
+              "y": 0.4560833231608073
+            },
+            {
+              "x": 1,
+              "y": 1
+            },
+            {
+              "x": 0.50625,
+              "y": 1
+            }
+          ],
+          "panelOrder": 4,
+          "tapZone": {
+            "x": 0.50625,
+            "y": 0.4560833231608073,
+            "width": 0.49375,
+            "height": 0.5439166768391928
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-8-4-28",
+              "type": "thought",
+              "position": {
+                "x": 0.5324999999999999,
+                "y": 0.47741666158040363,
+                "width": 0.2500000000000001,
+                "height": 0.2611666615804037
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s28",
+                  "text": "Una ensalada y pollo, hamburguesa y patatas fritas, vino tinto y una cerveza.",
+                  "translation": "A salad and chicken, hamburger and chips, red wine and a beer...",
+                  "audioUrl": "primer_turno_p8_s4_b6_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w102",
+                      "text": "Una",
+                      "meaning": "a",
+                      "baseForm": "uno",
+                      "startTimeMs": 0,
+                      "endTimeMs": 239,
+                      "wordAudioUrl": "words/una",
+                      "baseFormAudioUrl": "words/uno"
+                    },
+                    {
+                      "id": "primer_turno-w103",
+                      "text": "ensalada",
+                      "meaning": "salad",
+                      "baseForm": "ensalada",
+                      "startTimeMs": 299,
+                      "endTimeMs": 718,
+                      "wordAudioUrl": "words/ensalada",
+                      "baseFormAudioUrl": "words/ensalada"
+                    },
+                    {
+                      "id": "primer_turno-w104",
+                      "text": "y",
+                      "meaning": "and",
+                      "baseForm": "y",
+                      "startTimeMs": 758,
+                      "endTimeMs": 798,
+                      "wordAudioUrl": "words/y",
+                      "baseFormAudioUrl": "words/y"
+                    },
+                    {
+                      "id": "primer_turno-w105",
+                      "text": "pollo,",
+                      "meaning": "chicken",
+                      "baseForm": "pollo",
+                      "startTimeMs": 858,
+                      "endTimeMs": 1278,
+                      "wordAudioUrl": "words/pollo",
+                      "baseFormAudioUrl": "words/pollo"
+                    },
+                    {
+                      "id": "primer_turno-w106",
+                      "text": "hamburguesa",
+                      "meaning": "hamburger",
+                      "baseForm": "hamburguesa",
+                      "startTimeMs": 2078,
+                      "endTimeMs": 2876,
+                      "wordAudioUrl": "words/hamburguesa",
+                      "baseFormAudioUrl": "words/hamburguesa"
+                    },
+                    {
+                      "id": "primer_turno-w107",
+                      "text": "y",
+                      "meaning": "and",
+                      "baseForm": "y",
+                      "startTimeMs": 758,
+                      "endTimeMs": 798,
+                      "wordAudioUrl": "words/y",
+                      "baseFormAudioUrl": "words/y"
+                    },
+                    {
+                      "id": "primer_turno-w108",
+                      "text": "patatas",
+                      "meaning": "chips",
+                      "baseForm": "patata",
+                      "startTimeMs": 4120,
+                      "endTimeMs": 4476,
+                      "wordAudioUrl": "words/patatas",
+                      "baseFormAudioUrl": "words/patata"
+                    },
+                    {
+                      "id": "primer_turno-w109",
+                      "text": "fritas,",
+                      "meaning": "fried",
+                      "baseForm": "frito",
+                      "startTimeMs": 4516,
+                      "endTimeMs": 5116,
+                      "wordAudioUrl": "words/fritas",
+                      "baseFormAudioUrl": "words/frito"
+                    },
+                    {
+                      "id": "primer_turno-w110",
+                      "text": "vino",
+                      "meaning": "wine",
+                      "baseForm": "vino",
+                      "startTimeMs": 5396,
+                      "endTimeMs": 5916,
+                      "wordAudioUrl": "words/vino",
+                      "baseFormAudioUrl": "words/vino"
+                    },
+                    {
+                      "id": "primer_turno-w111",
+                      "text": "tinto",
+                      "meaning": "red",
+                      "baseForm": "tinto",
+                      "startTimeMs": 5956,
+                      "endTimeMs": 7196,
+                      "wordAudioUrl": "words/tinto",
+                      "baseFormAudioUrl": "words/tinto"
+                    },
+                    {
+                      "id": "primer_turno-w112",
+                      "text": "y",
+                      "meaning": "and",
+                      "baseForm": "y",
+                      "startTimeMs": 758,
+                      "endTimeMs": 798,
+                      "wordAudioUrl": "words/y",
+                      "baseFormAudioUrl": "words/y"
+                    },
+                    {
+                      "id": "primer_turno-w113",
+                      "text": "una",
+                      "meaning": "a",
+                      "baseForm": "uno",
+                      "startTimeMs": 0,
+                      "endTimeMs": 239,
+                      "wordAudioUrl": "words/una",
+                      "baseFormAudioUrl": "words/uno"
+                    },
+                    {
+                      "id": "primer_turno-w114",
+                      "text": "cerveza.",
+                      "meaning": "beer",
+                      "baseForm": "cerveza",
+                      "startTimeMs": 7676,
+                      "endTimeMs": 9196,
+                      "wordAudioUrl": "words/cerveza",
+                      "baseFormAudioUrl": "words/cerveza"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "primer_turno-page-9",
+      "pageNumber": 10,
+      "masterImage": "primer_turno_p9",
+      "noTextImage": "primer_turno_p9_no_text",
+      "panels": [
+        {
+          "id": "primer_turno-panel-9-1",
+          "artworkImage": "primer_turno_p9_s1",
+          "noTextImage": "primer_turno_p9_s1_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 0.4875,
+              "y": 0
+            },
+            {
+              "x": 0.565041736227045,
+              "y": 0.5016666666666667
+            },
+            {
+              "x": 0,
+              "y": 0.4691666666666666
+            }
+          ],
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 0.4875,
+            "height": 0.4691666666666666
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-9-1-29",
+              "type": "speech",
+              "position": {
+                "x": 0.0424999999999999,
+                "y": 0.006333338419596352,
+                "width": 0.2050000000000001,
+                "height": 0.1622499847412109
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s29",
+                  "text": "Sí, señora, estaré con usted en breve...",
+                  "translation": "Yes, madam, I'll be with you shortly...",
+                  "audioUrl": "primer_turno_p9_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w115",
+                      "text": "Sí,",
+                      "meaning": "yes",
+                      "baseForm": "sí",
+                      "startTimeMs": 0,
+                      "endTimeMs": 240,
+                      "wordAudioUrl": "words/sí",
+                      "baseFormAudioUrl": "words/sí"
+                    },
+                    {
+                      "id": "primer_turno-w116",
+                      "text": "señora,",
+                      "meaning": "madam",
+                      "baseForm": "señora",
+                      "startTimeMs": 300,
+                      "endTimeMs": 1279,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/señora",
+                      "baseFormAudioUrl": "words/señora"
+                    },
+                    {
+                      "id": "primer_turno-w117",
+                      "text": "estaré",
+                      "meaning": "I will be",
+                      "baseForm": "estar",
+                      "startTimeMs": 1359,
+                      "endTimeMs": 1679,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/estaré",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "primer_turno-w118",
+                      "text": "con",
+                      "meaning": "with",
+                      "baseForm": "con",
+                      "startTimeMs": 1719,
+                      "endTimeMs": 1839,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/con",
+                      "baseFormAudioUrl": "words/con"
+                    },
+                    {
+                      "id": "primer_turno-w119",
+                      "text": "usted",
+                      "meaning": "you (formal)",
+                      "baseForm": "usted",
+                      "startTimeMs": 1905,
+                      "endTimeMs": 2235,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/usted",
+                      "baseFormAudioUrl": "words/usted"
+                    },
+                    {
+                      "id": "primer_turno-w120",
+                      "text": "en",
+                      "meaning": "in",
+                      "baseForm": "en",
+                      "startTimeMs": 2368,
+                      "endTimeMs": 2634,
+                      "wordAudioUrl": "words/en",
+                      "baseFormAudioUrl": "words/en"
+                    },
+                    {
+                      "id": "primer_turno-w121",
+                      "text": "breve...",
+                      "meaning": "shortly",
+                      "baseForm": "breve",
+                      "startTimeMs": 2700,
+                      "endTimeMs": 4865,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/breve",
+                      "baseFormAudioUrl": "words/breve"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-9-2",
+          "artworkImage": "primer_turno_p9_s2",
+          "noTextImage": "primer_turno_p9_s2_no_text",
+          "corners": [
+            {
+              "x": 0.4875,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0.5358333333333334
+            },
+            {
+              "x": 0.565041736227045,
+              "y": 0.5016666666666667
+            }
+          ],
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0.4875,
+            "y": 0,
+            "width": 0.5125,
+            "height": 0.4691666666666666
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-9-2-30",
+              "type": "speech",
+              "position": {
+                "x": 0.6725000000000001,
+                "y": 0.035333328247070306,
+                "width": 0.2124999999999999,
+                "height": 0.085
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s30",
+                  "text": "¿Qué vas a pedir?",
+                  "translation": "What are you going to order?",
+                  "audioUrl": "primer_turno_p9_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w122",
+                      "text": "¿Qué",
+                      "meaning": "what",
+                      "baseForm": "qué",
+                      "startTimeMs": 0,
+                      "endTimeMs": 152,
+                      "wordAudioUrl": "words/qué",
+                      "baseFormAudioUrl": "words/qué"
+                    },
+                    {
+                      "id": "primer_turno-w123",
+                      "text": "vas",
+                      "meaning": "you go",
+                      "baseForm": "ir",
+                      "startTimeMs": 192,
+                      "endTimeMs": 312,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/vas",
+                      "baseFormAudioUrl": "words/ir"
+                    },
+                    {
+                      "id": "primer_turno-w124",
+                      "text": "a",
+                      "meaning": "to",
+                      "baseForm": "a",
+                      "startTimeMs": 352,
+                      "endTimeMs": 392,
+                      "wordAudioUrl": "words/a",
+                      "baseFormAudioUrl": "words/a"
+                    },
+                    {
+                      "id": "primer_turno-w125",
+                      "text": "pedir?",
+                      "meaning": "to order",
+                      "baseForm": "pedir",
+                      "startTimeMs": 452,
+                      "endTimeMs": 1912,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/pedir",
+                      "baseFormAudioUrl": "words/pedir"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-9-3",
+          "artworkImage": "primer_turno_p9_s3",
+          "noTextImage": "primer_turno_p9_s3_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0.4691666666666666
+            },
+            {
+              "x": 1,
+              "y": 0.5358333333333334
+            },
+            {
+              "x": 1,
+              "y": 1
+            },
+            {
+              "x": 0,
+              "y": 1
+            }
+          ],
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0,
+            "y": 0.4691666666666666,
+            "width": 1,
+            "height": 0.5308333333333334
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-9-3-31",
+              "type": "speech",
+              "position": {
+                "x": 0.15750000000000003,
+                "y": 0.5185833231608072,
+                "width": 0.27749999999999997,
+                "height": 0.09999999999999998
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s31",
+                  "text": "Para la mesa tres, no la mesa seis...",
+                  "translation": "For table three, not table six...",
+                  "audioUrl": "primer_turno_p9_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w126",
+                      "text": "Para",
+                      "meaning": "for",
+                      "baseForm": "para",
+                      "startTimeMs": 0,
+                      "endTimeMs": 320,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/para",
+                      "baseFormAudioUrl": "words/para"
+                    },
+                    {
+                      "id": "primer_turno-w127",
+                      "text": "la",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 373,
+                      "endTimeMs": 479,
+                      "wordAudioUrl": "words/la",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "primer_turno-w128",
+                      "text": "mesa",
+                      "meaning": "table",
+                      "baseForm": "mesa",
+                      "startTimeMs": 591,
+                      "endTimeMs": 1039,
+                      "wordAudioUrl": "words/mesa",
+                      "baseFormAudioUrl": "words/mesa"
+                    },
+                    {
+                      "id": "primer_turno-w129",
+                      "text": "tres,",
+                      "meaning": "three",
+                      "baseForm": "tres",
+                      "startTimeMs": 1167,
+                      "endTimeMs": 1839,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/tres",
+                      "baseFormAudioUrl": "words/tres"
+                    },
+                    {
+                      "id": "primer_turno-w130",
+                      "text": "no",
+                      "meaning": "not",
+                      "baseForm": "no",
+                      "startTimeMs": 2359,
+                      "endTimeMs": 2959,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "primer_turno-w131",
+                      "text": "la",
+                      "meaning": "the",
+                      "baseForm": "el",
+                      "startTimeMs": 3039,
+                      "endTimeMs": 3199,
+                      "wordAudioUrl": "words/la",
+                      "baseFormAudioUrl": "words/el"
+                    },
+                    {
+                      "id": "primer_turno-w132",
+                      "text": "mesa",
+                      "meaning": "table",
+                      "baseForm": "mesa",
+                      "startTimeMs": 3295,
+                      "endTimeMs": 3679,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mesa",
+                      "baseFormAudioUrl": "words/mesa"
+                    },
+                    {
+                      "id": "primer_turno-w133",
+                      "text": "seis...",
+                      "meaning": "six",
+                      "baseForm": "seis",
+                      "startTimeMs": 3807,
+                      "endTimeMs": 4559,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/seis",
+                      "baseFormAudioUrl": "words/seis"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "primer_turno-page-10",
+      "pageNumber": 11,
+      "masterImage": "primer_turno_p10",
+      "noTextImage": "primer_turno_p10_no_text",
+      "panels": [
+        {
+          "id": "primer_turno-panel-10-1",
+          "artworkImage": "primer_turno_p10_s1",
+          "noTextImage": "primer_turno_p10_s1_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0
+            },
+            {
+              "x": 1,
+              "y": 0.40524998982747396
+            },
+            {
+              "x": 0,
+              "y": 0.45024998982747394
+            }
+          ],
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.45024998982747394
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-10-1-32",
+              "type": "speech",
+              "position": {
+                "x": 0.6325000000000001,
+                "y": 0.05616666158040365,
+                "width": 0.18750000000000006,
+                "height": 0.059999999999999984
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s32",
+                  "text": "Lo sabía...",
+                  "translation": "I knew that...",
+                  "audioUrl": "primer_turno_p10_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w134",
+                      "text": "Lo",
+                      "meaning": "it",
+                      "baseForm": "lo",
+                      "startTimeMs": 0,
+                      "endTimeMs": 160,
+                      "wordAudioUrl": "words/lo",
+                      "baseFormAudioUrl": "words/lo"
+                    },
+                    {
+                      "id": "primer_turno-w135",
+                      "text": "sabía...",
+                      "meaning": "knew",
+                      "baseForm": "saber",
+                      "startTimeMs": 220,
+                      "endTimeMs": 1920,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/sabía",
+                      "baseFormAudioUrl": "words/saber"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "primer_turno-bubble-10-1-33",
+              "type": "speech",
+              "position": {
+                "x": 0.1725,
+                "y": 0.158249994913737,
+                "width": 0.16250000000000003,
+                "height": 0.09999999999999995
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s33",
+                  "text": "No, no lo hiciste!",
+                  "translation": "No you didn't...",
+                  "audioUrl": "primer_turno_p10_s1_b2_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w136",
+                      "text": "No,",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 0,
+                      "endTimeMs": 400,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "primer_turno-w137",
+                      "text": "No,",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 760,
+                      "endTimeMs": 1278,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "primer_turno-w138",
+                      "text": "lo",
+                      "meaning": "it",
+                      "baseForm": "lo",
+                      "startTimeMs": 1384,
+                      "endTimeMs": 1596,
+                      "wordAudioUrl": "words/lo",
+                      "baseFormAudioUrl": "words/lo"
+                    },
+                    {
+                      "id": "primer_turno-w139",
+                      "text": "hiciste...",
+                      "meaning": "you did",
+                      "baseForm": "hacer",
+                      "startTimeMs": 1656,
+                      "endTimeMs": 2716,
+                      "wordAudioUrl": "words/hiciste",
+                      "baseFormAudioUrl": "words/hacer"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-10-2",
+          "artworkImage": "primer_turno_p10_s2",
+          "noTextImage": "primer_turno_p10_s2_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0.45024998982747394
+            },
+            {
+              "x": 1,
+              "y": 0.40524998982747396
+            },
+            {
+              "x": 1,
+              "y": 1
+            },
+            {
+              "x": 0,
+              "y": 1
+            }
+          ],
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.45024998982747394,
+            "width": 1,
+            "height": 0.5497500101725261
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-10-2-34",
+              "type": "thought",
+              "position": {
+                "x": 0.515,
+                "y": 0.4675833384195963,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s34",
+                  "text": "Molesto, pero...",
+                  "translation": "Annoying, but...",
+                  "audioUrl": "primer_turno_p10_s2_b3_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w140",
+                      "text": "Molesto,",
+                      "meaning": "annoying",
+                      "baseForm": "molesto",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1036,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/molesto",
+                      "baseFormAudioUrl": "words/molesto"
+                    },
+                    {
+                      "id": "primer_turno-w141",
+                      "text": "pero...",
+                      "meaning": "but",
+                      "baseForm": "pero",
+                      "startTimeMs": 1260,
+                      "endTimeMs": 2315,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/pero",
+                      "baseFormAudioUrl": "words/pero"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "primer_turno-page-11",
+      "pageNumber": 12,
+      "masterImage": "primer_turno_p11",
+      "noTextImage": "primer_turno_p11_no_text",
+      "panels": [
+        {
+          "id": "primer_turno-panel-11-1",
+          "artworkImage": "primer_turno_p11_s1",
+          "noTextImage": "primer_turno_p11_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.4559166717529297
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-11-1-35",
+              "type": "narration",
+              "position": {
+                "x": 0.31000000000000005,
+                "y": 0.0235833231608073,
+                "width": 0.25249999999999995,
+                "height": 0.06666666666666668
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s35",
+                  "text": "Es tarde...",
+                  "translation": "It is late...",
+                  "audioUrl": "primer_turno_p11_s1_b1_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w142",
+                      "text": "Es",
+                      "meaning": "is",
+                      "baseForm": "ser",
+                      "startTimeMs": 0,
+                      "endTimeMs": 320,
+                      "wordAudioUrl": "words/es",
+                      "baseFormAudioUrl": "words/ser"
+                    },
+                    {
+                      "id": "primer_turno-w143",
+                      "text": "tarde...",
+                      "meaning": "late",
+                      "baseForm": "tarde",
+                      "startTimeMs": 413,
+                      "endTimeMs": 1037,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/tarde",
+                      "baseFormAudioUrl": "words/tarde"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-11-2",
+          "artworkImage": "primer_turno_p11_s2",
+          "noTextImage": "primer_turno_p11_s2_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0.4559166717529297
+            },
+            {
+              "x": 0.4675,
+              "y": 0.4559166717529297
+            },
+            {
+              "x": 0.5825,
+              "y": 1
+            },
+            {
+              "x": 0,
+              "y": 1
+            }
+          ],
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.4559166717529297,
+            "width": 0.4675,
+            "height": 0.5440833282470703
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-11-2-36",
+              "type": "thought",
+              "position": {
+                "x": 0.04749999999999999,
+                "y": 0.8252499898274739,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s36",
+                  "text": "Nadie está mirando...",
+                  "translation": "No one is watching...",
+                  "audioUrl": "primer_turno_p11_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w144",
+                      "text": "Nadie",
+                      "meaning": "no one",
+                      "baseForm": "nadie",
+                      "startTimeMs": 0,
+                      "endTimeMs": 468,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/nadie",
+                      "baseFormAudioUrl": "words/nadie"
+                    },
+                    {
+                      "id": "primer_turno-w145",
+                      "text": "está",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 516,
+                      "endTimeMs": 708,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "primer_turno-w146",
+                      "text": "mirando...",
+                      "meaning": "watching",
+                      "baseForm": "mirar",
+                      "startTimeMs": 788,
+                      "endTimeMs": 1588,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/mirando",
+                      "baseFormAudioUrl": "words/mirar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-11-3",
+          "artworkImage": "primer_turno_p11_s3",
+          "noTextImage": "primer_turno_p11_s3_no_text",
+          "corners": [
+            {
+              "x": 0.4675,
+              "y": 0.4559166717529297
+            },
+            {
+              "x": 1,
+              "y": 0.4559166717529297
+            },
+            {
+              "x": 1,
+              "y": 1
+            },
+            {
+              "x": 0.5825,
+              "y": 1
+            }
+          ],
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.4675,
+            "y": 0.4559166717529297,
+            "width": 0.5325,
+            "height": 0.5440833282470703
+          },
+          "bubbles": []
+        }
+      ]
+    },
+    {
+      "id": "primer_turno-page-12",
+      "pageNumber": 13,
+      "masterImage": "primer_turno_p12",
+      "noTextImage": "primer_turno_p12_no_text",
+      "panels": [
+        {
+          "id": "primer_turno-panel-12-1",
+          "artworkImage": "primer_turno_p12_s1",
+          "noTextImage": "primer_turno_p12_s1_no_text",
+          "panelOrder": 1,
+          "tapZone": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.355500005086263
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-12-1-37",
+              "type": "speech",
+              "isSoundEffect": true,
+              "position": {
+                "x": 0.3675,
+                "y": 0.10858332316080728,
+                "width": 0.18,
+                "height": 0.12466667175292971
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s37",
+                  "text": "???...",
+                  "translation": "",
+                  "audioUrl": "",
+                  "words": [
+                    {
+                      "id": "primer_turno-w147",
+                      "text": "???...",
+                      "meaning": "",
+                      "baseForm": "???..."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-12-2",
+          "artworkImage": "primer_turno_p12_s2",
+          "noTextImage": "primer_turno_p12_s2_no_text",
+          "corners": [
+            {
+              "x": 0,
+              "y": 0.355500005086263
+            },
+            {
+              "x": 0.485,
+              "y": 0.355500005086263
+            },
+            {
+              "x": 0.58,
+              "y": 1
+            },
+            {
+              "x": 0,
+              "y": 1
+            }
+          ],
+          "panelOrder": 2,
+          "tapZone": {
+            "x": 0,
+            "y": 0.355500005086263,
+            "width": 0.485,
+            "height": 0.644499994913737
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-12-2-38",
+              "type": "thought",
+              "position": {
+                "x": 0.035,
+                "y": 0.7165833282470704,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s38",
+                  "text": "¿Está... robando?",
+                  "translation": "Is she... stealing?",
+                  "audioUrl": "primer_turno_p12_s2_b2_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w148",
+                      "text": "¿Está...",
+                      "meaning": "is",
+                      "baseForm": "estar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 876,
+                      "wordAudioUrl": "words/está",
+                      "baseFormAudioUrl": "words/estar"
+                    },
+                    {
+                      "id": "primer_turno-w149",
+                      "text": "robando?",
+                      "meaning": "stealing",
+                      "baseForm": "robar",
+                      "startTimeMs": 1016,
+                      "endTimeMs": 1836,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/robando",
+                      "baseFormAudioUrl": "words/robar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "primer_turno-panel-12-3",
+          "artworkImage": "primer_turno_p12_s3",
+          "noTextImage": "primer_turno_p12_s3_no_text",
+          "corners": [
+            {
+              "x": 0.485,
+              "y": 0.355500005086263
+            },
+            {
+              "x": 1,
+              "y": 0.355500005086263
+            },
+            {
+              "x": 1,
+              "y": 1
+            },
+            {
+              "x": 0.58,
+              "y": 1
+            }
+          ],
+          "panelOrder": 3,
+          "tapZone": {
+            "x": 0.485,
+            "y": 0.355500005086263,
+            "width": 0.515,
+            "height": 0.644499994913737
+          },
+          "bubbles": [
+            {
+              "id": "primer_turno-bubble-12-3-39",
+              "type": "thought",
+              "position": {
+                "x": 0.5249999999999999,
+                "y": 0.368249994913737,
+                "width": 0.2,
+                "height": 0.1
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s39",
+                  "text": "Oh no... me vio.",
+                  "translation": "Oh no... he saw me...",
+                  "audioUrl": "primer_turno_p12_s3_b3_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w150",
+                      "text": "Oh",
+                      "meaning": "oh",
+                      "baseForm": "oh",
+                      "startTimeMs": 0,
+                      "endTimeMs": 240,
+                      "wordAudioUrl": "words/oh",
+                      "baseFormAudioUrl": "words/oh"
+                    },
+                    {
+                      "id": "primer_turno-w151",
+                      "text": "no...",
+                      "meaning": "no",
+                      "baseForm": "no",
+                      "startTimeMs": 400,
+                      "endTimeMs": 1278,
+                      "wordAudioUrl": "words/no",
+                      "baseFormAudioUrl": "words/no"
+                    },
+                    {
+                      "id": "primer_turno-w152",
+                      "text": "me",
+                      "meaning": "me",
+                      "baseForm": "me",
+                      "startTimeMs": 1331,
+                      "endTimeMs": 1437,
+                      "wordAudioUrl": "words/me",
+                      "baseFormAudioUrl": "words/me"
+                    },
+                    {
+                      "id": "primer_turno-w153",
+                      "text": "vio.",
+                      "meaning": "saw",
+                      "baseForm": "ver",
+                      "startTimeMs": 1517,
+                      "endTimeMs": 2237,
+                      "vocabQuiz": true,
+                      "wordAudioUrl": "words/vio",
+                      "baseFormAudioUrl": "words/ver"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "primer_turno-bubble-12-3-40",
+              "type": "narration",
+              "position": {
+                "x": 0.61,
+                "y": 0.8749166615804036,
+                "width": 0.35250000000000004,
+                "height": 0.15666666666666662
+              },
+              "sentences": [
+                {
+                  "id": "primer_turno-s40",
+                  "text": "Continuará...",
+                  "translation": "To be continued...",
+                  "audioUrl": "primer_turno_p12_s3_b4_t1",
+                  "words": [
+                    {
+                      "id": "primer_turno-w154",
+                      "text": "Continuará...",
+                      "meaning": "will continue",
+                      "baseForm": "continuar",
+                      "startTimeMs": 0,
+                      "endTimeMs": 1031,
+                      "wordAudioUrl": "words/continuará",
+                      "baseFormAudioUrl": "words/continuar"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "reviewWords": [
+    {
+      "word": {
+        "id": "primer_turno-w1",
+        "text": "Primer",
+        "meaning": "first",
+        "baseForm": "primer",
+        "wordAudioUrl": "words/primer",
+        "baseFormAudioUrl": "words/primer"
+      },
+      "panelId": "primer_turno-panel-cover",
+      "pageId": "primer_turno-page-cover"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w2",
+        "text": "turno",
+        "meaning": "shift",
+        "baseForm": "turno",
+        "wordAudioUrl": "words/turno",
+        "baseFormAudioUrl": "words/turno"
+      },
+      "panelId": "primer_turno-panel-cover",
+      "pageId": "primer_turno-page-cover"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w4",
+        "text": "me",
+        "meaning": "me",
+        "baseForm": "me",
+        "wordAudioUrl": "words/me",
+        "baseFormAudioUrl": "words/me"
+      },
+      "panelId": "primer_turno-panel-1-1",
+      "pageId": "primer_turno-page-1"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w5",
+        "text": "gusta",
+        "meaning": "like",
+        "baseForm": "gustar",
+        "wordAudioUrl": "words/gusta",
+        "baseFormAudioUrl": "words/gustar"
+      },
+      "panelId": "primer_turno-panel-1-1",
+      "pageId": "primer_turno-page-1"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w6",
+        "text": "la",
+        "meaning": "the (female)",
+        "baseForm": "el",
+        "wordAudioUrl": "words/la",
+        "baseFormAudioUrl": "words/el"
+      },
+      "panelId": "primer_turno-panel-1-1",
+      "pageId": "primer_turno-page-1"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w7",
+        "text": "escuela...",
+        "meaning": "school",
+        "baseForm": "escuela",
+        "wordAudioUrl": "words/escuela",
+        "baseFormAudioUrl": "words/escuela"
+      },
+      "panelId": "primer_turno-panel-1-1",
+      "pageId": "primer_turno-page-1"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w9",
+        "text": "quiero",
+        "meaning": "I want",
+        "baseForm": "querer",
+        "wordAudioUrl": "words/quiero",
+        "baseFormAudioUrl": "words/querer"
+      },
+      "panelId": "primer_turno-panel-1-2",
+      "pageId": "primer_turno-page-1"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w10",
+        "text": "estar",
+        "meaning": "to be",
+        "baseForm": "estar",
+        "wordAudioUrl": "words/estar",
+        "baseFormAudioUrl": "words/estar"
+      },
+      "panelId": "primer_turno-panel-1-2",
+      "pageId": "primer_turno-page-1"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w11",
+        "text": "aquí...",
+        "meaning": "here",
+        "baseForm": "aquí",
+        "wordAudioUrl": "words/aquí",
+        "baseFormAudioUrl": "words/aquí"
+      },
+      "panelId": "primer_turno-panel-1-2",
+      "pageId": "primer_turno-page-1"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w12",
+        "text": "Necesito",
+        "meaning": "I need",
+        "baseForm": "necesitar",
+        "wordAudioUrl": "words/necesito",
+        "baseFormAudioUrl": "words/necesitar"
+      },
+      "panelId": "primer_turno-panel-1-4",
+      "pageId": "primer_turno-page-1"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w14",
+        "text": "cambio...",
+        "meaning": "change",
+        "baseForm": "cambio",
+        "wordAudioUrl": "words/cambio",
+        "baseFormAudioUrl": "words/cambio"
+      },
+      "panelId": "primer_turno-panel-1-4",
+      "pageId": "primer_turno-page-1"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w15",
+        "text": "¿Dejar",
+        "meaning": "to leave",
+        "baseForm": "dejar",
+        "wordAudioUrl": "words/dejar",
+        "baseFormAudioUrl": "words/dejar"
+      },
+      "panelId": "primer_turno-panel-2-1",
+      "pageId": "primer_turno-page-2"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w17",
+        "text": "escuela?",
+        "meaning": "school",
+        "baseForm": "escuela",
+        "wordAudioUrl": "words/escuela",
+        "baseFormAudioUrl": "words/escuela"
+      },
+      "panelId": "primer_turno-panel-2-1",
+      "pageId": "primer_turno-page-2"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w18",
+        "text": "Eso",
+        "meaning": "that",
+        "baseForm": "eso",
+        "wordAudioUrl": "words/eso",
+        "baseFormAudioUrl": "words/eso"
+      },
+      "panelId": "primer_turno-panel-2-2",
+      "pageId": "primer_turno-page-2"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w20",
+        "text": "está",
+        "meaning": "is",
+        "baseForm": "estar",
+        "wordAudioUrl": "words/está",
+        "baseFormAudioUrl": "words/estar"
+      },
+      "panelId": "primer_turno-panel-2-2",
+      "pageId": "primer_turno-page-2"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w21",
+        "text": "bien...",
+        "meaning": "good",
+        "baseForm": "bien",
+        "wordAudioUrl": "words/bien",
+        "baseFormAudioUrl": "words/bien"
+      },
+      "panelId": "primer_turno-panel-2-2",
+      "pageId": "primer_turno-page-2"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w22",
+        "text": "Quiero",
+        "meaning": "I want",
+        "baseForm": "querer",
+        "wordAudioUrl": "words/quiero",
+        "baseFormAudioUrl": "words/querer"
+      },
+      "panelId": "primer_turno-panel-2-3",
+      "pageId": "primer_turno-page-2"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w23",
+        "text": "trabajar.",
+        "meaning": "to work",
+        "baseForm": "trabajar",
+        "wordAudioUrl": "words/trabajar",
+        "baseFormAudioUrl": "words/trabajar"
+      },
+      "panelId": "primer_turno-panel-2-3",
+      "pageId": "primer_turno-page-2"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w24",
+        "text": "Debo",
+        "meaning": "I must",
+        "baseForm": "deber",
+        "wordAudioUrl": "words/debo",
+        "baseFormAudioUrl": "words/deber"
+      },
+      "panelId": "primer_turno-panel-3-1",
+      "pageId": "primer_turno-page-3"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w25",
+        "text": "encontrar",
+        "meaning": "to find",
+        "baseForm": "encontrar",
+        "wordAudioUrl": "words/encontrar",
+        "baseFormAudioUrl": "words/encontrar"
+      },
+      "panelId": "primer_turno-panel-3-1",
+      "pageId": "primer_turno-page-3"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w26",
+        "text": "trabajo...",
+        "meaning": "work",
+        "baseForm": "trabajo",
+        "wordAudioUrl": "words/trabajo",
+        "baseFormAudioUrl": "words/trabajo"
+      },
+      "panelId": "primer_turno-panel-3-1",
+      "pageId": "primer_turno-page-3"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w31",
+        "text": "encantan",
+        "meaning": "love",
+        "baseForm": "encantar",
+        "wordAudioUrl": "words/encantan",
+        "baseFormAudioUrl": "words/encantar"
+      },
+      "panelId": "primer_turno-panel-3-3",
+      "pageId": "primer_turno-page-3"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w33",
+        "text": "libros...",
+        "meaning": "books",
+        "baseForm": "libro",
+        "wordAudioUrl": "words/libros",
+        "baseFormAudioUrl": "words/libro"
+      },
+      "panelId": "primer_turno-panel-3-3",
+      "pageId": "primer_turno-page-3"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w37",
+        "text": "momento...",
+        "meaning": "moment",
+        "baseForm": "momento",
+        "wordAudioUrl": "words/momento",
+        "baseFormAudioUrl": "words/momento"
+      },
+      "panelId": "primer_turno-panel-3-3",
+      "pageId": "primer_turno-page-3"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w39",
+        "text": "necesita",
+        "meaning": "needs",
+        "baseForm": "necesitar",
+        "wordAudioUrl": "words/necesita",
+        "baseFormAudioUrl": "words/necesitar"
+      },
+      "panelId": "primer_turno-panel-4-1",
+      "pageId": "primer_turno-page-4"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w40",
+        "text": "camarero",
+        "meaning": "waiter",
+        "baseForm": "camarero",
+        "wordAudioUrl": "words/camarero",
+        "baseFormAudioUrl": "words/camarero"
+      },
+      "panelId": "primer_turno-panel-4-1",
+      "pageId": "primer_turno-page-4"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w42",
+        "text": "quién",
+        "meaning": "who",
+        "baseForm": "quién",
+        "wordAudioUrl": "words/quién",
+        "baseFormAudioUrl": "words/quién"
+      },
+      "panelId": "primer_turno-panel-4-2",
+      "pageId": "primer_turno-page-4"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w44",
+        "text": "pregunto?",
+        "meaning": "I ask",
+        "baseForm": "preguntar",
+        "wordAudioUrl": "words/pregunto",
+        "baseFormAudioUrl": "words/preguntar"
+      },
+      "panelId": "primer_turno-panel-4-2",
+      "pageId": "primer_turno-page-4"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w45",
+        "text": "¿Puedo",
+        "meaning": "I can",
+        "baseForm": "poder",
+        "wordAudioUrl": "words/puedo",
+        "baseFormAudioUrl": "words/poder"
+      },
+      "panelId": "primer_turno-panel-4-3",
+      "pageId": "primer_turno-page-4"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w46",
+        "text": "ayudarte?",
+        "meaning": "to help you",
+        "baseForm": "ayudar",
+        "wordAudioUrl": "words/ayudarte",
+        "baseFormAudioUrl": "words/ayudar"
+      },
+      "panelId": "primer_turno-panel-4-3",
+      "pageId": "primer_turno-page-4"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w47",
+        "text": "Estoy",
+        "meaning": "I am",
+        "baseForm": "estar",
+        "wordAudioUrl": "words/estoy",
+        "baseFormAudioUrl": "words/estar"
+      },
+      "panelId": "primer_turno-panel-5-1",
+      "pageId": "primer_turno-page-5"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w48",
+        "text": "buscando...",
+        "meaning": "looking for",
+        "baseForm": "buscar",
+        "wordAudioUrl": "words/buscando",
+        "baseFormAudioUrl": "words/buscar"
+      },
+      "panelId": "primer_turno-panel-5-1",
+      "pageId": "primer_turno-page-5"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w49",
+        "text": "trabajo.",
+        "meaning": "work",
+        "baseForm": "trabajo",
+        "wordAudioUrl": "words/trabajo",
+        "baseFormAudioUrl": "words/trabajo"
+      },
+      "panelId": "primer_turno-panel-5-1",
+      "pageId": "primer_turno-page-5"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w50",
+        "text": "¿Tienes",
+        "meaning": "you have",
+        "baseForm": "tener",
+        "wordAudioUrl": "words/tienes",
+        "baseFormAudioUrl": "words/tener"
+      },
+      "panelId": "primer_turno-panel-5-2",
+      "pageId": "primer_turno-page-5"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w51",
+        "text": "experiencia?",
+        "meaning": "experience",
+        "baseForm": "experiencia",
+        "wordAudioUrl": "words/experiencia",
+        "baseFormAudioUrl": "words/experiencia"
+      },
+      "panelId": "primer_turno-panel-5-2",
+      "pageId": "primer_turno-page-5"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w55",
+        "text": "aprendo",
+        "meaning": "I learn",
+        "baseForm": "aprender",
+        "wordAudioUrl": "words/aprendo",
+        "baseFormAudioUrl": "words/aprender"
+      },
+      "panelId": "primer_turno-panel-5-3",
+      "pageId": "primer_turno-page-5"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w56",
+        "text": "rápido.",
+        "meaning": "quickly",
+        "baseForm": "rápido",
+        "wordAudioUrl": "words/rápido",
+        "baseFormAudioUrl": "words/rápido"
+      },
+      "panelId": "primer_turno-panel-5-3",
+      "pageId": "primer_turno-page-5"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w57",
+        "text": "Empiezas",
+        "meaning": "you start",
+        "baseForm": "empezar",
+        "wordAudioUrl": "words/empiezas",
+        "baseFormAudioUrl": "words/empezar"
+      },
+      "panelId": "primer_turno-panel-6-1",
+      "pageId": "primer_turno-page-6"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w58",
+        "text": "ahora.",
+        "meaning": "now",
+        "baseForm": "ahora",
+        "wordAudioUrl": "words/ahora",
+        "baseFormAudioUrl": "words/ahora"
+      },
+      "panelId": "primer_turno-panel-6-1",
+      "pageId": "primer_turno-page-6"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w65",
+        "text": "¡Para",
+        "meaning": "for",
+        "baseForm": "para",
+        "wordAudioUrl": "words/para",
+        "baseFormAudioUrl": "words/para"
+      },
+      "panelId": "primer_turno-panel-7-3",
+      "pageId": "primer_turno-page-7"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w66",
+        "text": "mí,",
+        "meaning": "me",
+        "baseForm": "yo",
+        "wordAudioUrl": "words/mí",
+        "baseFormAudioUrl": "words/yo"
+      },
+      "panelId": "primer_turno-panel-7-3",
+      "pageId": "primer_turno-page-7"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w68",
+        "text": "sopa!",
+        "meaning": "soup",
+        "baseForm": "sopa",
+        "wordAudioUrl": "words/sopa",
+        "baseFormAudioUrl": "words/sopa"
+      },
+      "panelId": "primer_turno-panel-7-3",
+      "pageId": "primer_turno-page-7"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w69",
+        "text": "agua",
+        "meaning": "water",
+        "baseForm": "agua",
+        "wordAudioUrl": "words/agua",
+        "baseFormAudioUrl": "words/agua"
+      },
+      "panelId": "primer_turno-panel-7-4",
+      "pageId": "primer_turno-page-7"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w70",
+        "text": "con",
+        "meaning": "with",
+        "baseForm": "con",
+        "wordAudioUrl": "words/con",
+        "baseFormAudioUrl": "words/con"
+      },
+      "panelId": "primer_turno-panel-7-4",
+      "pageId": "primer_turno-page-7"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w71",
+        "text": "gas,",
+        "meaning": "gas",
+        "baseForm": "gas",
+        "wordAudioUrl": "words/gas",
+        "baseFormAudioUrl": "words/gas"
+      },
+      "panelId": "primer_turno-panel-7-4",
+      "pageId": "primer_turno-page-7"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w75",
+        "text": "te",
+        "meaning": "you",
+        "baseForm": "tú",
+        "wordAudioUrl": "words/te",
+        "baseFormAudioUrl": "words/tú"
+      },
+      "panelId": "primer_turno-panel-8-1",
+      "pageId": "primer_turno-page-8"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w76",
+        "text": "gustaría?",
+        "meaning": "would like",
+        "baseForm": "gustar",
+        "wordAudioUrl": "words/gustaría",
+        "baseFormAudioUrl": "words/gustar"
+      },
+      "panelId": "primer_turno-panel-8-1",
+      "pageId": "primer_turno-page-8"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w78",
+        "text": "ensalada",
+        "meaning": "salad",
+        "baseForm": "ensalada",
+        "wordAudioUrl": "words/ensalada",
+        "baseFormAudioUrl": "words/ensalada"
+      },
+      "panelId": "primer_turno-panel-8-2",
+      "pageId": "primer_turno-page-8"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w81",
+        "text": "pollo,",
+        "meaning": "chicken",
+        "baseForm": "pollo",
+        "wordAudioUrl": "words/pollo",
+        "baseFormAudioUrl": "words/pollo"
+      },
+      "panelId": "primer_turno-panel-8-2",
+      "pageId": "primer_turno-page-8"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w86",
+        "text": "copa",
+        "meaning": "glass",
+        "baseForm": "copa",
+        "wordAudioUrl": "words/copa",
+        "baseFormAudioUrl": "words/copa"
+      },
+      "panelId": "primer_turno-panel-8-2",
+      "pageId": "primer_turno-page-8"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w88",
+        "text": "vino",
+        "meaning": "wine",
+        "baseForm": "vino",
+        "wordAudioUrl": "words/vino",
+        "baseFormAudioUrl": "words/vino"
+      },
+      "panelId": "primer_turno-panel-8-2",
+      "pageId": "primer_turno-page-8"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w89",
+        "text": "tinto.",
+        "meaning": "red",
+        "baseForm": "tinto",
+        "wordAudioUrl": "words/tinto",
+        "baseFormAudioUrl": "words/tinto"
+      },
+      "panelId": "primer_turno-panel-8-2",
+      "pageId": "primer_turno-page-8"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w90",
+        "text": "Y",
+        "meaning": "and",
+        "baseForm": "y",
+        "wordAudioUrl": "words/y",
+        "baseFormAudioUrl": "words/y"
+      },
+      "panelId": "primer_turno-panel-8-3",
+      "pageId": "primer_turno-page-8"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w94",
+        "text": "hamburguesa...",
+        "meaning": "hamburger",
+        "baseForm": "hamburguesa",
+        "wordAudioUrl": "words/hamburguesa",
+        "baseFormAudioUrl": "words/hamburguesa"
+      },
+      "panelId": "primer_turno-panel-8-3",
+      "pageId": "primer_turno-page-8"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w97",
+        "text": "patatas",
+        "meaning": "chips",
+        "baseForm": "patata",
+        "wordAudioUrl": "words/patatas",
+        "baseFormAudioUrl": "words/patata"
+      },
+      "panelId": "primer_turno-panel-8-3",
+      "pageId": "primer_turno-page-8"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w98",
+        "text": "fritas.",
+        "meaning": "fried",
+        "baseForm": "frito",
+        "wordAudioUrl": "words/fritas",
+        "baseFormAudioUrl": "words/frito"
+      },
+      "panelId": "primer_turno-panel-8-3",
+      "pageId": "primer_turno-page-8"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w100",
+        "text": "una",
+        "meaning": "a",
+        "baseForm": "uno",
+        "wordAudioUrl": "words/una",
+        "baseFormAudioUrl": "words/uno"
+      },
+      "panelId": "primer_turno-panel-8-3",
+      "pageId": "primer_turno-page-8"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w101",
+        "text": "cerveza",
+        "meaning": "beer",
+        "baseForm": "cerveza",
+        "wordAudioUrl": "words/cerveza",
+        "baseFormAudioUrl": "words/cerveza"
+      },
+      "panelId": "primer_turno-panel-8-3",
+      "pageId": "primer_turno-page-8"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w116",
+        "text": "señora,",
+        "meaning": "madam",
+        "baseForm": "señora",
+        "wordAudioUrl": "words/señora",
+        "baseFormAudioUrl": "words/señora"
+      },
+      "panelId": "primer_turno-panel-9-1",
+      "pageId": "primer_turno-page-9"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w117",
+        "text": "estaré",
+        "meaning": "I will be",
+        "baseForm": "estar",
+        "wordAudioUrl": "words/estaré",
+        "baseFormAudioUrl": "words/estar"
+      },
+      "panelId": "primer_turno-panel-9-1",
+      "pageId": "primer_turno-page-9"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w118",
+        "text": "con",
+        "meaning": "with",
+        "baseForm": "con",
+        "wordAudioUrl": "words/con",
+        "baseFormAudioUrl": "words/con"
+      },
+      "panelId": "primer_turno-panel-9-1",
+      "pageId": "primer_turno-page-9"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w119",
+        "text": "usted",
+        "meaning": "you (formal)",
+        "baseForm": "usted",
+        "wordAudioUrl": "words/usted",
+        "baseFormAudioUrl": "words/usted"
+      },
+      "panelId": "primer_turno-panel-9-1",
+      "pageId": "primer_turno-page-9"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w121",
+        "text": "breve...",
+        "meaning": "shortly",
+        "baseForm": "breve",
+        "wordAudioUrl": "words/breve",
+        "baseFormAudioUrl": "words/breve"
+      },
+      "panelId": "primer_turno-panel-9-1",
+      "pageId": "primer_turno-page-9"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w123",
+        "text": "vas",
+        "meaning": "you go",
+        "baseForm": "ir",
+        "wordAudioUrl": "words/vas",
+        "baseFormAudioUrl": "words/ir"
+      },
+      "panelId": "primer_turno-panel-9-2",
+      "pageId": "primer_turno-page-9"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w125",
+        "text": "pedir?",
+        "meaning": "to order",
+        "baseForm": "pedir",
+        "wordAudioUrl": "words/pedir",
+        "baseFormAudioUrl": "words/pedir"
+      },
+      "panelId": "primer_turno-panel-9-2",
+      "pageId": "primer_turno-page-9"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w126",
+        "text": "Para",
+        "meaning": "for",
+        "baseForm": "para",
+        "wordAudioUrl": "words/para",
+        "baseFormAudioUrl": "words/para"
+      },
+      "panelId": "primer_turno-panel-9-3",
+      "pageId": "primer_turno-page-9"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w129",
+        "text": "tres,",
+        "meaning": "three",
+        "baseForm": "tres",
+        "wordAudioUrl": "words/tres",
+        "baseFormAudioUrl": "words/tres"
+      },
+      "panelId": "primer_turno-panel-9-3",
+      "pageId": "primer_turno-page-9"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w132",
+        "text": "mesa",
+        "meaning": "table",
+        "baseForm": "mesa",
+        "wordAudioUrl": "words/mesa",
+        "baseFormAudioUrl": "words/mesa"
+      },
+      "panelId": "primer_turno-panel-9-3",
+      "pageId": "primer_turno-page-9"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w133",
+        "text": "seis...",
+        "meaning": "six",
+        "baseForm": "seis",
+        "wordAudioUrl": "words/seis",
+        "baseFormAudioUrl": "words/seis"
+      },
+      "panelId": "primer_turno-panel-9-3",
+      "pageId": "primer_turno-page-9"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w135",
+        "text": "sabía...",
+        "meaning": "knew",
+        "baseForm": "saber",
+        "wordAudioUrl": "words/sabía",
+        "baseFormAudioUrl": "words/saber"
+      },
+      "panelId": "primer_turno-panel-10-1",
+      "pageId": "primer_turno-page-10"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w140",
+        "text": "Molesto,",
+        "meaning": "annoying",
+        "baseForm": "molesto",
+        "wordAudioUrl": "words/molesto",
+        "baseFormAudioUrl": "words/molesto"
+      },
+      "panelId": "primer_turno-panel-10-2",
+      "pageId": "primer_turno-page-10"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w141",
+        "text": "pero...",
+        "meaning": "but",
+        "baseForm": "pero",
+        "wordAudioUrl": "words/pero",
+        "baseFormAudioUrl": "words/pero"
+      },
+      "panelId": "primer_turno-panel-10-2",
+      "pageId": "primer_turno-page-10"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w143",
+        "text": "tarde...",
+        "meaning": "late",
+        "baseForm": "tarde",
+        "wordAudioUrl": "words/tarde",
+        "baseFormAudioUrl": "words/tarde"
+      },
+      "panelId": "primer_turno-panel-11-1",
+      "pageId": "primer_turno-page-11"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w144",
+        "text": "Nadie",
+        "meaning": "no one",
+        "baseForm": "nadie",
+        "wordAudioUrl": "words/nadie",
+        "baseFormAudioUrl": "words/nadie"
+      },
+      "panelId": "primer_turno-panel-11-2",
+      "pageId": "primer_turno-page-11"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w145",
+        "text": "está",
+        "meaning": "is",
+        "baseForm": "estar",
+        "wordAudioUrl": "words/está",
+        "baseFormAudioUrl": "words/estar"
+      },
+      "panelId": "primer_turno-panel-11-2",
+      "pageId": "primer_turno-page-11"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w146",
+        "text": "mirando...",
+        "meaning": "watching",
+        "baseForm": "mirar",
+        "wordAudioUrl": "words/mirando",
+        "baseFormAudioUrl": "words/mirar"
+      },
+      "panelId": "primer_turno-panel-11-2",
+      "pageId": "primer_turno-page-11"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w149",
+        "text": "robando?",
+        "meaning": "stealing",
+        "baseForm": "robar",
+        "wordAudioUrl": "words/robando",
+        "baseFormAudioUrl": "words/robar"
+      },
+      "panelId": "primer_turno-panel-12-2",
+      "pageId": "primer_turno-page-12"
+    },
+    {
+      "word": {
+        "id": "primer_turno-w153",
+        "text": "vio.",
+        "meaning": "saw",
+        "baseForm": "ver",
+        "wordAudioUrl": "words/vio",
+        "baseFormAudioUrl": "words/ver"
+      },
+      "panelId": "primer_turno-panel-12-3",
+      "pageId": "primer_turno-page-12"
+    }
+  ],
+  "wordAudioMap": {
+    "primer": "words/primer",
+    "turno": "words/turno",
+    "no": "words/no",
+    "me": "words/me",
+    "gusta": "words/gusta",
+    "gustar": "words/gustar",
+    "la": "words/la",
+    "el": "words/el",
+    "escuela": "words/escuela",
+    "quiero": "words/quiero",
+    "querer": "words/querer",
+    "estar": "words/estar",
+    "aquí": "words/aquí",
+    "necesito": "words/necesito",
+    "necesitar": "words/necesitar",
+    "un": "words/un",
+    "cambio": "words/cambio",
+    "dejar": "words/dejar",
+    "eso": "words/eso",
+    "está": "words/está",
+    "bien": "words/bien",
+    "trabajar": "words/trabajar",
+    "debo": "words/debo",
+    "deber": "words/deber",
+    "encontrar": "words/encontrar",
+    "trabajo": "words/trabajo",
+    "lo": "words/lo",
+    "siento": "words/siento",
+    "sentir": "words/sentir",
+    "encantan": "words/encantan",
+    "encantar": "words/encantar",
+    "los": "words/los",
+    "libros": "words/libros",
+    "libro": "words/libro",
+    "por": "words/por",
+    "momento": "words/momento",
+    "se": "words/se",
+    "necesita": "words/necesita",
+    "camarero": "words/camarero",
+    "a": "words/a",
+    "quién": "words/quién",
+    "le": "words/le",
+    "pregunto": "words/pregunto",
+    "preguntar": "words/preguntar",
+    "puedo": "words/puedo",
+    "poder": "words/poder",
+    "ayudarte": "words/ayudarte",
+    "ayudar": "words/ayudar",
+    "estoy": "words/estoy",
+    "buscando": "words/buscando",
+    "buscar": "words/buscar",
+    "tienes": "words/tienes",
+    "tener": "words/tener",
+    "experiencia": "words/experiencia",
+    "pero": "words/pero",
+    "aprendo": "words/aprendo",
+    "aprender": "words/aprender",
+    "rápido": "words/rápido",
+    "empiezas": "words/empiezas",
+    "empezar": "words/empezar",
+    "ahora": "words/ahora",
+    "gracias": "words/gracias",
+    "gracia": "words/gracia",
+    "café": "words/café",
+    "favor": "words/favor",
+    "para": "words/para",
+    "mí": "words/mí",
+    "yo": "words/yo",
+    "una": "words/una",
+    "uno": "words/uno",
+    "sopa": "words/sopa",
+    "agua": "words/agua",
+    "con": "words/con",
+    "gas": "words/gas",
+    "qué": "words/qué",
+    "te": "words/te",
+    "tú": "words/tú",
+    "gustaría": "words/gustaría",
+    "ensalada": "words/ensalada",
+    "y": "words/y",
+    "pollo": "words/pollo",
+    "copa": "words/copa",
+    "de": "words/de",
+    "vino": "words/vino",
+    "tinto": "words/tinto",
+    "hamburguesa": "words/hamburguesa",
+    "las": "words/las",
+    "patatas": "words/patatas",
+    "patata": "words/patata",
+    "fritas": "words/fritas",
+    "frito": "words/frito",
+    "cerveza": "words/cerveza",
+    "sí": "words/sí",
+    "señora": "words/señora",
+    "estaré": "words/estaré",
+    "usted": "words/usted",
+    "en": "words/en",
+    "breve": "words/breve",
+    "vas": "words/vas",
+    "ir": "words/ir",
+    "pedir": "words/pedir",
+    "mesa": "words/mesa",
+    "tres": "words/tres",
+    "seis": "words/seis",
+    "sabía": "words/sabía",
+    "saber": "words/saber",
+    "hiciste": "words/hiciste",
+    "hacer": "words/hacer",
+    "molesto": "words/molesto",
+    "es": "words/es",
+    "ser": "words/ser",
+    "tarde": "words/tarde",
+    "nadie": "words/nadie",
+    "mirando": "words/mirando",
+    "mirar": "words/mirar",
+    "robando": "words/robando",
+    "robar": "words/robar",
+    "oh": "words/oh",
+    "vio": "words/vio",
+    "ver": "words/ver",
+    "continuará": "words/continuará",
+    "continuar": "words/continuar"
+  }
+}

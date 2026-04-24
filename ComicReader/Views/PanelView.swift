@@ -43,12 +43,9 @@ struct PanelView: View {
     }
 
     // Panels sorted by panelOrder for consistent navigation.
-    // Include floating panels (even without text) and non-floating panels that have text content.
+    // Include all panels so users can navigate through every panel on the page.
     var sortedPanels: [Panel] {
         page.panels
-            .filter { panel in
-                panel.floating || panel.bubbles.contains { !$0.sentences.isEmpty }
-            }
             .sorted { $0.panelOrder < $1.panelOrder }
     }
 
