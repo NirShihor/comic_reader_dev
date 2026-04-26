@@ -10,6 +10,7 @@
 		81498B972F5B37C700263740 /* WhisperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81498B962F5B37C600263740 /* WhisperService.swift */; };
 		81498B9E2F5CDBD000263740 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81498B9C2F5CDB2D00263740 /* Secrets.swift */; };
 		81498BA02F5B4A0000263740 /* SpeakingTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81498B9F2F5B4A0000263740 /* SpeakingTestView.swift */; };
+		819A36E52F9C05C1004A1687 /* ListeningTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819A36E42F9C05C1004A1687 /* ListeningTestView.swift */; };
 		A1000001222222220000001 /* ComicReaderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000001 /* ComicReaderApp.swift */; };
 		A1000001222222220000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000002 /* ContentView.swift */; };
 		A1000001222222220000003 /* Comic.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000003 /* Comic.swift */; };
@@ -32,16 +33,18 @@
 		A1000001222222220000021 /* StoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000021 /* StoreView.swift */; };
 		A1000001222222220000022 /* BundledComics in Resources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000022 /* BundledComics */; };
 		A1000001222222220000023 /* ComicImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000023 /* ComicImageLoader.swift */; };
-		A1000001222222220000024 /* Dictionary in Resources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000024 /* Dictionary */; };
 		A1000001222222220000025 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000025 /* SpeechRecognizer.swift */; };
 		A1000001222222220000026 /* CollectionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000026 /* CollectionDetailView.swift */; };
 		A1000001222222220000027 /* ZIPExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000027 /* ZIPExtractor.swift */; };
+		A1000001222222220000028 /* StoreCollectionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000028 /* StoreCollectionDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		81498B962F5B37C600263740 /* WhisperService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperService.swift; sourceTree = "<group>"; };
 		81498B9C2F5CDB2D00263740 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
+		A1000001111111110000028 /* StoreCollectionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreCollectionDetailView.swift; sourceTree = "<group>"; };
 		81498B9F2F5B4A0000263740 /* SpeakingTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakingTestView.swift; sourceTree = "<group>"; };
+		819A36E42F9C05C1004A1687 /* ListeningTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListeningTestView.swift; sourceTree = "<group>"; };
 		A1000001000000000000001 /* ComicReader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ComicReader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000001111111110000001 /* ComicReaderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicReaderApp.swift; sourceTree = "<group>"; };
 		A1000001111111110000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -66,7 +69,6 @@
 		A1000001111111110000021 /* StoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreView.swift; sourceTree = "<group>"; };
 		A1000001111111110000022 /* BundledComics */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BundledComics; sourceTree = "<group>"; };
 		A1000001111111110000023 /* ComicImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicImageLoader.swift; sourceTree = "<group>"; };
-		A1000001111111110000024 /* Dictionary */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Dictionary; sourceTree = "<group>"; };
 		A1000001111111110000025 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
 		A1000001111111110000026 /* CollectionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionDetailView.swift; sourceTree = "<group>"; };
 		A1000001111111110000027 /* ZIPExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZIPExtractor.swift; sourceTree = "<group>"; };
@@ -109,7 +111,6 @@
 				A1000001444444440000005 /* Views */,
 				A1000001444444440000006 /* Services */,
 				A1000001111111110000022 /* BundledComics */,
-				A1000001111111110000024 /* Dictionary */,
 				A1000001111111110000016 /* Assets.xcassets */,
 				A1000001111111110000017 /* Info.plist */,
 			);
@@ -136,6 +137,7 @@
 		A1000001444444440000005 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				819A36E42F9C05C1004A1687 /* ListeningTestView.swift */,
 				A1000001111111110000005 /* LibraryView.swift */,
 				A1000001111111110000006 /* ComicDetailView.swift */,
 				A1000001111111110000007 /* ReaderView.swift */,
@@ -147,6 +149,7 @@
 				A1000001111111110000021 /* StoreView.swift */,
 				81498B9F2F5B4A0000263740 /* SpeakingTestView.swift */,
 				A1000001111111110000026 /* CollectionDetailView.swift */,
+				A1000001111111110000028 /* StoreCollectionDetailView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -228,7 +231,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000001222222220000022 /* BundledComics in Resources */,
-				A1000001222222220000024 /* Dictionary in Resources */,
 				A1000001222222220000016 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -245,6 +247,7 @@
 				A1000001222222220000002 /* ContentView.swift in Sources */,
 				81498B972F5B37C700263740 /* WhisperService.swift in Sources */,
 				81498BA02F5B4A0000263740 /* SpeakingTestView.swift in Sources */,
+				819A36E52F9C05C1004A1687 /* ListeningTestView.swift in Sources */,
 				A1000001222222220000003 /* Comic.swift in Sources */,
 				A1000001222222220000004 /* ComicData.swift in Sources */,
 				A1000001222222220000005 /* LibraryView.swift in Sources */,
@@ -266,6 +269,7 @@
 				A1000001222222220000025 /* SpeechRecognizer.swift in Sources */,
 				A1000001222222220000026 /* CollectionDetailView.swift in Sources */,
 				A1000001222222220000027 /* ZIPExtractor.swift in Sources */,
+				A1000001222222220000028 /* StoreCollectionDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

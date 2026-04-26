@@ -3,6 +3,7 @@ import SwiftUI
 enum PracticeDestination: Hashable {
     case quiz
     case speaking
+    case listening
 }
 
 struct ComicDetailView: View {
@@ -85,17 +86,40 @@ struct ComicDetailView: View {
                             } label: {
                                 Label("Speaking", systemImage: "mic.fill")
                             }
+
+                            Button {
+                                practiceDestination = .listening
+                            } label: {
+                                Label("Listening", systemImage: "headphones")
+                            }
                         }
 
                         Section {
-                            Toggle(isOn: $settingsManager.speakingPracticeMode) {
+                            Toggle(isOn: Binding(
+                                get: { settingsManager.speakingPracticeMode },
+                                set: { newValue in
+                                    settingsManager.speakingPracticeMode = newValue
+                                    if newValue { settingsManager.listeningPracticeMode = false }
+                                }
+                            )) {
                                 Label("Speaking Practice Mode", systemImage: "bubble.left.and.text.bubble.right")
+                            }
+
+                            Toggle(isOn: Binding(
+                                get: { settingsManager.listeningPracticeMode },
+                                set: { newValue in
+                                    settingsManager.listeningPracticeMode = newValue
+                                    if newValue { settingsManager.speakingPracticeMode = false }
+                                }
+                            )) {
+                                Label("Listening Practice Mode", systemImage: "headphones")
                             }
                         }
                     } label: {
+                        let activePractice = settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode
                         Image(systemName: "graduationcap.fill")
                             .font(.body)
-                            .foregroundStyle(settingsManager.speakingPracticeMode ? .green : .accentColor)
+                            .foregroundStyle(activePractice ? .green : .accentColor)
                     }
 
                     Button(role: .destructive) {
@@ -124,6 +148,8 @@ struct ComicDetailView: View {
                 QuizView(comic: comic)
             case .speaking:
                 SpeakingTestView(comic: comic)
+            case .listening:
+                ListeningTestView(comic: comic)
             }
         }
         .navigationDestination(item: $selectedPage) { page in
@@ -226,7 +252,8 @@ struct PageThumbnail: View {
     var body: some View {
         VStack(spacing: 8) {
             GeometryReader { geo in
-                let imageName = settingsManager.speakingPracticeMode
+                let practiceActive = settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode
+                let imageName = practiceActive
                     ? (page.noTextImage ?? page.masterImage)
                     : page.masterImage
                 ComicImage(imageName: imageName, comicId: comic.id)

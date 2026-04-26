@@ -163,6 +163,14 @@ struct PanelView: View {
             textRevealed = false
             practiceFeedback = nil
         }
+        .onChange(of: settingsManager.listeningPracticeMode) { _, newValue in
+            textRevealed = false
+            practiceFeedback = nil
+            // Auto-play first sentence audio when entering listening mode
+            if newValue {
+                autoPlayFirstSentence()
+            }
+        }
         .onChange(of: whisperService.error) { _, newError in
             // Only show error if we have no transcribed text (actual failure)
             if let error = newError, whisperService.transcribedText.isEmpty {
@@ -190,6 +198,9 @@ struct PanelView: View {
         }
         .onAppear {
             audioManager.setPlaybackRate(Float(settingsManager.playbackSpeed))
+            if settingsManager.listeningPracticeMode {
+                autoPlayFirstSentence()
+            }
         }
         .onDisappear {
             audioManager.stop()
@@ -267,6 +278,11 @@ struct PanelView: View {
         processingSentenceId = nil
         audioManager.stop()
         whisperService.cancelRecording()
+
+        // Auto-play first sentence when navigating panels in listening mode
+        if settingsManager.listeningPracticeMode {
+            autoPlayFirstSentence()
+        }
     }
 
     private var panelClipShape: AnyShape {
@@ -276,9 +292,13 @@ struct PanelView: View {
         return AnyShape(RoundedRectangle(cornerRadius: 12))
     }
 
+    private var isPracticeMode: Bool {
+        settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode
+    }
+
     // MARK: - Panel Image
     private var panelImage: some View {
-        let imageName = settingsManager.speakingPracticeMode && !textRevealed
+        let imageName = isPracticeMode && !textRevealed
             ? (currentPanel.noTextImage ?? currentPanel.artworkImage)
             : currentPanel.artworkImage
 
@@ -294,7 +314,7 @@ struct PanelView: View {
 
             // Only show "Tap to reveal" if panel has text content (bubbles with sentences)
             let hasTextContent = currentPanel.bubbles.contains { !$0.sentences.isEmpty }
-            if settingsManager.speakingPracticeMode && !textRevealed && hasTextContent {
+            if isPracticeMode && !textRevealed && hasTextContent {
                 VStack {
                     Spacer()
                     Label("Tap to reveal", systemImage: "eye")
@@ -309,7 +329,7 @@ struct PanelView: View {
         }
         .onTapGesture {
             let hasTextContent = currentPanel.bubbles.contains { !$0.sentences.isEmpty }
-            if settingsManager.speakingPracticeMode && hasTextContent {
+            if isPracticeMode && hasTextContent {
                 withAnimation {
                     textRevealed.toggle()
                 }
@@ -329,6 +349,11 @@ struct PanelView: View {
                         Text(sentence.translation ?? "")
                             .font(.title3)
                             .fontWeight(.medium)
+                    } else if settingsManager.listeningPracticeMode {
+                        Text("What is the English meaning?")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .italic()
                     } else {
                         // Hide manually added phrases (quiz-only)
                         let displayWords = sentence.words.filter { word in
@@ -355,7 +380,7 @@ struct PanelView: View {
                     }
 
                     // Translation (only for sentences with audio - skip for sound effects)
-                    if !settingsManager.speakingPracticeMode,
+                    if !isPracticeMode,
                        let translation = sentence.translation,
                        let audioUrl = sentence.audioUrl, !audioUrl.isEmpty {
                         if translationRevealed.contains(sentence.id) {
@@ -380,88 +405,11 @@ struct PanelView: View {
                     if let audioUrl = sentence.audioUrl, !audioUrl.isEmpty {
                         HStack {
                             if settingsManager.speakingPracticeMode {
-                                let isThisRecording = recordingSentenceId == sentence.id
-                                Button {
-                                    if isThisRecording {
-                                        stopRecording(for: sentence)
-                                    } else {
-                                        startRecording(for: sentence)
-                                    }
-                                } label: {
-                                    Label(
-                                        isThisRecording ? "Stop" : "Speak",
-                                        systemImage: isThisRecording ? "stop.fill" : "mic.fill"
-                                    )
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundStyle(.white)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 10)
-                                    .background(isThisRecording ? Color.red : Color.blue)
-                                    .clipShape(Capsule())
-                                }
-                                .disabled(processingSentenceId != nil || (recordingSentenceId != nil && !isThisRecording))
-
-                                // Listen button to hear the sentence before speaking
-                                Button {
-                                    if audioManager.isPlaying && playingSentenceId == sentence.id {
-                                        audioManager.stop()
-                                    } else {
-                                        playingSentenceId = sentence.id
-                                        playAudio(sentence.audioUrl)
-                                    }
-                                } label: {
-                                    Group {
-                                        if audioManager.isLoading && playingSentenceId == sentence.id {
-                                            ProgressView()
-                                                .tint(.white)
-                                                .controlSize(.small)
-                                        } else {
-                                            Image(systemName: audioManager.isPlaying && playingSentenceId == sentence.id ? "stop.fill" : "speaker.wave.2.fill")
-                                        }
-                                    }
-                                    .frame(width: 40, height: 40)
-                                    .background(audioManager.isPlaying && playingSentenceId == sentence.id ? Color.red : Color.green)
-                                    .clipShape(Circle())
-                                    .foregroundStyle(.white)
-                                }
-                                .disabled(isThisRecording || processingSentenceId != nil)
-
-                                if processingSentenceId == sentence.id {
-                                    ProgressView()
-                                        .padding(.leading, 8)
-                                }
+                                speakingPracticeControls(for: sentence)
+                            } else if settingsManager.listeningPracticeMode {
+                                listeningPracticeControls(for: sentence)
                             } else {
-                                Button {
-                                    if audioManager.isPlaying && playingSentenceId == sentence.id {
-                                        audioManager.stop()
-                                    } else {
-                                        playingSentenceId = sentence.id
-                                        playAudio(sentence.audioUrl)
-                                    }
-                                } label: {
-                                    if audioManager.isLoading && playingSentenceId == sentence.id {
-                                        ProgressView()
-                                            .tint(.white)
-                                            .padding(.horizontal, 16)
-                                            .padding(.vertical, 10)
-                                            .background(Color.blue.opacity(0.6))
-                                            .clipShape(Capsule())
-                                    } else {
-                                        Label(
-                                            audioManager.isPlaying && playingSentenceId == sentence.id ? "Stop" : "Play",
-                                            systemImage: audioManager.isPlaying && playingSentenceId == sentence.id ? "stop.fill" : "play.fill"
-                                        )
-                                        .font(.subheadline)
-                                        .fontWeight(.medium)
-                                        .foregroundStyle(.white)
-                                        .padding(.horizontal, 16)
-                                        .padding(.vertical, 10)
-                                        .background(audioManager.isPlaying && playingSentenceId == sentence.id ? Color.red : Color.blue)
-                                        .clipShape(Capsule())
-                                    }
-                                }
-                                .disabled(audioManager.isLoading && playingSentenceId == sentence.id)
+                                normalPlaybackControls(for: sentence)
                             }
 
                             Spacer()
@@ -484,7 +432,7 @@ struct PanelView: View {
                     }
 
                     // Show Spanish text when revealed in practice mode (with tappable words)
-                    if settingsManager.speakingPracticeMode && textRevealed {
+                    if isPracticeMode && textRevealed {
                         let revealedWords = sentence.words.filter { word in
                             if word.manual == true { return false }
                             if word.startTimeMs == nil && word.text.contains(" ") { return false }
@@ -504,6 +452,16 @@ struct PanelView: View {
                         }
                     }
 
+                    // Show translation when revealed in listening practice mode
+                    if settingsManager.listeningPracticeMode && textRevealed {
+                        if let translation = sentence.translation {
+                            Text(translation)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .italic()
+                        }
+                    }
+
                     // Inline practice feedback for this sentence
                     if let feedback = practiceFeedback, feedback.sentenceId == sentence.id {
                         feedbackCard(feedback)
@@ -518,6 +476,154 @@ struct PanelView: View {
         .padding()
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    // MARK: - Speaking Practice Controls
+    @ViewBuilder
+    private func speakingPracticeControls(for sentence: Sentence) -> some View {
+        let isThisRecording = recordingSentenceId == sentence.id
+        Button {
+            if isThisRecording {
+                stopRecording(for: sentence)
+            } else {
+                startRecording(for: sentence)
+            }
+        } label: {
+            Label(
+                isThisRecording ? "Stop" : "Speak",
+                systemImage: isThisRecording ? "stop.fill" : "mic.fill"
+            )
+            .font(.subheadline)
+            .fontWeight(.medium)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(isThisRecording ? Color.red : Color.blue)
+            .clipShape(Capsule())
+        }
+        .disabled(processingSentenceId != nil || (recordingSentenceId != nil && !isThisRecording))
+
+        // Listen button to hear the sentence before speaking
+        Button {
+            if audioManager.isPlaying && playingSentenceId == sentence.id {
+                audioManager.stop()
+            } else {
+                playingSentenceId = sentence.id
+                playAudio(sentence.audioUrl)
+            }
+        } label: {
+            Group {
+                if audioManager.isLoading && playingSentenceId == sentence.id {
+                    ProgressView()
+                        .tint(.white)
+                        .controlSize(.small)
+                } else {
+                    Image(systemName: audioManager.isPlaying && playingSentenceId == sentence.id ? "stop.fill" : "speaker.wave.2.fill")
+                }
+            }
+            .frame(width: 40, height: 40)
+            .background(audioManager.isPlaying && playingSentenceId == sentence.id ? Color.red : Color.green)
+            .clipShape(Circle())
+            .foregroundStyle(.white)
+        }
+        .disabled(isThisRecording || processingSentenceId != nil)
+
+        if processingSentenceId == sentence.id {
+            ProgressView()
+                .padding(.leading, 8)
+        }
+    }
+
+    // MARK: - Listening Practice Controls
+    @ViewBuilder
+    private func listeningPracticeControls(for sentence: Sentence) -> some View {
+        // Speak English meaning button
+        let isThisRecording = recordingSentenceId == sentence.id
+        Button {
+            if isThisRecording {
+                stopListeningRecording(for: sentence)
+            } else {
+                startRecording(for: sentence)
+            }
+        } label: {
+            Label(
+                isThisRecording ? "Stop" : "Speak",
+                systemImage: isThisRecording ? "stop.fill" : "mic.fill"
+            )
+            .font(.subheadline)
+            .fontWeight(.medium)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(isThisRecording ? Color.red : Color.blue)
+            .clipShape(Capsule())
+        }
+        .disabled(processingSentenceId != nil || (recordingSentenceId != nil && !isThisRecording))
+
+        // Play Spanish audio button
+        Button {
+            if audioManager.isPlaying && playingSentenceId == sentence.id {
+                audioManager.stop()
+            } else {
+                playingSentenceId = sentence.id
+                playAudio(sentence.audioUrl)
+            }
+        } label: {
+            Group {
+                if audioManager.isLoading && playingSentenceId == sentence.id {
+                    ProgressView()
+                        .tint(.white)
+                        .controlSize(.small)
+                } else {
+                    Image(systemName: audioManager.isPlaying && playingSentenceId == sentence.id ? "stop.fill" : "speaker.wave.2.fill")
+                }
+            }
+            .frame(width: 40, height: 40)
+            .background(audioManager.isPlaying && playingSentenceId == sentence.id ? Color.red : Color.green)
+            .clipShape(Circle())
+            .foregroundStyle(.white)
+        }
+        .disabled(isThisRecording || processingSentenceId != nil)
+
+        if processingSentenceId == sentence.id {
+            ProgressView()
+                .padding(.leading, 8)
+        }
+    }
+
+    // MARK: - Normal Playback Controls
+    @ViewBuilder
+    private func normalPlaybackControls(for sentence: Sentence) -> some View {
+        Button {
+            if audioManager.isPlaying && playingSentenceId == sentence.id {
+                audioManager.stop()
+            } else {
+                playingSentenceId = sentence.id
+                playAudio(sentence.audioUrl)
+            }
+        } label: {
+            if audioManager.isLoading && playingSentenceId == sentence.id {
+                ProgressView()
+                    .tint(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color.blue.opacity(0.6))
+                    .clipShape(Capsule())
+            } else {
+                Label(
+                    audioManager.isPlaying && playingSentenceId == sentence.id ? "Stop" : "Play",
+                    systemImage: audioManager.isPlaying && playingSentenceId == sentence.id ? "stop.fill" : "play.fill"
+                )
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundStyle(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(audioManager.isPlaying && playingSentenceId == sentence.id ? Color.red : Color.blue)
+                .clipShape(Capsule())
+            }
+        }
+        .disabled(audioManager.isLoading && playingSentenceId == sentence.id)
     }
 
     // MARK: - Sound Effect Card (text only, no audio)
@@ -553,7 +659,42 @@ struct PanelView: View {
             }
             .font(.headline)
 
-            if !feedback.isCorrect {
+            if settingsManager.listeningPracticeMode {
+                // Listening mode feedback: show English expected + Spanish text
+                VStack(alignment: .leading, spacing: 4) {
+                    if !feedback.isCorrect {
+                        Text("You said: \"\(feedback.spokenText)\"")
+                            .font(.subheadline)
+                    }
+
+                    HStack {
+                        Text("English:")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text(feedback.expectedText)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                    }
+
+                    // Show the Spanish sentence with tappable words
+                    Text("Spanish:")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    let feedbackWords = feedback.words.filter { word in
+                        if word.manual == true { return false }
+                        if word.startTimeMs == nil && word.text.contains(" ") { return false }
+                        return true
+                    }
+                    if !feedbackWords.isEmpty {
+                        FlowLayout(spacing: 2) {
+                            ForEach(feedbackWords) { word in
+                                WordButton(word: word, isHighlighted: false)
+                            }
+                        }
+                    }
+                }
+            } else if !feedback.isCorrect {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("You said: \"\(feedback.spokenText)\"")
                         .font(.subheadline)
@@ -700,6 +841,101 @@ struct PanelView: View {
             )
             playingSentenceId = sentence.id
             playAudio(matchedAudio)
+        }
+    }
+
+    // MARK: - Listening Practice Recording
+    private func stopListeningRecording(for sentence: Sentence) {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        recordingSentenceId = nil
+        processingSentenceId = sentence.id
+
+        Task {
+            let expectedTranslation = sentence.translation ?? ""
+            let spokenText = await whisperService.stopRecording(
+                expectedText: expectedTranslation,
+                language: "en"
+            )
+
+            if let error = whisperService.error, spokenText.isEmpty {
+                processingSentenceId = nil
+                errorMessage = error
+                showingError = true
+                whisperService.error = nil
+                return
+            }
+            whisperService.error = nil
+
+            let isCorrect = compareEnglishMeaning(
+                spoken: spokenText,
+                expected: expectedTranslation
+            )
+
+            try? await Task.sleep(nanoseconds: 300_000_000)
+
+            processingSentenceId = nil
+            practiceFeedback = PracticeFeedback(
+                sentenceId: sentence.id,
+                isCorrect: isCorrect,
+                spokenText: spokenText.isEmpty ? "(no speech detected)" : spokenText,
+                expectedText: expectedTranslation,
+                words: sentence.words
+            )
+            // Play the Spanish audio so they can hear it again
+            playingSentenceId = sentence.id
+            playAudio(sentence.audioUrl)
+        }
+    }
+
+    // MARK: - English Meaning Comparison (lenient)
+    private func compareEnglishMeaning(spoken: String, expected: String) -> Bool {
+        let spokenNorm = normalizeEnglish(spoken)
+        let expectedNorm = normalizeEnglish(expected)
+
+        if spokenNorm.isEmpty { return false }
+        if spokenNorm == expectedNorm { return true }
+
+        // Contains check (handles "the house" matching "house")
+        if spokenNorm.contains(expectedNorm) || expectedNorm.contains(spokenNorm) {
+            return true
+        }
+
+        // Fuzzy match with relaxed threshold
+        let (isMatch, matchScore) = whisperService.compareText(spoken: spokenNorm, expected: expectedNorm)
+        if isMatch || matchScore >= 0.7 { return true }
+
+        return false
+    }
+
+    private func normalizeEnglish(_ text: String) -> String {
+        var result = text.lowercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: ".", with: "")
+            .replacingOccurrences(of: ",", with: "")
+            .replacingOccurrences(of: "!", with: "")
+            .replacingOccurrences(of: "?", with: "")
+            .replacingOccurrences(of: "'", with: "'")
+
+        // Strip leading articles
+        let articlePrefixes = ["the ", "a ", "an "]
+        for prefix in articlePrefixes {
+            if result.hasPrefix(prefix) {
+                result = String(result.dropFirst(prefix.count))
+            }
+        }
+
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    // MARK: - Auto-play First Sentence
+    private func autoPlayFirstSentence() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            if let firstBubble = currentPanel.bubbles.first(where: { $0.isSoundEffect != true }),
+               let firstSentence = firstBubble.sentences.first,
+               let audioUrl = firstSentence.audioUrl, !audioUrl.isEmpty {
+                playingSentenceId = firstSentence.id
+                playAudio(firstSentence.audioUrl)
+            }
         }
     }
 }

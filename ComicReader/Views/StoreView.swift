@@ -258,6 +258,7 @@ struct StoreComicCard: View {
             // Download button / status
             downloadButton
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(compact ? 12 : 16)
         .background(compact ? Color.clear : Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: compact ? 0 : 12))
@@ -377,61 +378,111 @@ struct StoreCollectionGroup: View {
     let comics: [StoreComic]
     var onOpenComic: ((Comic) -> Void)?
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Collection header
-            HStack(spacing: 10) {
-                Image(systemName: "books.vertical.fill")
-                    .font(.title3)
-                    .foregroundStyle(.green)
+    private var collectionDescription: String? {
+        comics.first?.collectionDescription
+    }
 
-                VStack(alignment: .leading, spacing: 2) {
+    private var collectionCoverUrl: String? {
+        if let url = comics.first?.collectionCoverThumbnailUrl, !url.isEmpty {
+            return url
+        }
+        if let url = comics.first?.coverThumbnailUrl, !url.isEmpty {
+            return url
+        }
+        return nil
+    }
+
+    private var levelColor: Color {
+        switch comics.first?.level ?? "beginner" {
+        case "beginner": return .green
+        case "intermediate": return .orange
+        case "advanced": return .red
+        default: return .blue
+        }
+    }
+
+    var body: some View {
+        NavigationLink {
+            StoreCollectionDetailView(
+                title: title,
+                comics: comics,
+                onOpenComic: onOpenComic
+            )
+        } label: {
+            HStack(spacing: 12) {
+                // Cover image
+                if let coverUrl = collectionCoverUrl {
+                    AsyncImage(url: URL(string: "\(Secrets.serverBaseURL)\(coverUrl)")) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 60, height: 90)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                        case .failure:
+                            coverPlaceholder
+                        default:
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(levelColor.opacity(0.1))
+                                .frame(width: 60, height: 90)
+                                .overlay(ProgressView())
+                        }
+                    }
+                    .frame(width: 60, height: 90)
+                } else {
+                    coverPlaceholder
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                        .font(.title3)
+                        .font(.headline)
                         .fontWeight(.bold)
                         .foregroundStyle(.primary)
+
                     Text("\(comics.count) episode\(comics.count == 1 ? "" : "s")")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+
+                    if let desc = collectionDescription, !desc.isEmpty {
+                        Text(desc)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                    }
+
+                    Text(comics.first?.level.capitalized ?? "Beginner")
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(levelColor)
+                        .foregroundStyle(.white)
+                        .clipShape(Capsule())
+                        .fixedSize()
                 }
 
                 Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(
-                .rect(topLeadingRadius: 12, topTrailingRadius: 12)
-            )
-
-            // Divider
-            Rectangle()
-                .fill(Color(.separator).opacity(0.3))
-                .frame(height: 1)
-
-            // Episode cards
-            VStack(spacing: 0) {
-                ForEach(Array(comics.enumerated()), id: \.element.id) { index, comic in
-                    StoreComicCard(
-                        comic: comic,
-                        onOpenComic: onOpenComic,
-                        compact: true,
-                        episodeLabel: "Ep. \(comic.episodeNumber ?? (index + 1))"
-                    )
-
-                    if index < comics.count - 1 {
-                        Rectangle()
-                            .fill(Color(.separator).opacity(0.3))
-                            .frame(height: 1)
-                            .padding(.leading, 16)
-                    }
-                }
-            }
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(
-                .rect(bottomLeadingRadius: 12, bottomTrailingRadius: 12)
-            )
+            .padding(12)
         }
+        .buttonStyle(.plain)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    private var coverPlaceholder: some View {
+        RoundedRectangle(cornerRadius: 6)
+            .fill(levelColor.opacity(0.2))
+            .frame(width: 60, height: 90)
+            .overlay(
+                Image(systemName: "books.vertical.fill")
+                    .foregroundStyle(levelColor)
+            )
     }
 }
 

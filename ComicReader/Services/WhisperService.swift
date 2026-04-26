@@ -81,7 +81,7 @@ class WhisperService: ObservableObject {
     }
 
     /// Stop recording and transcribe with Whisper
-    func stopRecording(expectedText: String? = nil) async -> String {
+    func stopRecording(expectedText: String? = nil, language: String = "es") async -> String {
         guard let recorder = audioRecorder, recorder.isRecording else {
             return ""
         }
@@ -127,7 +127,7 @@ class WhisperService: ObservableObject {
         }
 
         do {
-            let transcription = try await transcribeWithWhisper(audioURL: url, prompt: expectedText)
+            let transcription = try await transcribeWithWhisper(audioURL: url, prompt: expectedText, language: language)
             transcribedText = transcription
             isProcessing = false
             return transcription
@@ -153,7 +153,7 @@ class WhisperService: ObservableObject {
     }
 
     /// Send audio to Whisper API for transcription
-    private func transcribeWithWhisper(audioURL: URL, prompt: String? = nil) async throws -> String {
+    private func transcribeWithWhisper(audioURL: URL, prompt: String? = nil, language: String = "es") async throws -> String {
         let apiKey = Secrets.openAIAPIKey
 
         guard apiKey != "YOUR_OPENAI_API_KEY_HERE" else {
@@ -177,10 +177,10 @@ class WhisperService: ObservableObject {
         body.append("Content-Disposition: form-data; name=\"model\"\r\n\r\n".data(using: .utf8)!)
         body.append("whisper-1\r\n".data(using: .utf8)!)
 
-        // Add language field (Spanish)
+        // Add language field
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
         body.append("Content-Disposition: form-data; name=\"language\"\r\n\r\n".data(using: .utf8)!)
-        body.append("es\r\n".data(using: .utf8)!)
+        body.append("\(language)\r\n".data(using: .utf8)!)
 
         // Add prompt hint to reduce hallucination on short audio
         if let prompt = prompt, !prompt.isEmpty {

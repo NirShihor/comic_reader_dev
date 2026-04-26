@@ -16,11 +16,14 @@ struct StoreComic: Identifiable, Codable {
     let downloadUrl: String
     let collectionTitle: String?
     let episodeNumber: Int?
+    let collectionDescription: String?
+    let collectionCoverThumbnailUrl: String?
 
     enum CodingKeys: String, CodingKey {
         case id, title, description, coverThumbnailUrl, level
         case totalPages, estimatedMinutes, language, fileSizeMB, version, downloadUrl
         case collectionTitle, episodeNumber
+        case collectionDescription, collectionCoverThumbnailUrl
     }
 
     init(from decoder: Decoder) throws {
@@ -38,12 +41,15 @@ struct StoreComic: Identifiable, Codable {
         downloadUrl = try container.decodeIfPresent(String.self, forKey: .downloadUrl) ?? ""
         collectionTitle = try container.decodeIfPresent(String.self, forKey: .collectionTitle)
         episodeNumber = try container.decodeIfPresent(Int.self, forKey: .episodeNumber)
+        collectionDescription = try container.decodeIfPresent(String.self, forKey: .collectionDescription)
+        collectionCoverThumbnailUrl = try container.decodeIfPresent(String.self, forKey: .collectionCoverThumbnailUrl)
     }
 
     init(id: String, title: String, description: String, coverThumbnailUrl: String,
          level: String, totalPages: Int, estimatedMinutes: Int, language: String,
          fileSizeMB: Double, version: String, downloadUrl: String,
-         collectionTitle: String? = nil, episodeNumber: Int? = nil) {
+         collectionTitle: String? = nil, episodeNumber: Int? = nil,
+         collectionDescription: String? = nil, collectionCoverThumbnailUrl: String? = nil) {
         self.id = id
         self.title = title
         self.description = description
@@ -57,6 +63,8 @@ struct StoreComic: Identifiable, Codable {
         self.downloadUrl = downloadUrl
         self.collectionTitle = collectionTitle
         self.episodeNumber = episodeNumber
+        self.collectionDescription = collectionDescription
+        self.collectionCoverThumbnailUrl = collectionCoverThumbnailUrl
     }
 }
 
@@ -291,10 +299,18 @@ class ComicStoreService: ObservableObject {
         try? FileManager.default.removeItem(at: tempZip)
     }
 
-    /// Delete a downloaded comic
+    /// Delete a downloaded comic (hides it; can be restored)
     func deleteDownload(_ comicId: String) {
         localStorage.deleteComic(comicId)
-        downloadStates[comicId] = .notDownloaded
+        downloadStates[comicId] = .hidden
+    }
+
+    /// Delete all comics in a collection (hides them all; can be restored individually)
+    func deleteCollection(_ comicIds: [String]) {
+        for comicId in comicIds {
+            localStorage.deleteComic(comicId)
+            downloadStates[comicId] = .hidden
+        }
     }
 }
 
