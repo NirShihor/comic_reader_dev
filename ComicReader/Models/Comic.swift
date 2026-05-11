@@ -20,6 +20,7 @@ struct Sentence: Identifiable, Codable, Hashable {
     let text: String
     var translation: String?
     var audioUrl: String?
+    var translationAudioUrl: String?
     var alternativeTexts: [String]?
     var alternativeAudioUrls: [String]?
     let words: [Word]
@@ -67,6 +68,28 @@ struct Panel: Identifiable, Codable, Hashable {
     let bubbles: [Bubble]
 }
 
+// MARK: - HotspotSlide
+struct HotspotSlide: Identifiable, Codable, Hashable {
+    let id: String
+    var imageUrl: String?
+    let text: String
+    let translation: String
+    var audioUrl: String?
+    var translationAudioUrl: String?
+    let words: [Word]
+}
+
+// MARK: - Hotspot
+struct Hotspot: Identifiable, Codable, Hashable {
+    let id: String
+    let x: Double
+    let y: Double
+    let width: Double
+    let height: Double
+    var label: String?
+    let slides: [HotspotSlide]
+}
+
 // MARK: - Page
 struct Page: Identifiable, Codable, Hashable {
     let id: String
@@ -74,6 +97,7 @@ struct Page: Identifiable, Codable, Hashable {
     let masterImage: String
     var noTextImage: String?
     let panels: [Panel]
+    var hotspots: [Hotspot]?
 }
 
 // MARK: - ReviewWord
@@ -97,6 +121,7 @@ struct Comic: Identifiable, Codable, Hashable {
     // Collection fields (optional — comics without these are standalone)
     var collectionId: String?
     var collectionTitle: String?
+    var collectionCoverImage: String?
     var episodeNumber: Int?
 
     enum DifficultyLevel: String, Codable, Hashable {
@@ -128,12 +153,20 @@ struct ComicCollection: Identifiable, Hashable {
     let title: String
     let comics: [Comic]
 
+    /// The comic that provides the collection cover (prefers collection cover, falls back to first comic)
+    private var coverComic: Comic? {
+        comics.first(where: { $0.collectionCoverImage != nil }) ?? comics.first
+    }
+
     var coverImage: String {
-        comics.first?.coverImage ?? ""
+        if let colCover = coverComic?.collectionCoverImage {
+            return colCover
+        }
+        return coverComic?.coverImage ?? ""
     }
 
     var coverComicId: String {
-        comics.first?.id ?? ""
+        coverComic?.id ?? ""
     }
 
     var episodeCount: Int {

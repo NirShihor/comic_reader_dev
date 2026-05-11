@@ -230,6 +230,7 @@ struct ComicJSON: Codable {
     // Collection fields (optional)
     let collectionId: String?
     let collectionTitle: String?
+    let collectionCoverImage: String?
     let episodeNumber: Int?
 
     func toComic(basePath: URL) -> Comic {
@@ -244,6 +245,7 @@ struct ComicJSON: Codable {
             reviewWords: reviewWords?.map { $0.toReviewWord() },
             collectionId: collectionId,
             collectionTitle: collectionTitle,
+            collectionCoverImage: collectionCoverImage,
             episodeNumber: episodeNumber
         )
     }
@@ -287,12 +289,57 @@ struct ReviewWordEntry: Codable {
     }
 }
 
+struct HotspotSlideJSON: Codable {
+    let id: String
+    let imageUrl: String?
+    let text: String
+    let translation: String
+    let audioUrl: String?
+    let translationAudioUrl: String?
+    let words: [WordJSON]?
+
+    func toHotspotSlide() -> HotspotSlide {
+        HotspotSlide(
+            id: id,
+            imageUrl: imageUrl,
+            text: text,
+            translation: translation,
+            audioUrl: audioUrl,
+            translationAudioUrl: translationAudioUrl,
+            words: (words ?? []).map { $0.toWord() }
+        )
+    }
+}
+
+struct HotspotJSON: Codable {
+    let id: String
+    let x: Double
+    let y: Double
+    let width: Double
+    let height: Double
+    let label: String?
+    let slides: [HotspotSlideJSON]
+
+    func toHotspot() -> Hotspot {
+        Hotspot(
+            id: id,
+            x: x,
+            y: y,
+            width: width,
+            height: height,
+            label: label,
+            slides: slides.map { $0.toHotspotSlide() }
+        )
+    }
+}
+
 struct PageJSON: Codable {
     let id: String
     let pageNumber: Int
     let masterImage: String
     let noTextImage: String?
     let panels: [PanelJSON]
+    let hotspots: [HotspotJSON]?
 
     func toPage() -> Page {
         Page(
@@ -300,7 +347,8 @@ struct PageJSON: Codable {
             pageNumber: pageNumber,
             masterImage: masterImage,
             noTextImage: noTextImage,
-            panels: panels.map { $0.toPanel() }
+            panels: panels.map { $0.toPanel() },
+            hotspots: hotspots?.map { $0.toHotspot() }
         )
     }
 }
@@ -379,6 +427,7 @@ struct SentenceJSON: Codable {
     let text: String
     let translation: String?
     let audioUrl: String?
+    let translationAudioUrl: String?
     let alternativeTexts: [String]?
     let alternativeAudioUrls: [String]?
     let words: [WordJSON]
@@ -389,6 +438,7 @@ struct SentenceJSON: Codable {
             text: text,
             translation: translation,
             audioUrl: audioUrl,
+            translationAudioUrl: translationAudioUrl,
             alternativeTexts: alternativeTexts,
             alternativeAudioUrls: alternativeAudioUrls,
             words: words.map { $0.toWord() }

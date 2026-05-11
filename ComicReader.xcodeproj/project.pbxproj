@@ -11,6 +11,9 @@
 		81498B9E2F5CDBD000263740 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81498B9C2F5CDB2D00263740 /* Secrets.swift */; };
 		81498BA02F5B4A0000263740 /* SpeakingTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81498B9F2F5B4A0000263740 /* SpeakingTestView.swift */; };
 		819A36E52F9C05C1004A1687 /* ListeningTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819A36E42F9C05C1004A1687 /* ListeningTestView.swift */; };
+		819A36E92F9EA3EA004A1687 /* what_does_it_mean.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 819A36E82F9EA3EA004A1687 /* what_does_it_mean.mp3 */; };
+		819A36EA2F9EA3EA004A1687 /* not_quite_listen_again.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 819A36E72F9EA3EA004A1687 /* not_quite_listen_again.mp3 */; };
+		819A36EB2F9EA3EA004A1687 /* correct.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 819A36E62F9EA3EA004A1687 /* correct.mp3 */; };
 		A1000001222222220000001 /* ComicReaderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000001 /* ComicReaderApp.swift */; };
 		A1000001222222220000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000002 /* ContentView.swift */; };
 		A1000001222222220000003 /* Comic.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000003 /* Comic.swift */; };
@@ -37,14 +40,19 @@
 		A1000001222222220000026 /* CollectionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000026 /* CollectionDetailView.swift */; };
 		A1000001222222220000027 /* ZIPExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000027 /* ZIPExtractor.swift */; };
 		A1000001222222220000028 /* StoreCollectionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000028 /* StoreCollectionDetailView.swift */; };
+		A1000001222222220000029 /* RepeatPracticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000029 /* RepeatPracticeView.swift */; };
+		A1000001222222220000030 /* RepeatListenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000030 /* RepeatListenView.swift */; };
+		A1000001222222220000031 /* HotspotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000031 /* HotspotView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		81498B962F5B37C600263740 /* WhisperService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperService.swift; sourceTree = "<group>"; };
 		81498B9C2F5CDB2D00263740 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
-		A1000001111111110000028 /* StoreCollectionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreCollectionDetailView.swift; sourceTree = "<group>"; };
 		81498B9F2F5B4A0000263740 /* SpeakingTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakingTestView.swift; sourceTree = "<group>"; };
 		819A36E42F9C05C1004A1687 /* ListeningTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListeningTestView.swift; sourceTree = "<group>"; };
+		819A36E62F9EA3EA004A1687 /* correct.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = correct.mp3; sourceTree = "<group>"; };
+		819A36E72F9EA3EA004A1687 /* not_quite_listen_again.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = not_quite_listen_again.mp3; sourceTree = "<group>"; };
+		819A36E82F9EA3EA004A1687 /* what_does_it_mean.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = what_does_it_mean.mp3; sourceTree = "<group>"; };
 		A1000001000000000000001 /* ComicReader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ComicReader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000001111111110000001 /* ComicReaderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicReaderApp.swift; sourceTree = "<group>"; };
 		A1000001111111110000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -72,6 +80,10 @@
 		A1000001111111110000025 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
 		A1000001111111110000026 /* CollectionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionDetailView.swift; sourceTree = "<group>"; };
 		A1000001111111110000027 /* ZIPExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZIPExtractor.swift; sourceTree = "<group>"; };
+		A1000001111111110000028 /* StoreCollectionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreCollectionDetailView.swift; sourceTree = "<group>"; };
+		A1000001111111110000029 /* RepeatPracticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatPracticeView.swift; sourceTree = "<group>"; };
+		A1000001111111110000030 /* RepeatListenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatListenView.swift; sourceTree = "<group>"; };
+		A1000001111111110000031 /* HotspotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotspotView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +125,9 @@
 				A1000001111111110000022 /* BundledComics */,
 				A1000001111111110000016 /* Assets.xcassets */,
 				A1000001111111110000017 /* Info.plist */,
+				819A36E62F9EA3EA004A1687 /* correct.mp3 */,
+				819A36E72F9EA3EA004A1687 /* not_quite_listen_again.mp3 */,
+				819A36E82F9EA3EA004A1687 /* what_does_it_mean.mp3 */,
 			);
 			path = ComicReader;
 			sourceTree = "<group>";
@@ -150,6 +165,9 @@
 				81498B9F2F5B4A0000263740 /* SpeakingTestView.swift */,
 				A1000001111111110000026 /* CollectionDetailView.swift */,
 				A1000001111111110000028 /* StoreCollectionDetailView.swift */,
+				A1000001111111110000029 /* RepeatPracticeView.swift */,
+				A1000001111111110000030 /* RepeatListenView.swift */,
+				A1000001111111110000031 /* HotspotView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -230,6 +248,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				819A36E92F9EA3EA004A1687 /* what_does_it_mean.mp3 in Resources */,
+				819A36EA2F9EA3EA004A1687 /* not_quite_listen_again.mp3 in Resources */,
+				819A36EB2F9EA3EA004A1687 /* correct.mp3 in Resources */,
 				A1000001222222220000022 /* BundledComics in Resources */,
 				A1000001222222220000016 /* Assets.xcassets in Resources */,
 			);
@@ -270,6 +291,9 @@
 				A1000001222222220000026 /* CollectionDetailView.swift in Sources */,
 				A1000001222222220000027 /* ZIPExtractor.swift in Sources */,
 				A1000001222222220000028 /* StoreCollectionDetailView.swift in Sources */,
+				A1000001222222220000029 /* RepeatPracticeView.swift in Sources */,
+				A1000001222222220000030 /* RepeatListenView.swift in Sources */,
+				A1000001222222220000031 /* HotspotView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -401,7 +425,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = Cl;
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -434,7 +458,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = Cl;
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

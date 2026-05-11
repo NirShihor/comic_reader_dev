@@ -4,6 +4,7 @@ struct PanelView: View {
     let comic: Comic
     let page: Page
     let panel: Panel
+    let hotspots: [Hotspot]
     @Binding var navigateToPage: Int?
     var dismissToHome: (() -> Void)?
 
@@ -23,14 +24,15 @@ struct PanelView: View {
     @State private var showingError = false
     @State private var errorMessage = ""
     @State private var showEndOfEpisode = false
+    @State private var selectedHotspot: Hotspot?
 
-    init(comic: Comic, page: Page, panel: Panel, navigateToPage: Binding<Int?>, dismissToHome: (() -> Void)? = nil) {
+    init(comic: Comic, page: Page, panel: Panel, hotspots: [Hotspot] = [], navigateToPage: Binding<Int?>, dismissToHome: (() -> Void)? = nil) {
         self.comic = comic
         self.page = page
         self.panel = panel
+        self.hotspots = hotspots
         self._navigateToPage = navigateToPage
         self.dismissToHome = dismissToHome
-        // Store the panel ID directly - no index calculations
         _currentPanelId = State(initialValue: panel.id)
     }
 
@@ -75,6 +77,36 @@ struct PanelView: View {
     var hasPreviousPage: Bool {
         guard let pageIndex = comic.pages.firstIndex(where: { $0.id == page.id }) else { return false }
         return pageIndex > 0
+    }
+
+    /// Hotspots that overlap with the current panel, with coordinates mapped to panel-relative space (0-1)
+    var panelHotspots: [(hotspot: Hotspot, relX: Double, relY: Double, relW: Double, relH: Double)] {
+        let p = currentPanel
+        let tx = p.tapZoneX, ty = p.tapZoneY, tw = p.tapZoneWidth, th = p.tapZoneHeight
+        guard tw > 0, th > 0 else { return [] }
+
+        return hotspots.compactMap { hotspot in
+            // Check overlap between hotspot rect and panel tap zone
+            let hRight = hotspot.x + hotspot.width
+            let hBottom = hotspot.y + hotspot.height
+            let pRight = tx + tw
+            let pBottom = ty + th
+
+            let overlapX = max(hotspot.x, tx)
+            let overlapY = max(hotspot.y, ty)
+            let overlapRight = min(hRight, pRight)
+            let overlapBottom = min(hBottom, pBottom)
+
+            guard overlapRight > overlapX, overlapBottom > overlapY else { return nil }
+
+            // Map hotspot coordinates from page-space to panel-relative space (0-1)
+            let relX = (hotspot.x - tx) / tw
+            let relY = (hotspot.y - ty) / th
+            let relW = hotspot.width / tw
+            let relH = hotspot.height / th
+
+            return (hotspot: hotspot, relX: relX, relY: relY, relW: relW, relH: relH)
+        }
     }
 
     /// The sentence currently playing audio (for word highlighting)
@@ -211,6 +243,10 @@ struct PanelView: View {
         } message: {
             Text(errorMessage)
         }
+        .sheet(item: $selectedHotspot) { hotspot in
+            HotspotView(hotspot: hotspot, comicId: comic.id)
+                .environmentObject(settingsManager)
+        }
         .alert("End of Episode", isPresented: $showEndOfEpisode) {
             Button("Back to home page") {
                 dismiss()
@@ -311,6 +347,24 @@ struct PanelView: View {
                 .clipShape(panelClipShape)
                 .frame(maxWidth: .infinity, maxHeight: maxImageHeight)
                 .shadow(radius: 4)
+                .overlay {
+                    // Hotspot glowing indicators (on top, so their taps take priority)
+                    GeometryReader { geo in
+                        ForEach(panelHotspots, id: \.hotspot.id) { item in
+                            hotspotIndicator(item: item, in: geo)
+                        }
+                    }
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    let hasTextContent = currentPanel.bubbles.contains { !$0.sentences.isEmpty }
+                    if isPracticeMode && hasTextContent {
+                        withAnimation {
+                            textRevealed.toggle()
+                        }
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    }
+                }
 
             // Only show "Tap to reveal" if panel has text content (bubbles with sentences)
             let hasTextContent = currentPanel.bubbles.contains { !$0.sentences.isEmpty }
@@ -327,16 +381,39 @@ struct PanelView: View {
                 }
             }
         }
-        .onTapGesture {
-            let hasTextContent = currentPanel.bubbles.contains { !$0.sentences.isEmpty }
-            if isPracticeMode && hasTextContent {
-                withAnimation {
-                    textRevealed.toggle()
-                }
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        .id(currentPanel.id) // Force recreation when panel changes
+    }
+
+    // MARK: - Hotspot Indicator
+    @ViewBuilder
+    private func hotspotIndicator(item: (hotspot: Hotspot, relX: Double, relY: Double, relW: Double, relH: Double), in geo: GeometryProxy) -> some View {
+        let w = item.relW * geo.size.width
+        let h = item.relH * geo.size.height
+        let centerX = (item.relX + item.relW / 2) * geo.size.width
+        let centerY = (item.relY + item.relH / 2) * geo.size.height
+
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
+            let seconds = timeline.date.timeIntervalSinceReferenceDate
+            let pulse = (sin(seconds * 2.5) + 1.0) / 2.0 // 0...1 oscillation
+
+            ZStack {
+                // Pulsing border
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color.yellow, lineWidth: 1.5 + pulse * 1.5)
+                    .shadow(color: .yellow.opacity(pulse * 0.8), radius: 4 + pulse * 6)
+                    .opacity(0.3 + pulse * 0.7)
+
+                // Invisible tap target
+                Color.clear
+                    .contentShape(Rectangle())
             }
         }
-        .id(currentPanel.id) // Force recreation when panel changes
+        .frame(width: w, height: h)
+        .position(x: centerX, y: centerY)
+        .onTapGesture {
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            selectedHotspot = item.hotspot
+        }
     }
 
     // MARK: - Bubble Card (normal speech/thought/narration)
@@ -1207,6 +1284,7 @@ struct HandDrawnRectShape: Shape {
         comic: ComicData.allComics[0],
         page: ComicData.allComics[0].pages[0],
         panel: ComicData.allComics[0].pages[0].panels[0],
+        hotspots: ComicData.allComics[0].pages[0].hotspots ?? [],
         navigateToPage: .constant(nil)
     )
     .environmentObject(SettingsManager())

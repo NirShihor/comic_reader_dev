@@ -203,6 +203,7 @@ struct PageView: View {
                 comic: comic,
                 page: currentPage,
                 panel: panel,
+                hotspots: currentPage.hotspots ?? [],
                 navigateToPage: $navigateToPage,
                 dismissToHome: {
                     dismiss()
