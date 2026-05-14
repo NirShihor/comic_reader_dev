@@ -76,6 +76,7 @@ struct HotspotSlide: Identifiable, Codable, Hashable {
     let translation: String
     var audioUrl: String?
     var translationAudioUrl: String?
+    var speakingTest: Bool?
     let words: [Word]
 }
 

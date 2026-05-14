@@ -4,6 +4,8 @@ enum PracticeDestination: Hashable {
     case quiz
     case speaking
     case listening
+    case repeatPractice
+    case repeatListen
 }
 
 struct ComicDetailView: View {
@@ -74,6 +76,19 @@ struct ComicDetailView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 HStack(spacing: 16) {
                     Menu {
+                        Section("Sentence Practice") {
+                            Button {
+                                practiceDestination = .repeatPractice
+                            } label: {
+                                Label("Repeat Practice", systemImage: "mouth.fill")
+                            }
+                            Button {
+                                practiceDestination = .repeatListen
+                            } label: {
+                                Label("Repeat Listen", systemImage: "headphones")
+                            }
+                        }
+
                         Section("Practice Key Words") {
                             Button {
                                 practiceDestination = .quiz
@@ -150,6 +165,10 @@ struct ComicDetailView: View {
                 SpeakingTestView(comic: comic)
             case .listening:
                 ListeningTestView(comic: comic)
+            case .repeatPractice:
+                RepeatPracticeView(comic: comic)
+            case .repeatListen:
+                RepeatListenView(comic: comic)
             }
         }
         .navigationDestination(item: $selectedPage) { page in

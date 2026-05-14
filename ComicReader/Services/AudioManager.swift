@@ -3,7 +3,7 @@ import AVFoundation
 import UIKit
 
 @MainActor
-class AudioManager: ObservableObject {
+class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     static let shared = AudioManager()
 
     @Published var isPlaying = false
@@ -13,6 +13,9 @@ class AudioManager: ObservableObject {
     @Published var playbackRate: Float = 1.0
     @Published var isSentencePlayback = false  // True when playing full sentence (enables word highlighting)
 
+    /// Direct callback for playback completion — fires even in background (unlike SwiftUI .onChange)
+    var onPlaybackFinished: (() -> Void)?
+
     private var player: AVAudioPlayer?
     private var timer: Timer?
 
@@ -20,8 +23,20 @@ class AudioManager: ObservableObject {
     private var audioEngine: AVAudioEngine?
     private var playerNode: AVAudioPlayerNode?
 
-    init() {
+    override init() {
+        super.init()
         setupAudioSession()
+    }
+
+    // AVAudioPlayerDelegate — fires even in background
+    nonisolated func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        Task { @MainActor in
+            self.isPlaying = false
+            self.isSentencePlayback = false
+            self.currentTime = 0
+            self.stopTimer()
+            self.onPlaybackFinished?()
+        }
     }
 
     private func setupAudioSession() {
@@ -87,6 +102,7 @@ class AudioManager: ObservableObject {
         do {
             isLoading = true
             player = try AVAudioPlayer(contentsOf: url)
+            player?.delegate = self
             player?.enableRate = true
             player?.rate = playbackRate
             player?.volume = min(volume, 1.0)

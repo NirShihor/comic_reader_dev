@@ -256,7 +256,7 @@ class WhisperService: ObservableObject {
                 usedSpokenIndices.insert(idx)
             } else {
                 let isProperNoun = properNounIndices.contains(wordIdx)
-                // Fuzzy match: lenient for names (up to 50%), strict for regular words (1 edit only)
+                // Fuzzy match: lenient for names, moderate for regular words
                 for (idx, spokenWord) in spokenWords.enumerated() where !usedSpokenIndices.contains(idx) {
                     let distance = levenshteinDistance(expectedWord, spokenWord)
                     let maxLen = max(expectedWord.count, spokenWord.count)
@@ -264,10 +264,12 @@ class WhisperService: ObservableObject {
                     if isProperNoun {
                         // Names: allow up to 50% difference (handles "Zik"/"Zeke", "Mía"/"Mia")
                         matches = maxLen > 0 && Double(distance) / Double(maxLen) <= 0.5
+                    } else if maxLen <= 3 {
+                        // Short words (1-3 chars): allow 1 edit of any kind
+                        matches = distance <= 1
                     } else {
-                        // Regular words: only allow 1 insertion/deletion (different lengths),
-                        // not substitutions — Spanish endings matter (problema/problemo, esta/esto)
-                        matches = distance == 1 && expectedWord.count != spokenWord.count
+                        // Regular words: allow 1 edit of any kind, or 2 edits for longer words (6+)
+                        matches = distance <= 1 || (maxLen >= 6 && distance <= 2)
                     }
                     if matches {
                         matchedCount += 1
@@ -280,13 +282,14 @@ class WhisperService: ObservableObject {
 
         let score = Double(matchedCount) / Double(expectedWords.count)
 
-        // Word count must match exactly
-        if spokenWords.count != expectedWords.count {
+        // Allow small word count differences (Whisper may add/drop small words)
+        let wordCountDiff = abs(spokenWords.count - expectedWords.count)
+        if wordCountDiff > 2 {
             return (false, score * 0.5)
         }
 
-        // Require all words to match
-        return (score >= 1.0, score)
+        // Pass if 80%+ of expected words matched
+        return (score >= 0.8, score)
     }
 
     /// Levenshtein edit distance between two strings
