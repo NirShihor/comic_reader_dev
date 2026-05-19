@@ -32,6 +32,7 @@ struct Bubble: Identifiable, Codable, Hashable {
     let type: BubbleType
     var isSoundEffect: Bool?
     var imageUrl: String?
+    var fontSize: Double?
     let positionX: Double  // percentage 0-1
     let positionY: Double
     let width: Double
@@ -88,6 +89,7 @@ struct Hotspot: Identifiable, Codable, Hashable {
     let width: Double
     let height: Double
     var label: String?
+    var borderColor: String?
     let slides: [HotspotSlide]
 }
 

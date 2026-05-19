@@ -392,6 +392,8 @@ struct PanelView: View {
         let centerX = (item.relX + item.relW / 2) * geo.size.width
         let centerY = (item.relY + item.relH / 2) * geo.size.height
 
+        let frameColor = Color.fromHex(item.hotspot.borderColor)
+
         TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
             let seconds = timeline.date.timeIntervalSinceReferenceDate
             let pulse = (sin(seconds * 2.5) + 1.0) / 2.0 // 0...1 oscillation
@@ -399,8 +401,8 @@ struct PanelView: View {
             ZStack {
                 // Pulsing border
                 RoundedRectangle(cornerRadius: 6)
-                    .stroke(Color.yellow, lineWidth: 1.5 + pulse * 1.5)
-                    .shadow(color: .yellow.opacity(pulse * 0.8), radius: 4 + pulse * 6)
+                    .stroke(frameColor, lineWidth: 1.5 + pulse * 1.5)
+                    .shadow(color: frameColor.opacity(pulse * 0.8), radius: 4 + pulse * 6)
                     .opacity(0.3 + pulse * 0.7)
 
                 // Invisible tap target
@@ -439,9 +441,10 @@ struct PanelView: View {
                             if word.startTimeMs == nil && word.text.contains(" ") { return false }
                             return true
                         }
+                        let textFont: Font = bubble.fontSize.map { .system(size: CGFloat($0)) } ?? .title3
                         if displayWords.isEmpty {
                             Text(sentence.text)
-                                .font(.title3)
+                                .font(textFont)
                                 .fontWeight(.medium)
                         } else {
                             FlowLayout(spacing: 2) {
@@ -449,7 +452,8 @@ struct PanelView: View {
                                     let originalIndex = sentence.words.firstIndex(where: { $0.id == word.id })
                                     WordButton(
                                         word: word,
-                                        isHighlighted: playingSentenceId == sentence.id && highlightedWordIndex == originalIndex
+                                        isHighlighted: playingSentenceId == sentence.id && highlightedWordIndex == originalIndex,
+                                        fontSize: bubble.fontSize.map { CGFloat($0) }
                                     )
                                 }
                             }
@@ -523,7 +527,7 @@ struct PanelView: View {
                         } else {
                             FlowLayout(spacing: 2) {
                                 ForEach(revealedWords) { word in
-                                    WordButton(word: word, isHighlighted: false)
+                                    WordButton(word: word, isHighlighted: false, fontSize: bubble.fontSize.map { CGFloat($0) })
                                 }
                             }
                         }
@@ -1021,6 +1025,7 @@ struct PanelView: View {
 struct WordButton: View {
     let word: Word
     let isHighlighted: Bool
+    var fontSize: CGFloat? = nil
     @State private var showingDefinition = false
     @State private var isSaved = false
     @StateObject private var vocabularyManager = VocabularyManager()
@@ -1033,7 +1038,7 @@ struct WordButton: View {
             isSaved = vocabularyManager.savedWords.contains { $0.word.id == word.id }
         } label: {
             Text(word.text)
-                .font(.body)
+                .font(fontSize.map { .system(size: $0) } ?? .body)
                 .padding(.horizontal, 4)
                 .padding(.vertical, 4)
                 .background(isHighlighted ? Color.yellow.opacity(0.3) : Color(.systemGray6))
@@ -1288,4 +1293,18 @@ struct HandDrawnRectShape: Shape {
         navigateToPage: .constant(nil)
     )
     .environmentObject(SettingsManager())
+}
+
+// MARK: - Color Hex Extension
+extension Color {
+    static func fromHex(_ hex: String?, fallback: Color = .yellow) -> Color {
+        guard let hex = hex, hex.hasPrefix("#"), hex.count == 7 else { return fallback }
+        let start = hex.index(hex.startIndex, offsetBy: 1)
+        let hexColor = String(hex[start...])
+        guard let num = UInt64(hexColor, radix: 16) else { return fallback }
+        let r = Double((num >> 16) & 0xFF) / 255.0
+        let g = Double((num >> 8) & 0xFF) / 255.0
+        let b = Double(num & 0xFF) / 255.0
+        return Color(red: r, green: g, blue: b)
+    }
 }

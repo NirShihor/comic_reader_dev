@@ -318,6 +318,7 @@ struct HotspotJSON: Codable {
     let width: Double
     let height: Double
     let label: String?
+    let borderColor: String?
     let slides: [HotspotSlideJSON]
 
     func toHotspot() -> Hotspot {
@@ -328,6 +329,7 @@ struct HotspotJSON: Codable {
             width: width,
             height: height,
             label: label,
+            borderColor: borderColor,
             slides: slides.map { $0.toHotspotSlide() }
         )
     }

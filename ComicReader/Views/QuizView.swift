@@ -131,16 +131,30 @@ struct QuizView: View {
 
             // Action button
             if showResult {
-                Button {
-                    nextWord()
-                } label: {
-                    Text(currentIndex < reviewWords.count - 1 ? "Next Word" : "See Results")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                HStack(spacing: 12) {
+                    if currentIndex > 0 {
+                        Button {
+                            previousWord()
+                        } label: {
+                            Image(systemName: "chevron.left")
+                                .font(.headline)
+                                .padding()
+                                .background(Color(.systemGray5))
+                                .foregroundStyle(.primary)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                    }
+                    Button {
+                        nextWord()
+                    } label: {
+                        Text(currentIndex < reviewWords.count - 1 ? "Next Word" : "See Results")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundStyle(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
                 }
                 .padding(.horizontal)
             }
@@ -178,6 +192,16 @@ struct QuizView: View {
             // Listen, Hint, and Skip buttons
             HStack(spacing: 16) {
                 Button {
+                    previousWord()
+                } label: {
+                    Image(systemName: "backward.fill")
+                        .font(.subheadline)
+                }
+                .foregroundStyle(.secondary)
+                .disabled(currentIndex == 0)
+                .opacity(currentIndex == 0 ? 0.3 : 1)
+
+                Button {
                     playWordAudio()
                 } label: {
                     Label("Listen", systemImage: "speaker.wave.2")
@@ -197,7 +221,7 @@ struct QuizView: View {
                 Button {
                     skipWord()
                 } label: {
-                    Label("Skip", systemImage: "forward.fill")
+                    Image(systemName: "forward.fill")
                         .font(.subheadline)
                 }
                 .foregroundStyle(.secondary)
@@ -375,6 +399,16 @@ struct QuizView: View {
     }
 
     private func tryAgain() {
+        userAnswer = ""
+        showResult = false
+        isCorrect = false
+        isGenderVariant = false
+        isAnswerFocused = true
+    }
+
+    private func previousWord() {
+        guard currentIndex > 0 else { return }
+        currentIndex -= 1
         userAnswer = ""
         showResult = false
         isCorrect = false

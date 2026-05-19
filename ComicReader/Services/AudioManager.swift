@@ -26,6 +26,7 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     override init() {
         super.init()
         setupAudioSession()
+        setupInterruptionObserver()
     }
 
     // AVAudioPlayerDelegate — fires even in background
@@ -35,7 +36,12 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
             self.isSentencePlayback = false
             self.currentTime = 0
             self.stopTimer()
-            self.onPlaybackFinished?()
+            // Only advance the state machine if playback completed successfully.
+            // Interrupted playback (flag=false) from audio session interruptions,
+            // notifications, or Siri should not advance to the next step.
+            if flag {
+                self.onPlaybackFinished?()
+            }
         }
     }
 
@@ -45,6 +51,57 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             print("Failed to setup audio session: \(error)")
+        }
+    }
+
+    /// Observes audio session interruptions (phone calls, Siri, notifications with audio).
+    /// When an interruption ends, resumes playback so background listen/practice modes continue.
+    private func setupInterruptionObserver() {
+        NotificationCenter.default.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance(),
+            queue: .main
+        ) { [weak self] notification in
+            Task { @MainActor in
+                self?.handleInterruption(notification)
+            }
+        }
+    }
+
+    private func handleInterruption(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+            return
+        }
+
+        switch type {
+        case .began:
+            print("🔇 Audio interruption began")
+            // iOS automatically pauses our player; we just note it
+
+        case .ended:
+            print("🔊 Audio interruption ended")
+            // Re-activate the audio session
+            setupAudioSession()
+
+            // Check if we should resume
+            let shouldResume: Bool
+            if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
+                shouldResume = AVAudioSession.InterruptionOptions(rawValue: optionsValue).contains(.shouldResume)
+            } else {
+                shouldResume = true
+            }
+
+            if shouldResume, let player = self.player, !player.isPlaying {
+                print("🔊 Resuming playback after interruption")
+                player.play()
+                isPlaying = true
+                startTimer()
+            }
+
+        @unknown default:
+            break
         }
     }
 
@@ -239,13 +296,10 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
             Task { @MainActor in
                 guard let self = self, let player = self.player else { return }
                 self.currentTime = player.currentTime
-
-                // Check if playback finished
-                if !player.isPlaying && self.isPlaying {
-                    self.isPlaying = false
-                    self.currentTime = 0
-                    self.stopTimer()
-                }
+                // Note: we no longer detect playback stop via timer polling.
+                // The AVAudioPlayerDelegate handles completion, and the interruption
+                // observer handles pause/resume. Polling caused false stops during
+                // audio session interruptions.
             }
         }
     }
