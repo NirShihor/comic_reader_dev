@@ -559,17 +559,15 @@ struct RepeatPracticeView: View {
         state = .recordingRepeat
 
         Task {
-            do {
-                let audioSession = AVAudioSession.sharedInstance()
-                try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
-                try audioSession.setActive(true)
-            } catch {
-                print("Failed to setup recording session: \(error)")
+            // Auto-stop on silence after speech
+            whisperService.onSilenceDetected = {
+                guard self.state == .recordingRepeat else { return }
+                self.stopRecordingRepeat()
             }
 
             await whisperService.startRecording()
 
-            // Scale timer based on sentence length: 1s per word + 2s buffer, minimum 4s
+            // Fallback max timer (in case silence detection doesn't trigger)
             let sentence = sentences[currentIndex]
             let wordCount = sentence.text.split(separator: " ").count
             let timeout = max(4.0, Double(wordCount) * 1.0 + 2.0)
@@ -641,17 +639,15 @@ struct RepeatPracticeView: View {
         state = .recordingMeaning
 
         Task {
-            do {
-                let audioSession = AVAudioSession.sharedInstance()
-                try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
-                try audioSession.setActive(true)
-            } catch {
-                print("Failed to setup recording session: \(error)")
+            // Auto-stop on silence after speech
+            whisperService.onSilenceDetected = {
+                guard self.state == .recordingMeaning else { return }
+                self.stopRecordingMeaning()
             }
 
             await whisperService.startRecording()
 
-            // Scale timer based on translation length: 1s per word + 3s buffer, minimum 5s
+            // Fallback max timer (in case silence detection doesn't trigger)
             let sentence = sentences[currentIndex]
             let wordCount = sentence.translation.split(separator: " ").count
             let timeout = max(5.0, Double(wordCount) * 1.0 + 3.0)
@@ -898,7 +894,8 @@ struct RepeatPracticeView: View {
     private func resetAudioSessionForPlayback() {
         do {
             let audioSession = AVAudioSession.sharedInstance()
-            try audioSession.setCategory(.playback, mode: .default)
+            // Use .playAndRecord throughout practice so mic stays available in background
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
             try audioSession.setActive(true)
         } catch {
             print("Failed to reset audio session: \(error)")
@@ -1080,7 +1077,7 @@ struct RepeatPracticeView: View {
         let commandCenter = MPRemoteCommandCenter.shared()
 
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             print("Failed to activate audio session for remote commands: \(error)")

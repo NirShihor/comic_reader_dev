@@ -6,6 +6,7 @@ enum PracticeDestination: Hashable {
     case listening
     case repeatPractice
     case repeatListen
+    case originListen
 }
 
 struct ComicDetailView: View {
@@ -86,6 +87,11 @@ struct ComicDetailView: View {
                                 practiceDestination = .repeatListen
                             } label: {
                                 Label("Repeat Listen", systemImage: "headphones")
+                            }
+                            Button {
+                                practiceDestination = .originListen
+                            } label: {
+                                Label("Origin Listen", systemImage: "play.circle")
                             }
                         }
 
@@ -169,6 +175,8 @@ struct ComicDetailView: View {
                 RepeatPracticeView(comic: comic)
             case .repeatListen:
                 RepeatListenView(comic: comic)
+            case .originListen:
+                OriginListenView(comic: comic)
             }
         }
         .navigationDestination(item: $selectedPage) { page in

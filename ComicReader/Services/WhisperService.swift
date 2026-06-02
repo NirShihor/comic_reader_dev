@@ -14,6 +14,11 @@ class WhisperService: ObservableObject {
     private var recordingURL: URL?
     private var meteringTimer: Timer?
     private var peakPower: Float = -160
+    private var speechDetected = false
+    private var silenceStart: Date?
+    var onSilenceDetected: (() -> Void)?
+    private let silenceThreshold: Float = -35  // dB: below this is "silence"
+    private let silenceDuration: TimeInterval = 1.5  // seconds of silence after speech to auto-stop
 
     private let apiURL = URL(string: "https://api.openai.com/v1/audio/transcriptions")!
 
@@ -33,7 +38,7 @@ class WhisperService: ObservableObject {
         // Setup audio session for recording
         do {
             let audioSession = AVAudioSession.sharedInstance()
-            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP])
             try audioSession.setActive(true)
         } catch {
             self.error = "Failed to setup audio session: \(error.localizedDescription)"
@@ -63,15 +68,32 @@ class WhisperService: ObservableObject {
             audioRecorder?.record()
             isRecording = true
             peakPower = -160
+            speechDetected = false
+            silenceStart = nil
 
-            // Poll audio levels to detect speech
+            // Poll audio levels to detect speech and silence-after-speech
             meteringTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
                 Task { @MainActor in
-                    guard let self = self, let recorder = self.audioRecorder else { return }
+                    guard let self = self, let recorder = self.audioRecorder, self.isRecording else { return }
                     recorder.updateMeters()
                     let power = recorder.averagePower(forChannel: 0)
                     if power > self.peakPower {
                         self.peakPower = power
+                    }
+
+                    // Detect speech onset (above silence threshold)
+                    if power > self.silenceThreshold {
+                        self.speechDetected = true
+                        self.silenceStart = nil
+                    } else if self.speechDetected {
+                        // Speech was detected previously, now it's silent
+                        if self.silenceStart == nil {
+                            self.silenceStart = Date()
+                        } else if Date().timeIntervalSince(self.silenceStart!) >= self.silenceDuration {
+                            // Silence persisted long enough — notify caller
+                            self.onSilenceDetected?()
+                            self.onSilenceDetected = nil  // fire only once
+                        }
                     }
                 }
             }
@@ -90,6 +112,7 @@ class WhisperService: ObservableObject {
         isRecording = false
         meteringTimer?.invalidate()
         meteringTimer = nil
+        onSilenceDetected = nil
         isProcessing = true
 
         // Skip transcription if no speech detected (peak power below threshold)
@@ -108,16 +131,11 @@ class WhisperService: ObservableObject {
             }
             recordingURL = nil
 
-            // Reset audio session for playback
-            Task {
-                do {
-                    let audioSession = AVAudioSession.sharedInstance()
-                    try audioSession.setCategory(.playback, mode: .default)
-                    try audioSession.setActive(true)
-                } catch {
-                    print("Failed to reset audio session: \(error)")
-                }
-            }
+            // Don't reset audio session category here — the calling view
+            // (RepeatPracticeView, SpeakingTestView) manages the session for
+            // the entire practice flow. Flipping to .playback after each
+            // recording causes Bluetooth HFP/A2DP profile switches that
+            // create pauses and audio drops on car hands-free systems.
         }
 
         // Transcribe with Whisper
@@ -145,6 +163,7 @@ class WhisperService: ObservableObject {
         isRecording = false
         meteringTimer?.invalidate()
         meteringTimer = nil
+        onSilenceDetected = nil
 
         if let url = recordingURL {
             try? FileManager.default.removeItem(at: url)
@@ -268,8 +287,8 @@ class WhisperService: ObservableObject {
                         // Short words (1-3 chars): allow 1 edit of any kind
                         matches = distance <= 1
                     } else {
-                        // Regular words: allow 1 edit of any kind, or 2 edits for longer words (6+)
-                        matches = distance <= 1 || (maxLen >= 6 && distance <= 2)
+                        // Regular words: allow 1 edit of any kind, or 2 edits for longer words (8+)
+                        matches = distance <= 1 || (maxLen >= 8 && distance <= 2)
                     }
                     if matches {
                         matchedCount += 1
@@ -288,8 +307,8 @@ class WhisperService: ObservableObject {
             return (false, score * 0.5)
         }
 
-        // Pass if 80%+ of expected words matched
-        return (score >= 0.8, score)
+        // Pass if 85%+ of expected words matched
+        return (score >= 0.85, score)
     }
 
     /// Levenshtein edit distance between two strings

@@ -18,6 +18,7 @@ struct SpeakingTestView: View {
     @State private var dummyNavigateToPage: Int? = nil
     @State private var showingError = false
     @State private var errorMessage = ""
+    @State private var isGenderVariant = false
 
     var reviewWords: [ReviewWord] {
         comic.reviewWords ?? []
@@ -242,7 +243,10 @@ struct SpeakingTestView: View {
 
     // MARK: - Result View
     private func resultView(for reviewWord: ReviewWord) -> some View {
-        VStack(spacing: 16) {
+        let expectedWord = stripPunctuation(reviewWord.word.text)
+        let contextSentence = findContextSentence(for: reviewWord)
+
+        return VStack(spacing: 16) {
             Image(systemName: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .font(.system(size: 50))
                 .foregroundStyle(isCorrect ? .green : .red)
@@ -257,11 +261,39 @@ struct SpeakingTestView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                HStack {
-                    Text("Correct pronunciation:")
-                        .foregroundStyle(.secondary)
-                    Text(stripPunctuation(reviewWord.word.text).capitalized)
-                        .fontWeight(.semibold)
+                if isGenderVariant {
+                    // Gender variant — correct but explain the difference
+                    VStack(spacing: 4) {
+                        Text("\"\(spokenText.capitalized)\" is correct, but in this phrase the \(genderLabel(for: expectedWord)) form is used:")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                        Text(expectedWord.capitalized)
+                            .fontWeight(.semibold)
+                        if let sentence = contextSentence {
+                            Text("\"" + sentence + "\"")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .italic()
+                                .multilineTextAlignment(.center)
+                                .padding(.top, 2)
+                        }
+                    }
+                } else {
+                    HStack {
+                        Text("Correct pronunciation:")
+                            .foregroundStyle(.secondary)
+                        Text(expectedWord.capitalized)
+                            .fontWeight(.semibold)
+                    }
+                    if !isCorrect, let sentence = contextSentence {
+                        Text("Used in: \"" + sentence + "\"")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .italic()
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 2)
+                    }
                 }
 
                 HStack(spacing: 12) {
@@ -355,6 +387,60 @@ struct SpeakingTestView: View {
         }
     }
 
+    private func genderLabel(for word: String) -> String {
+        let w = word.folding(options: .diacriticInsensitive, locale: .current).lowercased()
+        let feminineWords: Set<String> = ["la", "las", "una", "unas", "esta", "estas", "esa", "esas", "aquella", "aquellas", "nuestra", "nuestras", "vuestra", "vuestras", "suya", "suyas", "mia", "mias", "tuya", "tuyas"]
+        if feminineWords.contains(w) || w.hasSuffix("a") || w.hasSuffix("as") {
+            return "feminine"
+        }
+        return "masculine"
+    }
+
+    // Spanish gender/number variant pairs — spoken word maps to its counterpart(s)
+    private static let genderVariants: [String: Set<String>] = {
+        let pairs: [(String, String)] = [
+            ("el", "la"), ("los", "las"),
+            ("un", "una"), ("unos", "unas"),
+            ("del", "de la"), ("al", "a la"),
+            ("este", "esta"), ("estos", "estas"),
+            ("ese", "esa"), ("esos", "esas"),
+            ("aquel", "aquella"), ("aquellos", "aquellas"),
+            ("nuestro", "nuestra"), ("nuestros", "nuestras"),
+            ("vuestro", "vuestra"), ("vuestros", "vuestras"),
+            ("suyo", "suya"), ("suyos", "suyas"),
+            ("mío", "mía"), ("míos", "mías"),
+            ("tuyo", "tuya"), ("tuyos", "tuyas"),
+        ]
+        var dict: [String: Set<String>] = [:]
+        for (a, b) in pairs {
+            let aLow = a.folding(options: .diacriticInsensitive, locale: .current).lowercased()
+            let bLow = b.folding(options: .diacriticInsensitive, locale: .current).lowercased()
+            dict[aLow, default: []].insert(bLow)
+            dict[bLow, default: []].insert(aLow)
+        }
+        return dict
+    }()
+
+    private func isGenderVariantMatch(spoken: String, expected: String) -> Bool {
+        let spokenNorm = spoken.folding(options: .diacriticInsensitive, locale: .current).lowercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let expectedNorm = expected.folding(options: .diacriticInsensitive, locale: .current).lowercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        if let variants = Self.genderVariants[expectedNorm], variants.contains(spokenNorm) {
+            return true
+        }
+        // Also check adjective-style -o/-a endings (e.g., bueno/buena, pequeño/pequeña)
+        if expectedNorm.count >= 4 {
+            if (expectedNorm.hasSuffix("o") && spokenNorm == String(expectedNorm.dropLast()) + "a") ||
+               (expectedNorm.hasSuffix("a") && spokenNorm == String(expectedNorm.dropLast()) + "o") ||
+               (expectedNorm.hasSuffix("os") && spokenNorm == String(expectedNorm.dropLast(2)) + "as") ||
+               (expectedNorm.hasSuffix("as") && spokenNorm == String(expectedNorm.dropLast(2)) + "os") {
+                return true
+            }
+        }
+        return false
+    }
+
     private func stopRecording() {
         print("[SpeakingTest] stopRecording tapped")
         Task {
@@ -363,8 +449,30 @@ struct SpeakingTestView: View {
             isRecording = false
             spokenText = transcription
             print("[SpeakingTest] transcription: '\(transcription)', error: \(whisperService.error ?? "none")")
-            let (correct, _) = whisperService.compareText(spoken: transcription, expected: expectedWord)
-            isCorrect = correct
+
+            let spokenNorm = transcription.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            let expectedNorm = expectedWord.lowercased()
+            let isExact = spokenNorm == expectedNorm
+
+            if isExact {
+                // Exact match
+                isCorrect = true
+                isGenderVariant = false
+            } else if isGenderVariantMatch(spoken: transcription, expected: expectedWord) {
+                // Said the opposite gender form — accept but explain
+                isCorrect = true
+                isGenderVariant = true
+            } else {
+                // For short single words (≤3 chars), require exact match —
+                // fuzzy matching is too lenient (e.g. "le" would match "la")
+                if expectedNorm.count <= 3 && !spokenNorm.contains(" ") {
+                    isCorrect = false
+                } else {
+                    let (correct, _) = whisperService.compareText(spoken: transcription, expected: expectedWord)
+                    isCorrect = correct
+                }
+                isGenderVariant = false
+            }
 
             if isCorrect {
                 score += 1
@@ -386,6 +494,7 @@ struct SpeakingTestView: View {
             spokenText = ""
             showResult = false
             isCorrect = false
+            isGenderVariant = false
         } else {
             testComplete = true
         }
@@ -395,6 +504,7 @@ struct SpeakingTestView: View {
         spokenText = ""
         showResult = false
         isCorrect = false
+        isGenderVariant = false
     }
 
     private func previousWord() {
@@ -403,6 +513,7 @@ struct SpeakingTestView: View {
         spokenText = ""
         showResult = false
         isCorrect = false
+        isGenderVariant = false
     }
 
     private func skipWord() {
@@ -411,6 +522,7 @@ struct SpeakingTestView: View {
             spokenText = ""
             showResult = false
             isCorrect = false
+            isGenderVariant = false
         } else {
             testComplete = true
         }
@@ -449,6 +561,22 @@ struct SpeakingTestView: View {
                 if sentence.words.contains(where: { $0.id == reviewWord.word.id }),
                    let audioUrl = sentence.audioUrl, !audioUrl.isEmpty {
                     return audioUrl
+                }
+            }
+        }
+        return nil
+    }
+
+    private func findContextSentence(for reviewWord: ReviewWord) -> String? {
+        guard let page = comic.pages.first(where: { $0.id == reviewWord.pageId }),
+              let panel = page.panels.first(where: { $0.id == reviewWord.panelId }) else {
+            return nil
+        }
+        for bubble in panel.bubbles {
+            for sentence in bubble.sentences {
+                if sentence.words.contains(where: { $0.id == reviewWord.word.id }),
+                   !sentence.text.isEmpty {
+                    return sentence.text
                 }
             }
         }
