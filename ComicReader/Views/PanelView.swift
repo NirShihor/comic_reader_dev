@@ -6,8 +6,8 @@ struct PanelView: View {
     let panel: Panel
     let hotspots: [Hotspot]
     @Binding var navigateToPage: Int?
+    var dismissPanel: (() -> Void)?
     var dismissToHome: (() -> Void)?
-
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var audioManager = AudioManager.shared
@@ -26,12 +26,13 @@ struct PanelView: View {
     @State private var showEndOfEpisode = false
     @State private var selectedHotspot: Hotspot?
 
-    init(comic: Comic, page: Page, panel: Panel, hotspots: [Hotspot] = [], navigateToPage: Binding<Int?>, dismissToHome: (() -> Void)? = nil) {
+    init(comic: Comic, page: Page, panel: Panel, hotspots: [Hotspot] = [], navigateToPage: Binding<Int?>, dismissPanel: (() -> Void)? = nil, dismissToHome: (() -> Void)? = nil) {
         self.comic = comic
         self.page = page
         self.panel = panel
         self.hotspots = hotspots
         self._navigateToPage = navigateToPage
+        self.dismissPanel = dismissPanel
         self.dismissToHome = dismissToHome
         _currentPanelId = State(initialValue: panel.id)
     }
@@ -44,11 +45,25 @@ struct PanelView: View {
         let words: [Word]
     }
 
+    // Pages sorted by pageNumber for navigation
+    private var sortedPages: [Page] {
+        comic.pages.sorted { $0.pageNumber < $1.pageNumber }
+    }
+
+    private var currentPageSortedIndex: Int {
+        sortedPages.firstIndex(where: { $0.id == page.id }) ?? 0
+    }
+
     // Panels sorted by panelOrder for consistent navigation.
-    // Include all panels so users can navigate through every panel on the page.
+    // Full-page "base" panels (tap zone covering ~the whole page, used as a
+    // catch-all behind floating panels) are excluded from panel-by-panel
+    // navigation — their artwork is just the entire page and they have no
+    // reading content. Without this, swiping back from the visually-first
+    // panel lands on the base panel instead of going to the previous page.
     var sortedPanels: [Panel] {
-        page.panels
-            .sorted { $0.panelOrder < $1.panelOrder }
+        let all = page.panels.sorted { $0.panelOrder < $1.panelOrder }
+        let navigable = all.filter { !($0.tapZoneWidth >= 0.95 && $0.tapZoneHeight >= 0.95) }
+        return navigable.isEmpty ? all : navigable
     }
 
     // Find current panel by ID - always returns the correct panel
@@ -70,13 +85,11 @@ struct PanelView: View {
     }
 
     var hasNextPage: Bool {
-        guard let pageIndex = comic.pages.firstIndex(where: { $0.id == page.id }) else { return false }
-        return pageIndex < comic.pages.count - 1
+        currentPageSortedIndex < sortedPages.count - 1
     }
 
     var hasPreviousPage: Bool {
-        guard let pageIndex = comic.pages.firstIndex(where: { $0.id == page.id }) else { return false }
-        return pageIndex > 0
+        currentPageSortedIndex > 0
     }
 
     /// Hotspots that overlap with the current panel, with coordinates mapped to panel-relative space (0-1)
@@ -149,6 +162,7 @@ struct PanelView: View {
                 )
             }
             .background(Color(.systemGroupedBackground))
+            .background(DisableInteractivePopGesture())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
@@ -176,7 +190,7 @@ struct PanelView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     if dismissToHome != nil {
                         Button {
-                            dismiss()
+                            closePanel()
                             dismissToHome?()
                         } label: {
                             Image(systemName: "house.fill")
@@ -185,7 +199,7 @@ struct PanelView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
-                        dismiss()
+                        closePanel()
                     }
                 }
             }
@@ -249,7 +263,7 @@ struct PanelView: View {
         }
         .alert("End of Episode", isPresented: $showEndOfEpisode) {
             Button("Back to home page") {
-                dismiss()
+                closePanel()
                 dismissToHome?()
             }
             Button("Stay", role: .cancel) { }
@@ -259,17 +273,26 @@ struct PanelView: View {
     }
 
     // MARK: - Navigation
-    private var currentPageIndex: Int {
-        comic.pages.firstIndex(where: { $0.id == page.id }) ?? 0
+
+    // Close the panel view using whichever mechanism matches the presentation:
+    // overlay mode (PageView provides dismissPanel) vs sheet mode (environment dismiss).
+    // Calling dismiss() in overlay mode would pop PageView off the navigation stack.
+    private func closePanel() {
+        if let dismissPanel {
+            dismissPanel()
+        } else {
+            dismiss()
+        }
     }
 
     private func goToNext() {
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
         if isLastPanel {
-            // Navigate to next page then dismiss
             if hasNextPage {
-                navigateToPage = currentPageIndex + 1
-                dismiss()
+                // Close panel view and show the next page in page view
+                let targetPage = currentPageSortedIndex + 1
+                navigateToPage = targetPage
+                closePanel()
             } else {
                 showEndOfEpisode = true
             }
@@ -288,10 +311,11 @@ struct PanelView: View {
     private func goToPrevious() {
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
         if isFirstPanel {
-            // Navigate to previous page then dismiss
             if hasPreviousPage {
-                navigateToPage = currentPageIndex - 1
-                dismiss()
+                // Close panel view and show the previous page in page view
+                let targetPage = currentPageSortedIndex - 1
+                navigateToPage = targetPage
+                closePanel()
             }
         } else {
             // Move to previous panel by ID
@@ -1027,6 +1051,7 @@ struct WordButton: View {
     let isHighlighted: Bool
     var fontSize: CGFloat? = nil
     @State private var showingDefinition = false
+    @State private var showingForms = false
     @State private var isSaved = false
     @StateObject private var vocabularyManager = VocabularyManager()
     @StateObject private var audioManager = AudioManager.shared
@@ -1113,26 +1138,106 @@ struct WordButton: View {
 
                 Divider()
 
-                Button {
-                    if isSaved {
-                        vocabularyManager.removeWord(word.id)
-                        isSaved = false
-                    } else {
-                        vocabularyManager.saveWord(word)
-                        isSaved = true
+                HStack {
+                    Button {
+                        if isSaved {
+                            vocabularyManager.removeWord(word.id)
+                            isSaved = false
+                        } else {
+                            vocabularyManager.saveWord(word)
+                            isSaved = true
+                        }
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    } label: {
+                        Label(
+                            isSaved ? "Remove from Vocabulary" : "Add to Vocabulary",
+                            systemImage: isSaved ? "bookmark.slash.fill" : "bookmark.fill"
+                        )
+                        .font(.subheadline)
+                        .foregroundStyle(isSaved ? .red : .blue)
                     }
-                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                } label: {
-                    Label(
-                        isSaved ? "Remove from Vocabulary" : "Add to Vocabulary",
-                        systemImage: isSaved ? "bookmark.slash.fill" : "bookmark.fill"
-                    )
-                    .font(.subheadline)
-                    .foregroundStyle(isSaved ? .red : .blue)
+
+                    if let forms = word.forms, !forms.isEmpty {
+                        Spacer()
+
+                        Button {
+                            showingDefinition = false
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                showingForms = true
+                            }
+                        } label: {
+                            Label("More", systemImage: "text.book.closed")
+                                .font(.subheadline)
+                                .foregroundStyle(.orange)
+                        }
+                    }
                 }
+
             }
             .padding()
             .presentationCompactAdaptation(.popover)
+        }
+        .sheet(isPresented: $showingForms) {
+            WordFormsView(word: word)
+        }
+    }
+}
+
+// MARK: - Word Forms View
+struct WordFormsView: View {
+    let word: Word
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var audioManager = AudioManager.shared
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    HStack {
+                        Text(word.baseForm ?? word.text)
+                            .font(.title2)
+                            .bold()
+                        Spacer()
+                        Text(word.meaning)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .listRowBackground(Color(.systemGray6))
+                }
+
+                if let forms = word.forms, !forms.isEmpty {
+                    Section("Forms") {
+                        ForEach(Array(forms.enumerated()), id: \.offset) { _, form in
+                            HStack {
+                                Text(form.label)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 120, alignment: .leading)
+                                Text(form.text)
+                                    .font(.body)
+                                Spacer()
+                                if let audioUrl = form.audioUrl {
+                                    Button {
+                                        audioManager.play(audioUrl, volume: 1.0)
+                                    } label: {
+                                        Image(systemName: "speaker.wave.2.fill")
+                                            .font(.caption)
+                                            .foregroundStyle(.blue)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle(word.text)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
         }
     }
 }
@@ -1290,7 +1395,8 @@ struct HandDrawnRectShape: Shape {
         page: ComicData.allComics[0].pages[0],
         panel: ComicData.allComics[0].pages[0].panels[0],
         hotspots: ComicData.allComics[0].pages[0].hotspots ?? [],
-        navigateToPage: .constant(nil)
+        navigateToPage: .constant(nil),
+        dismissPanel: {}
     )
     .environmentObject(SettingsManager())
 }

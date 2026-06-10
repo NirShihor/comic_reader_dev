@@ -1,5 +1,12 @@
 import Foundation
 
+// MARK: - WordForm
+struct WordForm: Codable, Hashable {
+    let label: String     // e.g. "Present", "Preterite", "Feminine plural"
+    let text: String      // e.g. "escondo", "escondí", "altas"
+    var audioUrl: String? // e.g. "words/escondo"
+}
+
 // MARK: - Word
 struct Word: Identifiable, Codable, Hashable {
     let id: String
@@ -12,6 +19,7 @@ struct Word: Identifiable, Codable, Hashable {
     var startTimeMs: Int?
     var endTimeMs: Int?
     var manual: Bool?
+    var forms: [WordForm]?
 }
 
 // MARK: - Sentence

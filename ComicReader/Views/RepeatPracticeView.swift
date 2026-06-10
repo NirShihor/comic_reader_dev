@@ -999,8 +999,9 @@ struct RepeatPracticeView: View {
         }
 
         let score = Double(matchCount) / Double(expectedWords.count)
-        // Require 85%+ exact word match to reject — much stricter than acceptance
-        return score >= 0.85
+        // Require 80%+ exact word match for English (lower than Spanish 85% —
+        // Whisper is less accurate with English in noisy/mobile conditions)
+        return score >= 0.80
     }
 
     private func normalizeEnglish(_ text: String) -> String {

@@ -122,7 +122,9 @@ struct PageView: View {
                                                           normalizedY <= (panel.tapZoneY + panel.tapZoneHeight)
                                             if inXRange && inYRange {
                                                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                                selectedPanel = panel
+                                                withAnimation {
+                                                    selectedPanel = panel
+                                                }
                                                 break
                                             }
                                         }
@@ -145,52 +147,84 @@ struct PageView: View {
                 )
             }
 
+            // Panel view overlay — presented on top of the page instead of as a sheet
+            // to avoid iOS sheet presentation scaling the underlying page view
+            if let panel = selectedPanel {
+                PanelView(
+                    comic: comic,
+                    page: currentPage,
+                    panel: panel,
+                    hotspots: currentPage.hotspots ?? [],
+                    navigateToPage: $navigateToPage,
+                    dismissPanel: {
+                        // Remove the overlay without animation — an interrupted
+                        // removal transition can leave the page layout stuck
+                        var transaction = Transaction()
+                        transaction.disablesAnimations = true
+                        withTransaction(transaction) {
+                            selectedPanel = nil
+                        }
+                    },
+                    dismissToHome: {
+                        dismiss()
+                    }
+                )
+                .environmentObject(settingsManager)
+                .transition(.move(edge: .bottom))
+                .zIndex(1)
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "house.fill")
-                        .foregroundStyle(.white)
-                }
-            }
-            ToolbarItem(placement: .principal) {
-                HStack(spacing: 20) {
+            // Only show the page controls while the panel overlay is closed —
+            // the panel's own toolbar items (home/Done/panel nav) render into
+            // the same bar, so showing both sets duplicates the buttons
+            if selectedPanel == nil {
+                ToolbarItem(placement: .topBarLeading) {
                     Button {
-                        goToPreviousPage()
+                        dismiss()
                     } label: {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(currentPageIndex > 0 ? .white : .gray)
-                    }
-                    .disabled(currentPageIndex == 0)
-
-                    Text("\(currentPage.pageNumber) / \(sortedPages.count)")
-                        .foregroundStyle(.white)
-
-                    Button {
-                        goToNextPage()
-                    } label: {
-                        Image(systemName: "chevron.right")
-                            .foregroundStyle(currentPageIndex < sortedPages.count - 1 ? .white : .gray)
-                    }
-                    .disabled(currentPageIndex >= sortedPages.count - 1)
-                }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 12) {
-                    Button {
-                        showingVocabulary = true
-                    } label: {
-                        Image(systemName: "bookmark.fill")
+                        Image(systemName: "house.fill")
                             .foregroundStyle(.white)
                     }
-                    Button {
-                        showingSettings = true
-                    } label: {
-                        Image(systemName: "gear")
+                }
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 20) {
+                        Button {
+                            goToPreviousPage()
+                        } label: {
+                            Image(systemName: "chevron.left")
+                                .foregroundStyle(currentPageIndex > 0 ? .white : .gray)
+                        }
+                        .disabled(currentPageIndex == 0)
+
+                        Text("\(currentPage.pageNumber) / \(sortedPages.count)")
                             .foregroundStyle(.white)
+
+                        Button {
+                            goToNextPage()
+                        } label: {
+                            Image(systemName: "chevron.right")
+                                .foregroundStyle(currentPageIndex < sortedPages.count - 1 ? .white : .gray)
+                        }
+                        .disabled(currentPageIndex >= sortedPages.count - 1)
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack(spacing: 12) {
+                        Button {
+                            showingVocabulary = true
+                        } label: {
+                            Image(systemName: "bookmark.fill")
+                                .foregroundStyle(.white)
+                        }
+                        Button {
+                            showingSettings = true
+                        } label: {
+                            Image(systemName: "gear")
+                                .foregroundStyle(.white)
+                        }
                     }
                 }
             }
@@ -198,19 +232,6 @@ struct PageView: View {
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarBackground(.visible, for: .tabBar)
         .toolbarColorScheme(.light, for: .tabBar)
-        .sheet(item: $selectedPanel) { panel in
-            PanelView(
-                comic: comic,
-                page: currentPage,
-                panel: panel,
-                hotspots: currentPage.hotspots ?? [],
-                navigateToPage: $navigateToPage,
-                dismissToHome: {
-                    dismiss()
-                }
-            )
-            .environmentObject(settingsManager)
-        }
         .onAppear {
             // Save progress when view appears
             progressManager.saveProgress(
@@ -229,8 +250,15 @@ struct PageView: View {
         }
         .onChange(of: navigateToPage) { _, newPageIndex in
             guard let newPageIndex = newPageIndex else { return }
-            // Navigate to the requested page
-            withAnimation {
+            // Cross-page navigation from the panel view: close the overlay and
+            // swap the page in a single transaction with animations disabled.
+            // Running the overlay's removal transition and the page change as
+            // concurrent animations can wedge the layout mid-flight, leaving
+            // the page rendered small and unresponsive.
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                selectedPanel = nil
                 currentPageIndex = newPageIndex
                 textRevealed = false
             }
@@ -268,6 +296,48 @@ struct PageView: View {
             Button("Stay", role: .cancel) { }
         } message: {
             Text("You've reached the last page of this episode.")
+        }
+        .background(DisableInteractivePopGesture())
+    }
+}
+
+// Disables the enclosing UINavigationController's interactive pop (edge swipe-back)
+// gesture while this view is on screen, restoring it when the view goes away.
+// A rightward swipe (e.g. "previous panel/page") can otherwise be captured by the
+// swipe-back recognizer, starting an interactive pop that gets cancelled mid-flight
+// and leaves the view stuck small and unresponsive.
+struct DisableInteractivePopGesture: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> Controller { Controller() }
+    func updateUIViewController(_ uiViewController: Controller, context: Context) {}
+
+    final class Controller: UIViewController {
+        private weak var navController: UINavigationController?
+        private var previousState = true
+
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            // Walk the responder chain to find the enclosing navigation controller
+            var responder: UIResponder? = view
+            while let current = responder {
+                if let nav = current as? UINavigationController {
+                    navController = nav
+                    break
+                }
+                if let vc = current as? UIViewController, let nav = vc.navigationController {
+                    navController = nav
+                    break
+                }
+                responder = current.next
+            }
+            if let gesture = navController?.interactivePopGestureRecognizer {
+                previousState = gesture.isEnabled
+                gesture.isEnabled = false
+            }
+        }
+
+        override func viewWillDisappear(_ animated: Bool) {
+            super.viewWillDisappear(animated)
+            navController?.interactivePopGestureRecognizer?.isEnabled = previousState
         }
     }
 }

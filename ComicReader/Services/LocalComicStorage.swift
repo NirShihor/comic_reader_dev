@@ -448,6 +448,16 @@ struct SentenceJSON: Codable {
     }
 }
 
+struct WordFormJSON: Codable {
+    let label: String
+    let text: String
+    let audioUrl: String?
+
+    func toWordForm() -> WordForm {
+        WordForm(label: label, text: text, audioUrl: audioUrl)
+    }
+}
+
 struct WordJSON: Codable {
     let id: String
     let text: String
@@ -459,6 +469,7 @@ struct WordJSON: Codable {
     let startTimeMs: Int?
     let endTimeMs: Int?
     let manual: Bool?
+    let forms: [WordFormJSON]?
 
     func toWord() -> Word {
         Word(
@@ -471,7 +482,8 @@ struct WordJSON: Codable {
             baseFormAudioUrl: baseFormAudioUrl,
             startTimeMs: startTimeMs,
             endTimeMs: endTimeMs,
-            manual: manual
+            manual: manual,
+            forms: forms?.map { $0.toWordForm() }
         )
     }
 }
