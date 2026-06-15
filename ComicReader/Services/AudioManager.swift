@@ -47,8 +47,18 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
     private func setupAudioSession() {
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-            try AVAudioSession.sharedInstance().setActive(true)
+            let session = AVAudioSession.sharedInstance()
+            // During practice modes the session is .playAndRecord with a live
+            // capture engine. Forcing .playback here fails ('!pri') and
+            // destabilizes the capture engine — playback works fine under
+            // .playAndRecord, so leave the session alone in that case.
+            if session.category == .playAndRecord {
+                return
+            }
+            if session.category != .playback {
+                try session.setCategory(.playback, mode: .default)
+                try session.setActive(true)
+            }
         } catch {
             print("Failed to setup audio session: \(error)")
         }

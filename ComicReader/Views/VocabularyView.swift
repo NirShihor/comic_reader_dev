@@ -92,14 +92,14 @@ struct WordRow: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(savedWord.word.text)
+                Text(savedWord.word.displayText)
                     .font(.headline)
 
                 Text(savedWord.word.meaning)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
-                if let baseForm = savedWord.word.baseForm, baseForm != savedWord.word.text {
+                if let baseForm = savedWord.word.baseForm, baseForm != savedWord.word.displayText {
                     Text("Base: \(baseForm)")
                         .font(.caption)
                         .foregroundStyle(.tertiary)

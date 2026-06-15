@@ -104,14 +104,14 @@ struct HotspotView: View {
             }
             .popover(item: $selectedWord) { word in
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(word.text)
+                    Text(word.displayText)
                         .font(.headline)
                     if !word.meaning.isEmpty {
                         Text(word.meaning)
                             .font(.body)
                             .foregroundColor(.secondary)
                     }
-                    if let baseForm = word.baseForm, !baseForm.isEmpty, baseForm != word.text {
+                    if let baseForm = word.baseForm, !baseForm.isEmpty, baseForm != word.displayText {
                         Text("Base: \(baseForm)")
                             .font(.caption)
                             .foregroundColor(.secondary)
@@ -128,6 +128,10 @@ struct HotspotView: View {
                     isRecording = false
                     whisperService.error = nil
                 }
+            }
+            .onDisappear {
+                whisperService.cancelRecording()
+                whisperService.endCaptureSession()
             }
             .alert("Speech Recognition Error", isPresented: $showingError) {
                 Button("OK", role: .cancel) { }
@@ -236,7 +240,7 @@ struct HotspotView: View {
                                     Button {
                                         selectedWord = word
                                     } label: {
-                                        Text(word.text)
+                                        Text(word.displayText)
                                             .font(.subheadline)
                                             .padding(.horizontal, 10)
                                             .padding(.vertical, 6)

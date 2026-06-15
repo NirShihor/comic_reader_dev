@@ -9,6 +9,7 @@ struct QuizView: View {
     @State private var showResult = false
     @State private var isCorrect = false
     @State private var isGenderVariant = false
+    @State private var isFormVariant = false
     @State private var score = 0
     @State private var quizComplete = false
     @State private var showingContext = false
@@ -232,11 +233,11 @@ struct QuizView: View {
     // MARK: - Result View
     private func resultView(for reviewWord: ReviewWord) -> some View {
         VStack(spacing: 16) {
-            Image(systemName: isCorrect || isGenderVariant ? "checkmark.circle.fill" : "xmark.circle.fill")
+            Image(systemName: isCorrect || isGenderVariant || isFormVariant ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .font(.system(size: 60))
-                .foregroundStyle(isCorrect || isGenderVariant ? .green : .red)
+                .foregroundStyle(isCorrect || isGenderVariant || isFormVariant ? .green : .red)
 
-            Text(isCorrect ? "Correct!" : isGenderVariant ? "Correct!" : "Not quite")
+            Text(isCorrect || isGenderVariant || isFormVariant ? "Correct!" : "Not quite")
                 .font(.title2)
                 .fontWeight(.bold)
 
@@ -247,13 +248,19 @@ struct QuizView: View {
                         .foregroundStyle(.orange)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
+                } else if isFormVariant {
+                    Text("\"\(userAnswer)\" is another form of this word — the comic uses \"\(stripPunctuation(reviewWord.word.text))\" here")
+                        .font(.subheadline)
+                        .foregroundStyle(.orange)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
                 } else if !isCorrect {
                     Text("Your answer: \(userAnswer)")
                         .foregroundStyle(.secondary)
                 }
 
                 HStack {
-                    Text(isGenderVariant ? "In the comic:" : "Correct answer:")
+                    Text(isGenderVariant || isFormVariant ? "In the comic:" : "Correct answer:")
                         .foregroundStyle(.secondary)
                     Text(stripPunctuation(reviewWord.word.text).capitalized)
                         .fontWeight(.semibold)
@@ -347,23 +354,39 @@ struct QuizView: View {
 
         isCorrect = normalizedAnswer == normalizedCorrect
         isGenderVariant = false
+        isFormVariant = false
 
         if !isCorrect {
             // Check for gendered variant (o↔a, os↔as endings)
             isGenderVariant = isGenderedVariant(normalizedAnswer, normalizedCorrect)
         }
 
-        if isCorrect || isGenderVariant {
+        if !isCorrect && !isGenderVariant {
+            // Check against the word's other known forms (base form, conjugations, plurals)
+            isFormVariant = matchesKnownForm(normalizedAnswer)
+        }
+
+        if isCorrect || isGenderVariant || isFormVariant {
             score += 1
         }
 
-        UIImpactFeedbackGenerator(style: isCorrect || isGenderVariant ? .light : .medium).impactOccurred()
+        UIImpactFeedbackGenerator(style: isCorrect || isGenderVariant || isFormVariant ? .light : .medium).impactOccurred()
         showResult = true
 
         // Auto-play correct pronunciation
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             playWordAudio()
         }
+    }
+
+    /// Check if the answer matches the word's base form or one of its listed forms
+    /// (e.g. typing "escondo" when the comic uses "escondí")
+    private func matchesKnownForm(_ answer: String) -> Bool {
+        guard let word = currentWord?.word, !answer.isEmpty else { return false }
+        var candidates: [String] = []
+        if let baseForm = word.baseForm { candidates.append(baseForm) }
+        if let forms = word.forms { candidates.append(contentsOf: forms.map { $0.text }) }
+        return candidates.contains { stripPunctuation($0) == answer }
     }
 
     /// Check if two words are gendered variants of each other (e.g. uno/una, bueno/buena)
@@ -392,6 +415,7 @@ struct QuizView: View {
             showResult = false
             isCorrect = false
             isGenderVariant = false
+            isFormVariant = false
             isAnswerFocused = true
         } else {
             quizComplete = true
@@ -403,6 +427,7 @@ struct QuizView: View {
         showResult = false
         isCorrect = false
         isGenderVariant = false
+        isFormVariant = false
         isAnswerFocused = true
     }
 
@@ -413,6 +438,7 @@ struct QuizView: View {
         showResult = false
         isCorrect = false
         isGenderVariant = false
+        isFormVariant = false
         isAnswerFocused = true
     }
 
@@ -423,6 +449,7 @@ struct QuizView: View {
             showResult = false
             isCorrect = false
             isGenderVariant = false
+            isFormVariant = false
         } else {
             quizComplete = true
         }
@@ -434,6 +461,7 @@ struct QuizView: View {
         showResult = false
         isCorrect = false
         isGenderVariant = false
+        isFormVariant = false
         score = 0
         quizComplete = false
     }

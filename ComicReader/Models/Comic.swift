@@ -20,6 +20,12 @@ struct Word: Identifiable, Codable, Hashable {
     var endTimeMs: Int?
     var manual: Bool?
     var forms: [WordForm]?
+
+    /// Word text with surrounding punctuation stripped (e.g. "¡Hola!" -> "Hola"),
+    /// for places that show the word on its own rather than inside a sentence.
+    var displayText: String {
+        text.trimmingCharacters(in: CharacterSet.letters.union(.decimalDigits).inverted)
+    }
 }
 
 // MARK: - Sentence
@@ -27,6 +33,7 @@ struct Sentence: Identifiable, Codable, Hashable {
     let id: String
     let text: String
     var translation: String?
+    var grammarNote: String?
     var audioUrl: String?
     var translationAudioUrl: String?
     var alternativeTexts: [String]?

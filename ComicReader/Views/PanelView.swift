@@ -15,6 +15,7 @@ struct PanelView: View {
 
     @State private var textRevealed = false
     @State private var translationRevealed: Set<String> = [] // Track by sentence ID
+    @State private var grammarRevealed: Set<String> = [] // Track by sentence ID
     @State private var highlightedWordIndex: Int?
     @State private var playingSentenceId: String?
     @State private var recordingSentenceId: String?
@@ -331,6 +332,7 @@ struct PanelView: View {
 
     private func resetPanelState() {
         translationRevealed = []
+        grammarRevealed = []
         textRevealed = false
         practiceFeedback = nil
         playingSentenceId = nil
@@ -502,6 +504,31 @@ struct PanelView: View {
                                 Label("Show translation", systemImage: "eye")
                                     .font(.subheadline)
                                     .foregroundStyle(.blue)
+                            }
+                        }
+                    }
+
+                    // Grammar explanation (pre-generated, baked into the bundle)
+                    if !isPracticeMode,
+                       let grammarNote = sentence.grammarNote, !grammarNote.isEmpty {
+                        if grammarRevealed.contains(sentence.id) {
+                            Text(grammarNote)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .padding(10)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color.purple.opacity(0.1))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        } else {
+                            Button {
+                                withAnimation {
+                                    grammarRevealed.insert(sentence.id)
+                                }
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            } label: {
+                                Label("Explain grammar", systemImage: "text.book.closed")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.purple)
                             }
                         }
                     }
@@ -1073,7 +1100,7 @@ struct WordButton: View {
         .popover(isPresented: $showingDefinition) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Text(word.text)
+                    Text(word.displayText)
                         .font(.headline)
 
                     Spacer()
@@ -1111,7 +1138,7 @@ struct WordButton: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
-                if let baseForm = word.baseForm, baseForm.lowercased() != word.text.lowercased() {
+                if let baseForm = word.baseForm, baseForm.lowercased() != word.displayText.lowercased() {
                     HStack {
                         Text("Base form: \(baseForm)")
                             .font(.caption)
@@ -1188,13 +1215,14 @@ struct WordFormsView: View {
     let word: Word
     @Environment(\.dismiss) private var dismiss
     @StateObject private var audioManager = AudioManager.shared
+    @State private var showingExplanations = false
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
                     HStack {
-                        Text(word.baseForm ?? word.text)
+                        Text(word.baseForm ?? word.displayText)
                             .font(.title2)
                             .bold()
                         Spacer()
@@ -1228,10 +1256,91 @@ struct WordFormsView: View {
                                 }
                             }
                         }
+
+                        Button {
+                            showingExplanations = true
+                        } label: {
+                            Label("Explain forms", systemImage: "info.circle")
+                                .font(.subheadline)
+                                .foregroundStyle(.blue)
+                        }
                     }
                 }
             }
-            .navigationTitle(word.text)
+            .navigationTitle(word.displayText)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+            .sheet(isPresented: $showingExplanations) {
+                FormExplanationsView(forms: word.forms ?? [])
+            }
+        }
+    }
+}
+
+// MARK: - Form Explanations View
+struct FormExplanationsView: View {
+    let forms: [WordForm]
+    @Environment(\.dismiss) private var dismiss
+
+    /// Universal explanations of grammatical form names, keyed by normalized label
+    private static let explanations: [String: String] = [
+        "present": "What happens now or habitually — \"I have\", \"I speak\".",
+        "preterite": "A completed action in the past, at a specific moment — \"I had\", \"I spoke\".",
+        "imperfect": "An ongoing, repeated, or background action in the past — \"I used to have\", \"I was speaking\".",
+        "future": "What will happen — \"I will have\".",
+        "conditional": "What would happen, in hypothetical or polite statements — \"I would have\".",
+        "subjunctive": "Used after wishes, doubts, emotions, and \"que...\" — \"...that I have\".",
+        "command": "An order or instruction to someone (tú) — \"Have!\", \"Speak!\".",
+        "gerund": "The \"-ing\" form, for actions in progress — \"having\", \"speaking\" (used with estar).",
+        "past participle": "The \"-ed\" form, used with haber for things already done — \"(I have) had, spoken\".",
+        "masc sing": "Used with one masculine noun — \"el chico alto\".",
+        "fem sing": "Used with one feminine noun — \"la chica alta\".",
+        "masc plural": "Used with several masculine (or mixed) nouns — \"los chicos altos\".",
+        "fem plural": "Used with several feminine nouns — \"las chicas altas\".",
+        "masculine": "The form used with masculine nouns.",
+        "feminine": "The form used with feminine nouns.",
+        "masculine singular": "Used with one masculine noun — \"el chico alto\".",
+        "feminine singular": "Used with one feminine noun — \"la chica alta\".",
+        "masculine plural": "Used with several masculine (or mixed) nouns — \"los chicos altos\".",
+        "feminine plural": "Used with several feminine nouns — \"las chicas altas\".",
+        "singular": "One of something — \"la casa\".",
+        "plural": "More than one — \"las casas\"."
+    ]
+
+    private func explanation(for label: String) -> String {
+        let key = label
+            .lowercased()
+            .replacingOccurrences(of: ".", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return Self.explanations[key] ?? "A grammatical variation of this word."
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(Array(forms.enumerated()), id: \.offset) { _, form in
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text(form.label)
+                                .font(.headline)
+                            Spacer()
+                            Text(form.text)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .italic()
+                        }
+                        Text(explanation(for: form.label))
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 2)
+                }
+            }
+            .navigationTitle("What the forms mean")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

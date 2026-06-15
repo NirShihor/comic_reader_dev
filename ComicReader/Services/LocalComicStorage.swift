@@ -428,6 +428,7 @@ struct SentenceJSON: Codable {
     let id: String
     let text: String
     let translation: String?
+    let grammarNote: String?
     let audioUrl: String?
     let translationAudioUrl: String?
     let alternativeTexts: [String]?
@@ -439,6 +440,7 @@ struct SentenceJSON: Codable {
             id: id,
             text: text,
             translation: translation,
+            grammarNote: grammarNote,
             audioUrl: audioUrl,
             translationAudioUrl: translationAudioUrl,
             alternativeTexts: alternativeTexts,

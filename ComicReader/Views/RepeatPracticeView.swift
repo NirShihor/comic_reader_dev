@@ -92,6 +92,24 @@ struct RepeatPracticeView: View {
     // This keeps the audio session active in the background so iOS doesn't suspend the app
     @State private var silentPlayer: AVAudioPlayer?
     @State private var silentTimerDelegate = SilentTimerDelegate()
+    // Loops near-silent audio for the whole session so iOS never suspends the
+    // app while the screen is dark — without it the silent gaps (especially
+    // waiting for Whisper transcription, when neither mic nor audio is live)
+    // freeze the practice loop.
+    @State private var keepAlivePlayer: AVAudioPlayer?
+    // What Whisper heard on the last attempt — shown on failed feedback so
+    // locked-phone recognition problems are visible without a debugger.
+    @State private var lastTranscription = ""
+
+    private var heardSummary: String {
+        if !lastTranscription.isEmpty {
+            return "Heard: \u{201C}\(lastTranscription)\u{201D}"
+        }
+        if let diag = whisperService.captureDiagnostic {
+            return "Heard: (\(diag))"
+        }
+        return "Heard: (nothing)"
+    }
 
     // TTS fallback for English
     @State private var synthesizer = AVSpeechSynthesizer()
@@ -289,19 +307,37 @@ struct RepeatPracticeView: View {
                 .onDisappear { pulseAnimation = false }
 
         case .recordingRepeat, .recordingMeaning:
-            Image(systemName: "mic.circle.fill")
-                .font(.system(size: 56))
-                .foregroundStyle(.red)
-                .symbolEffect(.pulse)
+            VStack(spacing: 8) {
+                Image(systemName: "mic.circle.fill")
+                    .font(.system(size: 56))
+                    .foregroundStyle(.red)
+                    .symbolEffect(.pulse)
+                if !lastTranscription.isEmpty {
+                    Text("Last heard: \u{201C}\(lastTranscription)\u{201D}")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+            }
 
         case .processingRepeat, .processingMeaning:
             ProgressView()
                 .scaleEffect(2)
 
         case .feedbackRepeat(let correct), .feedbackMeaning(let correct):
-            Image(systemName: correct ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .font(.system(size: 56))
-                .foregroundStyle(correct ? .green : .red)
+            VStack(spacing: 8) {
+                Image(systemName: correct ? "checkmark.circle.fill" : "xmark.circle.fill")
+                    .font(.system(size: 56))
+                    .foregroundStyle(correct ? .green : .red)
+                if !correct {
+                    Text(heardSummary)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+            }
 
         case .askingMeaning:
             Image(systemName: "questionmark.circle.fill")
@@ -447,6 +483,10 @@ struct RepeatPracticeView: View {
         pronunciationCorrect = 0
         meaningCorrect = 0
         totalAttempted = 0
+        startKeepAlive()
+        // Start the capture engine now, while we're certainly foreground —
+        // iOS refuses to start (but not continue) capture once locked.
+        whisperService.warmUpCapture()
         playCurrentSentence()
     }
 
@@ -463,6 +503,7 @@ struct RepeatPracticeView: View {
     private func playCurrentSentence() {
         guard currentIndex < sentences.count else {
             state = .completed
+            stopKeepAlive()
             updateNowPlaying()
             return
         }
@@ -589,6 +630,7 @@ struct RepeatPracticeView: View {
 
         Task {
             let transcription = await whisperService.stopRecording(expectedText: sentence.text, language: "es")
+            lastTranscription = transcription
 
             resetAudioSessionForPlayback()
 
@@ -604,14 +646,14 @@ struct RepeatPracticeView: View {
                 return
             }
 
-            // Compare with expected text
-            let result = whisperService.compareText(spoken: transcription, expected: sentence.text)
+            // Compare with expected text (85%)
+            let result = whisperService.compareText(spoken: transcription, expected: sentence.text, passThreshold: 0.85)
             var isCorrect = result.isCorrect
 
             // Check alternative texts
             if !isCorrect {
                 for alt in sentence.alternativeTexts {
-                    let altResult = whisperService.compareText(spoken: transcription, expected: alt)
+                    let altResult = whisperService.compareText(spoken: transcription, expected: alt, passThreshold: 0.85)
                     if altResult.isCorrect {
                         isCorrect = true
                         break
@@ -669,6 +711,7 @@ struct RepeatPracticeView: View {
 
         Task {
             let transcription = await whisperService.stopRecording(expectedText: sentence.translation, language: "en")
+            lastTranscription = transcription
 
             resetAudioSessionForPlayback()
 
@@ -721,6 +764,7 @@ struct RepeatPracticeView: View {
             self.currentIndex += 1
             if self.currentIndex >= self.sentences.count {
                 self.state = .completed
+                self.stopKeepAlive()
                 self.updateNowPlaying()
             } else {
                 self.playCurrentSentence()
@@ -827,9 +871,34 @@ struct RepeatPracticeView: View {
 
     private func cleanup() {
         cancelAllActivity()
+        stopKeepAlive()
+        whisperService.endCaptureSession()
     }
 
     // MARK: - Helpers
+
+    /// Start a looping near-silent player that runs for the whole practice
+    /// session. iOS keeps backgrounded apps alive only while audio is
+    /// actually playing; this covers every silent gap in the practice loop
+    /// (most importantly the Whisper transcription wait, when neither the
+    /// mic nor any audio is active).
+    private func startKeepAlive() {
+        guard keepAlivePlayer == nil else { return }
+        do {
+            let player = try AVAudioPlayer(data: makeSilentWav(duration: 10))
+            player.numberOfLoops = -1
+            player.volume = 0.01
+            player.play()
+            keepAlivePlayer = player
+        } catch {
+            print("Failed to start keep-alive player: \(error)")
+        }
+    }
+
+    private func stopKeepAlive() {
+        keepAlivePlayer?.stop()
+        keepAlivePlayer = nil
+    }
 
     /// Plays a near-silent audio clip of exact duration. When it finishes,
     /// the SilentTimerDelegate fires the action. This keeps the audio session
@@ -838,6 +907,23 @@ struct RepeatPracticeView: View {
         silentPlayer?.stop()
         silentPlayer = nil
 
+        do {
+            let player = try AVAudioPlayer(data: makeSilentWav(duration: interval))
+            player.numberOfLoops = 0
+            player.volume = 0.01
+            player.delegate = silentTimerDelegate
+            silentTimerDelegate.onFinish = action
+            player.play()
+            silentPlayer = player
+        } catch {
+            print("Failed to create silent timer: \(error)")
+            DispatchQueue.main.asyncAfter(deadline: .now() + interval) { action() }
+        }
+    }
+
+    /// Build a mono 16-bit PCM WAV of near-silence (amplitude 1/32767 — not
+    /// true zero so iOS keeps the audio session alive).
+    private func makeSilentWav(duration interval: TimeInterval) -> Data {
         let sampleRate: Double = 44100
         let numSamples = Int(sampleRate * interval)
         let bytesPerSample = 2
@@ -876,27 +962,20 @@ struct RepeatPracticeView: View {
             samples[i + 1] = 0  // high byte = 0 → amplitude of 1/32767
         }
         wav.append(samples)
-
-        do {
-            let player = try AVAudioPlayer(data: wav)
-            player.numberOfLoops = 0
-            player.volume = 0.01
-            player.delegate = silentTimerDelegate
-            silentTimerDelegate.onFinish = action
-            player.play()
-            silentPlayer = player
-        } catch {
-            print("Failed to create silent timer: \(error)")
-            DispatchQueue.main.asyncAfter(deadline: .now() + interval) { action() }
-        }
+        return wav
     }
 
     private func resetAudioSessionForPlayback() {
         do {
             let audioSession = AVAudioSession.sharedInstance()
-            // Use .playAndRecord throughout practice so mic stays available in background
-            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
-            try audioSession.setActive(true)
+            // Use .playAndRecord throughout practice so mic stays available in
+            // background. Only touch the session when something actually
+            // changed — redundant setCategory calls force the capture engine
+            // to reconfigure, which can kill the mic while the phone is locked.
+            if audioSession.category != .playAndRecord {
+                try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
+                try audioSession.setActive(true)
+            }
         } catch {
             print("Failed to reset audio session: \(error)")
         }
@@ -999,9 +1078,10 @@ struct RepeatPracticeView: View {
         }
 
         let score = Double(matchCount) / Double(expectedWords.count)
-        // Require 80%+ exact word match for English (lower than Spanish 85% —
-        // Whisper is less accurate with English in noisy/mobile conditions)
-        return score >= 0.80
+        // Require 75%+ exact word match for English (lower than Spanish 85% —
+        // Whisper is less accurate with English in noisy/mobile conditions,
+        // and the meaning check shouldn't punish loose-but-correct phrasing)
+        return score >= 0.75
     }
 
     private func normalizeEnglish(_ text: String) -> String {

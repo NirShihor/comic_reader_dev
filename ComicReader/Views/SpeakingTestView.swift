@@ -19,6 +19,7 @@ struct SpeakingTestView: View {
     @State private var showingError = false
     @State private var errorMessage = ""
     @State private var isGenderVariant = false
+    @State private var isFormVariant = false
 
     var reviewWords: [ReviewWord] {
         comic.reviewWords ?? []
@@ -75,6 +76,10 @@ struct SpeakingTestView: View {
         }
         .navigationTitle("Speaking Practice")
         .navigationBarTitleDisplayMode(.inline)
+        .onDisappear {
+            whisperService.cancelRecording()
+            whisperService.endCaptureSession()
+        }
         .sheet(isPresented: $showingContext) {
             if let page = contextPage, let panel = contextPanel {
                 PanelView(
@@ -279,6 +284,24 @@ struct SpeakingTestView: View {
                                 .padding(.top, 2)
                         }
                     }
+                } else if isFormVariant {
+                    // Different form of the same word — correct but explain
+                    VStack(spacing: 4) {
+                        Text("\"\(spokenText.capitalized)\" is another form of this word — in this phrase the comic uses:")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                        Text(expectedWord.capitalized)
+                            .fontWeight(.semibold)
+                        if let sentence = contextSentence {
+                            Text("\"" + sentence + "\"")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .italic()
+                                .multilineTextAlignment(.center)
+                                .padding(.top, 2)
+                        }
+                    }
                 } else {
                     HStack {
                         Text("Correct pronunciation:")
@@ -421,6 +444,23 @@ struct SpeakingTestView: View {
         return dict
     }()
 
+    /// Check if the spoken word matches the word's base form or one of its listed forms
+    /// (e.g. saying "escondo" when the comic uses "escondí")
+    private func matchesKnownForm(_ spoken: String) -> Bool {
+        guard let word = currentWord?.word else { return false }
+        func norm(_ s: String) -> String {
+            stripPunctuation(s)
+                .folding(options: .diacriticInsensitive, locale: .current)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        let spokenNorm = norm(spoken)
+        guard !spokenNorm.isEmpty else { return false }
+        var candidates: [String] = []
+        if let baseForm = word.baseForm { candidates.append(baseForm) }
+        if let forms = word.forms { candidates.append(contentsOf: forms.map { $0.text }) }
+        return candidates.contains { norm($0) == spokenNorm }
+    }
+
     private func isGenderVariantMatch(spoken: String, expected: String) -> Bool {
         let spokenNorm = spoken.folding(options: .diacriticInsensitive, locale: .current).lowercased()
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -454,6 +494,7 @@ struct SpeakingTestView: View {
             let expectedNorm = expectedWord.lowercased()
             let isExact = spokenNorm == expectedNorm
 
+            isFormVariant = false
             if isExact {
                 // Exact match
                 isCorrect = true
@@ -462,6 +503,11 @@ struct SpeakingTestView: View {
                 // Said the opposite gender form — accept but explain
                 isCorrect = true
                 isGenderVariant = true
+            } else if matchesKnownForm(transcription) {
+                // Said another known form of the word — accept but explain
+                isCorrect = true
+                isGenderVariant = false
+                isFormVariant = true
             } else {
                 // For short single words (≤3 chars), require exact match —
                 // fuzzy matching is too lenient (e.g. "le" would match "la")
@@ -495,6 +541,7 @@ struct SpeakingTestView: View {
             showResult = false
             isCorrect = false
             isGenderVariant = false
+            isFormVariant = false
         } else {
             testComplete = true
         }
@@ -505,6 +552,7 @@ struct SpeakingTestView: View {
         showResult = false
         isCorrect = false
         isGenderVariant = false
+        isFormVariant = false
     }
 
     private func previousWord() {
@@ -514,6 +562,7 @@ struct SpeakingTestView: View {
         showResult = false
         isCorrect = false
         isGenderVariant = false
+        isFormVariant = false
     }
 
     private func skipWord() {
@@ -523,6 +572,7 @@ struct SpeakingTestView: View {
             showResult = false
             isCorrect = false
             isGenderVariant = false
+            isFormVariant = false
         } else {
             testComplete = true
         }
