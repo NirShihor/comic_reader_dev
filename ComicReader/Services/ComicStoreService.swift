@@ -18,12 +18,14 @@ struct StoreComic: Identifiable, Codable {
     let episodeNumber: Int?
     let collectionDescription: String?
     let collectionCoverThumbnailUrl: String?
+    let order: Int?
 
     enum CodingKeys: String, CodingKey {
         case id, title, description, coverThumbnailUrl, level
         case totalPages, estimatedMinutes, language, fileSizeMB, version, downloadUrl
         case collectionTitle, episodeNumber
         case collectionDescription, collectionCoverThumbnailUrl
+        case order
     }
 
     init(from decoder: Decoder) throws {
@@ -43,13 +45,15 @@ struct StoreComic: Identifiable, Codable {
         episodeNumber = try container.decodeIfPresent(Int.self, forKey: .episodeNumber)
         collectionDescription = try container.decodeIfPresent(String.self, forKey: .collectionDescription)
         collectionCoverThumbnailUrl = try container.decodeIfPresent(String.self, forKey: .collectionCoverThumbnailUrl)
+        order = try container.decodeIfPresent(Int.self, forKey: .order)
     }
 
     init(id: String, title: String, description: String, coverThumbnailUrl: String,
          level: String, totalPages: Int, estimatedMinutes: Int, language: String,
          fileSizeMB: Double, version: String, downloadUrl: String,
          collectionTitle: String? = nil, episodeNumber: Int? = nil,
-         collectionDescription: String? = nil, collectionCoverThumbnailUrl: String? = nil) {
+         collectionDescription: String? = nil, collectionCoverThumbnailUrl: String? = nil,
+         order: Int? = nil) {
         self.id = id
         self.title = title
         self.description = description
@@ -65,6 +69,7 @@ struct StoreComic: Identifiable, Codable {
         self.episodeNumber = episodeNumber
         self.collectionDescription = collectionDescription
         self.collectionCoverThumbnailUrl = collectionCoverThumbnailUrl
+        self.order = order
     }
 }
 
@@ -136,6 +141,12 @@ class ComicStoreService: ObservableObject {
             let (data, _) = try await URLSession.shared.data(from: url)
             let response = try JSONDecoder().decode(StoreCatalog.self, from: data)
             catalog = response.comics
+
+            // Refresh the Library's order map from the live catalog so the
+            // downloaded shelf reflects the author's order without re-export.
+            let orderMap = Dictionary(catalog.map { ($0.id, $0.order ?? 0) },
+                                      uniquingKeysWith: { first, _ in first })
+            localStorage.updateCatalogOrders(orderMap)
 
             // Update download states
             for comic in catalog {

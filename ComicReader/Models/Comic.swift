@@ -142,6 +142,10 @@ struct Comic: Identifiable, Codable, Hashable {
     var collectionCoverImage: String?
     var episodeNumber: Int?
 
+    /// Manual sort position set in the generator (lower = higher up).
+    /// Falls back to title ordering when absent/equal.
+    var order: Int?
+
     enum DifficultyLevel: String, Codable, Hashable {
         case beginner
         case intermediate
@@ -212,6 +216,17 @@ enum LibraryItem: Identifiable, Hashable {
         switch self {
         case .standalone(let comic): return comic.title
         case .collection(let collection): return collection.title
+        }
+    }
+
+    /// Manual sort position. A collection takes the lowest `order` among its
+    /// episodes so it sits where the author placed that series.
+    var sortOrder: Int {
+        switch self {
+        case .standalone(let comic):
+            return comic.order ?? 0
+        case .collection(let collection):
+            return collection.comics.map { $0.order ?? 0 }.min() ?? 0
         }
     }
 }

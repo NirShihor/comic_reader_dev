@@ -9,8 +9,14 @@ class LocalComicStorage: ObservableObject {
     @Published private(set) var downloadedComics: [Comic] = []
     @Published private(set) var isLoading = false
 
+    /// Per-comic sort order from the live catalog, keyed by comic id. Lets the
+    /// Library reflect the author's order without re-exporting/re-downloading —
+    /// it overrides the (possibly stale) `order` baked into each bundle.
+    @Published private(set) var catalogOrders: [String: Int] = [:]
+
     private let fileManager = FileManager.default
     private let hiddenComicsKey = "hiddenComicIds"
+    private let catalogOrdersKey = "catalogOrders"
 
     /// IDs of comics the user has removed from their library
     private var hiddenComicIds: Set<String> {
@@ -25,10 +31,33 @@ class LocalComicStorage: ObservableObject {
     }
 
     init() {
+        catalogOrders = (UserDefaults.standard.dictionary(forKey: catalogOrdersKey) as? [String: Int]) ?? [:]
         createComicsDirectoryIfNeeded()
         Task {
             await loadDownloadedComics()
         }
+    }
+
+    /// Refresh per-comic order from the live catalog. Call after fetching the
+    /// catalog; the Library re-sorts immediately and the map is persisted for
+    /// offline use.
+    func updateCatalogOrders(_ orders: [String: Int]) {
+        guard orders != catalogOrders else { return }
+        catalogOrders = orders
+        UserDefaults.standard.set(orders, forKey: catalogOrdersKey)
+    }
+
+    /// A comic's effective sort position: live catalog order if known, else the
+    /// value baked into its bundle, else 0.
+    func effectiveOrder(for comic: Comic) -> Int {
+        catalogOrders[comic.id] ?? comic.order ?? 0
+    }
+
+    /// Order by effective order (lower first), then alphabetically.
+    func ordersBefore(_ a: Comic, _ b: Comic) -> Bool {
+        let ao = effectiveOrder(for: a), bo = effectiveOrder(for: b)
+        if ao != bo { return ao < bo }
+        return a.title.localizedCaseInsensitiveCompare(b.title) == .orderedAscending
     }
 
     // MARK: - Public Methods
@@ -61,7 +90,7 @@ class LocalComicStorage: ObservableObject {
         let hidden = hiddenComicIds
         comics.removeAll { hidden.contains($0.id) }
 
-        downloadedComics = comics.sorted { $0.title < $1.title }
+        downloadedComics = comics.sorted { ordersBefore($0, $1) }
     }
 
     /// Comics grouped into library items (standalone comics + collections)
@@ -84,7 +113,21 @@ class LocalComicStorage: ObservableObject {
             items.append(.collection(collection))
         }
 
-        return items.sorted { $0.sortTitle.localizedCaseInsensitiveCompare($1.sortTitle) == .orderedAscending }
+        // Author-set order first (lower = higher up), then alphabetical. A
+        // collection sits at the lowest effective order among its episodes.
+        func itemOrder(_ item: LibraryItem) -> Int {
+            switch item {
+            case .standalone(let comic):
+                return effectiveOrder(for: comic)
+            case .collection(let collection):
+                return collection.comics.map { effectiveOrder(for: $0) }.min() ?? 0
+            }
+        }
+        return items.sorted { a, b in
+            let ao = itemOrder(a), bo = itemOrder(b)
+            if ao != bo { return ao < bo }
+            return a.sortTitle.localizedCaseInsensitiveCompare(b.sortTitle) == .orderedAscending
+        }
     }
 
     /// Get the base path for a comic's assets

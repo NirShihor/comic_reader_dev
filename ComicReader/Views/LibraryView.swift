@@ -18,7 +18,13 @@ struct LibraryView: View {
         }
         .navigationTitle("Library")
         .background(Color(.systemGroupedBackground))
+        .task {
+            // Refresh the author-set order from the live catalog so the shelf
+            // re-sorts without needing comics re-exported.
+            await ComicStoreService.shared.fetchCatalog()
+        }
         .refreshable {
+            await ComicStoreService.shared.fetchCatalog()
             await localStorage.loadDownloadedComics()
         }
         .alert("Delete Comic", isPresented: Binding(

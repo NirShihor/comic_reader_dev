@@ -47,7 +47,12 @@ struct StoreView: View {
             }
         }
 
-        return items
+        // Author-set order first (lower = higher up), then alphabetical — so
+        // standalone comics and collections interleave wherever they're placed.
+        return items.sorted { a, b in
+            if a.sortOrder != b.sortOrder { return a.sortOrder < b.sortOrder }
+            return a.sortTitle.localizedCaseInsensitiveCompare(b.sortTitle) == .orderedAscending
+        }
     }
 
     enum StoreItem: Identifiable {
@@ -58,6 +63,21 @@ struct StoreView: View {
             switch self {
             case .standalone(let comic): return comic.id
             case .collection(let title, _): return "collection-\(title)"
+            }
+        }
+
+        /// Manual sort position. A collection takes the lowest `order` among its episodes.
+        var sortOrder: Int {
+            switch self {
+            case .standalone(let comic): return comic.order ?? 0
+            case .collection(_, let comics): return comics.map { $0.order ?? 0 }.min() ?? 0
+            }
+        }
+
+        var sortTitle: String {
+            switch self {
+            case .standalone(let comic): return comic.title
+            case .collection(let title, _): return title
             }
         }
     }
