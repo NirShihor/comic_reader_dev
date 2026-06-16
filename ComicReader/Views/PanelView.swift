@@ -26,6 +26,7 @@ struct PanelView: View {
     @State private var errorMessage = ""
     @State private var showEndOfEpisode = false
     @State private var selectedHotspot: Hotspot?
+    @StateObject private var help = HelpModeController()
 
     init(comic: Comic, page: Page, panel: Panel, hotspots: [Hotspot] = [], navigateToPage: Binding<Int?>, dismissPanel: (() -> Void)? = nil, dismissToHome: (() -> Void)? = nil) {
         self.comic = comic
@@ -199,13 +200,37 @@ struct PanelView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
-                        closePanel()
+                    HStack(spacing: 16) {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
+                        } label: {
+                            Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
+                        }
+                        Button(help.isActive ? "Done help" : "Done") {
+                            if help.isActive {
+                                withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
+                            } else {
+                                closePanel()
+                            }
+                        }
                     }
                 }
             }
         }
         .id(panel.id) // Force view recreation when panel changes
+        .helpTooltipLayer()
+        .environmentObject(help)
+        .onAppear {
+            #if DEBUG
+            let args = ProcessInfo.processInfo.arguments
+            if args.contains("--help-mode-on") { help.isActive = true }
+            if let i = args.firstIndex(of: "--help-active"), i + 1 < args.count {
+                help.isActive = true
+                help.tap(args[i + 1], "Play audio",
+                         "Play the sentence aloud — each word lights up as it's read.")
+            }
+            #endif
+        }
         .onChange(of: settingsManager.speakingPracticeMode) { _, _ in
             textRevealed = false
             practiceFeedback = nil
@@ -406,6 +431,17 @@ struct PanelView: View {
                         .padding(.bottom, 12)
                 }
             }
+
+            // Swipe affordance (help mode only)
+            VStack {
+                HelpHint(icon: "arrow.left.and.right",
+                         label: "Swipe",
+                         title: "Move between panels",
+                         text: "Swipe left or right anywhere on the panel — or use the arrows at the top — to go from panel to panel.",
+                         animatedSwipe: true)
+                    .padding(.top, 10)
+                Spacer()
+            }
         }
         .id(currentPanel.id) // Force recreation when panel changes
     }
@@ -442,6 +478,7 @@ struct PanelView: View {
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             selectedHotspot = item.hotspot
         }
+        .explains("Tappable spot", "These pulsing markers open extra vocabulary and phrase practice.", id: "panel.hotspot")
     }
 
     // MARK: - Bubble Card (normal speech/thought/narration)
@@ -481,6 +518,10 @@ struct PanelView: View {
                                         isHighlighted: playingSentenceId == sentence.id && highlightedWordIndex == originalIndex,
                                         fontSize: bubble.fontSize.map { CGFloat($0) }
                                     )
+                                    .explainsIf(word.id == displayWords.first?.id,
+                                                "Look up a word",
+                                                "Tap any highlighted word to see its meaning, hear it spoken, and save it to your vocabulary.",
+                                                id: "panel.word")
                                 }
                             }
                         }
@@ -505,6 +546,8 @@ struct PanelView: View {
                                     .font(.subheadline)
                                     .foregroundStyle(.blue)
                             }
+                            .explains("Show translation",
+                                      "Reveal the English translation of this sentence when you're stuck.")
                         }
                     }
 
@@ -530,6 +573,8 @@ struct PanelView: View {
                                     .font(.subheadline)
                                     .foregroundStyle(.purple)
                             }
+                            .explains("Explain grammar",
+                                      "Show a short, plain-language note on how this sentence works.")
                         }
                     }
 
@@ -560,6 +605,7 @@ struct PanelView: View {
                                     .background(Color(.systemGray5))
                                     .clipShape(Capsule())
                             }
+                            .explains("Playback speed", "Change how fast the narration plays.")
                         }
                     }
 
@@ -756,6 +802,7 @@ struct PanelView: View {
             }
         }
         .disabled(audioManager.isLoading && playingSentenceId == sentence.id)
+        .explains("Play audio", "Play the sentence aloud — each word lights up as it's read.")
     }
 
     // MARK: - Sound Effect Card (text only, no audio)

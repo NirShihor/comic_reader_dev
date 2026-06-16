@@ -18,6 +18,7 @@ struct ListeningTestView: View {
     @State private var dummyNavigateToPage: Int? = nil
     @State private var showingError = false
     @State private var errorMessage = ""
+    @StateObject private var help = HelpModeController()
 
     var reviewWords: [ReviewWord] {
         comic.reviewWords ?? []
@@ -74,6 +75,15 @@ struct ListeningTestView: View {
         }
         .navigationTitle("Listening Practice")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
+                } label: {
+                    Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
+                }
+            }
+        }
         .sheet(isPresented: $showingContext) {
             if let page = contextPage, let panel = contextPanel {
                 PanelView(
@@ -99,6 +109,8 @@ struct ListeningTestView: View {
         } message: {
             Text(errorMessage)
         }
+        .helpTooltipLayer()
+        .environmentObject(help)
     }
 
     // MARK: - Test Card
@@ -133,6 +145,7 @@ struct ListeningTestView: View {
                             .foregroundStyle(.blue)
                     }
                 }
+                .explains("Play the word", "Tap to hear the Spanish word, then say what it means in English.")
 
                 Text("Tap to hear the word")
                     .font(.caption)
@@ -163,6 +176,7 @@ struct ListeningTestView: View {
                                 .foregroundStyle(.primary)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
+                        .explains("Previous", "Go back to the previous word.", id: "listening.resultPrev")
                     }
                     Button {
                         nextWord()
@@ -175,6 +189,7 @@ struct ListeningTestView: View {
                             .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
+                    .explains("Next", "Continue to the next word, or see your results on the last one.")
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 16)
@@ -219,6 +234,7 @@ struct ListeningTestView: View {
                             .foregroundStyle(.white)
                     }
                 }
+                .explains("Record", "Tap to say the English meaning of the word, then tap again to stop and check it.")
 
                 Text(isRecording ? "Tap to stop" : "Tap to speak the English meaning")
                     .font(.caption)
@@ -236,6 +252,7 @@ struct ListeningTestView: View {
                 .foregroundStyle(.secondary)
                 .disabled(currentIndex == 0)
                 .opacity(currentIndex == 0 ? 0.3 : 1)
+                .explains("Previous", "Go back to the previous word.")
 
                 Button {
                     playWordAudio()
@@ -243,6 +260,7 @@ struct ListeningTestView: View {
                     Label("Replay", systemImage: "speaker.wave.2")
                         .font(.subheadline)
                 }
+                .explains("Replay", "Play the Spanish word again.")
 
                 if contextPanel != nil {
                     Button {
@@ -252,6 +270,7 @@ struct ListeningTestView: View {
                             .font(.subheadline)
                     }
                     .foregroundStyle(.orange)
+                    .explains("Hint", "Open the comic panel where this word appears for context.")
                 }
 
                 Button {
@@ -261,6 +280,7 @@ struct ListeningTestView: View {
                         .font(.subheadline)
                 }
                 .foregroundStyle(.secondary)
+                .explains("Skip", "Move on to the next word without answering.")
             }
             .padding(.top, 8)
         }
@@ -304,6 +324,7 @@ struct ListeningTestView: View {
                         Label("Listen", systemImage: "speaker.wave.2.fill")
                     }
                     .buttonStyle(.bordered)
+                    .explains("Listen", "Hear the Spanish word spoken aloud again.", id: "listening.resultListen")
 
                     Button {
                         tryAgain()
@@ -311,6 +332,7 @@ struct ListeningTestView: View {
                         Label("Try Again", systemImage: "arrow.counterclockwise")
                     }
                     .buttonStyle(.bordered)
+                    .explains("Try Again", "Record the meaning of this word again.", id: "listening.resultTryAgain")
                 }
                 .padding(.top, 8)
             }

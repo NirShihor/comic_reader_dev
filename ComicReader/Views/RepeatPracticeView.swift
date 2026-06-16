@@ -82,6 +82,7 @@ struct RepeatPracticeView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var audioManager = AudioManager.shared
     @ObservedObject private var whisperService = WhisperService.shared
+    @StateObject private var help = HelpModeController()
 
     @State private var sentences: [PracticeSentence] = []
     @State private var currentIndex = 0
@@ -145,6 +146,17 @@ struct RepeatPracticeView: View {
         }
         .navigationTitle("Repeat Practice")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
+                } label: {
+                    Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
+                }
+            }
+        }
+        .helpTooltipLayer()
+        .environmentObject(help)
         .onAppear {
             buildSentences()
             synthesizer.delegate = ttsDelegate
@@ -202,6 +214,7 @@ struct RepeatPracticeView: View {
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 32)
+            .explains("Start", "Begin the practice. You'll hear each sentence, repeat it aloud, then say what it means.")
         }
     }
 
@@ -262,6 +275,7 @@ struct RepeatPracticeView: View {
                         .font(.system(size: 48))
                         .foregroundStyle(isPaused ? .green : .secondary)
                 }
+                .explains("Pause / Play", "Pause the practice, or resume from where you left off.")
 
                 Button {
                     skipToNext()
@@ -270,6 +284,7 @@ struct RepeatPracticeView: View {
                         .font(.system(size: 48))
                         .foregroundStyle(.secondary)
                 }
+                .explains("Skip", "Jump ahead to the next sentence.")
             }
             .padding(.bottom, 32)
         }
@@ -400,6 +415,7 @@ struct RepeatPracticeView: View {
                         .background(.green)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
+                .explains("Try Again", "Restart the practice from the first sentence.")
 
                 Button {
                     dismiss()
@@ -412,6 +428,7 @@ struct RepeatPracticeView: View {
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
+                .explains("Done", "Finish and leave the practice.")
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 32)

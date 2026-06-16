@@ -20,6 +20,7 @@ struct SpeakingTestView: View {
     @State private var errorMessage = ""
     @State private var isGenderVariant = false
     @State private var isFormVariant = false
+    @StateObject private var help = HelpModeController()
 
     var reviewWords: [ReviewWord] {
         comic.reviewWords ?? []
@@ -76,6 +77,15 @@ struct SpeakingTestView: View {
         }
         .navigationTitle("Speaking Practice")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
+                } label: {
+                    Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
+                }
+            }
+        }
         .onDisappear {
             whisperService.cancelRecording()
             whisperService.endCaptureSession()
@@ -105,6 +115,8 @@ struct SpeakingTestView: View {
         } message: {
             Text(errorMessage)
         }
+        .helpTooltipLayer()
+        .environmentObject(help)
     }
 
     // MARK: - Test Card
@@ -155,6 +167,7 @@ struct SpeakingTestView: View {
                                 .foregroundStyle(.primary)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
+                        .explains("Previous", "Go back to the previous word.", id: "speaking.resultPrev")
                     }
                     Button {
                         nextWord()
@@ -167,6 +180,7 @@ struct SpeakingTestView: View {
                             .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
+                    .explains("Next", "Continue to the next word, or see your results on the last one.")
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 16)
@@ -199,6 +213,7 @@ struct SpeakingTestView: View {
                             .foregroundStyle(.white)
                     }
                 }
+                .explains("Record", "Tap to start speaking the Spanish word, then tap again to stop and check it.")
 
                 Text(isRecording ? "Tap to stop" : "Tap to speak")
                     .font(.caption)
@@ -216,6 +231,7 @@ struct SpeakingTestView: View {
                 .foregroundStyle(.secondary)
                 .disabled(currentIndex == 0)
                 .opacity(currentIndex == 0 ? 0.3 : 1)
+                .explains("Previous", "Go back to the previous word.")
 
                 Button {
                     playWordAudio()
@@ -223,6 +239,7 @@ struct SpeakingTestView: View {
                     Label("Listen", systemImage: "speaker.wave.2")
                         .font(.subheadline)
                 }
+                .explains("Listen", "Hear the correct Spanish word spoken aloud.")
 
                 if contextPanel != nil {
                     Button {
@@ -232,6 +249,7 @@ struct SpeakingTestView: View {
                             .font(.subheadline)
                     }
                     .foregroundStyle(.orange)
+                    .explains("Hint", "Open the comic panel where this word appears for context.")
                 }
 
                 Button {
@@ -241,6 +259,7 @@ struct SpeakingTestView: View {
                         .font(.subheadline)
                 }
                 .foregroundStyle(.secondary)
+                .explains("Skip", "Move on to the next word without answering.")
             }
             .padding(.top, 8)
         }
@@ -326,6 +345,7 @@ struct SpeakingTestView: View {
                         Label("Listen", systemImage: "speaker.wave.2.fill")
                     }
                     .buttonStyle(.bordered)
+                    .explains("Listen", "Hear the correct Spanish word spoken aloud.", id: "speaking.resultListen")
 
                     Button {
                         tryAgain()
@@ -333,6 +353,7 @@ struct SpeakingTestView: View {
                         Label("Try Again", systemImage: "arrow.counterclockwise")
                     }
                     .buttonStyle(.bordered)
+                    .explains("Try Again", "Record this word again.", id: "speaking.resultTryAgain")
                 }
                 .padding(.top, 8)
             }

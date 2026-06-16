@@ -19,6 +19,8 @@ struct ComicDetailView: View {
     @State private var practiceDestination: PracticeDestination?
     @State private var selectedPage: Page?
     @State private var showingDeleteConfirmation = false
+    @State private var showingPracticeHelp = false
+    @StateObject private var help = HelpModeController()
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -32,38 +34,8 @@ struct ComicDetailView: View {
                 headerSection
                     .padding(.horizontal, 16)
 
-                // Action buttons
-                HStack(spacing: 12) {
-                    Label(
-                        progressManager.getProgress(for: comic.id) != nil ? "Continue" : "Start Reading",
-                        systemImage: "book.fill"
-                    )
-                    .font(.subheadline)
+                actionButtons
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(.green)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        selectedPage = startingPage
-                    }
-
-                    if progressManager.getProgress(for: comic.id) != nil {
-                        Label("Start Again", systemImage: "arrow.counterclockwise")
-                            .font(.subheadline)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(Color(.secondarySystemGroupedBackground))
-                            .foregroundStyle(.primary)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                selectedPage = firstPage
-                            }
-                    }
-                }
-                .padding(.horizontal, 16)
 
                 // Pages grid
                 pagesGrid
@@ -75,82 +47,7 @@ struct ComicDetailView: View {
         .background(Color(.systemGroupedBackground))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 16) {
-                    Menu {
-                        Section("Sentence Practice") {
-                            Button {
-                                practiceDestination = .repeatPractice
-                            } label: {
-                                Label("Repeat Practice", systemImage: "mouth.fill")
-                            }
-                            Button {
-                                practiceDestination = .repeatListen
-                            } label: {
-                                Label("Repeat Listen", systemImage: "headphones")
-                            }
-                            Button {
-                                practiceDestination = .originListen
-                            } label: {
-                                Label("Origin Listen", systemImage: "play.circle")
-                            }
-                        }
-
-                        Section("Practice Key Words") {
-                            Button {
-                                practiceDestination = .quiz
-                            } label: {
-                                Label("Writing", systemImage: "pencil.line")
-                            }
-
-                            Button {
-                                practiceDestination = .speaking
-                            } label: {
-                                Label("Speaking", systemImage: "mic.fill")
-                            }
-
-                            Button {
-                                practiceDestination = .listening
-                            } label: {
-                                Label("Listening", systemImage: "headphones")
-                            }
-                        }
-
-                        Section {
-                            Toggle(isOn: Binding(
-                                get: { settingsManager.speakingPracticeMode },
-                                set: { newValue in
-                                    settingsManager.speakingPracticeMode = newValue
-                                    if newValue { settingsManager.listeningPracticeMode = false }
-                                }
-                            )) {
-                                Label("Speaking Practice Mode", systemImage: "bubble.left.and.text.bubble.right")
-                            }
-
-                            Toggle(isOn: Binding(
-                                get: { settingsManager.listeningPracticeMode },
-                                set: { newValue in
-                                    settingsManager.listeningPracticeMode = newValue
-                                    if newValue { settingsManager.speakingPracticeMode = false }
-                                }
-                            )) {
-                                Label("Listening Practice Mode", systemImage: "headphones")
-                            }
-                        }
-                    } label: {
-                        let activePractice = settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode
-                        Image(systemName: "graduationcap.fill")
-                            .font(.body)
-                            .foregroundStyle(activePractice ? .green : .accentColor)
-                    }
-
-                    Button(role: .destructive) {
-                        showingDeleteConfirmation = true
-                    } label: {
-                        Image(systemName: "trash")
-                            .font(.body)
-                            .foregroundStyle(.red)
-                    }
-                }
+                trailingToolbar
             }
         }
         .alert("Delete Comic", isPresented: $showingDeleteConfirmation) {
@@ -182,6 +79,158 @@ struct ComicDetailView: View {
         .navigationDestination(item: $selectedPage) { page in
             PageView(comic: comic, page: page)
                 .id(page.id)  // Force new view instance for each page
+        }
+        .sheet(isPresented: $showingPracticeHelp) {
+            PracticeModesHelpView()
+        }
+        .helpTooltipLayer()
+        .environmentObject(help)
+    }
+
+    // MARK: - Trailing Toolbar
+    @ViewBuilder
+    private var trailingToolbar: some View {
+        HStack(spacing: 16) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
+            } label: {
+                Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
+            }
+
+            if help.isActive {
+                // In help mode the hat explains the practice modes instead of opening the menu.
+                Button {
+                    showingPracticeHelp = true
+                } label: {
+                    Image(systemName: "graduationcap.fill")
+                        .font(.body)
+                        .foregroundStyle(Color.accentColor)
+                        .padding(4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(Color.accentColor.opacity(0.16))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .strokeBorder(Color.accentColor, lineWidth: 1.5)
+                                )
+                        )
+                }
+            } else {
+                practiceMenu
+            }
+
+            Button(role: .destructive) {
+                showingDeleteConfirmation = true
+            } label: {
+                Image(systemName: "trash")
+                    .font(.body)
+                    .foregroundStyle(.red)
+            }
+        }
+    }
+
+    // MARK: - Action Buttons
+    private var hasProgress: Bool {
+        progressManager.getProgress(for: comic.id) != nil
+    }
+
+    private var actionButtons: some View {
+        HStack(spacing: 12) {
+            Label(hasProgress ? "Continue" : "Start Reading", systemImage: "book.fill")
+                .font(.subheadline)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(.green)
+                .foregroundStyle(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .contentShape(Rectangle())
+                .onTapGesture { selectedPage = startingPage }
+                .explains("Start reading",
+                          "Open the comic and start reading — it picks up from where you left off.")
+
+            if hasProgress {
+                Label("Start Again", systemImage: "arrow.counterclockwise")
+                    .font(.subheadline)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .foregroundStyle(.primary)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .contentShape(Rectangle())
+                    .onTapGesture { selectedPage = firstPage }
+                    .explains("Start again",
+                              "Go back to the first page and read the comic from the beginning.")
+            }
+        }
+    }
+
+    // MARK: - Practice Menu (graduation cap)
+    private var practiceMenu: some View {
+        Menu {
+            Section("Sentence Practice") {
+                Button {
+                    practiceDestination = .repeatPractice
+                } label: {
+                    Label("Repeat Practice", systemImage: "mouth.fill")
+                }
+                Button {
+                    practiceDestination = .repeatListen
+                } label: {
+                    Label("Repeat Listen", systemImage: "headphones")
+                }
+                Button {
+                    practiceDestination = .originListen
+                } label: {
+                    Label("Origin Listen", systemImage: "play.circle")
+                }
+            }
+
+            Section("Practice Key Words") {
+                Button {
+                    practiceDestination = .quiz
+                } label: {
+                    Label("Writing", systemImage: "pencil.line")
+                }
+
+                Button {
+                    practiceDestination = .speaking
+                } label: {
+                    Label("Speaking", systemImage: "mic.fill")
+                }
+
+                Button {
+                    practiceDestination = .listening
+                } label: {
+                    Label("Listening", systemImage: "headphones")
+                }
+            }
+
+            Section("Reading and Speaking Practice") {
+                Toggle(isOn: Binding(
+                    get: { settingsManager.speakingPracticeMode },
+                    set: { newValue in
+                        settingsManager.speakingPracticeMode = newValue
+                        if newValue { settingsManager.listeningPracticeMode = false }
+                    }
+                )) {
+                    Label("Speaking Practice Mode", systemImage: "bubble.left.and.text.bubble.right")
+                }
+
+                Toggle(isOn: Binding(
+                    get: { settingsManager.listeningPracticeMode },
+                    set: { newValue in
+                        settingsManager.listeningPracticeMode = newValue
+                        if newValue { settingsManager.speakingPracticeMode = false }
+                    }
+                )) {
+                    Label("Listening Practice Mode", systemImage: "headphones")
+                }
+            }
+        } label: {
+            let activePractice = settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode
+            Image(systemName: "graduationcap.fill")
+                .font(.body)
+                .foregroundStyle(activePractice ? .green : .accentColor)
         }
     }
 
@@ -253,6 +302,9 @@ struct ComicDetailView: View {
                     .onTapGesture {
                         selectedPage = page
                     }
+                    .explainsIf(page.id == comic.pages.first?.id,
+                                "Jump to a page",
+                                "Tap any page thumbnail to open the comic straight at that page.")
             }
         }
         .padding(.horizontal, 16)
@@ -310,6 +362,83 @@ struct PageThumbnail: View {
 
     private var isCurrentPage: Bool {
         progressManager.getProgress(for: comic.id)?.pageNumber == page.pageNumber
+    }
+}
+
+// MARK: - Practice Modes Help
+/// Explains each entry in the practice (graduation-cap) menu. Shown when the
+/// hat is tapped in help mode.
+struct PracticeModesHelpView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    private struct Mode: Identifiable {
+        let id = UUID()
+        let icon: String
+        let name: String
+        let detail: String
+    }
+
+    private let sentenceModes: [Mode] = [
+        Mode(icon: "mouth.fill", name: "Repeat Practice",
+             detail: "Listen to each sentence, then say it back. The app checks your pronunciation and understanding before moving on."),
+        Mode(icon: "headphones", name: "Repeat Listen",
+             detail: "Hear each sentence in Spanish and recall its meaning, then reveal the translation — listening practice, hands-free."),
+        Mode(icon: "play.circle", name: "Origin Listen",
+             detail: "Sit back and listen to the whole story read aloud, sentence by sentence."),
+    ]
+
+    private let keyWordModes: [Mode] = [
+        Mode(icon: "pencil.line", name: "Writing",
+             detail: "Quiz yourself by typing the Spanish for each key word from the comic."),
+        Mode(icon: "mic.fill", name: "Speaking",
+             detail: "Say each key word out loud; the app listens and checks your pronunciation."),
+        Mode(icon: "headphones", name: "Listening",
+             detail: "Hear a key word in Spanish and say what it means in English."),
+    ]
+
+    private let practiceToggles: [Mode] = [
+        Mode(icon: "bubble.left.and.text.bubble.right", name: "Speaking Practice Mode",
+             detail: "Hides the Spanish text while you read, so you try to say each line yourself before revealing it."),
+        Mode(icon: "headphones", name: "Listening Practice Mode",
+             detail: "Hides the text and asks for the English meaning as you read — a listening-first way through the comic."),
+    ]
+
+    var body: some View {
+        NavigationStack {
+            List {
+                section("Sentence Practice", sentenceModes)
+                section("Practice Key Words", keyWordModes)
+                section("Reading and Speaking Practice", practiceToggles)
+            }
+            .navigationTitle("Practice modes")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func section(_ title: String, _ modes: [Mode]) -> some View {
+        Section(title) {
+            ForEach(modes) { mode in
+                HStack(alignment: .top, spacing: 14) {
+                    Image(systemName: mode.icon)
+                        .font(.title3)
+                        .foregroundStyle(.accent)
+                        .frame(width: 28)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(mode.name)
+                            .font(.headline)
+                        Text(mode.detail)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+        }
     }
 }
 

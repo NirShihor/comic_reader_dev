@@ -4,6 +4,7 @@ struct VocabularyView: View {
     @StateObject private var vocabularyManager = VocabularyManager()
     @StateObject private var comicStorage = LocalComicStorage.shared
     @State private var selectedFilter: SavedWord.ReviewState? = nil
+    @StateObject private var help = HelpModeController()
 
     var body: some View {
         Group {
@@ -16,6 +17,13 @@ struct VocabularyView: View {
         .navigationTitle("Vocabulary")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
+                } label: {
+                    Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button("All") { selectedFilter = nil }
                     Button("New") { selectedFilter = .new }
@@ -26,6 +34,8 @@ struct VocabularyView: View {
                 }
             }
         }
+        .helpTooltipLayer()
+        .environmentObject(help)
     }
 
     // MARK: - Empty State
@@ -40,8 +50,19 @@ struct VocabularyView: View {
     // MARK: - Word List
     private var wordList: some View {
         List {
-            ForEach(filteredWords) { savedWord in
-                WordRow(savedWord: savedWord, comics: comicStorage.downloadedComics)
+            if help.isActive {
+                HelpHint(icon: "trash",
+                         label: "Swipe to delete",
+                         title: "Remove a word",
+                         text: "Swipe left on any word in the list to delete it from your vocabulary.",
+                         animatedSwipe: true)
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+            }
+            ForEach(Array(filteredWords.enumerated()), id: \.element.id) { index, savedWord in
+                WordRow(savedWord: savedWord,
+                        comics: comicStorage.downloadedComics,
+                        isFirst: index == 0)
             }
             .onDelete(perform: deleteWords)
         }
@@ -67,6 +88,7 @@ struct VocabularyView: View {
 struct WordRow: View {
     let savedWord: SavedWord
     let comics: [Comic]
+    var isFirst: Bool = false
     @StateObject private var audioManager = AudioManager.shared
     @State private var showingContext = false
     @State private var dummyNavigateToPage: Int? = nil
@@ -122,6 +144,9 @@ struct WordRow: View {
                         .foregroundStyle(.orange)
                 }
                 .buttonStyle(.plain)
+                .explainsIf(isFirst, "Hint",
+                            "Open the comic panel where this word appears, to see it in context.",
+                            id: "vocab.hint")
             }
 
             // Play audio button
@@ -133,6 +158,9 @@ struct WordRow: View {
                         .foregroundStyle(.blue)
                 }
                 .buttonStyle(.plain)
+                .explainsIf(isFirst, "Play",
+                            "Hear this word spoken aloud in Spanish.",
+                            id: "vocab.play")
             }
         }
         .padding(.vertical, 4)

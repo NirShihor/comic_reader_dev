@@ -27,6 +27,7 @@ struct HotspotView: View {
     @State private var showingHint = false
 
     @ObservedObject private var whisperService = WhisperService.shared
+    @StateObject private var help = HelpModeController()
 
     enum TestDirection: String, CaseIterable {
         case enToEs = "EN → Spanish"
@@ -93,12 +94,23 @@ struct HotspotView: View {
                             }
                         }
                         .foregroundColor(isTestMode ? .blue : .orange)
+                        .explains(isTestMode ? "Back" : "Test",
+                                  isTestMode
+                                    ? "Leave the speaking test and return to browsing the slides."
+                                    : "Start a speaking test on these phrases — speak each one and get instant feedback.")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
-                        stopAudio()
-                        dismiss()
+                    HStack(spacing: 16) {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
+                        } label: {
+                            Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
+                        }
+                        Button("Done") {
+                            stopAudio()
+                            dismiss()
+                        }
                     }
                 }
             }
@@ -169,12 +181,21 @@ struct HotspotView: View {
                 }
             }
         }
+        .helpTooltipLayer()
+        .environmentObject(help)
     }
 
     // MARK: - Normal Content
 
     private var normalContent: some View {
         VStack(spacing: 0) {
+            // Swipe affordance (help mode only)
+            HelpHint(icon: "arrow.left.and.right",
+                     label: "Swipe",
+                     title: "Move between slides",
+                     text: "Swipe left or right anywhere on the screen — or use the arrows at the bottom — to move from slide to slide.",
+                     animatedSwipe: true)
+
             // Slide image
             if let slide = currentSlide, let imageUrl = slide.imageUrl {
                 ComicImage(imageName: imageUrl, comicId: comicId)
@@ -216,6 +237,7 @@ struct HotspotView: View {
                                     .foregroundColor(.white)
                                     .cornerRadius(8)
                             }
+                            .explains("Play", "Hear this phrase spoken aloud in Spanish.")
                         }
                         if slide.translationAudioUrl != nil {
                             Button {
@@ -229,6 +251,7 @@ struct HotspotView: View {
                                     .foregroundColor(.white)
                                     .cornerRadius(8)
                             }
+                            .explains("EN", "Hear the English translation of this phrase.")
                         }
                     }
                     .padding(.top, 4)
@@ -252,6 +275,10 @@ struct HotspotView: View {
                                                     .stroke(Color.cyan.opacity(0.4), lineWidth: 1)
                                             )
                                     }
+                                    .explainsIf(word.id == slide.words.first?.id,
+                                                "Look up a word",
+                                                "Tap any word to see its meaning and base form.",
+                                                id: "hotspot.word")
                                 }
                             }
                             .padding(.horizontal)
@@ -314,6 +341,7 @@ struct HotspotView: View {
             .onChange(of: testMode) { _, _ in
                 resetTest()
             }
+            .explains("Test direction", "Choose whether to translate from English into Spanish, or from Spanish into English.")
 
             // Progress
             ProgressView(value: Double(testSlideIndex), total: Double(testSlides.count))
@@ -357,6 +385,7 @@ struct HotspotView: View {
                             }
                         }
                         .disabled(slide.audioUrl == nil)
+                        .explains("Play the phrase", "Tap to hear the Spanish phrase, then say what it means in English.")
 
                         Text("Tap to hear")
                             .font(.caption)
@@ -389,6 +418,7 @@ struct HotspotView: View {
                                     .foregroundStyle(.primary)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
                             }
+                            .explains("Previous", "Go back to the previous phrase.", id: "hotspot.resultPrev")
                         }
 
                         Button {
@@ -402,6 +432,7 @@ struct HotspotView: View {
                                 .foregroundStyle(.white)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
+                        .explains("Next", "Continue to the next phrase, or see your results on the last one.")
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 16)
@@ -448,6 +479,7 @@ struct HotspotView: View {
                             .foregroundStyle(.white)
                     }
                 }
+                .explains("Record", "Tap to start speaking your answer, then tap again to stop and check it.")
 
                 Text(isRecording ? "Tap to stop" : "Tap to speak")
                     .font(.caption)
@@ -464,6 +496,7 @@ struct HotspotView: View {
                 }
                 .foregroundStyle(.secondary)
                 .disabled(testSlideIndex == 0)
+                .explains("Back", "Go back to the previous phrase.")
 
                 if testMode == .enToEs {
                     Button {
@@ -473,6 +506,7 @@ struct HotspotView: View {
                             .font(.subheadline)
                     }
                     .disabled(slide.audioUrl == nil)
+                    .explains("Listen", "Hear the correct Spanish answer spoken aloud.")
                 } else {
                     Button {
                         playSlideAudio(slide, isTranslation: false)
@@ -481,6 +515,7 @@ struct HotspotView: View {
                             .font(.subheadline)
                     }
                     .disabled(slide.audioUrl == nil)
+                    .explains("Replay", "Play the Spanish phrase again.")
                 }
 
                 Button {
@@ -490,6 +525,7 @@ struct HotspotView: View {
                         .font(.subheadline)
                 }
                 .foregroundStyle(.orange)
+                .explains("Hint", "Show the phrase and picture to help you answer.")
 
                 Button {
                     skipSlide()
@@ -498,6 +534,7 @@ struct HotspotView: View {
                         .font(.subheadline)
                 }
                 .foregroundStyle(.secondary)
+                .explains("Skip", "Move on to the next phrase without answering.")
             }
             .padding(.top, 8)
         }
@@ -544,6 +581,7 @@ struct HotspotView: View {
                         Label("Listen", systemImage: "speaker.wave.2.fill")
                     }
                     .buttonStyle(.bordered)
+                    .explains("Listen", "Hear the correct answer spoken aloud.", id: "hotspot.resultListen")
 
                     Button {
                         tryAgain()
@@ -551,6 +589,7 @@ struct HotspotView: View {
                         Label("Try Again", systemImage: "arrow.counterclockwise")
                     }
                     .buttonStyle(.bordered)
+                    .explains("Try Again", "Clear your answer and record this phrase again.", id: "hotspot.resultTryAgain")
                 }
                 .padding(.top, 8)
             }

@@ -62,6 +62,7 @@ struct RepeatListenView: View {
     let comic: Comic
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var audioManager = AudioManager.shared
+    @StateObject private var help = HelpModeController()
 
     @State private var sentences: [PracticeSentence] = []
     @State private var currentIndex = 0
@@ -93,6 +94,17 @@ struct RepeatListenView: View {
         }
         .navigationTitle("Repeat Listen")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
+                } label: {
+                    Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
+                }
+            }
+        }
+        .helpTooltipLayer()
+        .environmentObject(help)
         .onAppear {
             buildSentences()
             synthesizer.delegate = ttsDelegate
@@ -151,6 +163,7 @@ struct RepeatListenView: View {
             .padding(.horizontal, 32)
             .padding(.bottom, 32)
             .disabled(sentences.isEmpty)
+            .explains("Start Listening", "Begin the session. Each sentence plays in Spanish, then its English meaning, then Spanish again.")
         }
     }
 
@@ -185,6 +198,7 @@ struct RepeatListenView: View {
                         .background(.blue)
                         .cornerRadius(16)
                 }
+                .explains("Listen Again", "Replay the whole session from the first sentence.")
 
                 Button {
                     dismiss()
@@ -197,6 +211,7 @@ struct RepeatListenView: View {
                         .background(Color(.systemGray6))
                         .cornerRadius(16)
                 }
+                .explains("Done", "Finish and leave the listening session.")
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 32)
@@ -267,6 +282,7 @@ struct RepeatListenView: View {
                         .foregroundStyle(currentIndex > 0 ? .blue : .gray)
                 }
                 .disabled(currentIndex <= 0)
+                .explains("Back", "Go back to the previous sentence.")
 
                 // Pause/Resume
                 Button {
@@ -280,6 +296,7 @@ struct RepeatListenView: View {
                         .font(.system(size: 56))
                         .foregroundStyle(isPausedState ? .blue : .orange)
                 }
+                .explains("Pause / Resume", "Pause playback, or resume from where you left off.")
 
                 // Skip button
                 Button {
@@ -289,6 +306,7 @@ struct RepeatListenView: View {
                         .font(.title2)
                         .foregroundStyle(.blue)
                 }
+                .explains("Skip", "Jump ahead to the next sentence.")
             }
             .padding(.bottom, 32)
         }

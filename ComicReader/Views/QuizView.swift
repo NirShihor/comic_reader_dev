@@ -16,6 +16,7 @@ struct QuizView: View {
     @State private var dummyNavigateToPage: Int? = nil
     @FocusState private var isAnswerFocused: Bool
     @ObservedObject private var audioManager = AudioManager.shared
+    @StateObject private var help = HelpModeController()
 
     var reviewWords: [ReviewWord] {
         comic.reviewWords ?? []
@@ -76,6 +77,15 @@ struct QuizView: View {
         }
         .navigationTitle("Vocabulary Quiz")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
+                } label: {
+                    Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
+                }
+            }
+        }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 isAnswerFocused = true
@@ -92,6 +102,8 @@ struct QuizView: View {
                 .environmentObject(SettingsManager())
             }
         }
+        .helpTooltipLayer()
+        .environmentObject(help)
     }
 
     // MARK: - Quiz Card
@@ -144,6 +156,7 @@ struct QuizView: View {
                                 .foregroundStyle(.primary)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
+                        .explains("Previous", "Go back to the previous word.", id: "quiz.resultPrev")
                     }
                     Button {
                         nextWord()
@@ -156,6 +169,7 @@ struct QuizView: View {
                             .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
+                    .explains("Next", "Continue to the next word, or see your results on the last one.")
                 }
                 .padding(.horizontal)
             }
@@ -175,6 +189,7 @@ struct QuizView: View {
                 .focused($isAnswerFocused)
                 .onSubmit { checkAnswer() }
                 .padding(.horizontal)
+                .explains("Answer box", "Type the Spanish word for the meaning shown, then check it.")
 
             Button {
                 checkAnswer()
@@ -189,6 +204,7 @@ struct QuizView: View {
             }
             .disabled(userAnswer.isEmpty)
             .padding(.horizontal)
+            .explains("Check Answer", "Submit what you typed and see whether it's correct.")
 
             // Listen, Hint, and Skip buttons
             HStack(spacing: 16) {
@@ -201,6 +217,7 @@ struct QuizView: View {
                 .foregroundStyle(.secondary)
                 .disabled(currentIndex == 0)
                 .opacity(currentIndex == 0 ? 0.3 : 1)
+                .explains("Previous", "Go back to the previous word.")
 
                 Button {
                     playWordAudio()
@@ -208,6 +225,7 @@ struct QuizView: View {
                     Label("Listen", systemImage: "speaker.wave.2")
                         .font(.subheadline)
                 }
+                .explains("Listen", "Hear the correct Spanish word spoken aloud.")
 
                 if contextPanel != nil {
                     Button {
@@ -217,6 +235,7 @@ struct QuizView: View {
                             .font(.subheadline)
                     }
                     .foregroundStyle(.orange)
+                    .explains("Hint", "Open the comic panel where this word appears for context.")
                 }
 
                 Button {
@@ -226,6 +245,7 @@ struct QuizView: View {
                         .font(.subheadline)
                 }
                 .foregroundStyle(.secondary)
+                .explains("Skip", "Move on to the next word without answering.")
             }
         }
     }
@@ -273,6 +293,7 @@ struct QuizView: View {
                         Label("Listen", systemImage: "speaker.wave.2.fill")
                     }
                     .buttonStyle(.bordered)
+                    .explains("Listen", "Hear the correct Spanish word spoken aloud.", id: "quiz.resultListen")
 
                     Button {
                         tryAgain()
@@ -280,6 +301,7 @@ struct QuizView: View {
                         Label("Try Again", systemImage: "arrow.counterclockwise")
                     }
                     .buttonStyle(.bordered)
+                    .explains("Try Again", "Clear your answer and attempt this word again.", id: "quiz.resultTryAgain")
                 }
                 .padding(.top, 8)
             }

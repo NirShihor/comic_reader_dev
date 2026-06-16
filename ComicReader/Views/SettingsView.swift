@@ -49,6 +49,11 @@ struct SettingsView: View {
 
             // About Section
             Section {
+                Label("Tap ? on any screen to see what each button does.",
+                      systemImage: "questionmark.circle.fill")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
                 NavigationLink {
                     Text("Help content")
                         .navigationTitle("Help")

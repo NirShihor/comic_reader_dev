@@ -15,6 +15,7 @@ struct PageView: View {
     @State private var showingSettings = false
     @State private var showDebugZones = false
     @State private var showEndOfEpisode = false
+    @StateObject private var help = HelpModeController()
 
     // Pages sorted by pageNumber for consistent navigation
     private var sortedPages: [Page] {
@@ -147,6 +148,21 @@ struct PageView: View {
                 )
             }
 
+            // Help hints over the page (help mode only, while no panel is open)
+            if selectedPanel == nil {
+                VStack(spacing: 10) {
+                    Spacer()
+                    HelpHint(icon: "hand.tap.fill", label: "Tap a panel",
+                             title: "Open a panel",
+                             text: "Tap any panel on the page to open it and read the dialogue.")
+                    HelpHint(icon: "arrow.left.and.right", label: "Swipe",
+                             title: "Turn the page",
+                             text: "Swipe left or right anywhere on the page — or use the arrows at the top — to move between pages.",
+                             animatedSwipe: true)
+                }
+                .padding(.bottom, 60)
+            }
+
             // Panel view overlay — presented on top of the page instead of as a sheet
             // to avoid iOS sheet presentation scaling the underlying page view
             if let panel = selectedPanel {
@@ -173,6 +189,7 @@ struct PageView: View {
                 .transition(.move(edge: .bottom))
                 .zIndex(1)
             }
+
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
@@ -214,6 +231,12 @@ struct PageView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 12) {
                         Button {
+                            withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
+                        } label: {
+                            Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
+                                .foregroundStyle(.white)
+                        }
+                        Button {
                             showingVocabulary = true
                         } label: {
                             Image(systemName: "bookmark.fill")
@@ -229,6 +252,8 @@ struct PageView: View {
                 }
             }
         }
+        .helpTooltipLayer()
+        .environmentObject(help)
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarBackground(.visible, for: .tabBar)
         .toolbarColorScheme(.light, for: .tabBar)
