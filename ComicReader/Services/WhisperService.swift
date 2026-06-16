@@ -24,6 +24,7 @@ class WhisperService: ObservableObject {
     private var engineRunning = false
     private var configObserver: NSObjectProtocol?
     private var interruptionObserver: NSObjectProtocol?
+    private var routeChangeObserver: NSObjectProtocol?
     private var watchdogTimer: Timer?
     private var attemptStartBufferCount = 0
     private let capture = CaptureBox()
@@ -171,6 +172,23 @@ class WhisperService: ObservableObject {
                 Task { @MainActor in
                     print("[Whisper] Audio configuration changed")
                     self?.scheduleEngineRestart()
+                }
+            }
+        }
+        if routeChangeObserver == nil {
+            routeChangeObserver = NotificationCenter.default.addObserver(
+                forName: AVAudioSession.routeChangeNotification,
+                object: AVAudioSession.sharedInstance(),
+                queue: .main
+            ) { [weak self] _ in
+                Task { @MainActor in
+                    guard let self, self.engineRunning else { return }
+                    // A route change (AirPods in/out) changes the input format.
+                    // Tear the tap down now and rebuild on the new route — this
+                    // fires before the engine's own configuration-change in some
+                    // cases, narrowing the window for a format-mismatch crash.
+                    print("[Whisper] Audio route changed, rebuilding capture")
+                    self.scheduleEngineRestart()
                 }
             }
         }
@@ -602,10 +620,20 @@ final class CaptureBox: @unchecked Sendable {
         bufferCount += 1
         lastBufferAt = Date()
         guard let file else { return }
+        // CRITICAL: AVAudioFile.write(from:) raises an uncatchable Objective-C
+        // exception (NOT a Swift error) when the buffer's format doesn't match
+        // the file's. This happens during an audio route change (e.g. AirPods
+        // connecting) when buffers arrive in the new hardware format before the
+        // file has been swapped — the do/catch below does NOT save us, so we
+        // must reject mismatched buffers up front to avoid crashing the app.
+        let bf = buffer.format, ff = file.processingFormat
+        guard bf.sampleRate == ff.sampleRate, bf.channelCount == ff.channelCount else {
+            return
+        }
         do {
             try file.write(from: buffer)
         } catch {
-            // Format mismatch right after a route change — drop the buffer
+            // Genuine write error — drop the buffer.
         }
     }
 
