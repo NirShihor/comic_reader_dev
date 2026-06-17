@@ -13,13 +13,24 @@ struct PageView: View {
     @State private var navigateToPage: Int?
     @State private var showingVocabulary = false
     @State private var showingSettings = false
-    @State private var showDebugZones = false
     @State private var showEndOfEpisode = false
+    @State private var selectedBubbleIndex: Int?   // open bubble in the floating card
+    @State private var pageImageAspect: CGFloat?   // width/height of the page artwork
     @StateObject private var help = HelpModeController()
 
     // Pages sorted by pageNumber for consistent navigation
     private var sortedPages: [Page] {
         comic.pages.sorted { $0.pageNumber < $1.pageNumber }
+    }
+
+    // Text-bearing bubbles on the current page, in reading order (panel order,
+    // then the bubble order within each panel). These are the tap targets for the
+    // per-bubble reading sheet; sound effects and image bubbles are excluded.
+    private var pageTextBubbles: [Bubble] {
+        currentPage.panels
+            .sorted { $0.panelOrder < $1.panelOrder }
+            .flatMap { $0.bubbles }
+            .filter { $0.isSoundEffect != true && $0.type != .image && !$0.sentences.isEmpty }
     }
 
     init(comic: Comic, page: Page) {
@@ -33,6 +44,34 @@ struct PageView: View {
 
     var currentPage: Page {
         sortedPages[currentPageIndex]
+    }
+
+    // The rectangle the aspect-fit page image actually occupies inside `size`
+    // (centered, with letterbox bars excluded). Used to place tap targets so they
+    // line up with the artwork rather than the full container.
+    private func fittedImageRect(in size: CGSize) -> CGRect {
+        guard let aspect = pageImageAspect, aspect > 0, size.width > 0, size.height > 0 else {
+            return CGRect(origin: .zero, size: size)
+        }
+        if size.width / size.height > aspect {
+            let h = size.height, w = h * aspect
+            return CGRect(x: (size.width - w) / 2, y: 0, width: w, height: h)
+        } else {
+            let w = size.width, h = w / aspect
+            return CGRect(x: 0, y: (size.height - h) / 2, width: w, height: h)
+        }
+    }
+
+    private func loadPageAspect() {
+        let name = currentPage.masterImage
+        let comicId = comic.id
+        Task.detached {
+            let size = ComicImageLoader.shared.loadImage(named: name, forComic: comicId)?.size
+            if let size, size.height > 0 {
+                let aspect = size.width / size.height
+                await MainActor.run { pageImageAspect = aspect }
+            }
+        }
     }
 
     private func goToNextPage() {
@@ -70,66 +109,41 @@ struct PageView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(width: geometry.size.width, height: geometry.size.height)
                     .overlay {
-                        // Panel tap overlay - coordinates are relative to the image
+                        // Tap targets, mapped into the actual aspect-fit image rect
+                        // (so they line up with the artwork, not the letterbox bars).
                         GeometryReader { imageGeometry in
+                            let rect = fittedImageRect(in: imageGeometry.size)
                             ZStack {
-                                // Debug: Show tap zones when enabled (triple-tap to toggle)
-                                if showDebugZones {
+                                if settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode {
+                                    // Practice modes keep the per-panel tap-to-reveal flow.
                                     ForEach(currentPage.panels.sorted { $0.panelOrder < $1.panelOrder }) { panel in
-                                        Rectangle()
-                                            .stroke(Color.red, lineWidth: 2)
-                                            .background(Color.blue.opacity(0.2))
-                                            .frame(
-                                                width: panel.tapZoneWidth * imageGeometry.size.width,
-                                                height: panel.tapZoneHeight * imageGeometry.size.height
-                                            )
-                                            .overlay {
-                                                Text("P\(panel.panelOrder)")
-                                                    .font(.title)
-                                                    .foregroundColor(.white)
-                                                    .shadow(radius: 2)
+                                        Color.clear
+                                            .contentShape(Rectangle())
+                                            .frame(width: panel.tapZoneWidth * rect.width,
+                                                   height: panel.tapZoneHeight * rect.height)
+                                            .position(x: rect.minX + (panel.tapZoneX + panel.tapZoneWidth / 2) * rect.width,
+                                                      y: rect.minY + (panel.tapZoneY + panel.tapZoneHeight / 2) * rect.height)
+                                            .onTapGesture {
+                                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                                withAnimation { selectedPanel = panel }
                                             }
-                                            .position(
-                                                x: (panel.tapZoneX + panel.tapZoneWidth / 2) * imageGeometry.size.width,
-                                                y: (panel.tapZoneY + panel.tapZoneHeight / 2) * imageGeometry.size.height
-                                            )
+                                    }
+                                } else {
+                                    // Normal reading: one tap target per text bubble, padded a
+                                    // little so they're easy to hit.
+                                    ForEach(Array(pageTextBubbles.enumerated()), id: \.element.id) { i, b in
+                                        Color.clear
+                                            .contentShape(Rectangle())
+                                            .frame(width: b.width * rect.width + 16,
+                                                   height: b.height * rect.height + 16)
+                                            .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
+                                                      y: rect.minY + (b.positionY + b.height / 2) * rect.height)
+                                            .onTapGesture {
+                                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                                selectedBubbleIndex = i
+                                            }
                                     }
                                 }
-
-                                // Tap handler
-                                Color.clear
-                                    .contentShape(Rectangle())
-                                    .onTapGesture(count: 3) {
-                                        // Triple-tap to toggle debug zones
-                                        withAnimation {
-                                            showDebugZones.toggle()
-                                        }
-                                    }
-                                    .onTapGesture { location in
-                                        // Convert tap location to normalized coordinates (0-1)
-                                        let normalizedX = location.x / imageGeometry.size.width
-                                        let normalizedY = location.y / imageGeometry.size.height
-
-                                        // Find which panel was tapped
-                                        // Check floating panels first (they render on top), then non-floating
-                                        let floatingPanels = currentPage.panels.filter { $0.floating }.sorted { $0.panelOrder < $1.panelOrder }
-                                        let nonFloatingPanels = currentPage.panels.filter { !$0.floating }.sorted { $0.panelOrder < $1.panelOrder }
-                                        let allPanelsInTapOrder = floatingPanels + nonFloatingPanels
-
-                                        for panel in allPanelsInTapOrder {
-                                            let inXRange = normalizedX >= panel.tapZoneX &&
-                                                          normalizedX <= (panel.tapZoneX + panel.tapZoneWidth)
-                                            let inYRange = normalizedY >= panel.tapZoneY &&
-                                                          normalizedY <= (panel.tapZoneY + panel.tapZoneHeight)
-                                            if inXRange && inYRange {
-                                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                                withAnimation {
-                                                    selectedPanel = panel
-                                                }
-                                                break
-                                            }
-                                        }
-                                    }
                             }
                         }
                     }
@@ -148,13 +162,13 @@ struct PageView: View {
                 )
             }
 
-            // Help hints over the page (help mode only, while no panel is open)
-            if selectedPanel == nil {
+            // Help hints over the page (help mode only, while nothing is open)
+            if selectedPanel == nil && selectedBubbleIndex == nil {
                 VStack(spacing: 10) {
                     Spacer()
-                    HelpHint(icon: "hand.tap.fill", label: "Tap a panel",
-                             title: "Open a panel",
-                             text: "Tap any panel on the page to open it and read the dialogue.")
+                    HelpHint(icon: "hand.tap.fill", label: "Tap a bubble",
+                             title: "Open a speech bubble",
+                             text: "Tap any speech or narration bubble to open its text, translation, grammar and audio — the page stays visible above.")
                     HelpHint(icon: "arrow.left.and.right", label: "Swipe",
                              title: "Turn the page",
                              text: "Swipe left or right anywhere on the page — or use the arrows at the top — to move between pages.",
@@ -188,6 +202,24 @@ struct PageView: View {
                 .environmentObject(settingsManager)
                 .transition(.move(edge: .bottom))
                 .zIndex(1)
+            }
+
+            // Floating, draggable card showing one bubble's content (normal reading).
+            // Lives over the page so the artwork stays visible; drag its header to
+            // move it out of the way.
+            if let idx = selectedBubbleIndex, pageTextBubbles.indices.contains(idx) {
+                FloatingBubbleCard(
+                    comic: comic,
+                    bubbles: pageTextBubbles,
+                    index: Binding(
+                        get: { selectedBubbleIndex ?? 0 },
+                        set: { selectedBubbleIndex = $0 }
+                    ),
+                    onClose: { selectedBubbleIndex = nil }
+                )
+                .environmentObject(settingsManager)
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                .zIndex(2)
             }
 
         }
@@ -258,6 +290,7 @@ struct PageView: View {
         .toolbarBackground(.visible, for: .tabBar)
         .toolbarColorScheme(.light, for: .tabBar)
         .onAppear {
+            loadPageAspect()
             // Save progress when view appears
             progressManager.saveProgress(
                 comicId: comic.id,
@@ -266,6 +299,9 @@ struct PageView: View {
             )
         }
         .onChange(of: currentPageIndex) { _, _ in
+            // Close the bubble card and refresh the artwork aspect for the new page
+            selectedBubbleIndex = nil
+            loadPageAspect()
             // Save progress when page changes
             progressManager.saveProgress(
                 comicId: comic.id,
@@ -364,6 +400,262 @@ struct DisableInteractivePopGesture: UIViewControllerRepresentable {
             super.viewWillDisappear(animated)
             navController?.interactivePopGestureRecognizer?.isEnabled = previousState
         }
+    }
+}
+
+// MARK: - Per-bubble content + sheet (on-page reading, one bubble at a time)
+
+/// A single bubble's reading content — tappable words, show/hide translation,
+/// explain/close grammar, and audio playback with word highlighting. Mirrors the
+/// normal-reading parts of PanelView's bubble card but is self-contained so it
+/// can be shown in a bottom sheet anchored to one bubble. (If we keep this, the
+/// next step is to have PanelView reuse it instead of duplicating.)
+struct BubbleContentView: View {
+    let comic: Comic
+    let bubble: Bubble
+    @EnvironmentObject var settingsManager: SettingsManager
+    @StateObject private var audioManager = AudioManager.shared
+
+    @State private var translationRevealed: Set<String> = []
+    @State private var grammarRevealed: Set<String> = []
+    @State private var playingSentenceId: String?
+    @State private var highlightedWordIndex: Int?
+
+    private var playingSentence: Sentence? {
+        guard let id = playingSentenceId else { return nil }
+        return bubble.sentences.first { $0.id == id }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ForEach(bubble.sentences) { sentence in
+                VStack(alignment: .leading, spacing: 8) {
+                    sentenceText(sentence)
+                    translationRow(sentence)
+                    grammarRow(sentence)
+                    audioRow(sentence)
+                    if sentence.id != bubble.sentences.last?.id { Divider() }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .onChange(of: audioManager.currentTime) { _, _ in
+            if audioManager.isSentencePlayback, let s = playingSentence {
+                highlightedWordIndex = audioManager.currentWordIndex(for: s.words)
+            }
+        }
+        .onChange(of: audioManager.isPlaying) { _, isPlaying in
+            if !isPlaying { highlightedWordIndex = nil; playingSentenceId = nil }
+        }
+        .onChange(of: settingsManager.playbackSpeed) { _, s in
+            audioManager.setPlaybackRate(Float(s))
+        }
+        .onAppear { audioManager.setPlaybackRate(Float(settingsManager.playbackSpeed)) }
+        .onDisappear { audioManager.stop() }
+    }
+
+    @ViewBuilder
+    private func sentenceText(_ sentence: Sentence) -> some View {
+        let displayWords = sentence.words.filter { word in
+            if word.manual == true { return false }
+            if word.startTimeMs == nil && word.text.contains(" ") { return false }
+            return true
+        }
+        let textFont: Font = bubble.fontSize.map { .system(size: CGFloat($0)) } ?? .title3
+        if displayWords.isEmpty {
+            Text(sentence.text).font(textFont).fontWeight(.medium)
+        } else {
+            FlowLayout(spacing: 2) {
+                ForEach(displayWords) { word in
+                    let originalIndex = sentence.words.firstIndex(where: { $0.id == word.id })
+                    WordButton(
+                        word: word,
+                        isHighlighted: playingSentenceId == sentence.id && highlightedWordIndex == originalIndex,
+                        fontSize: bubble.fontSize.map { CGFloat($0) }
+                    )
+                    // In help mode, highlight every word so it's clear they're
+                    // tappable; a tap then explains (rather than opening) the word.
+                    .explains("Tap a word",
+                              "Tap any word to see its meaning and base form, hear it spoken, and save it to your vocabulary.",
+                              id: "bubbleword.\(word.id)")
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func translationRow(_ sentence: Sentence) -> some View {
+        if let translation = sentence.translation,
+           let audioUrl = sentence.audioUrl, !audioUrl.isEmpty {
+            if translationRevealed.contains(sentence.id) {
+                Text(translation).font(.subheadline).foregroundStyle(.secondary)
+            } else {
+                Button {
+                    withAnimation { translationRevealed.insert(sentence.id) }
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Label("Show translation", systemImage: "eye").font(.subheadline).foregroundStyle(.blue)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func grammarRow(_ sentence: Sentence) -> some View {
+        if let note = sentence.grammarNote, !note.isEmpty {
+            if grammarRevealed.contains(sentence.id) {
+                Text(note)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .padding(10)
+                    .padding(.trailing, 20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.purple.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(alignment: .topTrailing) {
+                        Button {
+                            withAnimation { grammarRevealed.remove(sentence.id) }
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.subheadline)
+                                .foregroundStyle(.purple.opacity(0.6))
+                                .padding(6)
+                        }
+                        .accessibilityLabel("Close grammar note")
+                    }
+            } else {
+                Button {
+                    withAnimation { grammarRevealed.insert(sentence.id) }
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Label("Explain grammar", systemImage: "text.book.closed").font(.subheadline).foregroundStyle(.purple)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func audioRow(_ sentence: Sentence) -> some View {
+        if let audioUrl = sentence.audioUrl, !audioUrl.isEmpty {
+            HStack {
+                Button {
+                    if audioManager.isPlaying && playingSentenceId == sentence.id {
+                        audioManager.stop()
+                    } else {
+                        playingSentenceId = sentence.id
+                        audioManager.play(audioUrl, enableHighlighting: true)
+                    }
+                } label: {
+                    let isThis = audioManager.isPlaying && playingSentenceId == sentence.id
+                    Label(isThis ? "Stop" : "Play", systemImage: isThis ? "stop.fill" : "play.fill")
+                        .font(.subheadline).fontWeight(.medium).foregroundStyle(.white)
+                        .padding(.horizontal, 16).padding(.vertical, 10)
+                        .background(isThis ? Color.red : Color.blue)
+                        .clipShape(Capsule())
+                }
+                Spacer()
+                Menu {
+                    Button("0.5x") { settingsManager.playbackSpeed = 0.5 }
+                    Button("0.75x") { settingsManager.playbackSpeed = 0.75 }
+                    Button("1x") { settingsManager.playbackSpeed = 1.0 }
+                    Button("1.25x") { settingsManager.playbackSpeed = 1.25 }
+                } label: {
+                    Text("\(settingsManager.playbackSpeed, specifier: "%.2g")x")
+                        .font(.caption).fontWeight(.medium)
+                        .padding(.horizontal, 12).padding(.vertical, 8)
+                        .background(Color(.systemGray5)).clipShape(Capsule())
+                }
+            }
+        }
+    }
+}
+
+/// A floating, draggable card showing one bubble's content at a time, with a
+/// stepper to move through the page's bubbles. Drag the header to reposition it
+/// anywhere over the page; sits near the bottom by default so the artwork above
+/// stays visible.
+struct FloatingBubbleCard: View {
+    let comic: Comic
+    let bubbles: [Bubble]
+    @Binding var index: Int
+    var onClose: () -> Void
+    @EnvironmentObject var settingsManager: SettingsManager
+
+    @State private var offset: CGSize = .zero
+    @State private var accumulated: CGSize = .zero
+
+    var body: some View {
+        card
+            .frame(maxWidth: 380)
+            .offset(offset)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 30)
+    }
+
+    private var card: some View {
+        VStack(spacing: 0) {
+            header
+            Divider()
+            ScrollView {
+                if bubbles.indices.contains(index) {
+                    BubbleContentView(comic: comic, bubble: bubbles[index])
+                        .id(bubbles[index].id)   // reset per-bubble state when stepping
+                        .padding(14)
+                }
+            }
+            .frame(maxHeight: 340)
+        }
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.25), radius: 14, y: 6)
+    }
+
+    // Drag this bar to move the whole card around the page.
+    private var header: some View {
+        HStack(spacing: 12) {
+            Button { if index > 0 { withAnimation { index -= 1 } } } label: {
+                Image(systemName: "chevron.left.circle.fill").font(.title3)
+            }
+            .disabled(index <= 0)
+
+            Spacer(minLength: 0)
+
+            VStack(spacing: 2) {
+                Image(systemName: "line.3.horizontal")
+                    .font(.caption2).foregroundStyle(.secondary)
+                Text("\(index + 1) of \(bubbles.count)")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+
+            Spacer(minLength: 0)
+
+            Button { if index < bubbles.count - 1 { withAnimation { index += 1 } } } label: {
+                Image(systemName: "chevron.right.circle.fill").font(.title3)
+            }
+            .disabled(index >= bubbles.count - 1)
+
+            Button { onClose() } label: {
+                Image(systemName: "xmark.circle.fill").font(.title3).foregroundStyle(.secondary)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(Color(.secondarySystemBackground))
+        .contentShape(Rectangle())
+        .gesture(
+            DragGesture()
+                .onChanged { v in
+                    offset = CGSize(width: accumulated.width + v.translation.width,
+                                    height: accumulated.height + v.translation.height)
+                }
+                .onEnded { _ in accumulated = offset }
+        )
     }
 }
 
