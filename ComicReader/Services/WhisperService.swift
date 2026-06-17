@@ -447,10 +447,14 @@ class WhisperService: ObservableObject {
         body.append("Content-Disposition: form-data; name=\"model\"\r\n\r\n".data(using: .utf8)!)
         body.append("gpt-4o-transcribe\r\n".data(using: .utf8)!)
 
-        // Add language field
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"language\"\r\n\r\n".data(using: .utf8)!)
-        body.append("\(language)\r\n".data(using: .utf8)!)
+        // Add language field. An empty language means auto-detect (used by Flow
+        // Practice, where the learner may speak the target language OR English
+        // to ask for help).
+        if !language.isEmpty {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"language\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(language)\r\n".data(using: .utf8)!)
+        }
 
         // Add prompt hint to reduce hallucination on short audio
         if let prompt = prompt, !prompt.isEmpty {

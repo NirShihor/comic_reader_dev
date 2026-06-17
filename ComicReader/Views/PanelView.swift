@@ -559,9 +559,24 @@ struct PanelView: View {
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                                 .padding(10)
+                                .padding(.trailing, 20)   // room for the close button
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .background(Color.purple.opacity(0.1))
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .overlay(alignment: .topTrailing) {
+                                    Button {
+                                        withAnimation {
+                                            grammarRevealed.remove(sentence.id)
+                                        }
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                    } label: {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.purple.opacity(0.6))
+                                            .padding(6)
+                                    }
+                                    .accessibilityLabel("Close grammar note")
+                                }
                         } else {
                             Button {
                                 withAnimation {

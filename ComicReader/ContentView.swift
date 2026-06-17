@@ -204,7 +204,9 @@ struct CoachmarkPreviewHarness: View {
             // Smoke-test a rolled-out screen: just launching it exercises the
             // help env wiring (the tooltip layer reads @EnvironmentObject on
             // first render, so a misorder would crash on appear).
-            if ProcessInfo.processInfo.arguments.contains("--practice-help-preview") {
+            if ProcessInfo.processInfo.arguments.contains("--flow-preview") {
+                NavigationStack { FlowPracticeView(comic: comic) }
+            } else if ProcessInfo.processInfo.arguments.contains("--practice-help-preview") {
                 PracticeModesHelpView()
             } else if ProcessInfo.processInfo.arguments.contains("--quiz-preview") {
                 NavigationStack { QuizView(comic: comic) }

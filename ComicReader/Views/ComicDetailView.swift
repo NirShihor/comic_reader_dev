@@ -7,6 +7,7 @@ enum PracticeDestination: Hashable {
     case repeatPractice
     case repeatListen
     case originListen
+    case flowPractice
 }
 
 struct ComicDetailView: View {
@@ -74,6 +75,8 @@ struct ComicDetailView: View {
                 RepeatListenView(comic: comic)
             case .originListen:
                 OriginListenView(comic: comic)
+            case .flowPractice:
+                FlowPracticeView(comic: comic)
             }
         }
         .navigationDestination(item: $selectedPage) { page in
@@ -183,6 +186,13 @@ struct ComicDetailView: View {
                 } label: {
                     Label("Origin Listen", systemImage: "play.circle")
                 }
+                // Flow Practice is hidden until it's ready (AI behaviour / English
+                // handling still being refined). Re-enable by restoring this button.
+                // Button {
+                //     practiceDestination = .flowPractice
+                // } label: {
+                //     Label("Flow Practice", systemImage: "bubble.left.and.bubble.right")
+                // }
             }
 
             Section("Practice Key Words") {
@@ -385,6 +395,9 @@ struct PracticeModesHelpView: View {
              detail: "Hear each sentence in Spanish and recall its meaning, then reveal the translation — listening practice, hands-free."),
         Mode(icon: "play.circle", name: "Origin Listen",
              detail: "Sit back and listen to the whole story read aloud, sentence by sentence."),
+        // Flow Practice hidden until ready — restore alongside the menu button.
+        // Mode(icon: "bubble.left.and.bubble.right", name: "Flow Practice",
+        //      detail: "Have a live chat with the AI that weaves in the words and phrases from this comic — used in new situations, so you have to understand and reply with them."),
     ]
 
     private let keyWordModes: [Mode] = [
