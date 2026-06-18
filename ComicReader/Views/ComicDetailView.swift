@@ -21,6 +21,11 @@ struct ComicDetailView: View {
     @State private var selectedPage: Page?
     @State private var showingDeleteConfirmation = false
     @State private var showingPracticeHelp = false
+    @State private var showPracticeOptions = false
+    @State private var guidedOnScreen = false   // next PageView push is a guided practice run
+    @State private var noSpeaking = false        // practice popup: skip speaking → listening only
+    @State private var openPracticeAfterReading = false  // end-of-episode "Practice" tapped
+    @State private var scrollTopToken = 0                 // bump to scroll the page to the top
     @StateObject private var help = HelpModeController()
 
     private let columns = [
@@ -29,65 +34,88 @@ struct ComicDetailView: View {
     ]
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Header with cover and info
-                headerSection
-                    .padding(.horizontal, 16)
+        scrollContent
+            .overlay { practiceOptionsOverlay }
+            .navigationTitle("")   // shown next to the cover instead — avoid duplicate
+            .navigationBarTitleDisplayMode(.inline)
+            .background(Color(.systemGroupedBackground))
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    trailingToolbar
+                }
+            }
+            .alert("Delete Comic", isPresented: $showingDeleteConfirmation) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    localStorage.deleteComic(comic.id)
+                    progressManager.clearProgress(for: comic.id)
+                    dismiss()
+                }
+            } message: {
+                Text("Delete \"\(comic.title)\"? This will remove it from your device. You can re-download it later.")
+            }
+            .navigationDestination(item: $practiceDestination) { destinationView($0) }
+            .navigationDestination(item: $selectedPage) { page in
+                PageView(comic: comic, page: page, guidedOnScreenPractice: guidedOnScreen,
+                         onRequestPractice: { openPracticeAfterReading = true })
+                    .id(page.id)  // Force new view instance for each page
+            }
+            .onChange(of: selectedPage) { _, newValue in
+                // Once the page view is dismissed, the next open is a normal read again.
+                if newValue == nil {
+                    guidedOnScreen = false
+                    // If they tapped "Practice" at the end of the episode, open the
+                    // practice popup once the page view has finished popping.
+                    if openPracticeAfterReading {
+                        openPracticeAfterReading = false
+                        scrollTopToken += 1   // jump the home page back to the top
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                            withAnimation(.easeInOut(duration: 0.2)) { showPracticeOptions = true }
+                        }
+                    }
+                }
+            }
+            .sheet(isPresented: $showingPracticeHelp) {
+                PracticeModesHelpView()
+            }
+            .helpTooltipLayer()
+            .environmentObject(help)
+    }
 
-                actionButtons
-                    .padding(.horizontal, 16)
+    // Extracted so the `body` modifier chain stays short enough for the Swift
+    // type-checker (a long chain + the destination switch was timing out).
+    private var scrollContent: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: 24) {
+                    headerSection
+                        .padding(.horizontal, 16)
+                        .id("top")
 
-                // Pages grid
-                pagesGrid
+                    actionButtons
+                        .padding(.horizontal, 16)
+
+                    pagesGrid
+                }
+                .padding(.vertical, 16)
             }
-            .padding(.vertical, 16)
-        }
-        .navigationTitle(comic.title)
-        .navigationBarTitleDisplayMode(.inline)
-        .background(Color(.systemGroupedBackground))
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                trailingToolbar
+            .onChange(of: scrollTopToken) { _, _ in
+                withAnimation { proxy.scrollTo("top", anchor: .top) }
             }
         }
-        .alert("Delete Comic", isPresented: $showingDeleteConfirmation) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
-                localStorage.deleteComic(comic.id)
-                progressManager.clearProgress(for: comic.id)
-                dismiss()
-            }
-        } message: {
-            Text("Delete \"\(comic.title)\"? This will remove it from your device. You can re-download it later.")
+    }
+
+    @ViewBuilder
+    private func destinationView(_ destination: PracticeDestination) -> some View {
+        switch destination {
+        case .quiz:          QuizView(comic: comic)
+        case .speaking:      SpeakingTestView(comic: comic)
+        case .listening:     ListeningTestView(comic: comic)
+        case .repeatPractice: RepeatPracticeView(comic: comic)
+        case .repeatListen:  RepeatListenView(comic: comic)
+        case .originListen:  OriginListenView(comic: comic)
+        case .flowPractice:  FlowPracticeView(comic: comic)
         }
-        .navigationDestination(item: $practiceDestination) { destination in
-            switch destination {
-            case .quiz:
-                QuizView(comic: comic)
-            case .speaking:
-                SpeakingTestView(comic: comic)
-            case .listening:
-                ListeningTestView(comic: comic)
-            case .repeatPractice:
-                RepeatPracticeView(comic: comic)
-            case .repeatListen:
-                RepeatListenView(comic: comic)
-            case .originListen:
-                OriginListenView(comic: comic)
-            case .flowPractice:
-                FlowPracticeView(comic: comic)
-            }
-        }
-        .navigationDestination(item: $selectedPage) { page in
-            PageView(comic: comic, page: page)
-                .id(page.id)  // Force new view instance for each page
-        }
-        .sheet(isPresented: $showingPracticeHelp) {
-            PracticeModesHelpView()
-        }
-        .helpTooltipLayer()
-        .environmentObject(help)
     }
 
     // MARK: - Trailing Toolbar
@@ -100,27 +128,10 @@ struct ComicDetailView: View {
                 Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
             }
 
-            if help.isActive {
-                // In help mode the hat explains the practice modes instead of opening the menu.
-                Button {
-                    showingPracticeHelp = true
-                } label: {
-                    Image(systemName: "graduationcap.fill")
-                        .font(.body)
-                        .foregroundStyle(Color.accentColor)
-                        .padding(4)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(Color.accentColor.opacity(0.16))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .strokeBorder(Color.accentColor, lineWidth: 1.5)
-                                )
-                        )
-                }
-            } else {
-                practiceMenu
-            }
+            // The graduation-cap practice menu was removed in favour of the Practice
+            // button + popup. `practiceMenu` and the .quiz/.speaking/.listening
+            // destinations are kept (unused) so the single-word practice can be
+            // wired in elsewhere later.
 
             Button(role: .destructive) {
                 showingDeleteConfirmation = true
@@ -164,6 +175,103 @@ struct ComicDetailView: View {
                     .explains("Start again",
                               "Go back to the first page and read the comic from the beginning.")
             }
+        }
+    }
+
+    // MARK: - Practice Button
+    // A chip styled to match the level tag (same caption font and height), sitting
+    // alongside it. Filled blue with white text so it stays legible in light and
+    // dark mode (an accent fill can resolve to white). Placeholder action for now —
+    // the practice flow is being redesigned next.
+    private var practiceButton: some View {
+        Label("Practice", systemImage: "graduationcap.fill")
+            .font(.caption2)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(Color.blue)
+            .foregroundStyle(.white)
+            .clipShape(Capsule())
+            .fixedSize()
+            .contentShape(Capsule())
+            .onTapGesture {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                withAnimation(.easeInOut(duration: 0.2)) { showPracticeOptions = true }
+            }
+    }
+
+    // MARK: - Practice Options (floating panel)
+    @ViewBuilder
+    private var practiceOptionsOverlay: some View {
+        if showPracticeOptions {
+            ZStack {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) { showPracticeOptions = false }
+                    }
+
+                VStack(spacing: 16) {
+                    Text("Practice")
+                        .font(.headline)
+
+                    Toggle("I don't want to speak", isOn: $noSpeaking)
+                        .font(.subheadline)
+                        .tint(.blue)
+
+                    Button {
+                        // On Screen guided run. With speaking it goes speaking → listening
+                        // through the comic; with "no speaking" it's a listening-only run.
+                        settingsManager.speakingPracticeMode = !noSpeaking
+                        settingsManager.listeningPracticeMode = noSpeaking
+                        guidedOnScreen = true
+                        showPracticeOptions = false
+                        selectedPage = firstPage
+                    } label: {
+                        Text("On Screen")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(Color.blue)
+                            .foregroundStyle(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+
+                    Button {
+                        // Off Screen = Repeat Practice (speak each sentence), or Repeat
+                        // Listen when "I don't want to speak" is on.
+                        showPracticeOptions = false
+                        practiceDestination = noSpeaking ? .repeatListen : .repeatPractice
+                    } label: {
+                        Text("Off Screen")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(Color.purple)
+                            .foregroundStyle(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+                .padding(20)
+                .frame(maxWidth: 300)
+                .background(Color(.secondarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .overlay(alignment: .topTrailing) {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { showPracticeOptions = false }
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.secondary)
+                            .padding(10)
+                    }
+                    .accessibilityLabel("Close")
+                }
+                .shadow(radius: 20)
+                .padding(.horizontal, 40)
+                .transition(.scale(scale: 0.92).combined(with: .opacity))
+            }
+            .zIndex(10)
         }
     }
 
@@ -246,31 +354,43 @@ struct ComicDetailView: View {
 
     // MARK: - Header Section
     private var headerSection: some View {
-        HStack(alignment: .top, spacing: 16) {
-            ComicImage(imageName: comic.coverImage, comicId: comic.id)
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 118)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .shadow(radius: 4)
+        VStack(alignment: .leading, spacing: 12) {
+            // Title spans the full width on its own line so long names don't get
+            // squeezed into the narrow column beside the cover.
+            Text(comic.title)
+                .font(.title2)
+                .fontWeight(.bold)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text(comic.title)
-                    .font(.title2)
-                    .fontWeight(.bold)
+            // Cover on the left; description + badges on the right, both starting
+            // at the same top edge (below the title).
+            HStack(alignment: .top, spacing: 16) {
+                ComicImage(imageName: comic.coverImage, comicId: comic.id)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 118)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(radius: 4)
 
-                Text(comic.description)
-                    .font(.body)
-                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(comic.description)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
 
-                HStack(spacing: 8) {
-                    Label(comic.level.displayName, systemImage: "chart.bar.fill")
-                        .font(.caption)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(levelColor.opacity(0.2))
-                        .foregroundStyle(levelColor)
-                        .clipShape(Capsule())
-                        .fixedSize()
+                    HStack(spacing: 6) {
+                        Label(comic.level.displayName, systemImage: "chart.bar.fill")
+                            .font(.caption2)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(levelColor.opacity(0.2))
+                            .foregroundStyle(levelColor)
+                            .clipShape(Capsule())
+                            .fixedSize()
+
+                        practiceButton
+                    }
 
                     Label("\(comic.pages.count) pages", systemImage: "book.pages")
                         .font(.caption)

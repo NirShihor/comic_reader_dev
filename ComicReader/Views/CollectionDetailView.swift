@@ -78,43 +78,51 @@ struct EpisodeCard: View {
     let progress: ReadingProgress?
 
     var body: some View {
-        HStack(spacing: 16) {
-            // Episode number
-            Text("\(comic.episodeNumber ?? 0)")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundStyle(.secondary)
-                .frame(width: 32)
-
-            // Cover Image
-            ComicImage(imageName: comic.coverImage, comicId: comic.id)
-                .aspectRatio(contentMode: .fill)
-                .frame(width: 60, height: 90)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-
-            // Info
-            VStack(alignment: .leading, spacing: 4) {
-                Text(comic.title)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.primary)
-
-                Text(comic.description)
-                    .font(.caption)
+        VStack(alignment: .leading, spacing: 12) {
+            // Title above the image, full width so long names never break mid-word.
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("\(comic.episodeNumber ?? 0)")
+                    .font(.headline)
+                    .fontWeight(.bold)
                     .foregroundStyle(.secondary)
-                    .lineLimit(2)
 
-                if progress != nil {
-                    Label("In Progress", systemImage: "book.fill")
-                        .font(.caption2)
-                        .foregroundStyle(.green)
-                }
+                Text(comic.title)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.primary)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.subheadline)
+                    .foregroundStyle(.tertiary)
             }
 
-            Spacer()
+            HStack(alignment: .top, spacing: 16) {
+                // Cover Image (a little larger)
+                ComicImage(imageName: comic.coverImage, comicId: comic.id)
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 80, height: 120)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
 
-            Image(systemName: "chevron.right")
-                .foregroundStyle(.tertiary)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(comic.description)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+
+                    if progress != nil {
+                        Label("In Progress", systemImage: "book.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.green)
+                    }
+                }
+
+                Spacer()
+            }
         }
         .padding()
         .background(Color(.secondarySystemGroupedBackground))

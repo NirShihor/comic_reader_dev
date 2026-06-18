@@ -3,6 +3,12 @@ import SwiftUI
 struct PageView: View {
     let comic: Comic
     let page: Page
+    /// When true, this is a guided "On Screen" practice run: speaking practice
+    /// through the whole comic, then listening practice through the whole comic.
+    var guidedOnScreenPractice: Bool = false
+    /// Called when the reader taps "Practice" at the end of the episode — the
+    /// detail screen uses it to open the practice options once this view pops.
+    var onRequestPractice: (() -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var progressManager: ReadingProgressManager
@@ -14,6 +20,8 @@ struct PageView: View {
     @State private var showingVocabulary = false
     @State private var showingSettings = false
     @State private var showEndOfEpisode = false
+    @State private var showSpeakingDonePrompt = false   // guided: speaking → listening
+    @State private var showOnScreenComplete = false     // guided: all done
     @State private var selectedBubbleIndex: Int?   // open bubble in the floating card
     @State private var pageImageAspect: CGFloat?   // width/height of the page artwork
     @StateObject private var help = HelpModeController()
@@ -33,9 +41,15 @@ struct PageView: View {
             .filter { $0.isSoundEffect != true && $0.type != .image && !$0.sentences.isEmpty }
     }
 
-    init(comic: Comic, page: Page) {
+    private var isPracticeMode: Bool {
+        settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode
+    }
+
+    init(comic: Comic, page: Page, guidedOnScreenPractice: Bool = false, onRequestPractice: (() -> Void)? = nil) {
         self.comic = comic
         self.page = page
+        self.guidedOnScreenPractice = guidedOnScreenPractice
+        self.onRequestPractice = onRequestPractice
         // Initialize currentPageIndex to the correct page in sorted order
         let sorted = comic.pages.sorted { $0.pageNumber < $1.pageNumber }
         let index = sorted.firstIndex(where: { $0.id == page.id }) ?? 0
@@ -76,13 +90,100 @@ struct PageView: View {
 
     private func goToNextPage() {
         guard currentPageIndex < sortedPages.count - 1 else {
-            showEndOfEpisode = true
+            if guidedOnScreenPractice {
+                handleGuidedEnd()
+            } else {
+                showEndOfEpisode = true
+            }
             return
         }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
         withAnimation {
             currentPageIndex += 1
             textRevealed = false
+        }
+    }
+
+    // MARK: - Guided "On Screen" practice (speaking → listening)
+
+    /// Reached the end of the comic during a guided run. After speaking practice,
+    /// offer to start listening practice; after listening, the run is complete.
+    private func handleGuidedEnd() {
+        if settingsManager.speakingPracticeMode {
+            showSpeakingDonePrompt = true
+        } else {
+            showOnScreenComplete = true
+        }
+    }
+
+    private func startListeningPhase() {
+        settingsManager.speakingPracticeMode = false
+        settingsManager.listeningPracticeMode = true
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        withAnimation {
+            currentPageIndex = 0
+            textRevealed = false
+        }
+    }
+
+    private func finishGuidedPractice() {
+        settingsManager.speakingPracticeMode = false
+        settingsManager.listeningPracticeMode = false
+        dismiss()
+    }
+
+    // End-of-episode prompt: nudges toward practice, but with an ✕ (and tap-outside)
+    // to dismiss and stay on the last page. Kept out of `body` to keep it compiling.
+    @ViewBuilder
+    private var endOfEpisodeOverlay: some View {
+        if showEndOfEpisode {
+            ZStack {
+                Color.black.opacity(0.55)
+                    .ignoresSafeArea()
+                    .onTapGesture { withAnimation { showEndOfEpisode = false } }
+
+                VStack(spacing: 16) {
+                    Text("End of Episode")
+                        .font(.headline)
+                    Text("You've reached the end. Ready to practice?")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                    Button {
+                        showEndOfEpisode = false
+                        onRequestPractice?()
+                        dismiss()
+                    } label: {
+                        Text("Practice")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(Color.blue)
+                            .foregroundStyle(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+                .padding(20)
+                .frame(maxWidth: 300)
+                .background(Color(.secondarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .overlay(alignment: .topTrailing) {
+                    Button {
+                        withAnimation { showEndOfEpisode = false }
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.secondary)
+                            .padding(10)
+                    }
+                    .accessibilityLabel("Close")
+                }
+                .shadow(radius: 20)
+                .padding(.horizontal, 40)
+            }
+            .transition(.opacity)
+            .zIndex(3)
         }
     }
 
@@ -100,9 +201,11 @@ struct PageView: View {
             Color.black.ignoresSafeArea()
 
             GeometryReader { geometry in
-                // Page image
-                let imageName = settingsManager.speakingPracticeMode && !textRevealed
-                    ? (currentPage.noTextImage ?? currentPage.masterImage)
+                // Page image. In practice modes show the empty-bubbles art (bubbles
+                // visible, text blank) so they're tappable; fall back to the no-text
+                // art, then the full page, for comics baked before that existed.
+                let imageName = isPracticeMode
+                    ? (currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage)
                     : currentPage.masterImage
 
                 ComicImage(imageName: imageName, comicId: comic.id)
@@ -114,35 +217,21 @@ struct PageView: View {
                         GeometryReader { imageGeometry in
                             let rect = fittedImageRect(in: imageGeometry.size)
                             ZStack {
-                                if settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode {
-                                    // Practice modes keep the per-panel tap-to-reveal flow.
-                                    ForEach(currentPage.panels.sorted { $0.panelOrder < $1.panelOrder }) { panel in
-                                        Color.clear
-                                            .contentShape(Rectangle())
-                                            .frame(width: panel.tapZoneWidth * rect.width,
-                                                   height: panel.tapZoneHeight * rect.height)
-                                            .position(x: rect.minX + (panel.tapZoneX + panel.tapZoneWidth / 2) * rect.width,
-                                                      y: rect.minY + (panel.tapZoneY + panel.tapZoneHeight / 2) * rect.height)
-                                            .onTapGesture {
-                                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                                withAnimation { selectedPanel = panel }
-                                            }
-                                    }
-                                } else {
-                                    // Normal reading: one tap target per text bubble, padded a
-                                    // little so they're easy to hit.
-                                    ForEach(Array(pageTextBubbles.enumerated()), id: \.element.id) { i, b in
-                                        Color.clear
-                                            .contentShape(Rectangle())
-                                            .frame(width: b.width * rect.width + 16,
-                                                   height: b.height * rect.height + 16)
-                                            .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
-                                                      y: rect.minY + (b.positionY + b.height / 2) * rect.height)
-                                            .onTapGesture {
-                                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                                selectedBubbleIndex = i
-                                            }
-                                    }
+                                // One tap target per text bubble. Opens the floating
+                                // card — the same interaction for normal reading and
+                                // for practice (the card shows practice controls when
+                                // a practice mode is on).
+                                ForEach(Array(pageTextBubbles.enumerated()), id: \.element.id) { i, b in
+                                    Color.clear
+                                        .contentShape(Rectangle())
+                                        .frame(width: b.width * rect.width + 16,
+                                               height: b.height * rect.height + 16)
+                                        .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
+                                                  y: rect.minY + (b.positionY + b.height / 2) * rect.height)
+                                        .onTapGesture {
+                                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                            selectedBubbleIndex = i
+                                        }
                                 }
                             }
                         }
@@ -197,7 +286,9 @@ struct PageView: View {
                     },
                     dismissToHome: {
                         dismiss()
-                    }
+                    },
+                    guidedOnScreenPractice: guidedOnScreenPractice,
+                    onGuidedEnd: { handleGuidedEnd() }
                 )
                 .environmentObject(settingsManager)
                 .transition(.move(edge: .bottom))
@@ -222,6 +313,7 @@ struct PageView: View {
                 .zIndex(2)
             }
 
+            endOfEpisodeOverlay
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
@@ -291,12 +383,24 @@ struct PageView: View {
         .toolbarColorScheme(.light, for: .tabBar)
         .onAppear {
             loadPageAspect()
+            // Guided run starts in speaking practice (safety net if not already set).
+            if guidedOnScreenPractice && !settingsManager.speakingPracticeMode && !settingsManager.listeningPracticeMode {
+                settingsManager.speakingPracticeMode = true
+            }
             // Save progress when view appears
             progressManager.saveProgress(
                 comicId: comic.id,
                 pageNumber: currentPage.pageNumber,
                 panelNumber: 0
             )
+        }
+        .onDisappear {
+            // Leaving a guided run (finished or backed out) returns the comic to
+            // normal reading — don't leave a practice mode stuck on.
+            if guidedOnScreenPractice {
+                settingsManager.speakingPracticeMode = false
+                settingsManager.listeningPracticeMode = false
+            }
         }
         .onChange(of: currentPageIndex) { _, _ in
             // Close the bubble card and refresh the artwork aspect for the new page
@@ -350,13 +454,16 @@ struct PageView: View {
                     }
             }
         }
-        .alert("End of Episode", isPresented: $showEndOfEpisode) {
-            Button("Back to home page") {
-                dismiss()
-            }
-            Button("Stay", role: .cancel) { }
+        .alert("Speaking practice complete", isPresented: $showSpeakingDonePrompt) {
+            Button("Start listening practice") { startListeningPhase() }
+            Button("Finish", role: .cancel) { finishGuidedPractice() }
         } message: {
-            Text("You've reached the last page of this episode.")
+            Text("Now go through the comic again — listen to each sentence and recall its meaning.")
+        }
+        .alert("Practice complete", isPresented: $showOnScreenComplete) {
+            Button("Done") { finishGuidedPractice() }
+        } message: {
+            Text("You've finished speaking and listening practice for this comic. ¡Bien hecho!")
         }
         .background(DisableInteractivePopGesture())
     }
@@ -405,21 +512,41 @@ struct DisableInteractivePopGesture: UIViewControllerRepresentable {
 
 // MARK: - Per-bubble content + sheet (on-page reading, one bubble at a time)
 
-/// A single bubble's reading content — tappable words, show/hide translation,
-/// explain/close grammar, and audio playback with word highlighting. Mirrors the
-/// normal-reading parts of PanelView's bubble card but is self-contained so it
-/// can be shown in a bottom sheet anchored to one bubble. (If we keep this, the
-/// next step is to have PanelView reuse it instead of duplicating.)
+private struct BubblePracticeFeedback {
+    let sentenceId: String
+    let isCorrect: Bool
+    let spokenText: String
+    let expectedText: String
+    let words: [Word]
+}
+
+/// A single bubble's content for the floating card. Handles normal reading
+/// (tappable words, translation, grammar, audio) AND practice modes (speaking:
+/// say the Spanish from the English prompt; listening: recall the meaning) — so
+/// the floating card is the single surface for both, mirroring PanelView's bubble
+/// card. (If kept, the cleanup is to have PanelView reuse this.)
 struct BubbleContentView: View {
     let comic: Comic
     let bubble: Bubble
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var audioManager = AudioManager.shared
+    @StateObject private var whisperService = WhisperService.shared
 
     @State private var translationRevealed: Set<String> = []
     @State private var grammarRevealed: Set<String> = []
+    @State private var textRevealed = false
     @State private var playingSentenceId: String?
     @State private var highlightedWordIndex: Int?
+    @State private var recordingSentenceId: String?
+    @State private var processingSentenceId: String?
+    @State private var practiceFeedback: BubblePracticeFeedback?
+    @State private var practiceSentence: Sentence?
+    @State private var showingError = false
+    @State private var errorMessage = ""
+
+    private var isPracticeMode: Bool {
+        settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode
+    }
 
     private var playingSentence: Sentence? {
         guard let id = playingSentenceId else { return nil }
@@ -430,10 +557,16 @@ struct BubbleContentView: View {
         VStack(alignment: .leading, spacing: 12) {
             ForEach(bubble.sentences) { sentence in
                 VStack(alignment: .leading, spacing: 8) {
-                    sentenceText(sentence)
-                    translationRow(sentence)
-                    grammarRow(sentence)
+                    mainText(sentence)
+                    if !isPracticeMode {
+                        translationRow(sentence)
+                        grammarRow(sentence)
+                    }
                     audioRow(sentence)
+                    revealedContent(sentence)
+                    if let fb = practiceFeedback, fb.sentenceId == sentence.id {
+                        feedbackCard(fb)
+                    }
                     if sentence.id != bubble.sentences.last?.id { Divider() }
                 }
             }
@@ -450,12 +583,51 @@ struct BubbleContentView: View {
         .onChange(of: settingsManager.playbackSpeed) { _, s in
             audioManager.setPlaybackRate(Float(s))
         }
-        .onAppear { audioManager.setPlaybackRate(Float(settingsManager.playbackSpeed)) }
-        .onDisappear { audioManager.stop() }
+        .onChange(of: whisperService.error) { _, newError in
+            if let error = newError, whisperService.transcribedText.isEmpty {
+                recordingSentenceId = nil
+                processingSentenceId = nil
+                errorMessage = error
+                showingError = true
+                whisperService.error = nil
+            }
+        }
+        .onAppear {
+            audioManager.setPlaybackRate(Float(settingsManager.playbackSpeed))
+            // In listening mode, auto-play the first sentence so the learner has
+            // something to recall the meaning of.
+            if settingsManager.listeningPracticeMode,
+               let first = bubble.sentences.first, let url = first.audioUrl, !url.isEmpty {
+                playingSentenceId = first.id
+                audioManager.play(url, enableHighlighting: true)
+            }
+        }
+        .onDisappear {
+            audioManager.stop()
+            whisperService.cancelRecording()
+        }
+        .alert("Speech Recognition Error", isPresented: $showingError) {
+            Button("OK", role: .cancel) { }
+        } message: { Text(errorMessage) }
+    }
+
+    // MARK: Main line (prompt differs per mode)
+
+    @ViewBuilder
+    private func mainText(_ sentence: Sentence) -> some View {
+        if settingsManager.speakingPracticeMode {
+            Text(sentence.translation ?? "")
+                .font(.title3).fontWeight(.medium)
+        } else if settingsManager.listeningPracticeMode {
+            Text("What is the English meaning?")
+                .font(.subheadline).foregroundStyle(.secondary).italic()
+        } else {
+            wordsLine(sentence, highlight: true)
+        }
     }
 
     @ViewBuilder
-    private func sentenceText(_ sentence: Sentence) -> some View {
+    private func wordsLine(_ sentence: Sentence, highlight: Bool) -> some View {
         let displayWords = sentence.words.filter { word in
             if word.manual == true { return false }
             if word.startTimeMs == nil && word.text.contains(" ") { return false }
@@ -470,11 +642,9 @@ struct BubbleContentView: View {
                     let originalIndex = sentence.words.firstIndex(where: { $0.id == word.id })
                     WordButton(
                         word: word,
-                        isHighlighted: playingSentenceId == sentence.id && highlightedWordIndex == originalIndex,
+                        isHighlighted: highlight && playingSentenceId == sentence.id && highlightedWordIndex == originalIndex,
                         fontSize: bubble.fontSize.map { CGFloat($0) }
                     )
-                    // In help mode, highlight every word so it's clear they're
-                    // tappable; a tap then explains (rather than opening) the word.
                     .explains("Tap a word",
                               "Tap any word to see its meaning and base form, hear it spoken, and save it to your vocabulary.",
                               id: "bubbleword.\(word.id)")
@@ -482,6 +652,8 @@ struct BubbleContentView: View {
             }
         }
     }
+
+    // MARK: Normal-mode rows
 
     @ViewBuilder
     private func translationRow(_ sentence: Sentence) -> some View {
@@ -535,39 +707,243 @@ struct BubbleContentView: View {
         }
     }
 
+    // MARK: Audio / practice controls
+
     @ViewBuilder
     private func audioRow(_ sentence: Sentence) -> some View {
         if let audioUrl = sentence.audioUrl, !audioUrl.isEmpty {
-            HStack {
-                Button {
-                    if audioManager.isPlaying && playingSentenceId == sentence.id {
-                        audioManager.stop()
-                    } else {
-                        playingSentenceId = sentence.id
-                        audioManager.play(audioUrl, enableHighlighting: true)
-                    }
-                } label: {
-                    let isThis = audioManager.isPlaying && playingSentenceId == sentence.id
-                    Label(isThis ? "Stop" : "Play", systemImage: isThis ? "stop.fill" : "play.fill")
-                        .font(.subheadline).fontWeight(.medium).foregroundStyle(.white)
-                        .padding(.horizontal, 16).padding(.vertical, 10)
-                        .background(isThis ? Color.red : Color.blue)
-                        .clipShape(Capsule())
+            HStack(spacing: 10) {
+                if settingsManager.speakingPracticeMode {
+                    micButton(sentence, listening: false)
+                    listenButton(sentence)
+                } else if settingsManager.listeningPracticeMode {
+                    micButton(sentence, listening: true)
+                    listenButton(sentence)
+                } else {
+                    playButton(sentence, audioUrl: audioUrl)
                 }
+                if processingSentenceId == sentence.id { ProgressView() }
                 Spacer()
-                Menu {
-                    Button("0.5x") { settingsManager.playbackSpeed = 0.5 }
-                    Button("0.75x") { settingsManager.playbackSpeed = 0.75 }
-                    Button("1x") { settingsManager.playbackSpeed = 1.0 }
-                    Button("1.25x") { settingsManager.playbackSpeed = 1.25 }
+                speedMenu
+            }
+        }
+    }
+
+    private var speedMenu: some View {
+        Menu {
+            Button("0.5x") { settingsManager.playbackSpeed = 0.5 }
+            Button("0.75x") { settingsManager.playbackSpeed = 0.75 }
+            Button("1x") { settingsManager.playbackSpeed = 1.0 }
+            Button("1.25x") { settingsManager.playbackSpeed = 1.25 }
+        } label: {
+            Text("\(settingsManager.playbackSpeed, specifier: "%.2g")x")
+                .font(.caption).fontWeight(.medium)
+                .padding(.horizontal, 12).padding(.vertical, 8)
+                .background(Color(.systemGray5)).clipShape(Capsule())
+        }
+    }
+
+    private func playButton(_ sentence: Sentence, audioUrl: String) -> some View {
+        Button {
+            if audioManager.isPlaying && playingSentenceId == sentence.id {
+                audioManager.stop()
+            } else {
+                playingSentenceId = sentence.id
+                audioManager.play(audioUrl, enableHighlighting: true)
+            }
+        } label: {
+            let isThis = audioManager.isPlaying && playingSentenceId == sentence.id
+            Label(isThis ? "Stop" : "Play", systemImage: isThis ? "stop.fill" : "play.fill")
+                .font(.subheadline).fontWeight(.medium).foregroundStyle(.white)
+                .padding(.horizontal, 16).padding(.vertical, 10)
+                .background(isThis ? Color.red : Color.blue)
+                .clipShape(Capsule())
+        }
+    }
+
+    private func micButton(_ sentence: Sentence, listening: Bool) -> some View {
+        let isThisRecording = recordingSentenceId == sentence.id
+        return Button {
+            if isThisRecording {
+                if listening { stopListeningRecording(for: sentence) } else { stopRecording(for: sentence) }
+            } else {
+                startRecording(for: sentence)
+            }
+        } label: {
+            Label(isThisRecording ? "Stop" : "Speak", systemImage: isThisRecording ? "stop.fill" : "mic.fill")
+                .font(.subheadline).fontWeight(.medium).foregroundStyle(.white)
+                .padding(.horizontal, 16).padding(.vertical, 10)
+                .background(isThisRecording ? Color.red : Color.blue)
+                .clipShape(Capsule())
+        }
+        .disabled(processingSentenceId != nil || (recordingSentenceId != nil && !isThisRecording))
+    }
+
+    private func listenButton(_ sentence: Sentence) -> some View {
+        let isThis = audioManager.isPlaying && playingSentenceId == sentence.id
+        return Button {
+            if isThis {
+                audioManager.stop()
+            } else {
+                playingSentenceId = sentence.id
+                playAudio(sentence.audioUrl)
+            }
+        } label: {
+            Image(systemName: isThis ? "stop.fill" : "speaker.wave.2.fill")
+                .frame(width: 40, height: 40)
+                .background(isThis ? Color.red : Color.green)
+                .clipShape(Circle())
+                .foregroundStyle(.white)
+        }
+        .disabled(recordingSentenceId == sentence.id || processingSentenceId != nil)
+    }
+
+    // MARK: Revealed text (practice modes)
+
+    @ViewBuilder
+    private func revealedContent(_ sentence: Sentence) -> some View {
+        if isPracticeMode {
+            if textRevealed {
+                if settingsManager.listeningPracticeMode, let translation = sentence.translation {
+                    Text(translation).font(.subheadline).foregroundStyle(.secondary).italic()
+                }
+                wordsLine(sentence, highlight: false)
+                Button {
+                    withAnimation { textRevealed = false }
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
-                    Text("\(settingsManager.playbackSpeed, specifier: "%.2g")x")
-                        .font(.caption).fontWeight(.medium)
-                        .padding(.horizontal, 12).padding(.vertical, 8)
-                        .background(Color(.systemGray5)).clipShape(Capsule())
+                    Label("Hide", systemImage: "eye.slash").font(.subheadline).foregroundStyle(.blue)
+                }
+            } else {
+                Button {
+                    withAnimation { textRevealed = true }
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Label("Reveal", systemImage: "eye").font(.subheadline).foregroundStyle(.blue)
                 }
             }
         }
+    }
+
+    // MARK: Feedback
+
+    private func feedbackCard(_ feedback: BubblePracticeFeedback) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: feedback.isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
+                    .foregroundStyle(feedback.isCorrect ? .green : .red)
+                Text(feedback.isCorrect ? "Correct!" : "Not quite").fontWeight(.semibold)
+            }
+            .font(.headline)
+
+            if !feedback.isCorrect {
+                Text("You said: \"\(feedback.spokenText)\"").font(.subheadline)
+            }
+            Text(settingsManager.listeningPracticeMode ? "Meaning: \(feedback.expectedText)" : "Expected: \(feedback.expectedText)")
+                .font(.subheadline).foregroundStyle(.secondary)
+
+            HStack {
+                Button { playAudio(practiceSentence?.audioUrl) } label: {
+                    Label("Listen", systemImage: "speaker.wave.2.fill").font(.subheadline)
+                }
+                .buttonStyle(.bordered)
+                Button { practiceFeedback = nil } label: {
+                    Label("Try Again", systemImage: "arrow.counterclockwise").font(.subheadline)
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(feedback.isCorrect ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    // MARK: Actions
+
+    private func playAudio(_ url: String?) {
+        guard let url else { return }
+        audioManager.play(url, enableHighlighting: true)
+    }
+
+    private func startRecording(for sentence: Sentence) {
+        practiceSentence = sentence
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        Task {
+            await whisperService.startRecording()
+            if whisperService.isRecording { recordingSentenceId = sentence.id }
+        }
+    }
+
+    private func stopRecording(for sentence: Sentence) {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        recordingSentenceId = nil
+        processingSentenceId = sentence.id
+        Task {
+            let expectedText = sentence.text
+            let spokenText = await whisperService.stopRecording(expectedText: expectedText)
+            if let error = whisperService.error, spokenText.isEmpty {
+                processingSentenceId = nil
+                errorMessage = error; showingError = true; whisperService.error = nil
+                return
+            }
+            whisperService.error = nil
+            let (isCorrect, _) = whisperService.compareText(spoken: spokenText, expected: expectedText)
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            processingSentenceId = nil
+            practiceFeedback = BubblePracticeFeedback(
+                sentenceId: sentence.id, isCorrect: isCorrect,
+                spokenText: spokenText.isEmpty ? "(no speech detected)" : spokenText,
+                expectedText: expectedText, words: sentence.words)
+            playingSentenceId = sentence.id
+            playAudio(sentence.audioUrl)
+        }
+    }
+
+    private func stopListeningRecording(for sentence: Sentence) {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        recordingSentenceId = nil
+        processingSentenceId = sentence.id
+        Task {
+            let expected = sentence.translation ?? ""
+            let spokenText = await whisperService.stopRecording(expectedText: expected, language: "en")
+            if let error = whisperService.error, spokenText.isEmpty {
+                processingSentenceId = nil
+                errorMessage = error; showingError = true; whisperService.error = nil
+                return
+            }
+            whisperService.error = nil
+            let isCorrect = compareEnglishMeaning(spoken: spokenText, expected: expected)
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            processingSentenceId = nil
+            practiceFeedback = BubblePracticeFeedback(
+                sentenceId: sentence.id, isCorrect: isCorrect,
+                spokenText: spokenText.isEmpty ? "(no speech detected)" : spokenText,
+                expectedText: expected, words: sentence.words)
+            playingSentenceId = sentence.id
+            playAudio(sentence.audioUrl)
+        }
+    }
+
+    private func compareEnglishMeaning(spoken: String, expected: String) -> Bool {
+        let s = normalizeEnglish(spoken), e = normalizeEnglish(expected)
+        if s.isEmpty { return false }
+        if s == e || s.contains(e) || e.contains(s) { return true }
+        let (isMatch, score) = whisperService.compareText(spoken: s, expected: e)
+        return isMatch || score >= 0.7
+    }
+
+    private func normalizeEnglish(_ text: String) -> String {
+        var result = text.lowercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: ".", with: "")
+            .replacingOccurrences(of: ",", with: "")
+            .replacingOccurrences(of: "!", with: "")
+            .replacingOccurrences(of: "?", with: "")
+        for prefix in ["the ", "a ", "an "] where result.hasPrefix(prefix) {
+            result = String(result.dropFirst(prefix.count))
+        }
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 

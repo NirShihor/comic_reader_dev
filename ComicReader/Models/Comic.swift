@@ -114,6 +114,7 @@ struct Page: Identifiable, Codable, Hashable {
     let pageNumber: Int
     let masterImage: String
     var noTextImage: String?
+    var emptyBubblesImage: String? = nil   // bubbles drawn, text blank — for practice modes
     let panels: [Panel]
     var hotspots: [Hotspot]?
 }

@@ -8,6 +8,11 @@ struct PanelView: View {
     @Binding var navigateToPage: Int?
     var dismissPanel: (() -> Void)?
     var dismissToHome: (() -> Void)?
+    /// Guided "On Screen" practice run — when the comic ends, hand back to the
+    /// page view to advance phases (speaking → listening) instead of showing the
+    /// end-of-episode alert.
+    var guidedOnScreenPractice: Bool = false
+    var onGuidedEnd: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var audioManager = AudioManager.shared
@@ -28,7 +33,7 @@ struct PanelView: View {
     @State private var selectedHotspot: Hotspot?
     @StateObject private var help = HelpModeController()
 
-    init(comic: Comic, page: Page, panel: Panel, hotspots: [Hotspot] = [], navigateToPage: Binding<Int?>, dismissPanel: (() -> Void)? = nil, dismissToHome: (() -> Void)? = nil) {
+    init(comic: Comic, page: Page, panel: Panel, hotspots: [Hotspot] = [], navigateToPage: Binding<Int?>, dismissPanel: (() -> Void)? = nil, dismissToHome: (() -> Void)? = nil, guidedOnScreenPractice: Bool = false, onGuidedEnd: (() -> Void)? = nil) {
         self.comic = comic
         self.page = page
         self.panel = panel
@@ -36,6 +41,8 @@ struct PanelView: View {
         self._navigateToPage = navigateToPage
         self.dismissPanel = dismissPanel
         self.dismissToHome = dismissToHome
+        self.guidedOnScreenPractice = guidedOnScreenPractice
+        self.onGuidedEnd = onGuidedEnd
         _currentPanelId = State(initialValue: panel.id)
     }
 
@@ -319,6 +326,11 @@ struct PanelView: View {
                 let targetPage = currentPageSortedIndex + 1
                 navigateToPage = targetPage
                 closePanel()
+            } else if guidedOnScreenPractice {
+                // End of comic during a guided run — let the page view advance the
+                // practice phase (speaking → listening) or finish.
+                closePanel()
+                onGuidedEnd?()
             } else {
                 showEndOfEpisode = true
             }

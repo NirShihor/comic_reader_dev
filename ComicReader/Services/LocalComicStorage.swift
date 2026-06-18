@@ -383,6 +383,7 @@ struct PageJSON: Codable {
     let pageNumber: Int
     let masterImage: String
     let noTextImage: String?
+    let emptyBubblesImage: String?
     let panels: [PanelJSON]
     let hotspots: [HotspotJSON]?
 
@@ -392,6 +393,7 @@ struct PageJSON: Codable {
             pageNumber: pageNumber,
             masterImage: masterImage,
             noTextImage: noTextImage,
+            emptyBubblesImage: emptyBubblesImage,
             panels: panels.map { $0.toPanel() },
             hotspots: hotspots?.map { $0.toHotspot() }
         )
