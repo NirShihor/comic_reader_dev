@@ -259,6 +259,7 @@ class LocalComicStorage: ObservableObject {
 struct ComicJSON: Codable {
     let id: String
     let title: String
+    let titleEn: String?
     let description: String
     let coverImage: String
     let level: String
@@ -273,6 +274,7 @@ struct ComicJSON: Codable {
     // Collection fields (optional)
     let collectionId: String?
     let collectionTitle: String?
+    let collectionTitleEn: String?
     let collectionCoverImage: String?
     let episodeNumber: Int?
 
@@ -280,6 +282,7 @@ struct ComicJSON: Codable {
         Comic(
             id: id,
             title: title,
+            titleEn: titleEn,
             description: description,
             coverImage: coverImage,
             level: Comic.DifficultyLevel(rawValue: level) ?? .beginner,
@@ -288,6 +291,7 @@ struct ComicJSON: Codable {
             reviewWords: reviewWords?.map { $0.toReviewWord() },
             collectionId: collectionId,
             collectionTitle: collectionTitle,
+            collectionTitleEn: collectionTitleEn,
             collectionCoverImage: collectionCoverImage,
             episodeNumber: episodeNumber
         )

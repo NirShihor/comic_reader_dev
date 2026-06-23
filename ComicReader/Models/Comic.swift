@@ -130,6 +130,7 @@ struct ReviewWord: Codable, Hashable {
 struct Comic: Identifiable, Codable, Hashable {
     let id: String
     let title: String
+    var titleEn: String?   // optional English title, shown under the Spanish
     let description: String
     let coverImage: String
     let level: DifficultyLevel
@@ -140,6 +141,7 @@ struct Comic: Identifiable, Codable, Hashable {
     // Collection fields (optional — comics without these are standalone)
     var collectionId: String?
     var collectionTitle: String?
+    var collectionTitleEn: String?   // optional English collection title
     var collectionCoverImage: String?
     var episodeNumber: Int?
 
@@ -175,6 +177,11 @@ struct ComicCollection: Identifiable, Hashable {
     let id: String
     let title: String
     let comics: [Comic]
+
+    /// English collection title, derived from the first episode that carries one.
+    var titleEn: String? {
+        comics.compactMap { $0.collectionTitleEn }.first
+    }
 
     /// The comic that provides the collection cover (prefers collection cover, falls back to first comic)
     private var coverComic: Comic? {

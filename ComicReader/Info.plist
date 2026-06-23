@@ -24,6 +24,11 @@
 	<string>We need microphone access to record your Spanish pronunciation for speaking practice.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>We use speech recognition to help you practice Spanish pronunciation.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>ComicRelief-Regular.ttf</string>
+		<string>ComicRelief-Bold.ttf</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

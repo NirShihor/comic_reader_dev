@@ -172,6 +172,15 @@ struct StoreComicCard: View {
         storeService.downloadState(for: comic.id)
     }
 
+    private var openLabel: some View {
+        Label("Open", systemImage: "book.fill")
+            .font(.subheadline)
+            .lineLimit(1)
+            .fixedSize()
+            .padding(.horizontal, 24)
+            .padding(.vertical, 8)
+    }
+
     private var coverSize: (width: CGFloat, height: CGFloat) {
         compact ? (60, 90) : (80, 120)
     }
@@ -207,16 +216,24 @@ struct StoreComicCard: View {
 
                 // Info
                 VStack(alignment: .leading, spacing: compact ? 4 : 8) {
-                    HStack {
+                    HStack(alignment: .firstTextBaseline) {
                         if let ep = episodeLabel {
                             Text(ep)
                                 .font(.caption)
                                 .fontWeight(.semibold)
                                 .foregroundStyle(.green)
                         }
-                        Text(comic.title)
-                            .font(compact ? .subheadline.weight(.semibold) : .headline)
-                            .foregroundStyle(.primary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(comic.title)
+                                .font(compact ? .subheadline.weight(.semibold) : .headline)
+                                .foregroundStyle(.primary)
+                            if let titleEn = comic.titleEn, !titleEn.isEmpty {
+                                Text(titleEn)
+                                    .font(compact ? .caption : .subheadline)
+                                    .fontWeight(.regular)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                     }
 
                     // Show collection info only for standalone cards (not inside a group)
@@ -323,18 +340,19 @@ struct StoreComicCard: View {
 
         case .downloaded:
             HStack {
-                Button {
-                    if let downloadedComic = localStorage.downloadedComics.first(where: { $0.id == comic.id }) {
-                        onOpenComic?(downloadedComic)
+                if let downloadedComic = localStorage.downloadedComics.first(where: { $0.id == comic.id }) {
+                    Group {
+                        if let onOpenComic {
+                            Button { onOpenComic(downloadedComic) } label: { openLabel }
+                        } else {
+                            // No explicit handler (used inside the Library) — push
+                            // ComicDetailView directly (robust in mixed nav stacks).
+                            NavigationLink(destination: ComicDetailView(comic: downloadedComic)) { openLabel }
+                        }
                     }
-                } label: {
-                    Label("Open in Library", systemImage: "book.fill")
-                        .font(.subheadline)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 8)
+                    .buttonStyle(.borderedProminent)
+                    .tint(.green)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.green)
 
                 Spacer()
 
@@ -397,6 +415,16 @@ struct StoreCollectionGroup: View {
     let title: String
     let comics: [StoreComic]
     var onOpenComic: ((Comic) -> Void)?
+    @StateObject private var localStorage = LocalComicStorage.shared
+
+    private var episodesLabel: String {
+        let total = comics.count
+        let downloaded = comics.filter { localStorage.isDownloaded($0.id) }.count
+        if downloaded > 0 && downloaded < total {
+            return "\(total) episodes · \(downloaded) downloaded"
+        }
+        return "\(total) episode\(total == 1 ? "" : "s")"
+    }
 
     private var collectionDescription: String? {
         comics.first?.collectionDescription
@@ -423,11 +451,7 @@ struct StoreCollectionGroup: View {
 
     var body: some View {
         NavigationLink {
-            StoreCollectionDetailView(
-                title: title,
-                comics: comics,
-                onOpenComic: onOpenComic
-            )
+            CollectionDetailView(title: title)
         } label: {
             HStack(spacing: 12) {
                 // Cover image
@@ -460,7 +484,14 @@ struct StoreCollectionGroup: View {
                         .fontWeight(.bold)
                         .foregroundStyle(.primary)
 
-                    Text("\(comics.count) episode\(comics.count == 1 ? "" : "s")")
+                    if let titleEn = comics.first?.collectionTitleEn, !titleEn.isEmpty {
+                        Text(titleEn)
+                            .font(.subheadline)
+                            .fontWeight(.regular)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Text(episodesLabel)
                         .font(.caption)
                         .foregroundStyle(.secondary)
 

@@ -9,12 +9,22 @@ struct PageView: View {
     /// Called when the reader taps "Practice" at the end of the episode — the
     /// detail screen uses it to open the practice options once this view pops.
     var onRequestPractice: (() -> Void)? = nil
+    /// Open this bubble's floating card on appear (e.g. opening a word's context
+    /// from the Vocabulary list).
+    var initialBubbleId: String? = nil
+    /// Transient context views (e.g. Vocabulary) shouldn't move the saved reading
+    /// position; set false to skip progress saving.
+    var savesProgress: Bool = true
+    /// When presented modally (e.g. from Vocabulary), show a "Done" button that
+    /// dismisses, instead of the "home" button used in the normal reading flow.
+    var presentedModally: Bool = false
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var progressManager: ReadingProgressManager
 
     @State private var textRevealed = false
     @State private var selectedPanel: Panel?
+    @State private var selectedHotspot: Hotspot?
     @State private var currentPageIndex: Int
     @State private var navigateToPage: Int?
     @State private var showingVocabulary = false
@@ -45,11 +55,15 @@ struct PageView: View {
         settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode
     }
 
-    init(comic: Comic, page: Page, guidedOnScreenPractice: Bool = false, onRequestPractice: (() -> Void)? = nil) {
+    init(comic: Comic, page: Page, guidedOnScreenPractice: Bool = false, onRequestPractice: (() -> Void)? = nil,
+         initialBubbleId: String? = nil, savesProgress: Bool = true, presentedModally: Bool = false) {
         self.comic = comic
         self.page = page
         self.guidedOnScreenPractice = guidedOnScreenPractice
         self.onRequestPractice = onRequestPractice
+        self.initialBubbleId = initialBubbleId
+        self.savesProgress = savesProgress
+        self.presentedModally = presentedModally
         // Initialize currentPageIndex to the correct page in sorted order
         let sorted = comic.pages.sorted { $0.pageNumber < $1.pageNumber }
         let index = sorted.firstIndex(where: { $0.id == page.id }) ?? 0
@@ -73,6 +87,35 @@ struct PageView: View {
         } else {
             let w = size.width, h = w / aspect
             return CGRect(x: 0, y: (size.height - h) / 2, width: w, height: h)
+        }
+    }
+
+    // A pulsing, tappable hotspot marker mapped into the fitted page-image rect.
+    // Coordinates (x/y/width/height) are fractions of the full page.
+    @ViewBuilder
+    private func hotspotIndicator(_ hotspot: Hotspot, in rect: CGRect) -> some View {
+        let w = hotspot.width * rect.width
+        let h = hotspot.height * rect.height
+        let centerX = rect.minX + (hotspot.x + hotspot.width / 2) * rect.width
+        let centerY = rect.minY + (hotspot.y + hotspot.height / 2) * rect.height
+        let frameColor = Color.fromHex(hotspot.borderColor)
+
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
+            let seconds = timeline.date.timeIntervalSinceReferenceDate
+            let pulse = (sin(seconds * 2.5) + 1.0) / 2.0
+            ZStack {
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(frameColor, lineWidth: 1.5 + pulse * 1.5)
+                    .shadow(color: frameColor.opacity(pulse * 0.8), radius: 4 + pulse * 6)
+                    .opacity(0.3 + pulse * 0.7)
+                Color.clear.contentShape(Rectangle())
+            }
+        }
+        .frame(width: w, height: h)
+        .position(x: centerX, y: centerY)
+        .onTapGesture {
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            selectedHotspot = hotspot
         }
     }
 
@@ -233,6 +276,12 @@ struct PageView: View {
                                             selectedBubbleIndex = i
                                         }
                                 }
+
+                                // Hotspots: pulsing tap markers mapped into the same
+                                // fitted image rect (restored for full-page reading).
+                                ForEach(currentPage.hotspots ?? [], id: \.id) { h in
+                                    hotspotIndicator(h, in: rect)
+                                }
                             }
                         }
                     }
@@ -315,6 +364,9 @@ struct PageView: View {
 
             endOfEpisodeOverlay
         }
+        .sheet(item: $selectedHotspot) { hotspot in
+            HotspotView(hotspot: hotspot, comicId: comic.id)
+        }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
@@ -326,8 +378,14 @@ struct PageView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "house.fill")
-                            .foregroundStyle(.white)
+                        if presentedModally {
+                            Text("Done")
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.white)
+                        } else {
+                            Image(systemName: "house.fill")
+                                .foregroundStyle(.white)
+                        }
                     }
                 }
                 ToolbarItem(placement: .principal) {
@@ -387,12 +445,18 @@ struct PageView: View {
             if guidedOnScreenPractice && !settingsManager.speakingPracticeMode && !settingsManager.listeningPracticeMode {
                 settingsManager.speakingPracticeMode = true
             }
-            // Save progress when view appears
-            progressManager.saveProgress(
-                comicId: comic.id,
-                pageNumber: currentPage.pageNumber,
-                panelNumber: 0
-            )
+            // Open a specific bubble's card (e.g. from a Vocabulary word's context).
+            if let initialBubbleId, let idx = pageTextBubbles.firstIndex(where: { $0.id == initialBubbleId }) {
+                selectedBubbleIndex = idx
+            }
+            // Save progress when view appears (skipped for transient context views).
+            if savesProgress {
+                progressManager.saveProgress(
+                    comicId: comic.id,
+                    pageNumber: currentPage.pageNumber,
+                    panelNumber: 0
+                )
+            }
         }
         .onDisappear {
             // Leaving a guided run (finished or backed out) returns the comic to
@@ -406,12 +470,14 @@ struct PageView: View {
             // Close the bubble card and refresh the artwork aspect for the new page
             selectedBubbleIndex = nil
             loadPageAspect()
-            // Save progress when page changes
-            progressManager.saveProgress(
-                comicId: comic.id,
-                pageNumber: currentPage.pageNumber,
-                panelNumber: 0
-            )
+            // Save progress when page changes (skipped for transient context views).
+            if savesProgress {
+                progressManager.saveProgress(
+                    comicId: comic.id,
+                    pageNumber: currentPage.pageNumber,
+                    panelNumber: 0
+                )
+            }
         }
         .onChange(of: navigateToPage) { _, newPageIndex in
             guard let newPageIndex = newPageIndex else { return }

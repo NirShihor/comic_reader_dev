@@ -27,6 +27,9 @@ struct ComicDetailView: View {
     @State private var openPracticeAfterReading = false  // end-of-episode "Practice" tapped
     @State private var scrollTopToken = 0                 // bump to scroll the page to the top
     @StateObject private var help = HelpModeController()
+    // False until the user opens any comic for the first time, ever. Used to
+    // auto-open the help explainers on that first visit; reachable via "?" after.
+    @AppStorage("hasSeenComic") private var hasSeenComic = false
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -36,10 +39,13 @@ struct ComicDetailView: View {
     var body: some View {
         scrollContent
             .overlay { practiceOptionsOverlay }
-            .navigationTitle("")   // shown next to the cover instead — avoid duplicate
+            .navigationTitle("")   // shown in the header instead — avoid duplicate
             .navigationBarTitleDisplayMode(.inline)
             .background(Color(.systemGroupedBackground))
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    navBarCollectionTitle
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     trailingToolbar
                 }
@@ -80,6 +86,16 @@ struct ComicDetailView: View {
             }
             .helpTooltipLayer()
             .environmentObject(help)
+            .onAppear {
+                // First time the user ever opens a comic, show the help explainers
+                // automatically. Afterwards they're reachable any time via "?".
+                if !hasSeenComic {
+                    hasSeenComic = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        withAnimation(.easeInOut(duration: 0.2)) { help.isActive = true }
+                    }
+                }
+            }
     }
 
     // Extracted so the `body` modifier chain stays short enough for the Swift
@@ -149,33 +165,52 @@ struct ComicDetailView: View {
     }
 
     private var actionButtons: some View {
-        HStack(spacing: 12) {
-            Label(hasProgress ? "Continue" : "Start Reading", systemImage: "book.fill")
-                .font(.subheadline)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .background(.green)
-                .foregroundStyle(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-                .contentShape(Rectangle())
-                .onTapGesture { selectedPage = startingPage }
-                .explains("Start reading",
-                          "Open the comic and start reading — it picks up from where you left off.")
+        // All three share the row equally and shrink to fit side by side.
+        HStack(spacing: 8) {
+            actionButton(hasProgress ? "Continue" : "Start Reading",
+                         icon: "book.fill",
+                         fill: .green, textColor: .white, vPadding: 11) {
+                selectedPage = startingPage
+            }
+            .explains("Start reading",
+                      "Open the comic and start reading — it picks up from where you left off.")
 
             if hasProgress {
-                Label("Start Again", systemImage: "arrow.counterclockwise")
-                    .font(.subheadline)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(Color(.secondarySystemGroupedBackground))
-                    .foregroundStyle(.primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .contentShape(Rectangle())
-                    .onTapGesture { selectedPage = firstPage }
-                    .explains("Start again",
-                              "Go back to the first page and read the comic from the beginning.")
+                actionButton("Restart",
+                             icon: "arrow.counterclockwise",
+                             fill: Color(.secondarySystemGroupedBackground), textColor: .primary) {
+                    selectedPage = firstPage
+                }
+                .explains("Restart",
+                          "Go back to the first page and read the comic from the beginning.")
             }
+
+            actionButton("Practice",
+                         icon: "graduationcap.fill",
+                         fill: .blue, textColor: .white, vPadding: 9) {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                withAnimation(.easeInOut(duration: 0.2)) { showPracticeOptions = true }
+            }
+            .explains("Practice",
+                      "Practice speaking and listening with this comic.")
         }
+    }
+
+    private func actionButton(_ title: String, icon: String, fill: Color,
+                              textColor: Color, vPadding: CGFloat = 10,
+                              action: @escaping () -> Void) -> some View {
+        Label(title, systemImage: icon)
+            .font(.footnote.weight(.medium))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 8)
+            .padding(.vertical, vPadding)
+            .background(fill)
+            .foregroundStyle(textColor)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .contentShape(Rectangle())
+            .onTapGesture(perform: action)
     }
 
     // MARK: - Practice Button
@@ -183,20 +218,15 @@ struct ComicDetailView: View {
     // alongside it. Filled blue with white text so it stays legible in light and
     // dark mode (an accent fill can resolve to white). Placeholder action for now —
     // the practice flow is being redesigned next.
-    private var practiceButton: some View {
-        Label("Practice", systemImage: "graduationcap.fill")
+    private var levelBadge: some View {
+        Label(comic.level.displayName, systemImage: "chart.bar.fill")
             .font(.caption2)
             .padding(.horizontal, 10)
-            .padding(.vertical, 4)
-            .background(Color.blue)
-            .foregroundStyle(.white)
+            .padding(.vertical, 5)
+            .background(levelColor.opacity(0.2))
+            .foregroundStyle(levelColor)
             .clipShape(Capsule())
             .fixedSize()
-            .contentShape(Capsule())
-            .onTapGesture {
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                withAnimation(.easeInOut(duration: 0.2)) { showPracticeOptions = true }
-            }
     }
 
     // MARK: - Practice Options (floating panel)
@@ -214,26 +244,30 @@ struct ComicDetailView: View {
                     Text("Practice")
                         .font(.headline)
 
-                    Toggle("I don't want to speak", isOn: $noSpeaking)
+                    Toggle("I don't want to speak", isOn: $noSpeaking.animation(.easeInOut(duration: 0.2)))
                         .font(.subheadline)
                         .tint(.blue)
 
-                    Button {
-                        // On Screen guided run. With speaking it goes speaking → listening
-                        // through the comic; with "no speaking" it's a listening-only run.
-                        settingsManager.speakingPracticeMode = !noSpeaking
-                        settingsManager.listeningPracticeMode = noSpeaking
-                        guidedOnScreen = true
-                        showPracticeOptions = false
-                        selectedPage = firstPage
-                    } label: {
-                        Text("On Screen")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(Color.blue)
-                            .foregroundStyle(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    // On Screen is a guided speaking→listening run, so it only makes
+                    // sense when the user is willing to speak. With "I don't want to
+                    // speak" on it would be identical to plain reading, so hide it.
+                    if !noSpeaking {
+                        Button {
+                            // On Screen guided run: speaking → listening through the comic.
+                            settingsManager.speakingPracticeMode = true
+                            settingsManager.listeningPracticeMode = false
+                            guidedOnScreen = true
+                            showPracticeOptions = false
+                            selectedPage = firstPage
+                        } label: {
+                            Text("On Screen")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(Color.blue)
+                                .foregroundStyle(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
                     }
 
                     Button {
@@ -352,18 +386,53 @@ struct ComicDetailView: View {
         }
     }
 
+    // Collection (series) name shown in the nav bar — comic view only, so the
+    // collection detail view's bar stays clean.
+    @ViewBuilder
+    private var navBarCollectionTitle: some View {
+        if let collectionTitle = comic.collectionTitle, !collectionTitle.isEmpty {
+            VStack(spacing: 0) {
+                Text(collectionTitle)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.primary)
+                if let collectionTitleEn = comic.collectionTitleEn, !collectionTitleEn.isEmpty {
+                    Text(collectionTitleEn)
+                        .font(.caption2)
+                        .fontWeight(.regular)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+        }
+    }
+
     // MARK: - Header Section
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Title spans the full width on its own line so long names don't get
             // squeezed into the narrow column beside the cover.
-            Text(comic.title)
-                .font(.title2)
-                .fontWeight(.bold)
-                .lineLimit(2)
-                .minimumScaleFactor(0.7)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(comic.title)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                if let titleEn = comic.titleEn, !titleEn.isEmpty {
+                    Text(titleEn)
+                        .font(.title3)
+                        .fontWeight(.regular)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.7)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
 
             // Cover on the left; description + badges on the right, both starting
             // at the same top edge (below the title).
@@ -379,18 +448,7 @@ struct ComicDetailView: View {
                         .font(.body)
                         .foregroundStyle(.secondary)
 
-                    HStack(spacing: 6) {
-                        Label(comic.level.displayName, systemImage: "chart.bar.fill")
-                            .font(.caption2)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(levelColor.opacity(0.2))
-                            .foregroundStyle(levelColor)
-                            .clipShape(Capsule())
-                            .fixedSize()
-
-                        practiceButton
-                    }
+                    levelBadge
 
                     Label("\(comic.pages.count) pages", systemImage: "book.pages")
                         .font(.caption)

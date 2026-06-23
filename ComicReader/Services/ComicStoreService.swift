@@ -5,6 +5,7 @@ import SwiftUI
 struct StoreComic: Identifiable, Codable {
     let id: String
     let title: String
+    let titleEn: String?
     let description: String
     let coverThumbnailUrl: String
     let level: String
@@ -15,15 +16,16 @@ struct StoreComic: Identifiable, Codable {
     let version: String
     let downloadUrl: String
     let collectionTitle: String?
+    let collectionTitleEn: String?
     let episodeNumber: Int?
     let collectionDescription: String?
     let collectionCoverThumbnailUrl: String?
     let order: Int?
 
     enum CodingKeys: String, CodingKey {
-        case id, title, description, coverThumbnailUrl, level
+        case id, title, titleEn, description, coverThumbnailUrl, level
         case totalPages, estimatedMinutes, language, fileSizeMB, version, downloadUrl
-        case collectionTitle, episodeNumber
+        case collectionTitle, collectionTitleEn, episodeNumber
         case collectionDescription, collectionCoverThumbnailUrl
         case order
     }
@@ -32,6 +34,7 @@ struct StoreComic: Identifiable, Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(String.self, forKey: .id)
         title = try container.decode(String.self, forKey: .title)
+        titleEn = try container.decodeIfPresent(String.self, forKey: .titleEn)
         description = try container.decodeIfPresent(String.self, forKey: .description) ?? ""
         coverThumbnailUrl = try container.decodeIfPresent(String.self, forKey: .coverThumbnailUrl) ?? ""
         level = try container.decodeIfPresent(String.self, forKey: .level) ?? "beginner"
@@ -42,20 +45,22 @@ struct StoreComic: Identifiable, Codable {
         version = try container.decodeIfPresent(String.self, forKey: .version) ?? "1.0"
         downloadUrl = try container.decodeIfPresent(String.self, forKey: .downloadUrl) ?? ""
         collectionTitle = try container.decodeIfPresent(String.self, forKey: .collectionTitle)
+        collectionTitleEn = try container.decodeIfPresent(String.self, forKey: .collectionTitleEn)
         episodeNumber = try container.decodeIfPresent(Int.self, forKey: .episodeNumber)
         collectionDescription = try container.decodeIfPresent(String.self, forKey: .collectionDescription)
         collectionCoverThumbnailUrl = try container.decodeIfPresent(String.self, forKey: .collectionCoverThumbnailUrl)
         order = try container.decodeIfPresent(Int.self, forKey: .order)
     }
 
-    init(id: String, title: String, description: String, coverThumbnailUrl: String,
+    init(id: String, title: String, titleEn: String? = nil, description: String, coverThumbnailUrl: String,
          level: String, totalPages: Int, estimatedMinutes: Int, language: String,
          fileSizeMB: Double, version: String, downloadUrl: String,
-         collectionTitle: String? = nil, episodeNumber: Int? = nil,
+         collectionTitle: String? = nil, collectionTitleEn: String? = nil, episodeNumber: Int? = nil,
          collectionDescription: String? = nil, collectionCoverThumbnailUrl: String? = nil,
          order: Int? = nil) {
         self.id = id
         self.title = title
+        self.titleEn = titleEn
         self.description = description
         self.coverThumbnailUrl = coverThumbnailUrl
         self.level = level
@@ -66,6 +71,7 @@ struct StoreComic: Identifiable, Codable {
         self.version = version
         self.downloadUrl = downloadUrl
         self.collectionTitle = collectionTitle
+        self.collectionTitleEn = collectionTitleEn
         self.episodeNumber = episodeNumber
         self.collectionDescription = collectionDescription
         self.collectionCoverThumbnailUrl = collectionCoverThumbnailUrl
@@ -166,9 +172,20 @@ class ComicStoreService: ObservableObject {
         isLoadingCatalog = false
     }
 
-    /// Get download state for a comic
+    /// Get download state for a comic. Transient states (downloading / failed)
+    /// are tracked in `downloadStates`; the persistent truth (downloaded / hidden
+    /// / not-downloaded) is derived from local storage so it stays correct when a
+    /// comic is deleted directly from the Library (which doesn't touch this dict).
     func downloadState(for comicId: String) -> DownloadState {
-        downloadStates[comicId] ?? .notDownloaded
+        if let state = downloadStates[comicId] {
+            switch state {
+            case .downloading, .failed: return state
+            default: break
+            }
+        }
+        if localStorage.isDownloaded(comicId) { return .downloaded }
+        if localStorage.existsOnDevice(comicId) && localStorage.isHidden(comicId) { return .hidden }
+        return .notDownloaded
     }
 
     // MARK: - Downloads

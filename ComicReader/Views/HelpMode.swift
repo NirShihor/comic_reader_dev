@@ -112,6 +112,42 @@ extension View {
             }
             .ignoresSafeArea()
         }
+        // A persistent banner (respecting the safe area) telling the user how to
+        // close help — otherwise the auto-opened explainers look stuck.
+        .overlay(alignment: .bottom) { HelpCloseBanner() }
+    }
+}
+
+/// Shown at the top while help mode is on, so users know to tap "?" to close.
+/// Tapping the banner itself also closes help.
+private struct HelpCloseBanner: View {
+    @EnvironmentObject private var help: HelpModeController
+
+    var body: some View {
+        if help.isActive {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "questionmark")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.blue)
+                        .frame(width: 20, height: 20)
+                        .background(Circle().fill(.white))
+                    Text("Help is on — tap ? (top right) or here to close")
+                        .font(.footnote.weight(.medium))
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Capsule().fill(Color.blue))
+                .shadow(color: .black.opacity(0.2), radius: 6, y: 2)
+            }
+            .buttonStyle(.plain)
+            .padding(.bottom, 10)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
+            .zIndex(100)
+        }
     }
 }
 
@@ -141,7 +177,7 @@ private struct HelpTooltipOverlay: View {
 
             ZStack(alignment: .topLeading) {
                 Triangle()
-                    .fill(Color(.secondarySystemBackground))
+                    .fill(Color.orange)
                     .frame(width: arrowW, height: arrowH)
                     .rotationEffect(.degrees(placeAbove ? 180 : 0))
                     .position(
@@ -169,10 +205,11 @@ private struct HelpTooltipOverlay: View {
         VStack(alignment: .leading, spacing: 3) {
             Text(help.activeTitle)
                 .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.white)
                 .padding(.trailing, 20) // leave room for the close button
             Text(help.activeText)
                 .font(.footnote)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white.opacity(0.9))
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 12)
@@ -180,7 +217,7 @@ private struct HelpTooltipOverlay: View {
         .frame(maxWidth: 240, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color(.secondarySystemBackground))
+                .fill(Color.orange)
                 .shadow(color: .black.opacity(0.18), radius: 10, y: 3)
         )
         .overlay(alignment: .topTrailing) {
@@ -190,7 +227,7 @@ private struct HelpTooltipOverlay: View {
                 Image(systemName: "xmark.circle.fill")
                     .font(.title3)
                     .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white)
             }
             .padding(6)
             .accessibilityLabel("Close")
