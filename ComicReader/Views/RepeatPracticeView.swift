@@ -79,6 +79,7 @@ class TTSDelegate: NSObject, AVSpeechSynthesizerDelegate {
 // MARK: - RepeatPracticeView
 struct RepeatPracticeView: View {
     let comic: Comic
+    @EnvironmentObject private var progressManager: ReadingProgressManager
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var audioManager = AudioManager.shared
     @ObservedObject private var whisperService = WhisperService.shared
@@ -170,6 +171,10 @@ struct RepeatPracticeView: View {
             }
         }
         .onDisappear {
+            // Remember the spot if they left mid-session (not finished / not on start).
+            if state != .completed && state != .idle && !sentences.isEmpty {
+                savePracticeSpot()
+            }
             cleanup()
             teardownRemoteCommands()
             audioManager.onPlaybackFinished = nil
@@ -496,7 +501,9 @@ struct RepeatPracticeView: View {
 
     private func startPractice() {
         guard !sentences.isEmpty else { return }
-        currentIndex = 0
+        // Resume where the last practice run left off (0 if none / already finished).
+        let saved = progressManager.practiceStartIndex(for: comic.id)
+        currentIndex = saved < sentences.count ? saved : 0
         pronunciationCorrect = 0
         meaningCorrect = 0
         totalAttempted = 0
@@ -781,9 +788,11 @@ struct RepeatPracticeView: View {
             self.currentIndex += 1
             if self.currentIndex >= self.sentences.count {
                 self.state = .completed
+                self.clearPracticeSpot()
                 self.stopKeepAlive()
                 self.updateNowPlaying()
             } else {
+                self.savePracticeSpot()
                 self.playCurrentSentence()
             }
         }
@@ -852,10 +861,20 @@ struct RepeatPracticeView: View {
         currentIndex += 1
         if currentIndex >= sentences.count {
             state = .completed
+            clearPracticeSpot()
             updateNowPlaying()
         } else {
+            savePracticeSpot()
             playCurrentSentence()
         }
+    }
+
+    private func savePracticeSpot() {
+        progressManager.savePracticePosition(comicId: comic.id, index: currentIndex, total: sentences.count)
+    }
+
+    private func clearPracticeSpot() {
+        progressManager.clearPracticePosition(for: comic.id)
     }
 
     private func goBack() {

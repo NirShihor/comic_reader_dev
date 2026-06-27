@@ -3,28 +3,48 @@ import SwiftUI
 struct LibraryView: View {
     @EnvironmentObject var progressManager: ReadingProgressManager
     @StateObject private var localStorage = LocalComicStorage.shared
+    @StateObject private var storeService = ComicStoreService.shared
     @State private var comicToDelete: Comic?
     @State private var collectionToDelete: ComicCollection?
+    @State private var searchText = ""
+    @State private var selectedLevel: String? = nil
+    @StateObject private var help = HelpModeController()
+
+    private var showInitialLoader: Bool {
+        localStorage.isLoading && localStorage.downloadedComics.isEmpty
+            && storeService.isLoadingCatalog && storeService.catalog.isEmpty
+    }
+
+    private var showEmptyState: Bool {
+        localStorage.downloadedComics.isEmpty && availableItems.isEmpty && !storeService.isLoadingCatalog
+    }
 
     var body: some View {
         Group {
-            if localStorage.isLoading {
+            if showInitialLoader {
                 ProgressView("Loading...")
-            } else if localStorage.downloadedComics.isEmpty {
+            } else if showEmptyState {
                 emptyState
             } else {
-                comicList
+                list
             }
         }
         .navigationTitle("Library")
         .background(Color(.systemGroupedBackground))
+        .searchable(text: $searchText, prompt: "Search comics")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                HelpModeButton()
+            }
+        }
+        .helpTooltipLayer()
+        .environmentObject(help)
         .task {
-            // Refresh the author-set order from the live catalog so the shelf
-            // re-sorts without needing comics re-exported.
-            await ComicStoreService.shared.fetchCatalog()
+            // Pull the catalog so available comics + author-set order load.
+            await storeService.fetchCatalog()
         }
         .refreshable {
-            await ComicStoreService.shared.fetchCatalog()
+            await storeService.fetchCatalog()
             await localStorage.loadDownloadedComics()
         }
         .alert("Delete Comic", isPresented: Binding(
@@ -61,55 +81,340 @@ struct LibraryView: View {
         }
     }
 
-    private var emptyState: some View {
-        ContentUnavailableView {
-            Label("No Comics Downloaded", systemImage: "books.vertical")
-        } description: {
-            Text("Visit the Store to browse and download comics.")
-        } actions: {
-            Text("Tap the Store tab below")
-                .font(.callout)
-                .foregroundStyle(.secondary)
+    // Indigo brand accent (reserved for primary actions / selected chips).
+    private var accentColor: Color { Color(red: 91/255, green: 91/255, blue: 214/255) }
+
+    /// The most-recently-started downloaded comic, resolved to the library item
+    /// (collection or standalone) it belongs to — so the hero links to the
+    /// collection page when it's part of a series.
+    private var continueItem: (item: LibraryItem, startedComic: Comic, progress: ReadingProgress)? {
+        guard let started = localStorage.downloadedComics
+            .compactMap({ c -> (Comic, ReadingProgress)? in
+                guard let p = progressManager.getProgress(for: c.id) else { return nil }
+                return (c, p)
+            })
+            .max(by: { $0.1.updatedAt < $1.1.updatedAt }) else { return nil }
+
+        let startedComic = started.0
+        let item = localStorage.libraryItems.first { item in
+            switch item {
+            case .standalone(let c): return c.id == startedComic.id
+            case .collection(let col): return col.comics.contains { $0.id == startedComic.id }
+            }
+        }
+        guard let item else { return nil }
+        return (item, startedComic, started.1)
+    }
+
+    @ViewBuilder
+    private func continueHero(_ item: LibraryItem, _ startedComic: Comic, _ progress: ReadingProgress) -> some View {
+        let practicing = progressManager.interactionKind(for: startedComic.id) == "practice"
+        let practicePos = progressManager.practicePosition(for: startedComic.id)
+        let pageTotal = max(startedComic.pages.count, 1)
+
+        // Progress line + bar fraction depend on whether reading or practicing.
+        let practiceLine = practicePos.map { "Sentence \($0.index + 1) of \($0.total)" }
+        let fraction: Double = {
+            if practicing, let p = practicePos, p.total > 0 {
+                return Double(min(p.index, p.total)) / Double(p.total)
+            }
+            return Double(min(progress.pageNumber, pageTotal)) / Double(pageTotal)
+        }()
+
+        switch item {
+        case .standalone(let comic):
+            let line = practicing ? (practiceLine ?? "In practice")
+                                   : "Page \(progress.pageNumber) of \(pageTotal)"
+            NavigationLink(value: comic) {
+                heroCard(coverName: comic.coverImage, coverComicId: comic.id,
+                         title: comic.title, subtitle: comic.titleEn,
+                         line: line, fraction: fraction, practicing: practicing)
+            }
+            .buttonStyle(.plain)
+
+        case .collection(let collection):
+            let totalEpisodes = max(storeService.catalog.filter { $0.collectionTitle == collection.title }.count,
+                                    collection.episodeCount)
+            let episodeLine = "Episode \(startedComic.episodeNumber ?? 1) of \(totalEpisodes)"
+            let line = practicing ? (practiceLine ?? episodeLine) : episodeLine
+            NavigationLink(destination: CollectionDetailView(title: collection.title)) {
+                heroCard(coverName: collection.coverImage, coverComicId: collection.coverComicId,
+                         title: collection.title, subtitle: collection.titleEn,
+                         line: line, fraction: fraction, practicing: practicing)
+            }
+            .buttonStyle(.plain)
         }
     }
 
-    private var comicList: some View {
-        ScrollView {
-            LazyVStack(spacing: 16) {
-                // Storage info
-                storageInfo
+    private func heroCard(coverName: String, coverComicId: String,
+                          title: String, subtitle: String?,
+                          line: String, fraction: Double, practicing: Bool) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            ComicImage(imageName: coverName, comicId: coverComicId)
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 106, height: 148)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
 
-                ForEach(localStorage.libraryItems) { item in
-                    switch item {
-                    case .standalone(let comic):
-                        NavigationLink(value: comic) {
-                            ComicCard(comic: comic, progress: progressManager.getProgress(for: comic.id))
-                        }
-                        .buttonStyle(.plain)
-                        .contextMenu {
-                            Button(role: .destructive) {
-                                comicToDelete = comic
-                            } label: {
-                                Label("Delete", systemImage: "trash")
-                            }
-                        }
+            VStack(alignment: .leading, spacing: 6) {
+                Text(practicing ? "CONTINUE PRACTICING" : "CONTINUE READING")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .tracking(0.5)
+                    .foregroundStyle(accentColor)
 
-                    case .collection(let collection):
-                        NavigationLink(destination: CollectionDetailView(collection: collection)) {
-                            CollectionCard(collection: collection)
+                Text(title)
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                if let subtitle, !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+
+                Text(line)
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+
+                ProgressView(value: fraction, total: 1.0)
+                    .tint(accentColor)
+
+                HStack(spacing: 6) {
+                    Image(systemName: "play.fill").font(.system(size: 12, weight: .bold))
+                    Text(practicing ? "Continue practicing" : "Continue reading")
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 9)
+                .background(accentColor, in: Capsule())
+                .padding(.top, 2)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18))
+        .shadow(color: .black.opacity(0.08), radius: 16, y: 4)
+    }
+
+    private let levelOptions: [(label: String, value: String?)] = [
+        ("All", nil), ("Beginner", "beginner"), ("Intermediate", "intermediate"), ("Advanced", "advanced")
+    ]
+
+    private var levelChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(levelOptions, id: \.label) { option in
+                    let selected = selectedLevel == option.value
+                    Text(option.label)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundStyle(selected ? .white : .secondary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 9)
+                        .background(selected ? accentColor : Color(.secondarySystemGroupedBackground),
+                                    in: Capsule())
+                        .contentShape(Capsule())
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.15)) { selectedLevel = option.value }
                         }
-                        .buttonStyle(.plain)
-                        .contextMenu {
-                            Button(role: .destructive) {
-                                collectionToDelete = collection
-                            } label: {
-                                Label("Delete All Episodes", systemImage: "trash")
-                            }
-                        }
-                    }
                 }
             }
+            .padding(.horizontal, 2)
+            .padding(.vertical, 2)
+        }
+    }
+
+    private var emptyState: some View {
+        ContentUnavailableView {
+            Label("No Comics", systemImage: "books.vertical")
+        } description: {
+            Text("Pull down to refresh, or check your internet connection.")
+        }
+    }
+
+    private var list: some View {
+        ScrollView {
+            LazyVStack(spacing: 16) {
+                if help.isActive {
+                    HelpHint(icon: "books.vertical.fill",
+                             label: "How it works",
+                             title: "Your library",
+                             text: "Collections that have downloaded comics in them sit at the top — tap one to open it. Comics under “Available to download” can be downloaded with the green button. Use the search bar and the level filter to find a comic, and tap “?” any time for help.")
+                }
+
+                // The series/comic the reader has started — shown first, with Continue.
+                if let cont = continueItem {
+                    continueHero(cont.item, cont.startedComic, cont.progress)
+                }
+
+                levelChips
+
+                // Downloaded shelf (your comics) on top.
+                if !localStorage.downloadedComics.isEmpty {
+                    storageInfo
+                    ForEach(filteredLibraryItems) { item in
+                        downloadedRow(item)
+                    }
+                }
+
+                availableSection
+            }
             .padding()
+        }
+    }
+
+    /// Downloaded shelf filtered by the search box + level filter. Without this the
+    /// search only affected the "available to download" section below.
+    private var filteredLibraryItems: [LibraryItem] {
+        // The in-progress item is surfaced by the Continue hero, so drop it here
+        // to avoid showing it twice.
+        let heroId = continueItem?.item.id
+        return localStorage.libraryItems.filter { item in
+            if let heroId, item.id == heroId { return false }
+            // Level filter
+            if let level = selectedLevel {
+                switch item {
+                case .standalone(let c):
+                    if c.level.rawValue != level { return false }
+                case .collection(let col):
+                    if col.level.rawValue != level { return false }
+                }
+            }
+            // Search text (title / English title / description / collection name)
+            guard !searchText.isEmpty else { return true }
+            switch item {
+            case .standalone(let c):
+                return c.title.localizedCaseInsensitiveContains(searchText)
+                    || (c.titleEn ?? "").localizedCaseInsensitiveContains(searchText)
+                    || c.description.localizedCaseInsensitiveContains(searchText)
+            case .collection(let col):
+                return col.title.localizedCaseInsensitiveContains(searchText)
+                    || (col.titleEn ?? "").localizedCaseInsensitiveContains(searchText)
+                    || col.comics.contains { c in
+                        c.title.localizedCaseInsensitiveContains(searchText)
+                            || (c.titleEn ?? "").localizedCaseInsensitiveContains(searchText)
+                    }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func downloadedRow(_ item: LibraryItem) -> some View {
+        switch item {
+        case .standalone(let comic):
+            NavigationLink(value: comic) {
+                ComicCard(comic: comic, progress: progressManager.getProgress(for: comic.id))
+            }
+            .buttonStyle(.plain)
+            .contextMenu {
+                Button(role: .destructive) {
+                    comicToDelete = comic
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
+
+        case .collection(let collection):
+            NavigationLink(destination: CollectionDetailView(title: collection.title)) {
+                CollectionCard(collection: collection)
+            }
+            .buttonStyle(.plain)
+            .contextMenu {
+                Button(role: .destructive) {
+                    collectionToDelete = collection
+                } label: {
+                    Label("Delete All Episodes", systemImage: "trash")
+                }
+            }
+        }
+    }
+
+    // Comics from the catalog that aren't (fully) downloaded yet — shown with the
+    // Store's download cards. Once downloaded they drop out of here and appear in
+    // the shelf above.
+    @ViewBuilder
+    private var availableSection: some View {
+        if storeService.isLoadingCatalog && storeService.catalog.isEmpty {
+            ProgressView()
+                .frame(maxWidth: .infinity)
+                .padding(.vertical)
+        } else if storeService.catalogError != nil && storeService.catalog.isEmpty {
+            if !localStorage.downloadedComics.isEmpty {
+                Text("Couldn't load more comics — pull down to refresh.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 8)
+            }
+        } else if !availableItems.isEmpty {
+            HStack {
+                Text("Available to download")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+            .padding(.top, 8)
+
+            ForEach(availableItems) { item in
+                switch item {
+                case .standalone(let comic):
+                    StoreComicCard(comic: comic, onOpenComic: nil)
+                case .collection(let title, let comics):
+                    StoreCollectionGroup(title: title, comics: comics, onOpenComic: nil)
+                }
+            }
+        }
+    }
+
+    /// Catalog grouped into standalone/collection items, filtered by search/level
+    /// and to exclude what's already fully downloaded, sorted author-order first.
+    private var availableItems: [StoreView.StoreItem] {
+        let downloadedIds = Set(localStorage.downloadedComics.map { $0.id })
+        var comics = storeService.catalog
+
+        if !searchText.isEmpty {
+            comics = comics.filter {
+                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                $0.description.localizedCaseInsensitiveContains(searchText) ||
+                ($0.collectionTitle ?? "").localizedCaseInsensitiveContains(searchText)
+            }
+        }
+        if let level = selectedLevel {
+            comics = comics.filter { $0.level == level }
+        }
+
+        // Group by collection (mirrors StoreView)
+        var items: [StoreView.StoreItem] = []
+        var collectionMap: [String: [StoreComic]] = [:]
+        var collectionOrder: [String] = []
+        for comic in comics {
+            if let collectionTitle = comic.collectionTitle {
+                if collectionMap[collectionTitle] == nil { collectionOrder.append(collectionTitle) }
+                collectionMap[collectionTitle, default: []].append(comic)
+            } else {
+                items.append(.standalone(comic))
+            }
+        }
+        for title in collectionOrder {
+            if let episodes = collectionMap[title] {
+                let sorted = episodes.sorted { ($0.episodeNumber ?? 0) < ($1.episodeNumber ?? 0) }
+                items.append(.collection(title: title, comics: sorted))
+            }
+        }
+
+        // Drop items already fully in the shelf (a collection stays here while it
+        // still has episodes left to download, so you can complete it).
+        items = items.filter { item in
+            switch item {
+            case .standalone(let c): return !downloadedIds.contains(c.id)
+            case .collection(_, let cs): return !cs.contains { downloadedIds.contains($0.id) }
+            }
+        }
+
+        return items.sorted { a, b in
+            if a.sortOrder != b.sortOrder { return a.sortOrder < b.sortOrder }
+            return a.sortTitle.localizedCaseInsensitiveCompare(b.sortTitle) == .orderedAscending
         }
     }
 
@@ -151,15 +456,24 @@ struct ComicCard: View {
             // Cover Image
             ComicImage(imageName: comic.coverImage, comicId: comic.id)
                 .aspectRatio(contentMode: .fill)
-                .frame(width: 80, height: 120)
+                .frame(width: 106, height: 159)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .shadow(radius: 2)
 
             // Info
             VStack(alignment: .leading, spacing: 8) {
-                Text(comic.title)
-                    .font(.headline)
-                    .foregroundStyle(.primary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(comic.title)
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+
+                    if let titleEn = comic.titleEn, !titleEn.isEmpty {
+                        Text(titleEn)
+                            .font(.subheadline)
+                            .fontWeight(.regular)
+                            .foregroundStyle(.secondary)
+                    }
+                }
 
                 Text(comic.description)
                     .font(.subheadline)
@@ -212,35 +526,53 @@ struct ComicCard: View {
 // MARK: - Collection Card
 struct CollectionCard: View {
     let collection: ComicCollection
+    @StateObject private var storeService = ComicStoreService.shared
+
+    // Total episodes from the catalog (falls back to downloaded count offline).
+    private var totalEpisodes: Int {
+        let catalogTotal = storeService.catalog.filter { $0.collectionTitle == collection.title }.count
+        return max(catalogTotal, collection.episodeCount)
+    }
+
+    private var episodesLabel: String {
+        let downloaded = collection.episodeCount
+        if totalEpisodes > downloaded {
+            return "\(downloaded) of \(totalEpisodes) episodes"
+        }
+        return "\(totalEpisodes) episode\(totalEpisodes == 1 ? "" : "s")"
+    }
+
+    // English title: prefer a downloaded episode's value, else the catalog.
+    private var titleEn: String? {
+        collection.titleEn
+            ?? storeService.catalog.first(where: { $0.collectionTitle == collection.title })?.collectionTitleEn
+    }
 
     var body: some View {
         HStack(spacing: 16) {
             // Cover Image (from first episode)
             ComicImage(imageName: collection.coverImage, comicId: collection.coverComicId)
                 .aspectRatio(contentMode: .fill)
-                .frame(width: 80, height: 120)
+                .frame(width: 106, height: 159)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .shadow(radius: 2)
-                .overlay(
-                    Text("\(collection.episodeCount)")
-                        .font(.caption2)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(.green)
-                        .clipShape(Capsule())
-                        .padding(4),
-                    alignment: .topTrailing
-                )
 
             // Info
             VStack(alignment: .leading, spacing: 8) {
-                Text(collection.title)
-                    .font(.headline)
-                    .foregroundStyle(.primary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(collection.title)
+                        .font(.headline)
+                        .foregroundStyle(.primary)
 
-                Text("\(collection.episodeCount) episodes")
+                    if let titleEn = titleEn, !titleEn.isEmpty {
+                        Text(titleEn)
+                            .font(.subheadline)
+                            .fontWeight(.regular)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Text(episodesLabel)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 

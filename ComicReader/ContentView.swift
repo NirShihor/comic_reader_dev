@@ -2,12 +2,11 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectedTab: Tab = .library
-    @State private var comicToOpen: Comic?
     @State private var libraryNavigationPath = NavigationPath()
+    @State private var showSplash = true
 
     enum Tab {
         case library
-        case store
         case vocabulary
         case settings
     }
@@ -25,74 +24,21 @@ struct ContentView: View {
     }
 
     var mainBody: some View {
-        tabs
-            // The Store's "Open in Library" presents the comic full-screen in
-            // its own NavigationStack instead of pushing onto the Library
-            // tab's stack. Programmatic pushes onto an off-screen stack
-            // corrupt its destination table on recent iOS (blank/triangle
-            // destinations, page taps popping to root), especially when the
-            // main thread hangs during the tab switch on large libraries.
-            .fullScreenCover(item: $comicToOpen) { comic in
-                NavigationStack {
-                    ComicDetailView(comic: comic)
-                        .toolbar {
-                            ToolbarItem(placement: .topBarLeading) {
-                                Button {
-                                    comicToOpen = nil
-                                } label: {
-                                    Image(systemName: "xmark")
-                                }
-                            }
-                        }
-                }
+        // Show the splash ALONE first — don't mount the TabView/LibraryView behind
+        // it. On a cold first-download launch, mounting the library kicks off the
+        // catalog fetch + comic loading + image decoding, and that main-thread
+        // contention is what made the spin/typing stutter and mistime. Deferring it
+        // until the splash is done keeps the intro smooth.
+        Group {
+            if showSplash {
+                LandingView(
+                    onGetStarted: { withAnimation(.easeInOut(duration: 0.4)) { showSplash = false } }
+                )
+            } else {
+                tabs
             }
-            .onAppear {
-                #if DEBUG
-                if ProcessInfo.processInfo.arguments.contains("--auto-open-test") {
-                    runAutoOpenTest()
-                }
-                #endif
-            }
-    }
-
-    #if DEBUG
-    // Simulator-only reproduction of the Store -> "Open in Library" flow.
-    private func runAutoOpenTest() {
-        Task { @MainActor in
-            print("[AutoTest] starting")
-            let store = ComicStoreService.shared
-            let storage = LocalComicStorage.shared
-            if storage.downloadedComics.isEmpty {
-                await store.fetchCatalog()
-                print("[AutoTest] catalog: \(store.catalog.count) comics, error: \(store.catalogError ?? "none")")
-                guard let smallest = store.catalog.min(by: { $0.fileSizeMB < $1.fileSizeMB }) else {
-                    print("[AutoTest] FAIL: empty catalog"); return
-                }
-                print("[AutoTest] downloading \(smallest.id) (\(smallest.fileSizeMB) MB)")
-                await store.downloadComic(smallest)
-                print("[AutoTest] download finished, downloadedComics: \(storage.downloadedComics.count)")
-            }
-            guard let comic = storage.downloadedComics.first else {
-                print("[AutoTest] FAIL: nothing downloaded"); return
-            }
-            // Two full open/close cycles — reproduces the repeat-open case.
-            for cycle in 1...2 {
-                selectedTab = .store
-                try? await Task.sleep(nanoseconds: 2_000_000_000)
-                print("[AutoTest] CYCLE \(cycle): simulating Open in Library for \(comic.id)")
-                selectedTab = .library
-                comicToOpen = comic
-                try? await Task.sleep(nanoseconds: 3_000_000_000)
-                print("[AutoTest] CYCLE \(cycle) settled: cover \(comicToOpen == nil ? "CLOSED (FAIL)" : "presented")")
-                if cycle == 1 {
-                    comicToOpen = nil
-                    try? await Task.sleep(nanoseconds: 1_000_000_000)
-                }
-            }
-            print("[AutoTest] complete")
         }
     }
-    #endif
 
     private var tabs: some View {
         TabView(selection: $selectedTab) {
@@ -106,20 +52,6 @@ struct ContentView: View {
                 Label("Library", systemImage: "books.vertical")
             }
             .tag(Tab.library)
-
-            NavigationStack {
-                StoreView(onOpenComic: { comic in
-                    // Presented as a fullScreenCover by ContentView; the
-                    // Library tab is selected behind it so dismissing the
-                    // cover lands the user in their library.
-                    selectedTab = .library
-                    comicToOpen = comic
-                })
-            }
-            .tabItem {
-                Label("Store", systemImage: "bag.fill")
-            }
-            .tag(Tab.store)
 
             NavigationStack {
                 VocabularyView()
@@ -155,10 +87,167 @@ struct ContentView: View {
     }
 }
 
+// MARK: - Landing / Splash
+
+// Design tokens for the landing screen (match the rest of the refresh).
+private enum Brand {
+    static let accent        = Color(red: 0x5B/255, green: 0x5B/255, blue: 0xD6/255) // #5B5BD6
+    static let bg            = Color(red: 0xF4/255, green: 0xF1/255, blue: 0xED/255) // #F4F1ED
+    static let textPrimary   = Color(red: 0x1F/255, green: 0x1B/255, blue: 0x18/255) // #1F1B18
+    static let textSecondary = Color(red: 0x75/255, green: 0x6E/255, blue: 0x67/255) // #756E67
+    static let textTertiary  = Color(red: 0x6B/255, green: 0x63/255, blue: 0x5C/255) // #6B635C
+
+    static func rounded(_ size: CGFloat, _ weight: Font.Weight = .bold) -> Font {
+        .system(size: size, weight: weight, design: .rounded)
+    }
+}
+
+/// First-run / landing screen — COMIGO logo over a curated comic mosaic, warm
+/// wash fading into the app background, indigo "Get started" CTA.
+struct LandingView: View {
+    var onGetStarted: () -> Void = {}
+
+    var body: some View {
+        ZStack {
+            Brand.bg.ignoresSafeArea()
+
+            // 1) Comic mosaic backdrop (top ~66% of the screen)
+            GeometryReader { geo in
+                MosaicBackdrop()
+                    .frame(height: geo.size.height * 0.66)
+                    .clipped()
+                    // Soft warm wash over the panels.
+                    .overlay(
+                        LinearGradient(
+                            colors: [Brand.bg.opacity(0.18), Brand.bg.opacity(0.28)],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+                    // Dissolve the bottom into the page: the mosaic fades to fully
+                    // transparent before its own edge, so there is no line — the
+                    // identical Brand.bg behind shows straight through.
+                    .mask(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white, location: 0.00),
+                                .init(color: .white, location: 0.66),
+                                .init(color: .clear, location: 0.96),
+                            ],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+                    .ignoresSafeArea(edges: .top)
+            }
+
+            // 3) Content, pinned to the bottom
+            VStack(spacing: 0) {
+                Spacer()
+
+                Image("comigo-logo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 226)
+                    .shadow(color: Brand.textPrimary.opacity(0.12), radius: 12, x: 0, y: 6)
+                    .padding(.bottom, 46)
+
+                // Tagline — note the indigo period
+                VStack(spacing: 0) {
+                    Text("Spanish.")
+                    (Text("One comic at a time")
+                        + Text(".").foregroundColor(Brand.accent))
+                }
+                .font(Brand.rounded(27, .heavy))
+                .foregroundColor(Brand.textPrimary)
+                .multilineTextAlignment(.center)
+
+                Text("Read and listen to comics in Spanish, tap sentences and words to understand them and practice out loud.")
+                    .font(.system(size: 15.5))
+                    .foregroundColor(Brand.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(3)
+                    .frame(maxWidth: 280)
+                    .padding(.top, 14)
+
+                Button(action: onGetStarted) {
+                    Text("Get started")
+                        .font(Brand.rounded(16, .heavy))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Brand.accent)
+                        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+                        .shadow(color: Brand.accent.opacity(0.30), radius: 11, x: 0, y: 10)
+                }
+                .padding(.top, 30)
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 46)
+        }
+    }
+}
+
+// MARK: - Mosaic backdrop
+// Two columns of comic tiles. Swap MosaicTile's fill for real cover Images:
+//   MosaicTile { Image("cover_rey").resizable().scaledToFill() }
+// The warm gradient above handles the dimming, so tiles need no overlay of their own.
+private struct MosaicBackdrop: View {
+    var body: some View {
+        HStack(spacing: 6) {
+            VStack(spacing: 6) {
+                MosaicTile(color: Color(red: 0x7C/255, green: 0x5A/255, blue: 0x3A/255)).frame(height: 188)
+                MosaicTile(color: Color(red: 0x3E/255, green: 0x56/255, blue: 0x41/255)).frame(height: 150)
+                MosaicTile(color: Color(red: 0x5C/255, green: 0x73/255, blue: 0x55/255)) // fills remainder
+            }
+            VStack(spacing: 6) {
+                MosaicTile(color: Color(red: 0x9A/255, green: 0x8C/255, blue: 0x72/255)).frame(height: 132)
+                MosaicTile(color: Color(red: 0x2F/255, green: 0x5D/255, blue: 0x62/255)).frame(height: 206)
+                MosaicTile(color: Color(red: 0x5A/255, green: 0x4A/255, blue: 0x6A/255)) // fills remainder
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+}
+
+private struct MosaicTile<Content: View>: View {
+    var color: Color = .gray
+    @ViewBuilder var content: () -> Content
+
+    init(color: Color, @ViewBuilder content: @escaping () -> Content = { EmptyView() }) {
+        self.color = color
+        self.content = content
+    }
+
+    var body: some View {
+        ZStack {
+            color
+            content()
+            // subtle hatch so placeholder tiles read as comic panels (remove with real art)
+            GeometryReader { g in
+                Path { p in
+                    let step: CGFloat = 16
+                    var x = -g.size.height
+                    while x < g.size.width {
+                        p.move(to: CGPoint(x: x, y: 0))
+                        p.addLine(to: CGPoint(x: x + g.size.height, y: g.size.height))
+                        x += step
+                    }
+                }
+                .stroke(Color.white.opacity(0.06), lineWidth: 8)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .clipped()
+    }
+}
+
 #Preview {
     ContentView()
         .environmentObject(SettingsManager())
         .environmentObject(ReadingProgressManager())
+}
+
+#Preview("Landing") {
+    LandingView()
 }
 
 #if DEBUG

@@ -1,0 +1,6 @@
+{
+  "images" : [
+    { "filename" : "landing_western.png", "idiom" : "universal" }
+  ],
+  "info" : { "author" : "xcode", "version" : 1 }
+}

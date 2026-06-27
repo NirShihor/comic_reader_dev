@@ -91,17 +91,16 @@ struct WordRow: View {
     var isFirst: Bool = false
     @StateObject private var audioManager = AudioManager.shared
     @State private var showingContext = false
-    @State private var dummyNavigateToPage: Int? = nil
 
-    /// Find the first comic/page/panel where this word appears
-    private var wordContext: (comic: Comic, page: Page, panel: Panel)? {
+    /// Find the first comic/page/bubble where this word appears
+    private var wordContext: (comic: Comic, page: Page, bubble: Bubble)? {
         for comic in comics {
             for page in comic.pages {
                 for panel in page.panels {
                     for bubble in panel.bubbles {
                         for sentence in bubble.sentences {
                             if sentence.words.contains(where: { $0.id == savedWord.word.id }) {
-                                return (comic, page, panel)
+                                return (comic, page, bubble)
                             }
                         }
                     }
@@ -164,15 +163,19 @@ struct WordRow: View {
             }
         }
         .padding(.vertical, 4)
-        .sheet(isPresented: $showingContext) {
+        .fullScreenCover(isPresented: $showingContext) {
             if let context = wordContext {
-                PanelView(
-                    comic: context.comic,
-                    page: context.page,
-                    panel: context.panel,
-                    navigateToPage: $dummyNavigateToPage
-                )
+                NavigationStack {
+                    PageView(
+                        comic: context.comic,
+                        page: context.page,
+                        initialBubbleId: context.bubble.id,
+                        savesProgress: false,
+                        presentedModally: true
+                    )
+                }
                 .environmentObject(SettingsManager())
+                .environmentObject(ReadingProgressManager())
             }
         }
     }

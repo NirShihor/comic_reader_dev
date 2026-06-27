@@ -259,8 +259,11 @@ class LocalComicStorage: ObservableObject {
 struct ComicJSON: Codable {
     let id: String
     let title: String
+    let titleEn: String?
     let description: String
     let coverImage: String
+    let coverLandscape: String?
+    let bannerTitlePosition: String?
     let level: String
     let totalPages: Int
     let estimatedMinutes: Int
@@ -273,6 +276,7 @@ struct ComicJSON: Codable {
     // Collection fields (optional)
     let collectionId: String?
     let collectionTitle: String?
+    let collectionTitleEn: String?
     let collectionCoverImage: String?
     let episodeNumber: Int?
 
@@ -280,14 +284,18 @@ struct ComicJSON: Codable {
         Comic(
             id: id,
             title: title,
+            titleEn: titleEn,
             description: description,
             coverImage: coverImage,
+            coverLandscape: coverLandscape,
+            bannerTitlePosition: bannerTitlePosition,
             level: Comic.DifficultyLevel(rawValue: level) ?? .beginner,
             isPremium: false,
             pages: pages.map { $0.toPage() },
             reviewWords: reviewWords?.map { $0.toReviewWord() },
             collectionId: collectionId,
             collectionTitle: collectionTitle,
+            collectionTitleEn: collectionTitleEn,
             collectionCoverImage: collectionCoverImage,
             episodeNumber: episodeNumber
         )
@@ -383,6 +391,7 @@ struct PageJSON: Codable {
     let pageNumber: Int
     let masterImage: String
     let noTextImage: String?
+    let emptyBubblesImage: String?
     let panels: [PanelJSON]
     let hotspots: [HotspotJSON]?
 
@@ -392,6 +401,7 @@ struct PageJSON: Codable {
             pageNumber: pageNumber,
             masterImage: masterImage,
             noTextImage: noTextImage,
+            emptyBubblesImage: emptyBubblesImage,
             panels: panels.map { $0.toPanel() },
             hotspots: hotspots?.map { $0.toHotspot() }
         )

@@ -21,6 +21,11 @@ struct ComicDetailView: View {
     @State private var selectedPage: Page?
     @State private var showingDeleteConfirmation = false
     @State private var showingPracticeHelp = false
+    @State private var showPracticeOptions = false
+    @State private var showingDrillChooser = false
+    @State private var guidedOnScreen = false   // next PageView push is a guided practice run
+    @State private var openPracticeAfterReading = false  // end-of-episode "Practice" tapped
+    @State private var scrollTopToken = 0                 // bump to scroll the page to the top
     @StateObject private var help = HelpModeController()
 
     private let columns = [
@@ -29,65 +34,116 @@ struct ComicDetailView: View {
     ]
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Header with cover and info
-                headerSection
-                    .padding(.horizontal, 16)
+        scrollContent
+            .overlay { practiceOptionsOverlay }
+            .navigationTitle("")   // shown in the header instead — avoid duplicate
+            .navigationBarTitleDisplayMode(.inline)
+            .background(Color(.systemGroupedBackground))
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    navBarCollectionTitle
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    trailingToolbar
+                }
+            }
+            .alert("Delete Comic", isPresented: $showingDeleteConfirmation) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    localStorage.deleteComic(comic.id)
+                    progressManager.clearProgress(for: comic.id)
+                    dismiss()
+                }
+            } message: {
+                Text("Delete \"\(comic.title)\"? This will remove it from your device. You can re-download it later.")
+            }
+            .navigationDestination(item: $practiceDestination) { destinationView($0) }
+            .onChange(of: practiceDestination) { _, newValue in
+                if newValue != nil {
+                    // Launching practice counts as interacting → Library "Continue";
+                    // also close the practice popup if it was open.
+                    progressManager.touchProgress(comicId: comic.id)
+                    showPracticeOptions = false
+                }
+            }
+            .navigationDestination(item: $selectedPage) { page in
+                PageView(comic: comic, page: page, guidedOnScreenPractice: guidedOnScreen,
+                         onRequestPractice: { openPracticeAfterReading = true })
+                    .id(page.id)  // Force new view instance for each page
+            }
+            .onChange(of: selectedPage) { _, newValue in
+                // Once the page view is dismissed, the next open is a normal read again.
+                if newValue == nil {
+                    guidedOnScreen = false
+                    // If they tapped "Practice" at the end of the episode, open the
+                    // practice popup once the page view has finished popping.
+                    if openPracticeAfterReading {
+                        openPracticeAfterReading = false
+                        scrollTopToken += 1   // jump the home page back to the top
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                            withAnimation(.easeInOut(duration: 0.2)) { showPracticeOptions = true }
+                        }
+                    }
+                }
+            }
+            .sheet(isPresented: $showingPracticeHelp) {
+                PracticeModesHelpView()
+            }
+            .confirmationDialog("Drill the key words", isPresented: $showingDrillChooser, titleVisibility: .visible) {
+                Button("Writing") { practiceDestination = .quiz }
+                if settingsManager.speakingEnabled {
+                    Button("Speaking") { practiceDestination = .speaking }
+                }
+                Button("Listening") { practiceDestination = .listening }
+                Button("Cancel", role: .cancel) { }
+            }
+            .helpTooltipLayer()
+            .environmentObject(help)
+    }
 
-                actionButtons
-                    .padding(.horizontal, 16)
+    // Extracted so the `body` modifier chain stays short enough for the Swift
+    // type-checker (a long chain + the destination switch was timing out).
+    private var scrollContent: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: 24) {
+                    coverBanner
+                        .padding(.horizontal, 16)
+                        .id("top")
 
-                // Pages grid
-                pagesGrid
+                    bannerCaption
+                        .padding(.horizontal, 16)
+
+                    actionButtons
+                        .padding(.horizontal, 16)
+
+                    descriptionParagraph
+                        .padding(.horizontal, 16)
+
+                    practiceSection
+                        .padding(.horizontal, 16)
+
+                    pagesGrid
+                }
+                .padding(.vertical, 16)
             }
-            .padding(.vertical, 16)
-        }
-        .navigationTitle(comic.title)
-        .navigationBarTitleDisplayMode(.inline)
-        .background(Color(.systemGroupedBackground))
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                trailingToolbar
-            }
-        }
-        .alert("Delete Comic", isPresented: $showingDeleteConfirmation) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
-                localStorage.deleteComic(comic.id)
-                progressManager.clearProgress(for: comic.id)
-                dismiss()
-            }
-        } message: {
-            Text("Delete \"\(comic.title)\"? This will remove it from your device. You can re-download it later.")
-        }
-        .navigationDestination(item: $practiceDestination) { destination in
-            switch destination {
-            case .quiz:
-                QuizView(comic: comic)
-            case .speaking:
-                SpeakingTestView(comic: comic)
-            case .listening:
-                ListeningTestView(comic: comic)
-            case .repeatPractice:
-                RepeatPracticeView(comic: comic)
-            case .repeatListen:
-                RepeatListenView(comic: comic)
-            case .originListen:
-                OriginListenView(comic: comic)
-            case .flowPractice:
-                FlowPracticeView(comic: comic)
+            .onChange(of: scrollTopToken) { _, _ in
+                withAnimation { proxy.scrollTo("top", anchor: .top) }
             }
         }
-        .navigationDestination(item: $selectedPage) { page in
-            PageView(comic: comic, page: page)
-                .id(page.id)  // Force new view instance for each page
+    }
+
+    @ViewBuilder
+    private func destinationView(_ destination: PracticeDestination) -> some View {
+        switch destination {
+        case .quiz:          QuizView(comic: comic)
+        case .speaking:      SpeakingTestView(comic: comic)
+        case .listening:     ListeningTestView(comic: comic)
+        case .repeatPractice: RepeatPracticeView(comic: comic)
+        case .repeatListen:  RepeatListenView(comic: comic)
+        case .originListen:  OriginListenView(comic: comic)
+        case .flowPractice:  FlowPracticeView(comic: comic)
         }
-        .sheet(isPresented: $showingPracticeHelp) {
-            PracticeModesHelpView()
-        }
-        .helpTooltipLayer()
-        .environmentObject(help)
     }
 
     // MARK: - Trailing Toolbar
@@ -100,27 +156,10 @@ struct ComicDetailView: View {
                 Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
             }
 
-            if help.isActive {
-                // In help mode the hat explains the practice modes instead of opening the menu.
-                Button {
-                    showingPracticeHelp = true
-                } label: {
-                    Image(systemName: "graduationcap.fill")
-                        .font(.body)
-                        .foregroundStyle(Color.accentColor)
-                        .padding(4)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(Color.accentColor.opacity(0.16))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .strokeBorder(Color.accentColor, lineWidth: 1.5)
-                                )
-                        )
-                }
-            } else {
-                practiceMenu
-            }
+            // The graduation-cap practice menu was removed in favour of the Practice
+            // button + popup. `practiceMenu` and the .quiz/.speaking/.listening
+            // destinations are kept (unused) so the single-word practice can be
+            // wired in elsewhere later.
 
             Button(role: .destructive) {
                 showingDeleteConfirmation = true
@@ -137,33 +176,99 @@ struct ComicDetailView: View {
         progressManager.getProgress(for: comic.id) != nil
     }
 
+    // Indigo brand accent (reserved for primary actions).
+    private var accentColor: Color { Color(red: 91/255, green: 91/255, blue: 214/255) }
+
+    // Whether the most recent interaction with this comic was a practice session,
+    // so the primary button mirrors the Library's "Continue practicing" label.
+    private var lastWasPractice: Bool {
+        hasProgress && progressManager.interactionKind(for: comic.id) == "practice"
+    }
+
     private var actionButtons: some View {
         HStack(spacing: 12) {
-            Label(hasProgress ? "Continue" : "Start Reading", systemImage: "book.fill")
-                .font(.subheadline)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .background(.green)
+            // Primary action — accent, fills the remaining width. Mirrors what the
+            // user was last doing: continue reading, continue practicing, or start.
+            Text(hasProgress ? (lastWasPractice ? "Continue practicing" : "Continue reading") : "Start reading")
+                .font(.system(size: 17, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 15)
+                .background(accentColor, in: RoundedRectangle(cornerRadius: 16))
                 .contentShape(Rectangle())
-                .onTapGesture { selectedPage = startingPage }
+                .onTapGesture {
+                    if lastWasPractice {
+                        withAnimation(.easeInOut(duration: 0.2)) { showPracticeOptions = true }
+                    } else {
+                        startNormalReading(startingPage)
+                    }
+                }
                 .explains("Start reading",
                           "Open the comic and start reading — it picks up from where you left off.")
 
+            // Restart — white, hugs its label.
             if hasProgress {
-                Label("Start Again", systemImage: "arrow.counterclockwise")
-                    .font(.subheadline)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(Color(.secondarySystemGroupedBackground))
+                Text("Restart")
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal, 22)
+                    .padding(.vertical, 15)
+                    .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+                    .shadow(color: .black.opacity(0.06), radius: 3, y: 1)
                     .contentShape(Rectangle())
-                    .onTapGesture { selectedPage = firstPage }
-                    .explains("Start again",
+                    .onTapGesture { startNormalReading(firstPage) }
+                    .explains("Restart",
                               "Go back to the first page and read the comic from the beginning.")
             }
+        }
+    }
+
+
+
+    // MARK: - Practice Options (floating panel)
+    @ViewBuilder
+    private var practiceOptionsOverlay: some View {
+        if showPracticeOptions {
+            ZStack {
+                Rectangle()
+                    .fill(.thickMaterial)   // strong frost so the page behind (incl. the
+                    .ignoresSafeArea()      // inline Practice section) doesn't show through
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) { showPracticeOptions = false }
+                    }
+
+                // Same Practice content as the home (comic-detail) section.
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Practice")
+                            .font(.system(size: 20, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.primary)
+                            .padding(.bottom, 2)
+
+                        practiceOptionsContent
+                    }
+                    .padding(18)
+                }
+                .frame(maxWidth: 360, maxHeight: 560)
+                .background(Color(.systemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .overlay(alignment: .topTrailing) {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { showPracticeOptions = false }
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.secondary)
+                            .padding(10)
+                    }
+                    .accessibilityLabel("Close")
+                }
+                .shadow(radius: 20)
+                .padding(.horizontal, 24)
+                .transition(.scale(scale: 0.92).combined(with: .opacity))
+            }
+            .zIndex(10)
         }
     }
 
@@ -244,44 +349,253 @@ struct ComicDetailView: View {
         }
     }
 
-    // MARK: - Header Section
-    private var headerSection: some View {
-        HStack(alignment: .top, spacing: 16) {
-            ComicImage(imageName: comic.coverImage, comicId: comic.id)
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 118)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .shadow(radius: 4)
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text(comic.title)
-                    .font(.title2)
-                    .fontWeight(.bold)
-
-                Text(comic.description)
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-
-                HStack(spacing: 8) {
-                    Label(comic.level.displayName, systemImage: "chart.bar.fill")
-                        .font(.caption)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(levelColor.opacity(0.2))
-                        .foregroundStyle(levelColor)
-                        .clipShape(Capsule())
-                        .fixedSize()
-
-                    Label("\(comic.pages.count) pages", systemImage: "book.pages")
-                        .font(.caption)
+    // Collection (series) name shown in the nav bar — comic view only, so the
+    // collection detail view's bar stays clean.
+    @ViewBuilder
+    private var navBarCollectionTitle: some View {
+        if let collectionTitle = comic.collectionTitle, !collectionTitle.isEmpty {
+            VStack(spacing: 0) {
+                Text(collectionTitle)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.primary)
+                if let collectionTitleEn = comic.collectionTitleEn, !collectionTitleEn.isEmpty {
+                    Text(collectionTitleEn)
+                        .font(.caption2)
+                        .fontWeight(.regular)
                         .foregroundStyle(.secondary)
-                        .fixedSize()
                 }
             }
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    // MARK: - Cover Banner (image only; title sits below so it never covers art)
+    private var coverBanner: some View {
+        // GeometryReader fixes the box size so the image fills + crops inside it
+        // (top-aligned), instead of the image's intrinsic width leaking out and
+        // widening the whole layout for certain cover aspect ratios.
+        GeometryReader { geo in
+            ComicImage(imageName: comic.coverLandscape ?? comic.coverImage, comicId: comic.id)
+                .aspectRatio(contentMode: .fill)
+                .frame(width: geo.size.width, height: geo.size.height, alignment: .top)
+        }
+        .frame(height: 208)
+        .clipped()
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .shadow(color: .black.opacity(0.08), radius: 16, y: 4)
+    }
+
+    /// Title + English subtitle + level/pages, shown BELOW the banner so it never
+    /// covers the art. Uses adaptive label colours (dark/grey in light mode, white
+    /// in dark mode).
+    private var bannerCaption: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(comic.title)
+                .font(.system(size: 24, weight: .heavy, design: .rounded))
+                .foregroundStyle(.primary)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let titleEn = comic.titleEn, !titleEn.isEmpty {
+                Text(titleEn)
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
+
+            HStack(spacing: 6) {
+                HStack(spacing: 3) {
+                    ForEach(0..<3, id: \.self) { i in
+                        Circle()
+                            .fill(i < levelFilledDots ? Color.primary : Color.primary.opacity(0.25))
+                            .frame(width: 6, height: 6)
+                    }
+                }
+                Text(comic.level.displayName)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Text("· \(comic.pages.count) pages")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.top, 2)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var levelFilledDots: Int {
+        switch comic.level {
+        case .beginner: return 1
+        case .intermediate: return 2
+        case .advanced: return 3
+        }
+    }
+
+    private var descriptionParagraph: some View {
+        Text(comic.description)
+            .font(.body)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - Practice Section (README §5)
+    private var practiceSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("PRACTICE")
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .tracking(0.5)
+                .foregroundStyle(.secondary)
+                .padding(.leading, 4)
+
+            practiceOptionsContent
+        }
+    }
+
+    // Shared by the inline Practice section and the end-of-episode popup, so both
+    // look identical (toggle + mode cards + drill).
+    @ViewBuilder
+    private var practiceOptionsContent: some View {
+        speakingToggleCard
+
+        if settingsManager.speakingEnabled {
+            practiceModeCard(icon: "text.bubble.fill",
+                             title: "Read & speak", tag: "ON SCREEN",
+                             description: "Look at the English. Listen to the Spanish and repeat back. Reveal text if needed.",
+                             action: startReadAndSpeak)
+            practiceModeCard(icon: "headphones",
+                             title: "Listen & speak", tag: "OFF SCREEN",
+                             description: "Screen off, eyes free. Hear each line, repeat it, say what it means.",
+                             action: { practiceDestination = .repeatPractice })
+        } else {
+            practiceModeCard(icon: "headphones",
+                             title: "Just listen", tag: "OFF SCREEN",
+                             description: "Screen off, eyes free. Hear each line and its meaning — no speaking.",
+                             action: { practiceDestination = .repeatListen })
+            speakingOffNote
+        }
+
+        drillCard
+    }
+
+    private var speakingToggleCard: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Speaking exercises")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
+                Text(settingsManager.speakingEnabled
+                     ? "Repeat lines aloud and get pronunciation feedback."
+                     : "Off — practice is listen-only.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 8)
+            Toggle("", isOn: $settingsManager.speakingEnabled.animation(.easeInOut(duration: 0.2)))
+                .labelsHidden()
+                .tint(accentColor)
+        }
+        .padding(13)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.06), radius: 3, y: 1)
+    }
+
+    private func practiceModeCard(icon: String, title: String, tag: String,
+                                  description: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(accentColor)
+                    .frame(width: 44, height: 44)
+                    .background(accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 8) {
+                        Text(title)
+                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.primary)
+                        Text(tag)
+                            .font(.system(size: 10.5, weight: .bold, design: .rounded))
+                            .tracking(0.5)
+                            .foregroundStyle(accentColor)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 3)
+                            .background(accentColor.opacity(0.12), in: Capsule())
+                    }
+                    Text(description)
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(13)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+            .shadow(color: .black.opacity(0.06), radius: 3, y: 1)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var speakingOffNote: some View {
+        HStack(alignment: .top, spacing: 6) {
+            Image(systemName: "info.circle")
+                .font(.system(size: 12))
+                .foregroundStyle(.tertiary)
+            Text("Speaking is off, so the on-screen read-and-speak mode is hidden. Turn speaking on to practise saying lines aloud.")
+                .font(.system(size: 12))
+                .foregroundStyle(.tertiary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 4)
+    }
+
+    private var drillCard: some View {
+        Button {
+            showingDrillChooser = true
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "pencil")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 44, height: 44)
+                    .background(Color(.secondarySystemFill), in: RoundedRectangle(cornerRadius: 12))
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Drill the key words")
+                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.primary)
+                    Text(settingsManager.speakingEnabled
+                         ? "Writing · Speaking · Listening"
+                         : "Writing · Listening")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(13)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+            .shadow(color: .black.opacity(0.06), radius: 3, y: 1)
+        }
+        .buttonStyle(.plain)
+    }
+
+    /// On-screen "Read & speak": text stays visible, learner speaks each line.
+    /// Mirrors the legacy On-Screen guided run.
+    private func startReadAndSpeak() {
+        settingsManager.speakingPracticeMode = true
+        settingsManager.listeningPracticeMode = false
+        guidedOnScreen = true
+        showPracticeOptions = false
+        selectedPage = firstPage
     }
 
     // Pages sorted by pageNumber for navigation
@@ -292,6 +606,15 @@ struct ComicDetailView: View {
     // The first page (cover)
     private var firstPage: Page {
         sortedPages.first ?? comic.pages[0]
+    }
+
+    /// Open a page for plain reading. Clears any leftover practice-mode flags so
+    /// the reader shows the real (text) artwork, not the empty-bubble practice art.
+    private func startNormalReading(_ page: Page) {
+        settingsManager.speakingPracticeMode = false
+        settingsManager.listeningPracticeMode = false
+        guidedOnScreen = false
+        selectedPage = page
     }
 
     private var startingPage: Page {
@@ -310,7 +633,7 @@ struct ComicDetailView: View {
                 PageThumbnail(page: page, comic: comic, isCover: page.pageNumber <= 1)
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        selectedPage = page
+                        startNormalReading(page)
                     }
                     .explainsIf(page.id == comic.pages.first?.id,
                                 "Jump to a page",
@@ -321,13 +644,6 @@ struct ComicDetailView: View {
         .clipped()
     }
 
-    private var levelColor: Color {
-        switch comic.level {
-        case .beginner: return .green
-        case .intermediate: return .orange
-        case .advanced: return .red
-        }
-    }
 }
 
 // MARK: - Page Thumbnail
@@ -349,7 +665,9 @@ struct PageThumbnail: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: geo.size.height, alignment: isCover ? .top : .center)
             }
-            .frame(height: 180)
+            // Portrait page aspect (2:3), matching the actual comic page art,
+            // instead of the old fixed square-ish height.
+            .aspectRatio(2.0 / 3.0, contentMode: .fit)
             .clipped()
                 .overlay(
                     Rectangle()

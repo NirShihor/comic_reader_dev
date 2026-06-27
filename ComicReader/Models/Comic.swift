@@ -114,6 +114,7 @@ struct Page: Identifiable, Codable, Hashable {
     let pageNumber: Int
     let masterImage: String
     var noTextImage: String?
+    var emptyBubblesImage: String? = nil   // bubbles drawn, text blank — for practice modes
     let panels: [Panel]
     var hotspots: [Hotspot]?
 }
@@ -129,8 +130,11 @@ struct ReviewWord: Codable, Hashable {
 struct Comic: Identifiable, Codable, Hashable {
     let id: String
     let title: String
+    var titleEn: String?   // optional English title, shown under the Spanish
     let description: String
     let coverImage: String
+    var coverLandscape: String? = nil   // 3:2 banner for the detail view (falls back to coverImage)
+    var bannerTitlePosition: String? = nil   // topLeft|topRight|bottomLeft|bottomRight|center|hidden
     let level: DifficultyLevel
     let isPremium: Bool
     let pages: [Page]
@@ -139,6 +143,7 @@ struct Comic: Identifiable, Codable, Hashable {
     // Collection fields (optional — comics without these are standalone)
     var collectionId: String?
     var collectionTitle: String?
+    var collectionTitleEn: String?   // optional English collection title
     var collectionCoverImage: String?
     var episodeNumber: Int?
 
@@ -174,6 +179,11 @@ struct ComicCollection: Identifiable, Hashable {
     let id: String
     let title: String
     let comics: [Comic]
+
+    /// English collection title, derived from the first episode that carries one.
+    var titleEn: String? {
+        comics.compactMap { $0.collectionTitleEn }.first
+    }
 
     /// The comic that provides the collection cover (prefers collection cover, falls back to first comic)
     private var coverComic: Comic? {
