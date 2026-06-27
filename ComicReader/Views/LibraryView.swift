@@ -9,10 +9,6 @@ struct LibraryView: View {
     @State private var searchText = ""
     @State private var selectedLevel: String? = nil
     @StateObject private var help = HelpModeController()
-    // False only until the user has landed on the Library once, ever (persists
-    // across launches). Used to auto-open the welcome overlay on the first visit;
-    // afterwards the welcome stays reachable on demand via the "?" button.
-    @AppStorage("hasSeenLibrary") private var hasSeenLibrary = false
 
     private var showInitialLoader: Bool {
         localStorage.isLoading && localStorage.downloadedComics.isEmpty
@@ -40,30 +36,9 @@ struct LibraryView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 HelpModeButton()
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button("All Levels") { selectedLevel = nil }
-                    Divider()
-                    Button("Beginner") { selectedLevel = "beginner" }
-                    Button("Intermediate") { selectedLevel = "intermediate" }
-                    Button("Advanced") { selectedLevel = "advanced" }
-                } label: {
-                    Image(systemName: selectedLevel == nil ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
-                }
-            }
         }
         .helpTooltipLayer()
         .environmentObject(help)
-        .onAppear {
-            // First time the user ever lands on the Library, open the welcome
-            // automatically. Afterwards it's reachable any time via the "?" button.
-            if !hasSeenLibrary {
-                hasSeenLibrary = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                    withAnimation(.easeInOut(duration: 0.2)) { help.isActive = true }
-                }
-            }
-        }
         .task {
             // Pull the catalog so available comics + author-set order load.
             await storeService.fetchCatalog()
@@ -106,6 +81,150 @@ struct LibraryView: View {
         }
     }
 
+    // Indigo brand accent (reserved for primary actions / selected chips).
+    private var accentColor: Color { Color(red: 91/255, green: 91/255, blue: 214/255) }
+
+    /// The most-recently-started downloaded comic, resolved to the library item
+    /// (collection or standalone) it belongs to — so the hero links to the
+    /// collection page when it's part of a series.
+    private var continueItem: (item: LibraryItem, startedComic: Comic, progress: ReadingProgress)? {
+        guard let started = localStorage.downloadedComics
+            .compactMap({ c -> (Comic, ReadingProgress)? in
+                guard let p = progressManager.getProgress(for: c.id) else { return nil }
+                return (c, p)
+            })
+            .max(by: { $0.1.updatedAt < $1.1.updatedAt }) else { return nil }
+
+        let startedComic = started.0
+        let item = localStorage.libraryItems.first { item in
+            switch item {
+            case .standalone(let c): return c.id == startedComic.id
+            case .collection(let col): return col.comics.contains { $0.id == startedComic.id }
+            }
+        }
+        guard let item else { return nil }
+        return (item, startedComic, started.1)
+    }
+
+    @ViewBuilder
+    private func continueHero(_ item: LibraryItem, _ startedComic: Comic, _ progress: ReadingProgress) -> some View {
+        let practicing = progressManager.interactionKind(for: startedComic.id) == "practice"
+        let practicePos = progressManager.practicePosition(for: startedComic.id)
+        let pageTotal = max(startedComic.pages.count, 1)
+
+        // Progress line + bar fraction depend on whether reading or practicing.
+        let practiceLine = practicePos.map { "Sentence \($0.index + 1) of \($0.total)" }
+        let fraction: Double = {
+            if practicing, let p = practicePos, p.total > 0 {
+                return Double(min(p.index, p.total)) / Double(p.total)
+            }
+            return Double(min(progress.pageNumber, pageTotal)) / Double(pageTotal)
+        }()
+
+        switch item {
+        case .standalone(let comic):
+            let line = practicing ? (practiceLine ?? "In practice")
+                                   : "Page \(progress.pageNumber) of \(pageTotal)"
+            NavigationLink(value: comic) {
+                heroCard(coverName: comic.coverImage, coverComicId: comic.id,
+                         title: comic.title, subtitle: comic.titleEn,
+                         line: line, fraction: fraction, practicing: practicing)
+            }
+            .buttonStyle(.plain)
+
+        case .collection(let collection):
+            let totalEpisodes = max(storeService.catalog.filter { $0.collectionTitle == collection.title }.count,
+                                    collection.episodeCount)
+            let episodeLine = "Episode \(startedComic.episodeNumber ?? 1) of \(totalEpisodes)"
+            let line = practicing ? (practiceLine ?? episodeLine) : episodeLine
+            NavigationLink(destination: CollectionDetailView(title: collection.title)) {
+                heroCard(coverName: collection.coverImage, coverComicId: collection.coverComicId,
+                         title: collection.title, subtitle: collection.titleEn,
+                         line: line, fraction: fraction, practicing: practicing)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func heroCard(coverName: String, coverComicId: String,
+                          title: String, subtitle: String?,
+                          line: String, fraction: Double, practicing: Bool) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            ComicImage(imageName: coverName, comicId: coverComicId)
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 106, height: 148)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(practicing ? "CONTINUE PRACTICING" : "CONTINUE READING")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .tracking(0.5)
+                    .foregroundStyle(accentColor)
+
+                Text(title)
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                if let subtitle, !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+
+                Text(line)
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+
+                ProgressView(value: fraction, total: 1.0)
+                    .tint(accentColor)
+
+                HStack(spacing: 6) {
+                    Image(systemName: "play.fill").font(.system(size: 12, weight: .bold))
+                    Text(practicing ? "Continue practicing" : "Continue reading")
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 9)
+                .background(accentColor, in: Capsule())
+                .padding(.top, 2)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18))
+        .shadow(color: .black.opacity(0.08), radius: 16, y: 4)
+    }
+
+    private let levelOptions: [(label: String, value: String?)] = [
+        ("All", nil), ("Beginner", "beginner"), ("Intermediate", "intermediate"), ("Advanced", "advanced")
+    ]
+
+    private var levelChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(levelOptions, id: \.label) { option in
+                    let selected = selectedLevel == option.value
+                    Text(option.label)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundStyle(selected ? .white : .secondary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 9)
+                        .background(selected ? accentColor : Color(.secondarySystemGroupedBackground),
+                                    in: Capsule())
+                        .contentShape(Capsule())
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.15)) { selectedLevel = option.value }
+                        }
+                }
+            }
+            .padding(.horizontal, 2)
+            .padding(.vertical, 2)
+        }
+    }
+
     private var emptyState: some View {
         ContentUnavailableView {
             Label("No Comics", systemImage: "books.vertical")
@@ -119,14 +238,17 @@ struct LibraryView: View {
             LazyVStack(spacing: 16) {
                 if help.isActive {
                     HelpHint(icon: "books.vertical.fill",
-                             label: "Welcome",
+                             label: "How it works",
                              title: "Your library",
-                             text: "Collections that have downloaded comics in them sit at the top — tap one to open it. Comics under “Available to download” can be downloaded with the green button. Use the search bar and the filter (top right) to find a comic, and tap “?” any time for help.")
-                    HelpHint(icon: "arrow.down.circle.fill",
-                             label: "Download",
-                             title: "Get a comic",
-                             text: "Tap the green Download button on any available comic to save it to your device so you can read it offline.")
+                             text: "Collections that have downloaded comics in them sit at the top — tap one to open it. Comics under “Available to download” can be downloaded with the green button. Use the search bar and the level filter to find a comic, and tap “?” any time for help.")
                 }
+
+                // The series/comic the reader has started — shown first, with Continue.
+                if let cont = continueItem {
+                    continueHero(cont.item, cont.startedComic, cont.progress)
+                }
+
+                levelChips
 
                 // Downloaded shelf (your comics) on top.
                 if !localStorage.downloadedComics.isEmpty {
@@ -145,7 +267,11 @@ struct LibraryView: View {
     /// Downloaded shelf filtered by the search box + level filter. Without this the
     /// search only affected the "available to download" section below.
     private var filteredLibraryItems: [LibraryItem] {
-        localStorage.libraryItems.filter { item in
+        // The in-progress item is surfaced by the Continue hero, so drop it here
+        // to avoid showing it twice.
+        let heroId = continueItem?.item.id
+        return localStorage.libraryItems.filter { item in
+            if let heroId, item.id == heroId { return false }
             // Level filter
             if let level = selectedLevel {
                 switch item {
@@ -330,7 +456,7 @@ struct ComicCard: View {
             // Cover Image
             ComicImage(imageName: comic.coverImage, comicId: comic.id)
                 .aspectRatio(contentMode: .fill)
-                .frame(width: 80, height: 120)
+                .frame(width: 106, height: 159)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .shadow(radius: 2)
 
@@ -427,7 +553,7 @@ struct CollectionCard: View {
             // Cover Image (from first episode)
             ComicImage(imageName: collection.coverImage, comicId: collection.coverComicId)
                 .aspectRatio(contentMode: .fill)
-                .frame(width: 80, height: 120)
+                .frame(width: 106, height: 159)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .shadow(radius: 2)
 

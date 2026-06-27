@@ -1151,6 +1151,9 @@ struct WordButton: View {
     let word: Word
     let isHighlighted: Bool
     var fontSize: CGFloat? = nil
+    /// Optional: notified when the word is tapped (used to clear the first-run
+    /// "tap a word" onboarding hint).
+    var onTap: (() -> Void)? = nil
     @State private var showingDefinition = false
     @State private var showingForms = false
     @State private var isSaved = false
@@ -1159,6 +1162,7 @@ struct WordButton: View {
 
     var body: some View {
         Button {
+            onTap?()
             showingDefinition = true
             // Check if word is already saved
             isSaved = vocabularyManager.savedWords.contains { $0.word.id == word.id }

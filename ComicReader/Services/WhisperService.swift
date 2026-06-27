@@ -396,12 +396,11 @@ class WhisperService: ObservableObject {
         }
 
         do {
-            // Only feed Whisper the expected text as a prompt when we actually
-            // detected speech. On silence/background noise, the prompt makes Whisper
-            // echo the expected answer back verbatim — which then scores as a pass.
-            // Dropping it means silence transcribes to nothing (or junk) and fails.
-            let prompt = speechDetected ? expectedText : nil
-            let transcription = try await transcribeWithWhisper(audioURL: url, prompt: prompt, language: language)
+            // Never pass the expected sentence as the Whisper prompt: it biases the
+            // model into echoing the answer back for mumbled/incoherent/low-confidence
+            // audio, so wrong attempts "pass". Transcribe what was actually said
+            // (language hint only) and let compareText judge it honestly.
+            let transcription = try await transcribeWithWhisper(audioURL: url, prompt: nil, language: language)
             print("[Whisper] Transcribed: \"\(transcription)\" (expected: \"\(expectedText ?? "-")\", speechDetected: \(speechDetected))")
             transcribedText = transcription
             isProcessing = false

@@ -31,9 +31,9 @@ struct ContentView: View {
         // until the splash is done keeps the intro smooth.
         Group {
             if showSplash {
-                SplashView {
-                    withAnimation(.easeInOut(duration: 0.4)) { showSplash = false }
-                }
+                LandingView(
+                    onGetStarted: { withAnimation(.easeInOut(duration: 0.4)) { showSplash = false } }
+                )
             } else {
                 tabs
             }
@@ -87,150 +87,156 @@ struct ContentView: View {
     }
 }
 
-// MARK: - Splash / Home
+// MARK: - Landing / Splash
 
-/// Launch screen: blue background with the Comigo logo bubble spinning in from
-/// the left, fast, and coming to a stop in the top third of the page.
-struct SplashView: View {
-    var onEnter: () -> Void
+// Design tokens for the landing screen (match the rest of the refresh).
+private enum Brand {
+    static let accent        = Color(red: 0x5B/255, green: 0x5B/255, blue: 0xD6/255) // #5B5BD6
+    static let bg            = Color(red: 0xF4/255, green: 0xF1/255, blue: 0xED/255) // #F4F1ED
+    static let textPrimary   = Color(red: 0x1F/255, green: 0x1B/255, blue: 0x18/255) // #1F1B18
+    static let textSecondary = Color(red: 0x75/255, green: 0x6E/255, blue: 0x67/255) // #756E67
+    static let textTertiary  = Color(red: 0x6B/255, green: 0x63/255, blue: 0x5C/255) // #6B635C
 
-    @State private var animate = false
-    @State private var started = false
-    @State private var typed1 = ""   // "Learn Spanish" — revealed char by char
-    @State private var typed2 = ""   // "one comic at a time"
+    static func rounded(_ size: CGFloat, _ weight: Font.Weight = .bold) -> Font {
+        .system(size: size, weight: weight, design: .rounded)
+    }
+}
 
-    private let line1 = "Learn Spanish"
-    private let line2 = "One comic at a time."
-
-    @State private var revealed = [Bool](repeating: false, count: 7)
-    @State private var blackBg = false      // black backdrop behind the finished montage
-    @State private var showButton = false   // "Start Reading" button below the montage
-
-    // Reveal order by panel-file number 1,7,3,6,2,4,5 → 0-based layer indices.
-    private let revealOrder = [0, 6, 2, 5, 1, 3, 4]
-    private let montageAspect: CGFloat = 720.0 / 1084.0
-    // Match the logo's own background so its white square blends into the page —
-    // only the bubble outline appears to spin.
-    private let bgColor = Color.white
+/// First-run / landing screen — COMIGO logo over a curated comic mosaic, warm
+/// wash fading into the app background, indigo "Get started" CTA.
+struct LandingView: View {
+    var onGetStarted: () -> Void = {}
 
     var body: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .top) {
-                bgColor.ignoresSafeArea()
-
-                Image("ComigoLogo")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: min(geo.size.width * 0.5, 200))
-                    .position(x: geo.size.width / 2, y: geo.size.height * 0.33)  // a bit lower, closer to the text
-                    .opacity(animate ? 1 : 0)                                    // simple fade in
-
-                // Tagline under the logo, typed on over two lines in the comic font.
-                // Fixed height + top alignment so line 1 stays put as line 2 types in.
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(typed1)
-                    Text(typed2)
-                }
-                .font(.custom("ComicRelief-Bold", size: 26))
-                .tracking(-0.8)   // tighten spacing so the longer line fits on one row
-                .foregroundStyle(.black)
-                .multilineTextAlignment(.leading)
-                .lineLimit(1)
-                // Fixed-width block, content pinned top-left, so characters type out
-                // left-to-right from a fixed left edge (not growing from the centre).
-                .frame(width: geo.size.width * 0.9, height: 90, alignment: .topLeading)
-                .position(x: geo.size.width / 2, y: geo.size.height * 0.60)
-
-                // Black backdrop that fades in behind the finished montage.
-                Color.black.ignoresSafeArea().opacity(blackBg ? 1 : 0)
-
-                // Comic-panel montage, assembled one panel at a time over the page.
-                montageView(in: geo)
-
-                // Button below the montage — advances to the comics.
-                Button(action: onEnter) {
-                    Text("Start Reading")
-                        .font(.custom("ComicRelief-Bold", size: 16))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 10)
-                        .background(Color(red: 0.16, green: 0.45, blue: 0.92))
-                        .clipShape(Capsule())
-                }
-                .position(x: geo.size.width / 2, y: geo.size.height * 0.955)
-                .opacity(showButton ? 1 : 0)
-            }
-        }
-        .onAppear {
-            guard !started else { return }
-            started = true
-            Task { await runIntro() }
-        }
-    }
-
-    /// Deterministic intro order, robust on a cold launch (first download):
-    /// let the first real layout happen, spin the logo in, then — only after the
-    /// full animation has run — type the tagline.
-    // The full montage, masked so only the revealed panels show. Sized to fill the
-    // screen width and centred; the white letterbox margins blend with the page.
-    @ViewBuilder
-    private func montageView(in geo: GeometryProxy) -> some View {
-        let mW = geo.size.width
-        let mH = mW / montageAspect
         ZStack {
-            // Each layer is the full canvas with one panel painted in its exact
-            // place (transparent elsewhere) — stacking them rebuilds the page, and
-            // fading them in one at a time assembles it panel by panel.
-            ForEach(0..<7, id: \.self) { i in
-                Image("SplashLayer\(i + 1)")
+            Brand.bg.ignoresSafeArea()
+
+            // 1) Comic mosaic backdrop (top ~66% of the screen)
+            GeometryReader { geo in
+                MosaicBackdrop()
+                    .frame(height: geo.size.height * 0.66)
+                    .clipped()
+                    // Soft warm wash over the panels.
+                    .overlay(
+                        LinearGradient(
+                            colors: [Brand.bg.opacity(0.18), Brand.bg.opacity(0.28)],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+                    // Dissolve the bottom into the page: the mosaic fades to fully
+                    // transparent before its own edge, so there is no line — the
+                    // identical Brand.bg behind shows straight through.
+                    .mask(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white, location: 0.00),
+                                .init(color: .white, location: 0.66),
+                                .init(color: .clear, location: 0.96),
+                            ],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+                    .ignoresSafeArea(edges: .top)
+            }
+
+            // 3) Content, pinned to the bottom
+            VStack(spacing: 0) {
+                Spacer()
+
+                Image("comigo-logo")
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: mW, height: mH)
-                    .opacity(revealed[i] ? 1 : 0)
+                    .scaledToFit()
+                    .frame(width: 226)
+                    .shadow(color: Brand.textPrimary.opacity(0.12), radius: 12, x: 0, y: 6)
+                    .padding(.bottom, 46)
+
+                // Tagline — note the indigo period
+                VStack(spacing: 0) {
+                    Text("Spanish.")
+                    (Text("One comic at a time")
+                        + Text(".").foregroundColor(Brand.accent))
+                }
+                .font(Brand.rounded(27, .heavy))
+                .foregroundColor(Brand.textPrimary)
+                .multilineTextAlignment(.center)
+
+                Text("Read and listen to comics in Spanish, tap sentences and words to understand them and practice out loud.")
+                    .font(.system(size: 15.5))
+                    .foregroundColor(Brand.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(3)
+                    .frame(maxWidth: 280)
+                    .padding(.top, 14)
+
+                Button(action: onGetStarted) {
+                    Text("Get started")
+                        .font(Brand.rounded(16, .heavy))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Brand.accent)
+                        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+                        .shadow(color: Brand.accent.opacity(0.30), radius: 11, x: 0, y: 10)
+                }
+                .padding(.top, 30)
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 46)
+        }
+    }
+}
+
+// MARK: - Mosaic backdrop
+// Two columns of comic tiles. Swap MosaicTile's fill for real cover Images:
+//   MosaicTile { Image("cover_rey").resizable().scaledToFill() }
+// The warm gradient above handles the dimming, so tiles need no overlay of their own.
+private struct MosaicBackdrop: View {
+    var body: some View {
+        HStack(spacing: 6) {
+            VStack(spacing: 6) {
+                MosaicTile(color: Color(red: 0x7C/255, green: 0x5A/255, blue: 0x3A/255)).frame(height: 188)
+                MosaicTile(color: Color(red: 0x3E/255, green: 0x56/255, blue: 0x41/255)).frame(height: 150)
+                MosaicTile(color: Color(red: 0x5C/255, green: 0x73/255, blue: 0x55/255)) // fills remainder
+            }
+            VStack(spacing: 6) {
+                MosaicTile(color: Color(red: 0x9A/255, green: 0x8C/255, blue: 0x72/255)).frame(height: 132)
+                MosaicTile(color: Color(red: 0x2F/255, green: 0x5D/255, blue: 0x62/255)).frame(height: 206)
+                MosaicTile(color: Color(red: 0x5A/255, green: 0x4A/255, blue: 0x6A/255)) // fills remainder
             }
         }
-        .frame(width: mW, height: mH)
-        .position(x: geo.size.width / 2, y: geo.size.height / 2)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+}
+
+private struct MosaicTile<Content: View>: View {
+    var color: Color = .gray
+    @ViewBuilder var content: () -> Content
+
+    init(color: Color, @ViewBuilder content: @escaping () -> Content = { EmptyView() }) {
+        self.color = color
+        self.content = content
     }
 
-    @MainActor
-    private func runIntro() async {
-        // The view's initial frame can be zero on a fresh launch; a short wait lets
-        // it lay out before we animate, and keeps the sequence in order.
-        try? await Task.sleep(nanoseconds: 400_000_000)
-        withAnimation(.easeIn(duration: 1.0)) {
-            animate = true   // fade the logo in
+    var body: some View {
+        ZStack {
+            color
+            content()
+            // subtle hatch so placeholder tiles read as comic panels (remove with real art)
+            GeometryReader { g in
+                Path { p in
+                    let step: CGFloat = 16
+                    var x = -g.size.height
+                    while x < g.size.width {
+                        p.move(to: CGPoint(x: x, y: 0))
+                        p.addLine(to: CGPoint(x: x + g.size.height, y: g.size.height))
+                        x += step
+                    }
+                }
+                .stroke(Color.white.opacity(0.06), lineWidth: 8)
+            }
         }
-        // Wait for the fade plus a brief beat before typing.
-        try? await Task.sleep(nanoseconds: 1_300_000_000)
-        await typeTagline()
-        // Hold for 2 seconds after the tagline finishes before the panels start.
-        try? await Task.sleep(nanoseconds: 2_000_000_000)
-        // Bring the comic panels in one at a time until they cover the page.
-        for idx in revealOrder {
-            withAnimation(.easeOut(duration: 0.3)) { revealed[idx] = true }
-            try? await Task.sleep(nanoseconds: 640_000_000)
-        }
-        // Quick black backdrop behind the montage…
-        withAnimation(.easeIn(duration: 0.3)) { blackBg = true }
-        // …then wait 3 seconds on the framed montage before the button appears.
-        try? await Task.sleep(nanoseconds: 3_000_000_000)
-        withAnimation(.easeIn(duration: 0.25)) { showButton = true }
-    }
-
-    /// Reveals the two lines one character at a time with slightly uneven timing
-    /// so it reads like real typing, with a beat between the lines.
-    @MainActor
-    private func typeTagline() async {
-        for ch in line1 {
-            typed1.append(ch)
-            try? await Task.sleep(nanoseconds: UInt64(Double.random(in: 0.025...0.075) * 1_000_000_000))
-        }
-        try? await Task.sleep(nanoseconds: 350_000_000)     // slight pause before line 2
-        for ch in line2 {
-            typed2.append(ch)
-            try? await Task.sleep(nanoseconds: UInt64(Double.random(in: 0.025...0.075) * 1_000_000_000))
-        }
+        .frame(maxWidth: .infinity)
+        .clipped()
     }
 }
 
@@ -240,8 +246,8 @@ struct SplashView: View {
         .environmentObject(ReadingProgressManager())
 }
 
-#Preview("Splash") {
-    SplashView(onEnter: {})
+#Preview("Landing") {
+    LandingView()
 }
 
 #if DEBUG

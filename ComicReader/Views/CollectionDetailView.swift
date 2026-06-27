@@ -10,9 +10,6 @@ struct CollectionDetailView: View {
     @StateObject private var localStorage = LocalComicStorage.shared
     @StateObject private var storeService = ComicStoreService.shared
     @StateObject private var help = HelpModeController()
-    // False until the user opens any collection for the first time, ever. Used to
-    // auto-open the help explainers on that first visit; reachable via "?" after.
-    @AppStorage("hasSeenCollection") private var hasSeenCollection = false
 
     // All episodes from the catalog (when loaded), in episode order.
     private var catalogEpisodes: [StoreComic] {
@@ -82,16 +79,6 @@ struct CollectionDetailView: View {
         }
         .helpTooltipLayer()
         .environmentObject(help)
-        .onAppear {
-            // First time the user ever opens a collection, show the help explainers
-            // automatically. Afterwards they're reachable any time via "?".
-            if !hasSeenCollection {
-                hasSeenCollection = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                    withAnimation(.easeInOut(duration: 0.2)) { help.isActive = true }
-                }
-            }
-        }
     }
 
     private var header: some View {

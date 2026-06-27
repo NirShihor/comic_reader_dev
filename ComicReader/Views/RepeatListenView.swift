@@ -60,6 +60,7 @@ class SilentTimerDelegate: NSObject, AVAudioPlayerDelegate {
 // MARK: - RepeatListenView
 struct RepeatListenView: View {
     let comic: Comic
+    @EnvironmentObject private var progressManager: ReadingProgressManager
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var audioManager = AudioManager.shared
     @StateObject private var help = HelpModeController()
@@ -118,6 +119,9 @@ struct RepeatListenView: View {
             }
         }
         .onDisappear {
+            if state != .completed && state != .idle && !sentences.isEmpty {
+                savePracticeSpot()
+            }
             cleanup()
             teardownRemoteCommands()
             audioManager.onPlaybackFinished = nil
@@ -428,8 +432,18 @@ struct RepeatListenView: View {
 
     private func startListening() {
         guard !sentences.isEmpty else { return }
-        currentIndex = 0
+        // Resume where the last listen run left off (0 if none / already finished).
+        let saved = progressManager.practiceStartIndex(for: comic.id)
+        currentIndex = saved < sentences.count ? saved : 0
         playCurrentSentence()
+    }
+
+    private func savePracticeSpot() {
+        progressManager.savePracticePosition(comicId: comic.id, index: currentIndex, total: sentences.count)
+    }
+
+    private func clearPracticeSpot() {
+        progressManager.clearPracticePosition(for: comic.id)
     }
 
     private func resetListening() {
@@ -522,8 +536,10 @@ struct RepeatListenView: View {
         currentIndex += 1
         if currentIndex >= sentences.count {
             state = .completed
+            clearPracticeSpot()
             updateNowPlaying()
         } else {
+            savePracticeSpot()
             playCurrentSentence()
         }
     }
@@ -533,8 +549,10 @@ struct RepeatListenView: View {
         currentIndex += 1
         if currentIndex >= sentences.count {
             state = .completed
+            clearPracticeSpot()
             updateNowPlaying()
         } else {
+            savePracticeSpot()
             playCurrentSentence()
         }
     }

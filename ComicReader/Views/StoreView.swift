@@ -182,7 +182,7 @@ struct StoreComicCard: View {
     }
 
     private var coverSize: (width: CGFloat, height: CGFloat) {
-        compact ? (60, 90) : (80, 120)
+        compact ? (60, 90) : (106, 159)
     }
 
     var body: some View {
@@ -462,18 +462,18 @@ struct StoreCollectionGroup: View {
                             image
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
-                                .frame(width: 60, height: 90)
+                                .frame(width: 79, height: 120)
                                 .clipShape(RoundedRectangle(cornerRadius: 6))
                         case .failure:
                             coverPlaceholder
                         default:
                             RoundedRectangle(cornerRadius: 6)
                                 .fill(levelColor.opacity(0.1))
-                                .frame(width: 60, height: 90)
+                                .frame(width: 79, height: 120)
                                 .overlay(ProgressView())
                         }
                     }
-                    .frame(width: 60, height: 90)
+                    .frame(width: 79, height: 120)
                 } else {
                     coverPlaceholder
                 }
@@ -529,7 +529,7 @@ struct StoreCollectionGroup: View {
     private var coverPlaceholder: some View {
         RoundedRectangle(cornerRadius: 6)
             .fill(levelColor.opacity(0.2))
-            .frame(width: 60, height: 90)
+            .frame(width: 79, height: 120)
             .overlay(
                 Image(systemName: "books.vertical.fill")
                     .foregroundStyle(levelColor)

@@ -262,6 +262,8 @@ struct ComicJSON: Codable {
     let titleEn: String?
     let description: String
     let coverImage: String
+    let coverLandscape: String?
+    let bannerTitlePosition: String?
     let level: String
     let totalPages: Int
     let estimatedMinutes: Int
@@ -285,6 +287,8 @@ struct ComicJSON: Codable {
             titleEn: titleEn,
             description: description,
             coverImage: coverImage,
+            coverLandscape: coverLandscape,
+            bannerTitlePosition: bannerTitlePosition,
             level: Comic.DifficultyLevel(rawValue: level) ?? .beginner,
             isPremium: false,
             pages: pages.map { $0.toPage() },

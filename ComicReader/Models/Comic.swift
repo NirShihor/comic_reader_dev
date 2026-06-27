@@ -133,6 +133,8 @@ struct Comic: Identifiable, Codable, Hashable {
     var titleEn: String?   // optional English title, shown under the Spanish
     let description: String
     let coverImage: String
+    var coverLandscape: String? = nil   // 3:2 banner for the detail view (falls back to coverImage)
+    var bannerTitlePosition: String? = nil   // topLeft|topRight|bottomLeft|bottomRight|center|hidden
     let level: DifficultyLevel
     let isPremium: Bool
     let pages: [Page]
