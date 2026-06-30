@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
     @State private var selectedTab: Tab = .library
@@ -62,6 +63,37 @@ struct ContentView: View {
             }
         }
         .preferredColorScheme(preferredColorScheme)
+        .onAppear { ContentView.warmUpNotebook() }
+    }
+
+    /// Pay the one-time costs (custom-font glyph load + keyboard subsystem init)
+    /// during the splash, so the Notebook opens and accepts typing without the
+    /// first-use hitch.
+    private static var didWarmUp = false
+    static func warmUpNotebook() {
+        guard !didWarmUp else { return }
+        didWarmUp = true
+
+        // Force CoreText to load + lay out the handwritten font's glyphs.
+        for name in ["ComicRelief-Regular", "ComicRelief-Bold"] {
+            let label = UILabel()
+            label.font = UIFont(name: name, size: 17)
+            label.text = "warming up"
+            label.sizeToFit()
+        }
+
+        // Pre-warm the keyboard so the first tap-to-type doesn't stall.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            guard let window = UIApplication.shared.connectedScenes
+                .compactMap({ $0 as? UIWindowScene })
+                .flatMap({ $0.windows })
+                .first(where: { $0.isKeyWindow }) else { return }
+            let field = UITextField(frame: .zero)
+            window.addSubview(field)
+            field.becomeFirstResponder()
+            field.resignFirstResponder()
+            field.removeFromSuperview()
+        }
     }
 
     private var tabs: some View {
@@ -331,6 +363,137 @@ struct NotebookPage: Identifiable, Codable, Equatable {
     var body: String = ""
 }
 
+private let notebookHighlightColor = Color.yellow.opacity(0.55)
+
+/// Render a note body, turning ==marked== spans into yellow highlights.
+func notebookHighlighted(_ s: String) -> AttributedString {
+    var result = AttributedString("")
+    var rest = Substring(s)
+    while let open = rest.range(of: "==") {
+        result += AttributedString(String(rest[..<open.lowerBound]))
+        let after = rest[open.upperBound...]
+        if let close = after.range(of: "==") {
+            var hi = AttributedString(String(after[..<close.lowerBound]))
+            hi.backgroundColor = notebookHighlightColor
+            result += hi
+            rest = after[close.upperBound...]
+        } else {
+            result += AttributedString("==" + String(after))
+            return result
+        }
+    }
+    result += AttributedString(String(rest))
+    return result
+}
+
+/// A UITextView-backed editor that shows ==marked== text as live yellow
+/// highlights and provides a keyboard toolbar "Highlight" button. The stored
+/// value stays a plain string with ==markers== (iOS 17 compatible).
+struct HighlightingTextView: UIViewRepresentable {
+    @Binding var markup: String
+    var font: UIFont
+    var textColor: UIColor
+
+    static let highlightColor = UIColor.systemYellow.withAlphaComponent(0.55)
+
+    func makeUIView(context: Context) -> UITextView {
+        let tv = UITextView()
+        tv.delegate = context.coordinator
+        tv.font = font
+        tv.textColor = textColor
+        tv.backgroundColor = .clear
+        tv.textContainerInset = UIEdgeInsets(top: 8, left: 4, bottom: 8, right: 4)
+        tv.typingAttributes = [.font: font, .foregroundColor: textColor]
+        tv.attributedText = Self.attributed(from: markup, font: font, color: textColor)
+
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        toolbar.items = [
+            UIBarButtonItem(title: "🖍 Highlight", style: .plain, target: context.coordinator, action: #selector(Coordinator.toggleHighlight)),
+            UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
+            UIBarButtonItem(barButtonSystemItem: .done, target: context.coordinator, action: #selector(Coordinator.endEditing))
+        ]
+        tv.inputAccessoryView = toolbar
+        context.coordinator.textView = tv
+        return tv
+    }
+
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        // Only resync if the external value changed (avoids clobbering edits).
+        if Self.markup(from: uiView.attributedText) != markup {
+            let sel = uiView.selectedRange
+            uiView.attributedText = Self.attributed(from: markup, font: font, color: textColor)
+            uiView.selectedRange = sel
+        }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    final class Coordinator: NSObject, UITextViewDelegate {
+        let parent: HighlightingTextView
+        weak var textView: UITextView?
+        init(_ parent: HighlightingTextView) { self.parent = parent }
+
+        func textViewDidChange(_ textView: UITextView) {
+            parent.markup = HighlightingTextView.markup(from: textView.attributedText)
+        }
+
+        @objc func toggleHighlight() {
+            guard let tv = textView, tv.selectedRange.length > 0 else { return }
+            let range = tv.selectedRange
+            let mutable = NSMutableAttributedString(attributedString: tv.attributedText)
+            var allHighlighted = true
+            mutable.enumerateAttribute(.backgroundColor, in: range, options: []) { value, _, _ in
+                if value == nil { allHighlighted = false }
+            }
+            if allHighlighted {
+                mutable.removeAttribute(.backgroundColor, range: range)
+            } else {
+                mutable.addAttribute(.backgroundColor, value: HighlightingTextView.highlightColor, range: range)
+            }
+            mutable.addAttribute(.font, value: parent.font, range: NSRange(location: 0, length: mutable.length))
+            mutable.addAttribute(.foregroundColor, value: parent.textColor, range: NSRange(location: 0, length: mutable.length))
+            tv.attributedText = mutable
+            tv.selectedRange = range
+            tv.typingAttributes = [.font: parent.font, .foregroundColor: parent.textColor]
+            parent.markup = HighlightingTextView.markup(from: mutable)
+        }
+
+        @objc func endEditing() { textView?.resignFirstResponder() }
+    }
+
+    static func attributed(from markup: String, font: UIFont, color: UIColor) -> NSAttributedString {
+        let result = NSMutableAttributedString()
+        let base: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color]
+        var rest = Substring(markup)
+        while let open = rest.range(of: "==") {
+            result.append(NSAttributedString(string: String(rest[..<open.lowerBound]), attributes: base))
+            let after = rest[open.upperBound...]
+            if let close = after.range(of: "==") {
+                var hiAttrs = base
+                hiAttrs[.backgroundColor] = highlightColor
+                result.append(NSAttributedString(string: String(after[..<close.lowerBound]), attributes: hiAttrs))
+                rest = after[close.upperBound...]
+            } else {
+                result.append(NSAttributedString(string: "==" + String(after), attributes: base))
+                return result
+            }
+        }
+        result.append(NSAttributedString(string: String(rest), attributes: base))
+        return result
+    }
+
+    static func markup(from attributed: NSAttributedString) -> String {
+        var out = ""
+        let full = NSRange(location: 0, length: attributed.length)
+        attributed.enumerateAttribute(.backgroundColor, in: full, options: []) { value, range, _ in
+            let sub = (attributed.string as NSString).substring(with: range)
+            out += value != nil ? "==\(sub)==" : sub
+        }
+        return out
+    }
+}
+
 // MARK: Admin notes (ship with the app)
 //
 // These pages are compiled into the app, so every user gets them and they're
@@ -364,11 +527,26 @@ final class NotebookManager: ObservableObject {
     @Published var adminPages: [NotebookPage]
     /// User-created pages, stored on this device.
     @Published var userPages: [NotebookPage] { didSet { save() } }
+    /// Admin note ids the user has hidden on this device.
+    @Published var hiddenAdminIds: Set<String> {
+        didSet { UserDefaults.standard.set(Array(hiddenAdminIds), forKey: hiddenKey) }
+    }
 
     private let storageKey = "notebookPages.v1"
     private let adminCacheKey = "notebookAdminCache.v1"
+    private let hiddenKey = "notebookHiddenAdmin.v1"
+
+    /// Admin pages the user hasn't hidden.
+    var visibleAdminPages: [NotebookPage] { adminPages.filter { !hiddenAdminIds.contains($0.id) } }
+    /// Admin pages the user has hidden.
+    var hiddenAdminPages: [NotebookPage] { adminPages.filter { hiddenAdminIds.contains($0.id) } }
+
+    func setAdminHidden(_ id: String, _ hidden: Bool) {
+        if hidden { hiddenAdminIds.insert(id) } else { hiddenAdminIds.remove(id) }
+    }
 
     init() {
+        hiddenAdminIds = Set(UserDefaults.standard.array(forKey: "notebookHiddenAdmin.v1") as? [String] ?? [])
         // Admin: prefer the cached server copy; otherwise the compiled fallback.
         if let cached = UserDefaults.standard.data(forKey: adminCacheKey),
            let decoded = try? JSONDecoder().decode([NotebookPage].self, from: cached) {
@@ -458,18 +636,46 @@ struct NotebookView: View {
     @EnvironmentObject private var notebook: NotebookManager
     @State private var editingPage: NotebookPage?
     @State private var readingPage: NotebookPage?
+    @State private var showingHelp = false
 
     private static let ink = Color(red: 0.14, green: 0.15, blue: 0.22)
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                if !notebook.adminPages.isEmpty {
-                    sectionHeader("Grammar")
-                    ForEach(notebook.adminPages) { page in
+                if !notebook.visibleAdminPages.isEmpty {
+                    sectionHeader("Admin Notes")
+                    ForEach(notebook.visibleAdminPages) { page in
                         NotebookPaper(page: page, locked: true)
                             .onTapGesture { readingPage = page }
+                            .contextMenu {
+                                Button {
+                                    notebook.setAdminHidden(page.id, true)
+                                } label: {
+                                    Label("Hide note", systemImage: "eye.slash")
+                                }
+                            }
                     }
+                }
+
+                if !notebook.hiddenAdminPages.isEmpty {
+                    DisclosureGroup("Hidden admin notes (\(notebook.hiddenAdminPages.count))") {
+                        ForEach(notebook.hiddenAdminPages) { page in
+                            HStack {
+                                Text(page.title.isEmpty ? "Untitled" : page.title)
+                                    .font(.custom("ComicRelief-Regular", size: 16))
+                                    .foregroundColor(Self.ink.opacity(0.7))
+                                    .lineLimit(1)
+                                Spacer()
+                                Button("Unhide") { notebook.setAdminHidden(page.id, false) }
+                                    .font(.custom("ComicRelief-Bold", size: 14))
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                    .font(.custom("ComicRelief-Bold", size: 14))
+                    .foregroundColor(Self.ink.opacity(0.6))
+                    .tint(Self.ink.opacity(0.6))
                 }
 
                 sectionHeader("My notes")
@@ -499,12 +705,20 @@ struct NotebookView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
+                Button { showingHelp = true } label: {
+                    Image(systemName: "questionmark.circle")
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     editingPage = NotebookPage()
                 } label: {
                     Image(systemName: "plus")
                 }
             }
+        }
+        .sheet(isPresented: $showingHelp) {
+            NotebookHelpView()
         }
         .sheet(item: $editingPage) { page in
             NotebookPageEditor(page: page, onSave: { updated in
@@ -520,7 +734,13 @@ struct NotebookView: View {
             })
         }
         .sheet(item: $readingPage) { page in
-            NotebookPageReader(page: page)
+            NotebookPageReader(page: page, onCopyToMyNotes: {
+                // Make an independent, editable copy in My notes (keeps admin highlights).
+                let copy = NotebookPage(title: page.title, body: page.body)
+                notebook.upsert(copy)
+            }, onHide: {
+                notebook.setAdminHidden(page.id, true)
+            })
         }
     }
 
@@ -544,17 +764,20 @@ private struct NotebookPaper: View {
             HStack(alignment: .firstTextBaseline) {
                 if !page.title.isEmpty {
                     Text(page.title)
-                        .font(.custom("ComicRelief-Bold", size: 24))
+                        .font(.custom("ComicRelief-Bold", size: 20.4))
                         .foregroundColor(Self.ink)
                 }
                 Spacer(minLength: 8)
                 if locked {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 12))
-                        .foregroundColor(Self.ink.opacity(0.3))
+                    Text("ADMIN")
+                        .font(.custom("ComicRelief-Bold", size: 11))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Capsule().fill(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255)))
                 }
             }
-            Text(page.body.isEmpty ? "Tap to write…" : page.body)
+            Text(page.body.isEmpty ? AttributedString("Tap to write…") : notebookHighlighted(page.body))
                 .font(.custom("ComicRelief-Regular", size: 19))
                 .foregroundColor(page.body.isEmpty ? Self.ink.opacity(0.4) : Self.ink)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -566,16 +789,22 @@ private struct NotebookPaper: View {
         .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Self.paper))
         .overlay(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                .stroke(locked
+                        ? Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255)   // logo purple — Admin
+                        : Color(red: 0x27/255, green: 0xAE/255, blue: 0x60/255),  // green — My Notes
+                        lineWidth: 2)
         )
         .shadow(color: .black.opacity(0.10), radius: 6, x: 0, y: 3)
     }
 }
 
-/// Read-only viewer for bundled admin (grammar) pages.
+/// Read-only viewer for admin (grammar) pages, with a "copy to My Notes" action
+/// so the user can make an editable, highlightable personal copy.
 private struct NotebookPageReader: View {
     @Environment(\.dismiss) private var dismiss
     let page: NotebookPage
+    var onCopyToMyNotes: () -> Void
+    var onHide: () -> Void
     private static let paper = Color(red: 0.99, green: 0.98, blue: 0.94)
     private static let ink = Color(red: 0.14, green: 0.15, blue: 0.22)
 
@@ -584,18 +813,42 @@ private struct NotebookPageReader: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     Text(page.title)
-                        .font(.custom("ComicRelief-Bold", size: 28))
+                        .font(.custom("ComicRelief-Bold", size: 23.8))
                         .foregroundColor(Self.ink)
-                    Text(page.body)
+                    Text(notebookHighlighted(page.body))
                         .font(.custom("ComicRelief-Regular", size: 20))
                         .foregroundColor(Self.ink)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .lineSpacing(7)
+
+                    Button {
+                        onCopyToMyNotes()
+                        dismiss()
+                    } label: {
+                        Label("Copy admin note to My Notes for editing", systemImage: "square.and.pencil")
+                            .font(.custom("ComicRelief-Bold", size: 16))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255))
+                    .padding(.top, 12)
+
+                    Button {
+                        onHide()
+                        dismiss()
+                    } label: {
+                        Label("Hide note", systemImage: "eye.slash")
+                            .font(.custom("ComicRelief-Regular", size: 15))
+                            .frame(maxWidth: .infinity)
+                    }
+                    .tint(Self.ink.opacity(0.6))
+                    .padding(.top, 2)
                 }
                 .padding(24)
             }
             .background(Self.paper.ignoresSafeArea())
-            .navigationTitle("Grammar")
+            .navigationTitle("Admin Note")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -603,6 +856,74 @@ private struct NotebookPageReader: View {
                 }
             }
         }
+    }
+}
+
+/// Explains how the notebook works.
+private struct NotebookHelpView: View {
+    @Environment(\.dismiss) private var dismiss
+    private static let paper = Color(red: 0.99, green: 0.98, blue: 0.94)
+    private static let ink = Color(red: 0.14, green: 0.15, blue: 0.22)
+    private static let purple = Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255)
+    private static let green = Color(red: 0x27/255, green: 0xAE/255, blue: 0x60/255)
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    block("Two kinds of notes", Self.ink, """
+                    There are two sections in your notebook.
+                    """)
+
+                    block("📘 Admin Notes (purple border)", Self.purple, """
+                    Grammar and tips from Comigo. They’re read-only here and update on their own — you can’t edit them directly, but you can copy or hide them.
+                    """)
+
+                    block("📗 My Notes (green border)", Self.green, """
+                    Your own notes. Tap + at the top to add one, then tap a note to write and edit it.
+                    """)
+
+                    block("🖍 Highlighting", Self.ink, """
+                    While editing a note, select some text and tap “Highlight” to mark it yellow. Tap it again to remove the highlight.
+                    """)
+
+                    block("Copy an admin note", Self.ink, """
+                    Open an admin note and tap “Copy admin note to My Notes for editing” — the button is at the BOTTOM of the note. You’ll get your own editable copy (with its highlights) in My Notes.
+                    """)
+
+                    block("Hide an admin note", Self.ink, """
+                    Open an admin note and tap “Hide note” at the BOTTOM (or press and hold the card). Hidden notes move into “Hidden admin notes” — tap Unhide to bring one back.
+                    """)
+
+                    block("Delete one of My Notes", Self.ink, """
+                    Open your note and tap “Delete page” at the BOTTOM (or press and hold the card). Admin notes can’t be deleted — only hidden.
+                    """)
+                }
+                .padding(24)
+            }
+            .background(Self.paper.ignoresSafeArea())
+            .navigationTitle("How the notebook works")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func block(_ title: String, _ titleColor: Color, _ text: String) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(title)
+                .font(.custom("ComicRelief-Bold", size: 19))
+                .foregroundColor(titleColor)
+            Text(text)
+                .font(.custom("ComicRelief-Regular", size: 16))
+                .foregroundColor(Self.ink)
+                .fixedSize(horizontal: false, vertical: true)
+                .lineSpacing(4)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -623,11 +944,12 @@ private struct NotebookPageEditor: View {
                     .font(.custom("ComicRelief-Bold", size: 22))
                     .foregroundColor(Self.ink)
                 Divider()
-                TextEditor(text: $page.body)
-                    .font(.custom("ComicRelief-Regular", size: 19))
-                    .foregroundColor(Self.ink)
-                    .scrollContentBackground(.hidden)
-                    .lineSpacing(6)
+                HighlightingTextView(
+                    markup: $page.body,
+                    font: UIFont(name: "ComicRelief-Regular", size: 19) ?? .systemFont(ofSize: 19),
+                    textColor: UIColor(Self.ink)
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 if let onDelete {
                     Button(role: .destructive) {
