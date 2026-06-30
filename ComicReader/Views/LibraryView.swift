@@ -1,5 +1,10 @@
 import SwiftUI
 
+extension Color {
+    /// Navy outline matching the logo bubble (#15172A).
+    static let comigoInk = Color(red: 0x15/255, green: 0x17/255, blue: 0x2A/255)
+}
+
 struct LibraryView: View {
     @EnvironmentObject var progressManager: ReadingProgressManager
     @StateObject private var localStorage = LocalComicStorage.shared
@@ -31,7 +36,6 @@ struct LibraryView: View {
         }
         .navigationTitle("Library")
         .background(Color(.systemGroupedBackground))
-        .searchable(text: $searchText, prompt: "Search comics")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 HelpModeButton()
@@ -84,6 +88,31 @@ struct LibraryView: View {
     // Indigo brand accent (reserved for primary actions / selected chips).
     private var accentColor: Color { Color(red: 91/255, green: 91/255, blue: 214/255) }
 
+    // Navy outline matching the logo bubble — used for card/chip/field borders.
+    private var borderInk: Color { .comigoInk }
+
+    // Custom (bordered) search field — replaces the system .searchable bar so it
+    // can carry the navy outline. Bound to the same searchText, so filtering is unchanged.
+    private var searchField: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            TextField("Search comics", text: $searchText)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+            if !searchText.isEmpty {
+                Button { searchText = "" } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(borderInk, lineWidth: 2))
+    }
+
     /// The most-recently-started downloaded comic, resolved to the library item
     /// (collection or standalone) it belongs to — so the hero links to the
     /// collection page when it's part of a series.
@@ -125,7 +154,7 @@ struct LibraryView: View {
         case .standalone(let comic):
             let line = practicing ? (practiceLine ?? "In practice")
                                    : "Page \(progress.pageNumber) of \(pageTotal)"
-            NavigationLink(value: comic) {
+            NavigationLink(destination: ComicDetailView(comic: startedComic, autoResume: true)) {
                 heroCard(coverName: comic.coverImage, coverComicId: comic.id,
                          title: comic.title, subtitle: comic.titleEn,
                          line: line, fraction: fraction, practicing: practicing)
@@ -137,7 +166,8 @@ struct LibraryView: View {
                                     collection.episodeCount)
             let episodeLine = "Episode \(startedComic.episodeNumber ?? 1) of \(totalEpisodes)"
             let line = practicing ? (practiceLine ?? episodeLine) : episodeLine
-            NavigationLink(destination: CollectionDetailView(title: collection.title)) {
+            // Resume the exact episode the user left off in, at its spot and mode.
+            NavigationLink(destination: ComicDetailView(comic: startedComic, autoResume: true)) {
                 heroCard(coverName: collection.coverImage, coverComicId: collection.coverComicId,
                          title: collection.title, subtitle: collection.titleEn,
                          line: line, fraction: fraction, practicing: practicing)
@@ -188,6 +218,7 @@ struct LibraryView: View {
                 .padding(.horizontal, 18)
                 .padding(.vertical, 9)
                 .background(accentColor, in: Capsule())
+                .overlay(Capsule().stroke(borderInk, lineWidth: 2))
                 .padding(.top, 2)
             }
             Spacer(minLength: 0)
@@ -195,6 +226,7 @@ struct LibraryView: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18))
+        .overlay(RoundedRectangle(cornerRadius: 18).stroke(borderInk, lineWidth: 2))
         .shadow(color: .black.opacity(0.08), radius: 16, y: 4)
     }
 
@@ -214,6 +246,7 @@ struct LibraryView: View {
                         .padding(.vertical, 9)
                         .background(selected ? accentColor : Color(.secondarySystemGroupedBackground),
                                     in: Capsule())
+                        .overlay(Capsule().stroke(borderInk, lineWidth: 2))
                         .contentShape(Capsule())
                         .onTapGesture {
                             withAnimation(.easeInOut(duration: 0.15)) { selectedLevel = option.value }
@@ -236,6 +269,8 @@ struct LibraryView: View {
     private var list: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
+                searchField
+
                 if help.isActive {
                     HelpHint(icon: "books.vertical.fill",
                              label: "How it works",
@@ -511,6 +546,7 @@ struct ComicCard: View {
         .padding()
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.comigoInk, lineWidth: 2))
         .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
     }
 
@@ -599,6 +635,7 @@ struct CollectionCard: View {
         .padding()
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.comigoInk, lineWidth: 2))
         .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
     }
 

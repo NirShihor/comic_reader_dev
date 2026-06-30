@@ -79,10 +79,16 @@ class WhisperService: ObservableObject {
             print("[Whisper] Engine start refused (will retry via watchdog): \(error)")
         }
 
-        // Create temp WAV file for this segment, in the live input format
+        // Create temp WAV file for this segment, in the live input format (from
+        // the session, not the node — the node's format goes stale across route
+        // changes, which would make every captured buffer get dropped as a
+        // mismatch and the recording come out empty).
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("recording_\(UUID().uuidString).wav")
-        let format = engine.inputNode.outputFormat(forBus: 0)
+        guard let format = currentCaptureFormat() else {
+            self.error = "Audio input not ready"
+            return
+        }
 
         do {
             let file = try AVAudioFile(forWriting: url, settings: format.settings)
@@ -130,17 +136,29 @@ class WhisperService: ObservableObject {
 
     /// Start the shared capture engine (idempotent). Must first be called in
     /// the foreground; once running it survives screen lock.
+    /// Capture format derived from the audio session's current hardware (mono
+    /// float at the live sample rate). Used instead of the input node's format,
+    /// which goes stale across route changes while the engine is stopped.
+    private func currentCaptureFormat() -> AVAudioFormat? {
+        let session = AVAudioSession.sharedInstance()
+        let rate = session.sampleRate
+        guard rate > 0 else { return nil }
+        let channels = AVAudioChannelCount(max(1, session.inputNumberOfChannels))
+        return AVAudioFormat(standardFormatWithSampleRate: rate, channels: channels)
+    }
+
     private func startEngineIfNeeded() throws {
         guard !engineRunning else { return }
         let input = engine.inputNode
-        let format = input.outputFormat(forBus: 0)
-        // During an audio route change (e.g. AirPods connecting) the input
-        // format is briefly invalid (0 Hz / 0 channels). Installing a tap or
-        // starting the engine with it raises an uncatchable AVAudioEngine
-        // exception that hangs the app — bail out and let the watchdog retry
-        // once the new route has settled.
-        guard format.sampleRate > 0, format.channelCount > 0 else {
-            print("[Whisper] Input format not ready (\(format.sampleRate) Hz, \(format.channelCount) ch) — deferring start")
+        // The input node's reported format is stale while the engine is stopped —
+        // it lags route changes (e.g. stuck at the old AirPods 24 kHz after they're
+        // unplugged, even though the hardware is back to 48 kHz). Gating on it
+        // deadlocks; building a tap from it crashes. The audio SESSION's sample
+        // rate is the live hardware truth, so build the tap from that — the node
+        // reconfigures to match when the engine starts, so the formats line up at
+        // render time (no mismatch crash, no deadlock).
+        guard let format = currentCaptureFormat() else {
+            print("[Whisper] Session input not ready — deferring start")
             return
         }
         input.removeTap(onBus: 0)
@@ -235,20 +253,25 @@ class WhisperService: ObservableObject {
         // The input hardware format just changed (e.g. phone mic 48 kHz ->
         // AirPods 24 kHz). The installed tap is now stale, and the moment the
         // engine renders a buffer against it CoreAudio throws "Input HW format
-        // and tap format not matching" and crashes the app. So tear the tap
-        // down IMMEDIATELY here...
+        // and tap format not matching" and crashes. So detach the tap IMMEDIATELY
+        // (cheap, non-blocking) — but do NOT call engine.stop() here: during a
+        // live Bluetooth route switch stop() blocks the main thread until the
+        // route finishes renegotiating, which can hang the app indefinitely.
         if engineRunning {
             engine.inputNode.removeTap(onBus: 0)
-            engine.stop()
             engineRunning = false
         }
-        // ...then rebuild once the new route has settled. The fresh format is
-        // briefly invalid mid-switch, which the guard in startEngineIfNeeded
-        // handles (it returns and the watchdog/this task retries).
+        // Rebuild once the new route has settled. The engine stops itself on a
+        // configuration change, so by now stop() is usually a quick no-op rather
+        // than a blocking call. The fresh format is briefly invalid mid-switch,
+        // which the guard in startEngineIfNeeded handles (it defers and the next
+        // record attempt retries).
         restartTask?.cancel()
         restartTask = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 250_000_000)
+            try? await Task.sleep(nanoseconds: 400_000_000)
             guard !Task.isCancelled else { return }
+            if self.engine.isRunning { self.engine.stop() }
+            self.engineRunning = false   // keep flag in sync so startEngineIfNeeded rebuilds
             do {
                 try self.startEngineIfNeeded()
             } catch {
@@ -396,12 +419,32 @@ class WhisperService: ObservableObject {
         }
 
         do {
-            // Never pass the expected sentence as the Whisper prompt: it biases the
-            // model into echoing the answer back for mumbled/incoherent/low-confidence
-            // audio, so wrong attempts "pass". Transcribe what was actually said
-            // (language hint only) and let compareText judge it honestly.
-            let transcription = try await transcribeWithWhisper(audioURL: url, prompt: nil, language: language)
+            // Quiet recordings make gpt-4o-transcribe hallucinate a plausible but
+            // wrong sentence; boost faint-but-real speech to a healthy level first.
+            // Only boost when something actually crossed the speech threshold —
+            // otherwise we'd amplify near-silent noise into a hallucination and
+            // rob the "I didn't hear anything" path of its empty transcription.
+            if peakPower > silenceThreshold {
+                boostRecordingGain(at: url)
+            }
+            // Never pass the EXPECTED sentence as the prompt: it biases the model
+            // into echoing the answer back for mumbled/low-confidence audio, so
+            // wrong attempts "pass". But gpt-4o-transcribe often ignores the
+            // `language` field on short clips and auto-detects the wrong language
+            // (e.g. Spanish decoded as Esperanto), so we pass a GENERIC prompt in
+            // the target language to anchor it — it contains no answer words, so it
+            // can't cause an echo/false-pass.
+            let transcription = try await transcribeWithWhisper(audioURL: url, prompt: languageAnchorPrompt(language), language: language)
             print("[Whisper] Transcribed: \"\(transcription)\" (expected: \"\(expectedText ?? "-")\", speechDetected: \(speechDetected))")
+            // On silence/non-speech the model often just echoes our generic anchor
+            // prompt back. That isn't real speech — treat it as empty so callers run
+            // their "I didn't hear anything" path instead of scoring it wrong.
+            if isAnchorEcho(transcription, language: language) {
+                print("[Whisper] Anchor prompt echoed — treating as no speech")
+                transcribedText = ""
+                isProcessing = false
+                return ""
+            }
             transcribedText = transcription
             isProcessing = false
             return transcription
@@ -423,6 +466,75 @@ class WhisperService: ObservableObject {
             try? FileManager.default.removeItem(at: url)
         }
         recordingURL = nil
+    }
+
+    /// Peak-normalize a quiet recording before transcription. Faint audio (e.g.
+    /// the phone held a little far, or metered low while locked) makes the model
+    /// invent text; boosting toward ~-3 dBFS — capped so we never crank near-
+    /// silence into noise — keeps real speech intelligible. Any failure is
+    /// swallowed and the original file is left untouched.
+    private func boostRecordingGain(at url: URL) {
+        guard let file = try? AVAudioFile(forReading: url) else { return }
+        let format = file.processingFormat
+        let frames = AVAudioFrameCount(file.length)
+        guard frames > 0,
+              let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frames),
+              (try? file.read(into: buffer)) != nil,
+              let channels = buffer.floatChannelData else { return }
+
+        let channelCount = Int(format.channelCount)
+        let n = Int(buffer.frameLength)
+        var peak: Float = 0
+        for c in 0..<channelCount {
+            let s = channels[c]
+            for i in 0..<n { let a = abs(s[i]); if a > peak { peak = a } }
+        }
+        guard peak > 0.0005 else { return }            // basically silence — leave it
+        let gain = min(0.7 / peak, 16.0)               // target ~-3 dBFS, cap ~+24 dB
+        guard gain > 1.2 else { return }               // already loud enough
+        for c in 0..<channelCount {
+            let s = channels[c]
+            for i in 0..<n { s[i] *= gain }
+        }
+
+        // Write boosted audio to a temp file, then atomically replace the original
+        // so a failure can never leave us without a recording.
+        let tmp = url.deletingLastPathComponent().appendingPathComponent("boost_\(UUID().uuidString).wav")
+        do {
+            let out = try AVAudioFile(forWriting: tmp, settings: file.fileFormat.settings)
+            try out.write(from: buffer)
+            _ = try FileManager.default.replaceItemAt(url, withItemAt: tmp)
+        } catch {
+            try? FileManager.default.removeItem(at: tmp)
+        }
+    }
+
+    /// A generic prompt in the target language, used only to pin the transcription
+    /// to that language (gpt-4o-transcribe otherwise auto-detects and can drift to
+    /// a similar-sounding language). Deliberately contains no comic/answer words.
+    private func languageAnchorPrompt(_ language: String) -> String? {
+        switch language {
+        case "es": return "Lo que sigue es una frase corta en español."
+        case "en": return "The following is a short phrase in English."
+        default: return nil
+        }
+    }
+
+    /// True when the transcription is just the anchor prompt echoed back (which the
+    /// model does on silence/non-speech) — so we can treat it as "nothing heard".
+    private func isAnchorEcho(_ text: String, language: String) -> Bool {
+        guard let anchor = languageAnchorPrompt(language) else { return false }
+        let t = wordsOnly(text), a = wordsOnly(anchor)
+        guard !a.isEmpty else { return false }
+        return t == a || t.contains(a) || a.contains(t)
+    }
+
+    /// Lowercased, letters-only, single-spaced — for loose text comparison.
+    private func wordsOnly(_ s: String) -> String {
+        s.lowercased()
+            .components(separatedBy: CharacterSet.letters.inverted)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
     }
 
     /// Send audio to Whisper API for transcription
@@ -525,6 +637,11 @@ class WhisperService: ObservableObject {
 
         guard !expectedWords.isEmpty else { return (true, 1.0) }
 
+        // A lone word gives Whisper no context, so it mis-spells or mis-scripts
+        // it far more often than words in a sentence. Be much more forgiving when
+        // the target is a single word.
+        let singleWord = expectedWords.count == 1
+
         var matchedCount = 0
         var usedSpokenIndices = Set<Int>()
 
@@ -543,6 +660,10 @@ class WhisperService: ObservableObject {
                     if isProperNoun {
                         // Names: allow up to 50% difference (handles "Zik"/"Zeke", "Mía"/"Mia")
                         matches = maxLen > 0 && Double(distance) / Double(maxLen) <= 0.5
+                    } else if singleWord {
+                        // Single-word target: allow ~40% difference (handles
+                        // mis-spellings and transliterated hallucinations).
+                        matches = maxLen > 0 && Double(distance) / Double(maxLen) <= 0.4
                     } else if maxLen <= 3 {
                         // Short words (1-3 chars): allow 1 edit of any kind
                         matches = distance <= 1
@@ -595,7 +716,11 @@ class WhisperService: ObservableObject {
     }
 
     private func normalizeText(_ text: String) -> String {
-        text.folding(options: .diacriticInsensitive, locale: .current)
+        // Transliterate any non-Latin script to Latin first: Whisper sometimes
+        // renders a lone Spanish word in another alphabet (e.g. "Nadie" as
+        // Cyrillic "Надія"), and this makes the two comparable.
+        let latin = text.applyingTransform(.toLatin, reverse: false) ?? text
+        return latin.folding(options: .diacriticInsensitive, locale: .current)
             .lowercased()
             .replacingOccurrences(of: "¿", with: "")
             .replacingOccurrences(of: "?", with: "")

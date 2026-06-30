@@ -140,6 +140,7 @@ struct CollectionDetailView: View {
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.comigoInk, lineWidth: 2))
         .padding(.horizontal)
         .explains("Collection",
                   "This is the collection — a series of comics. Its name, level and episode count are shown here. The comics in it are listed below.",
@@ -170,6 +171,7 @@ struct CollectionDetailView: View {
                         )
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.comigoInk, lineWidth: 2))
                     }
                 }
             }
@@ -261,5 +263,6 @@ struct EpisodeCard: View {
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.comigoInk, lineWidth: 2))
     }
 }

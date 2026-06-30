@@ -299,6 +299,11 @@ struct StoreComicCard: View {
         .padding(compact ? 12 : 16)
         .background(compact ? Color.clear : Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: compact ? 0 : 12))
+        .overlay {
+            if !compact {
+                RoundedRectangle(cornerRadius: 12).stroke(Color.comigoInk, lineWidth: 2)
+            }
+        }
     }
 
     @ViewBuilder
@@ -524,6 +529,7 @@ struct StoreCollectionGroup: View {
         .buttonStyle(.plain)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.comigoInk, lineWidth: 2))
     }
 
     private var coverPlaceholder: some View {

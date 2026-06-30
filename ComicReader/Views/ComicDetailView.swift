@@ -8,15 +8,45 @@ enum PracticeDestination: Hashable {
     case repeatListen
     case originListen
     case flowPractice
+
+    // Stable string used to persist/restore the last-used practice mode.
+    var modeKey: String {
+        switch self {
+        case .quiz: return "quiz"
+        case .speaking: return "speaking"
+        case .listening: return "listening"
+        case .repeatPractice: return "repeatPractice"
+        case .repeatListen: return "repeatListen"
+        case .originListen: return "originListen"
+        case .flowPractice: return "flowPractice"
+        }
+    }
+
+    init?(modeKey: String) {
+        switch modeKey {
+        case "quiz": self = .quiz
+        case "speaking": self = .speaking
+        case "listening": self = .listening
+        case "repeatPractice": self = .repeatPractice
+        case "repeatListen": self = .repeatListen
+        case "originListen": self = .originListen
+        case "flowPractice": self = .flowPractice
+        default: return nil
+        }
+    }
 }
 
 struct ComicDetailView: View {
     let comic: Comic
+    /// When true (e.g. opened from the Library "Continue" card), immediately
+    /// resume reading/practice exactly like tapping the primary button here.
+    var autoResume: Bool = false
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var progressManager: ReadingProgressManager
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var localStorage = LocalComicStorage.shared
 
+    @State private var didAutoResume = false
     @State private var practiceDestination: PracticeDestination?
     @State private var selectedPage: Page?
     @State private var showingDeleteConfirmation = false
@@ -59,10 +89,11 @@ struct ComicDetailView: View {
             }
             .navigationDestination(item: $practiceDestination) { destinationView($0) }
             .onChange(of: practiceDestination) { _, newValue in
-                if newValue != nil {
+                if let dest = newValue {
                     // Launching practice counts as interacting → Library "Continue";
-                    // also close the practice popup if it was open.
+                    // remember the mode (for Restart/Continue) and close the popup.
                     progressManager.touchProgress(comicId: comic.id)
+                    progressManager.setPracticeMode(comic.id, mode: dest.modeKey)
                     showPracticeOptions = false
                 }
             }
@@ -99,6 +130,19 @@ struct ComicDetailView: View {
             }
             .helpTooltipLayer()
             .environmentObject(help)
+            .onAppear {
+                // Opened via the Library "Continue" card: pick up exactly where the
+                // user left off (same spot and mode as the primary button here).
+                guard autoResume, !didAutoResume else { return }
+                didAutoResume = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    if lastWasPractice {
+                        launchPractice(restart: false)
+                    } else {
+                        startNormalReading(startingPage)
+                    }
+                }
+            }
     }
 
     // Extracted so the `body` modifier chain stays short enough for the Swift
@@ -186,40 +230,75 @@ struct ComicDetailView: View {
     }
 
     private var actionButtons: some View {
-        HStack(spacing: 12) {
-            // Primary action — accent, fills the remaining width. Mirrors what the
-            // user was last doing: continue reading, continue practicing, or start.
-            Text(hasProgress ? (lastWasPractice ? "Continue practicing" : "Continue reading") : "Start reading")
-                .font(.system(size: 17, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 15)
-                .background(accentColor, in: RoundedRectangle(cornerRadius: 16))
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    if lastWasPractice {
-                        withAnimation(.easeInOut(duration: 0.2)) { showPracticeOptions = true }
-                    } else {
-                        startNormalReading(startingPage)
-                    }
-                }
-                .explains("Start reading",
-                          "Open the comic and start reading — it picks up from where you left off.")
-
-            // Restart — white, hugs its label.
-            if hasProgress {
-                Text("Restart")
+        VStack(spacing: 10) {
+            HStack(spacing: 12) {
+                // Primary action — accent, fills the remaining width. Mirrors what the
+                // user was last doing: continue reading, continue practicing, or start.
+                Text(hasProgress ? (lastWasPractice ? "Continue practicing" : "Continue reading") : "Start reading")
                     .font(.system(size: 17, weight: .bold, design: .rounded))
-                    .foregroundStyle(.primary)
-                    .padding(.horizontal, 22)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
                     .padding(.vertical, 15)
-                    .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: .black.opacity(0.06), radius: 3, y: 1)
+                    .background(accentColor, in: RoundedRectangle(cornerRadius: 16))
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.comigoInk, lineWidth: 2))
                     .contentShape(Rectangle())
-                    .onTapGesture { startNormalReading(firstPage) }
-                    .explains("Restart",
-                              "Go back to the first page and read the comic from the beginning.")
+                    .onTapGesture {
+                        if lastWasPractice {
+                            launchPractice(restart: false)   // resume the last mode
+                        } else {
+                            startNormalReading(startingPage)
+                        }
+                    }
+                    .explains("Start reading",
+                              "Open the comic and start reading — it picks up from where you left off.")
+
+                // Restart — white, hugs its label. Restarts whichever activity the
+                // primary button reflects (practice in the same mode, or reading).
+                if hasProgress {
+                    Text("Restart")
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .foregroundStyle(.primary)
+                        .padding(.horizontal, 22)
+                        .padding(.vertical, 15)
+                        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.comigoInk, lineWidth: 2))
+                        .shadow(color: .black.opacity(0.06), radius: 3, y: 1)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            if lastWasPractice {
+                                launchPractice(restart: true)   // same mode, from the start
+                            } else {
+                                startNormalReading(firstPage)
+                            }
+                        }
+                        .explains("Restart",
+                                  "Start over from the beginning — the same practice mode, or reading.")
+                }
             }
+
+            // When the primary button is practice-focused, keep reading one tap away.
+            if lastWasPractice {
+                Text("Continue reading instead")
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.secondary)
+                    .contentShape(Rectangle())
+                    .onTapGesture { startNormalReading(startingPage) }
+            }
+        }
+    }
+
+    // Launch the last-used practice mode. `restart` clears the saved spot so it
+    // begins from the first sentence; otherwise it resumes where it left off.
+    private func launchPractice(restart: Bool) {
+        if restart { progressManager.clearPracticePosition(for: comic.id) }
+        let mode = progressManager.lastPracticeMode(for: comic.id)
+        if mode == "readSpeak" {
+            startReadAndSpeak()
+        } else if let dest = PracticeDestination(modeKey: mode) {
+            practiceDestination = dest
+        } else {
+            // No recorded mode — let the user pick one.
+            withAnimation(.easeInOut(duration: 0.2)) { showPracticeOptions = true }
         }
     }
 
@@ -499,6 +578,7 @@ struct ComicDetailView: View {
         }
         .padding(13)
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.comigoInk, lineWidth: 2))
         .shadow(color: .black.opacity(0.06), radius: 3, y: 1)
     }
 
@@ -536,6 +616,7 @@ struct ComicDetailView: View {
             .padding(13)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.comigoInk, lineWidth: 2))
             .shadow(color: .black.opacity(0.06), radius: 3, y: 1)
         }
         .buttonStyle(.plain)
@@ -583,6 +664,7 @@ struct ComicDetailView: View {
             .padding(13)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.comigoInk, lineWidth: 2))
             .shadow(color: .black.opacity(0.06), radius: 3, y: 1)
         }
         .buttonStyle(.plain)
@@ -595,6 +677,7 @@ struct ComicDetailView: View {
         settingsManager.listeningPracticeMode = false
         guidedOnScreen = true
         showPracticeOptions = false
+        progressManager.setPracticeMode(comic.id, mode: "readSpeak")
         selectedPage = firstPage
     }
 

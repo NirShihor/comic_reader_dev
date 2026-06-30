@@ -31,6 +31,8 @@ enum PracticeState: Equatable {
     case playingEnglish                   // playing English translation audio (incorrect meaning)
     case replayingBeforeAdvance           // playing Spanish before advancing (correct meaning)
     case replayingBeforeRetry             // playing Spanish before retrying meaning
+    case repromptNoAudioRepeat            // "I didn't hear anything" → then replay Spanish
+    case repromptNoAudioMeaning           // "I didn't hear anything" → then re-ask the meaning
     case advancing
     indirect case paused(previous: PracticeState)
     case completed
@@ -50,6 +52,8 @@ enum PracticeState: Equatable {
              (.playingEnglish, .playingEnglish),
              (.replayingBeforeAdvance, .replayingBeforeAdvance),
              (.replayingBeforeRetry, .replayingBeforeRetry),
+             (.repromptNoAudioRepeat, .repromptNoAudioRepeat),
+             (.repromptNoAudioMeaning, .repromptNoAudioMeaning),
              (.advancing, .advancing),
              (.completed, .completed):
             return true
@@ -99,19 +103,6 @@ struct RepeatPracticeView: View {
     // waiting for Whisper transcription, when neither mic nor audio is live)
     // freeze the practice loop.
     @State private var keepAlivePlayer: AVAudioPlayer?
-    // What Whisper heard on the last attempt — shown on failed feedback so
-    // locked-phone recognition problems are visible without a debugger.
-    @State private var lastTranscription = ""
-
-    private var heardSummary: String {
-        if !lastTranscription.isEmpty {
-            return "Heard: \u{201C}\(lastTranscription)\u{201D}"
-        }
-        if let diag = whisperService.captureDiagnostic {
-            return "Heard: (\(diag))"
-        }
-        return "Heard: (nothing)"
-    }
 
     // TTS fallback for English
     @State private var synthesizer = AVSpeechSynthesizer()
@@ -134,6 +125,7 @@ struct RepeatPracticeView: View {
     private let correctClip = "correct"
     private let notQuiteClip = "not_quite_listen_again"
     private let whatDoesItMeanClip = "what_does_it_mean"
+    private let noAudioClip = "no_audio"   // "I didn't hear anything. Please try again."
 
     var body: some View {
         Group {
@@ -209,7 +201,7 @@ struct RepeatPracticeView: View {
             Button {
                 startPractice()
             } label: {
-                Label("Start", systemImage: "play.fill")
+                Label(isResumingPractice ? "Continue" : "Start", systemImage: "play.fill")
                     .font(.headline)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -273,6 +265,16 @@ struct RepeatPracticeView: View {
             // Bottom controls
             HStack(spacing: 40) {
                 Button {
+                    skipToPrevious()
+                } label: {
+                    Image(systemName: "backward.end.circle.fill")
+                        .font(.system(size: 48))
+                        .foregroundStyle(currentIndex > 0 ? .secondary : Color.secondary.opacity(0.3))
+                }
+                .disabled(currentIndex == 0)
+                .explains("Back", "Go back to the previous sentence.")
+
+                Button {
                     togglePause()
                 } label: {
                     let isPaused = isPausedState
@@ -327,42 +329,30 @@ struct RepeatPracticeView: View {
                 .onDisappear { pulseAnimation = false }
 
         case .recordingRepeat, .recordingMeaning:
-            VStack(spacing: 8) {
-                Image(systemName: "mic.circle.fill")
-                    .font(.system(size: 56))
-                    .foregroundStyle(.red)
-                    .symbolEffect(.pulse)
-                if !lastTranscription.isEmpty {
-                    Text("Last heard: \u{201C}\(lastTranscription)\u{201D}")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-            }
+            Image(systemName: "mic.circle.fill")
+                .font(.system(size: 56))
+                .foregroundStyle(.red)
+                .symbolEffect(.pulse)
 
         case .processingRepeat, .processingMeaning:
             ProgressView()
                 .scaleEffect(2)
 
         case .feedbackRepeat(let correct), .feedbackMeaning(let correct):
-            VStack(spacing: 8) {
-                Image(systemName: correct ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .font(.system(size: 56))
-                    .foregroundStyle(correct ? .green : .red)
-                if !correct {
-                    Text(heardSummary)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-            }
+            Image(systemName: correct ? "checkmark.circle.fill" : "xmark.circle.fill")
+                .font(.system(size: 56))
+                .foregroundStyle(correct ? .green : .red)
 
         case .askingMeaning:
             Image(systemName: "questionmark.circle.fill")
                 .font(.system(size: 56))
                 .foregroundStyle(.purple)
+
+        case .repromptNoAudioRepeat, .repromptNoAudioMeaning:
+            // Neutral "didn't catch that" — not a wrong-answer ✗.
+            Image(systemName: "mic.slash.fill")
+                .font(.system(size: 56))
+                .foregroundStyle(.orange)
 
         case .advancing:
             Image(systemName: "arrow.right.circle.fill")
@@ -499,6 +489,13 @@ struct RepeatPracticeView: View {
         return false
     }
 
+    // True when there's a saved spot partway through, so the start button reads
+    // "Continue" rather than "Start".
+    private var isResumingPractice: Bool {
+        let idx = progressManager.practiceStartIndex(for: comic.id)
+        return idx > 0 && idx < sentences.count
+    }
+
     private func startPractice() {
         guard !sentences.isEmpty else { return }
         // Resume where the last practice run left off (0 if none / already finished).
@@ -613,6 +610,19 @@ struct RepeatPracticeView: View {
                 self.audioManager.play(self.whatDoesItMeanClip)
             }
 
+        case .repromptNoAudioRepeat:
+            // "I didn't hear anything" finished → replay the phrase, then re-record
+            // (same as the incorrect-pronunciation path, but unscored).
+            resetAudioSessionForPlayback()
+            state = .replayingCorrect
+            audioManager.play(sentences[currentIndex].audioUrl)
+
+        case .repromptNoAudioMeaning:
+            // "I didn't hear anything" finished → re-ask "what does it mean?"
+            resetAudioSessionForPlayback()
+            state = .askingMeaning
+            audioManager.play(whatDoesItMeanClip)
+
         default:
             break
         }
@@ -654,9 +664,15 @@ struct RepeatPracticeView: View {
 
         Task {
             let transcription = await whisperService.stopRecording(expectedText: sentence.text, language: "es")
-            lastTranscription = transcription
 
             resetAudioSessionForPlayback()
+
+            // No speech captured → say so and re-record, rather than scoring a
+            // silent attempt as wrong.
+            if transcription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                handleNoAudio(repeatStep: true)
+                return
+            }
 
             // Reject if user spoke the English translation instead of Spanish
             if !sentence.translation.isEmpty && detectSpokenEnglish(spoken: transcription, expected: sentence.translation) {
@@ -735,9 +751,14 @@ struct RepeatPracticeView: View {
 
         Task {
             let transcription = await whisperService.stopRecording(expectedText: sentence.translation, language: "en")
-            lastTranscription = transcription
 
             resetAudioSessionForPlayback()
+
+            // No speech captured → say so and re-record, rather than scoring it wrong.
+            if transcription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                handleNoAudio(repeatStep: false)
+                return
+            }
 
             let isCorrect = compareEnglish(spoken: transcription, expected: sentence.translation)
 
@@ -867,6 +888,18 @@ struct RepeatPracticeView: View {
             savePracticeSpot()
             playCurrentSentence()
         }
+    }
+
+    private func skipToPrevious() {
+        cancelAllActivity()
+        guard currentIndex > 0 else {
+            // Already at the first sentence — just replay it.
+            playCurrentSentence()
+            return
+        }
+        currentIndex -= 1
+        savePracticeSpot()
+        playCurrentSentence()
     }
 
     private func savePracticeSpot() {
@@ -1018,6 +1051,25 @@ struct RepeatPracticeView: View {
     }
 
     // MARK: - TTS Fallback
+
+    /// No speech captured: tell the user and re-record the same step (never
+    /// scored as wrong). Prefers the recorded clip (plays even when the phone is
+    /// locked, via the audio engine); falls back to the system voice until the
+    /// clip is added to the app bundle/target.
+    private func handleNoAudio(repeatStep: Bool) {
+        // After the prompt, replay the phrase and try again (like the "Not quite"
+        // flow): repromptNoAudioRepeat → replay Spanish → record; repromptNoAudio-
+        // Meaning → re-ask "what does it mean?" → record. handleAudioFinished
+        // drives those transitions when the prompt clip/TTS finishes.
+        state = repeatStep ? .repromptNoAudioRepeat : .repromptNoAudioMeaning
+        if Bundle.main.url(forResource: noAudioClip, withExtension: "mp3") != nil {
+            audioManager.play(noAudioClip)
+        } else {
+            speakTTS("I didn't hear anything. Please try again.") {
+                self.handleAudioFinished()
+            }
+        }
+    }
 
     private func speakTTS(_ text: String, completion: @escaping () -> Void) {
         resetAudioSessionForPlayback()

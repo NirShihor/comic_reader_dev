@@ -13,10 +13,13 @@ class ReadingProgressManager: ObservableObject {
     @Published private(set) var practicePositions: [String: PracticePosition] = [:]
     /// Kind of the most recent interaction per comic: "reading" or "practice".
     @Published private(set) var interactionKinds: [String: String] = [:]
+    /// Last practice mode used per comic, so Restart can relaunch the same one.
+    @Published private(set) var practiceModes: [String: String] = [:]
 
     private let storageKey = "readingProgress"
     private let practiceKey = "practicePositions"
     private let kindKey = "interactionKinds"
+    private let modeStorageKey = "practiceModes"
 
     init() {
         loadProgress()
@@ -76,10 +79,22 @@ class ReadingProgressManager: ObservableObject {
         interactionKinds[comicId] ?? "reading"
     }
 
+    /// Record which practice mode was last launched for a comic.
+    func setPracticeMode(_ comicId: String, mode: String) {
+        practiceModes[comicId] = mode
+        persistProgress()
+    }
+
+    /// The last practice mode used (empty string if none recorded).
+    func lastPracticeMode(for comicId: String) -> String {
+        practiceModes[comicId] ?? ""
+    }
+
     func clearProgress(for comicId: String) {
         progressMap.removeValue(forKey: comicId)
         practicePositions.removeValue(forKey: comicId)
         interactionKinds.removeValue(forKey: comicId)
+        practiceModes.removeValue(forKey: comicId)
         persistProgress()
     }
 
@@ -96,6 +111,10 @@ class ReadingProgressManager: ObservableObject {
            let decoded = try? JSONDecoder().decode([String: String].self, from: data) {
             interactionKinds = decoded
         }
+        if let data = UserDefaults.standard.data(forKey: modeStorageKey),
+           let decoded = try? JSONDecoder().decode([String: String].self, from: data) {
+            practiceModes = decoded
+        }
     }
 
     private func persistProgress() {
@@ -104,6 +123,9 @@ class ReadingProgressManager: ObservableObject {
         }
         if let data = try? JSONEncoder().encode(interactionKinds) {
             UserDefaults.standard.set(data, forKey: kindKey)
+        }
+        if let data = try? JSONEncoder().encode(practiceModes) {
+            UserDefaults.standard.set(data, forKey: modeStorageKey)
         }
         persistPracticePositions()
     }

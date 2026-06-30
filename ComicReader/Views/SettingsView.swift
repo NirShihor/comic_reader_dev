@@ -2,9 +2,23 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
+    @AppStorage("appearanceMode") private var appearanceMode = "system"
 
     var body: some View {
         List {
+            // Appearance Section
+            Section {
+                Picker(selection: $appearanceMode) {
+                    Text("System").tag("system")
+                    Text("Light").tag("light")
+                    Text("Dark").tag("dark")
+                } label: {
+                    Label("Theme", systemImage: "circle.lefthalf.filled")
+                }
+            } header: {
+                Text("Appearance")
+            }
+
             // Reading Section
             Section {
                 Toggle(isOn: $settingsManager.autoPlayAudio) {

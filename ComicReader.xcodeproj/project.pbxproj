@@ -15,6 +15,9 @@
 		819A36E92F9EA3EA004A1687 /* what_does_it_mean.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 819A36E82F9EA3EA004A1687 /* what_does_it_mean.mp3 */; };
 		819A36EA2F9EA3EA004A1687 /* not_quite_listen_again.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 819A36E72F9EA3EA004A1687 /* not_quite_listen_again.mp3 */; };
 		819A36EB2F9EA3EA004A1687 /* correct.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 819A36E62F9EA3EA004A1687 /* correct.mp3 */; };
+		81A80AE82FF055D100B9D2C2 /* no_audio.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 81A80AE72FF055D100B9D2C2 /* no_audio.mp3 */; };
+		81A80AEA2FF1A29900B9D2C2 /* LuckiestGuy-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 81A80AE92FF1A29900B9D2C2 /* LuckiestGuy-Regular.ttf */; };
+		81A80AEC2FF1A2AE00B9D2C2 /* Inter-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 81A80AEB2FF1A2AE00B9D2C2 /* Inter-Variable.ttf */; };
 		81C2EFB12FE5506400F5A811 /* ComicRelief-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 81C2EFAF2FE5506400F5A811 /* ComicRelief-Bold.ttf */; };
 		81C2EFB22FE5506400F5A811 /* ComicRelief-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 81C2EFB02FE5506400F5A811 /* ComicRelief-Regular.ttf */; };
 		A1000001222222220000001 /* ComicReaderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000001 /* ComicReaderApp.swift */; };
@@ -59,6 +62,9 @@
 		819A36E62F9EA3EA004A1687 /* correct.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = correct.mp3; sourceTree = "<group>"; };
 		819A36E72F9EA3EA004A1687 /* not_quite_listen_again.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = not_quite_listen_again.mp3; sourceTree = "<group>"; };
 		819A36E82F9EA3EA004A1687 /* what_does_it_mean.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = what_does_it_mean.mp3; sourceTree = "<group>"; };
+		81A80AE72FF055D100B9D2C2 /* no_audio.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = no_audio.mp3; sourceTree = "<group>"; };
+		81A80AE92FF1A29900B9D2C2 /* LuckiestGuy-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LuckiestGuy-Regular.ttf"; sourceTree = "<group>"; };
+		81A80AEB2FF1A2AE00B9D2C2 /* Inter-Variable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Variable.ttf"; sourceTree = "<group>"; };
 		81C2EFAF2FE5506400F5A811 /* ComicRelief-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ComicRelief-Bold.ttf"; sourceTree = "<group>"; };
 		81C2EFB02FE5506400F5A811 /* ComicRelief-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ComicRelief-Regular.ttf"; sourceTree = "<group>"; };
 		A1000001000000000000001 /* ComicReader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ComicReader.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -136,10 +142,13 @@
 				A1000001111111110000016 /* Assets.xcassets */,
 				A1000001111111110000017 /* Info.plist */,
 				819A36E62F9EA3EA004A1687 /* correct.mp3 */,
+				81A80AE72FF055D100B9D2C2 /* no_audio.mp3 */,
 				819A36E72F9EA3EA004A1687 /* not_quite_listen_again.mp3 */,
 				819A36E82F9EA3EA004A1687 /* what_does_it_mean.mp3 */,
 				81C2EFAF2FE5506400F5A811 /* ComicRelief-Bold.ttf */,
 				81C2EFB02FE5506400F5A811 /* ComicRelief-Regular.ttf */,
+				81A80AE92FF1A29900B9D2C2 /* LuckiestGuy-Regular.ttf */,
+				81A80AEB2FF1A2AE00B9D2C2 /* Inter-Variable.ttf */,
 			);
 			path = ComicReader;
 			sourceTree = "<group>";
@@ -263,11 +272,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				81A80AE82FF055D100B9D2C2 /* no_audio.mp3 in Resources */,
 				819A36E92F9EA3EA004A1687 /* what_does_it_mean.mp3 in Resources */,
+				81A80AEA2FF1A29900B9D2C2 /* LuckiestGuy-Regular.ttf in Resources */,
 				819A36EA2F9EA3EA004A1687 /* not_quite_listen_again.mp3 in Resources */,
 				81C2EFB12FE5506400F5A811 /* ComicRelief-Bold.ttf in Resources */,
 				81C2EFB22FE5506400F5A811 /* ComicRelief-Regular.ttf in Resources */,
 				819A36EB2F9EA3EA004A1687 /* correct.mp3 in Resources */,
+				81A80AEC2FF1A2AE00B9D2C2 /* Inter-Variable.ttf in Resources */,
 				A1000001222222220000022 /* BundledComics in Resources */,
 				A1000001222222220000016 /* Assets.xcassets in Resources */,
 			);
@@ -445,7 +457,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 48;
+				CURRENT_PROJECT_VERSION = 54;
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -478,7 +490,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 48;
+				CURRENT_PROJECT_VERSION = 54;
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

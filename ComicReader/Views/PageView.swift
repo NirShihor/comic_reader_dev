@@ -658,6 +658,7 @@ private struct BubblePracticeFeedback {
     let spokenText: String
     let expectedText: String
     let words: [Word]
+    var noSpeech: Bool = false   // nothing was heard — not a wrong answer
 }
 
 /// A single bubble's content for the floating card. Handles normal reading
@@ -986,17 +987,27 @@ struct BubbleContentView: View {
     private func feedbackCard(_ feedback: BubblePracticeFeedback) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Image(systemName: feedback.isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundStyle(feedback.isCorrect ? .green : .red)
-                Text(feedback.isCorrect ? "Correct!" : "Not quite").fontWeight(.semibold)
+                if feedback.noSpeech {
+                    Image(systemName: "mic.slash.fill").foregroundStyle(.orange)
+                    Text("I didn't hear anything").fontWeight(.semibold)
+                } else {
+                    Image(systemName: feedback.isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .foregroundStyle(feedback.isCorrect ? .green : .red)
+                    Text(feedback.isCorrect ? "Correct!" : "Not quite").fontWeight(.semibold)
+                }
             }
             .font(.headline)
 
-            if !feedback.isCorrect {
-                Text("You said: \"\(feedback.spokenText)\"").font(.subheadline)
+            if feedback.noSpeech {
+                Text("Tap Speak and say the line again.")
+                    .font(.subheadline).foregroundStyle(.secondary)
+            } else {
+                if !feedback.isCorrect {
+                    Text("You said: \"\(feedback.spokenText)\"").font(.subheadline)
+                }
+                Text(settingsManager.listeningPracticeMode ? "Meaning: \(feedback.expectedText)" : "Expected: \(feedback.expectedText)")
+                    .font(.subheadline).foregroundStyle(.secondary)
             }
-            Text(settingsManager.listeningPracticeMode ? "Meaning: \(feedback.expectedText)" : "Expected: \(feedback.expectedText)")
-                .font(.subheadline).foregroundStyle(.secondary)
 
             HStack {
                 Button { playAudio(practiceSentence?.audioUrl) } label: {
@@ -1011,7 +1022,7 @@ struct BubbleContentView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(feedback.isCorrect ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
+        .background((feedback.noSpeech ? Color.orange : (feedback.isCorrect ? Color.green : Color.red)).opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
@@ -1044,12 +1055,20 @@ struct BubbleContentView: View {
                 return
             }
             whisperService.error = nil
+            if spokenText.isEmpty {
+                try? await Task.sleep(nanoseconds: 200_000_000)
+                processingSentenceId = nil
+                practiceFeedback = BubblePracticeFeedback(
+                    sentenceId: sentence.id, isCorrect: false, spokenText: "",
+                    expectedText: expectedText, words: sentence.words, noSpeech: true)
+                return
+            }
             let (isCorrect, _) = whisperService.compareText(spoken: spokenText, expected: expectedText)
             try? await Task.sleep(nanoseconds: 300_000_000)
             processingSentenceId = nil
             practiceFeedback = BubblePracticeFeedback(
                 sentenceId: sentence.id, isCorrect: isCorrect,
-                spokenText: spokenText.isEmpty ? "(no speech detected)" : spokenText,
+                spokenText: spokenText,
                 expectedText: expectedText, words: sentence.words)
             playingSentenceId = sentence.id
             playAudio(sentence.audioUrl)
@@ -1069,12 +1088,20 @@ struct BubbleContentView: View {
                 return
             }
             whisperService.error = nil
+            if spokenText.isEmpty {
+                try? await Task.sleep(nanoseconds: 200_000_000)
+                processingSentenceId = nil
+                practiceFeedback = BubblePracticeFeedback(
+                    sentenceId: sentence.id, isCorrect: false, spokenText: "",
+                    expectedText: expected, words: sentence.words, noSpeech: true)
+                return
+            }
             let isCorrect = compareEnglishMeaning(spoken: spokenText, expected: expected)
             try? await Task.sleep(nanoseconds: 300_000_000)
             processingSentenceId = nil
             practiceFeedback = BubblePracticeFeedback(
                 sentenceId: sentence.id, isCorrect: isCorrect,
-                spokenText: spokenText.isEmpty ? "(no speech detected)" : spokenText,
+                spokenText: spokenText,
                 expectedText: expected, words: sentence.words)
             playingSentenceId = sentence.id
             playAudio(sentence.audioUrl)

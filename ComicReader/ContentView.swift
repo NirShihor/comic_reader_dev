@@ -4,6 +4,24 @@ struct ContentView: View {
     @State private var selectedTab: Tab = .library
     @State private var libraryNavigationPath = NavigationPath()
     @State private var showSplash = true
+    // App appearance override, set from Settings → Appearance: "system"/"light"/"dark".
+    @AppStorage("appearanceMode") private var appearanceMode = "system"
+
+    private var preferredColorScheme: ColorScheme? {
+        switch appearanceMode {
+        case "light": return .light
+        case "dark": return .dark
+        default: return nil   // follow the system
+        }
+    }
+
+    // Returning user = has launched before (flag set on first Get started) or
+    // already has reading progress. They see "Continue learning".
+    @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore = false
+    @EnvironmentObject private var progressManager: ReadingProgressManager
+    private var returningUser: Bool {
+        hasLaunchedBefore || !progressManager.progressMap.isEmpty
+    }
 
     enum Tab {
         case library
@@ -32,12 +50,17 @@ struct ContentView: View {
         Group {
             if showSplash {
                 LandingView(
-                    onGetStarted: { withAnimation(.easeInOut(duration: 0.4)) { showSplash = false } }
+                    ctaTitle: returningUser ? "Continue learning" : "Get started",
+                    onGetStarted: {
+                        hasLaunchedBefore = true
+                        withAnimation(.easeInOut(duration: 0.4)) { showSplash = false }
+                    }
                 )
             } else {
                 tabs
             }
         }
+        .preferredColorScheme(preferredColorScheme)
     }
 
     private var tabs: some View {
@@ -92,6 +115,9 @@ struct ContentView: View {
 // Design tokens for the landing screen (match the rest of the refresh).
 private enum Brand {
     static let accent        = Color(red: 0x5B/255, green: 0x5B/255, blue: 0xD6/255) // #5B5BD6
+    static let yellow        = Color(red: 0xFF/255, green: 0xD2/255, blue: 0x3F/255) // #FFD23F
+    static let violet        = Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255) // #6E40F0
+    static let ink           = Color(red: 0x15/255, green: 0x17/255, blue: 0x2A/255) // #15172A (bubble outline)
     static let bg            = Color(red: 0xF4/255, green: 0xF1/255, blue: 0xED/255) // #F4F1ED
     static let textPrimary   = Color(red: 0x1F/255, green: 0x1B/255, blue: 0x18/255) // #1F1B18
     static let textSecondary = Color(red: 0x75/255, green: 0x6E/255, blue: 0x67/255) // #756E67
@@ -100,83 +126,90 @@ private enum Brand {
     static func rounded(_ size: CGFloat, _ weight: Font.Weight = .bold) -> Font {
         .system(size: size, weight: weight, design: .rounded)
     }
+
+    /// Luckiest Guy — comic display font, for headlines.
+    static func display(_ size: CGFloat) -> Font {
+        Font.custom("LuckiestGuy-Regular", size: size)
+    }
+
+    /// Inter — body font (variable; weights applied via .weight()).
+    static func body(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
+        Font.custom("Inter", size: size).weight(weight)
+    }
 }
 
-/// First-run / landing screen — COMIGO logo over a curated comic mosaic, warm
-/// wash fading into the app background, indigo "Get started" CTA.
+/// Hand-drawn yellow underline squiggle, ported from the mockup SVG (viewBox 0 0 240 10).
+private struct Squiggle: Shape {
+    func path(in rect: CGRect) -> Path {
+        let sx = rect.width / 240, sy = rect.height / 10
+        func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: x * sx, y: y * sy) }
+        var p = Path()
+        p.move(to: pt(2, 5))
+        p.addQuadCurve(to: pt(80, 5),  control: pt(41, 1))
+        p.addQuadCurve(to: pt(160, 5), control: pt(120, 9))
+        p.addQuadCurve(to: pt(238, 5), control: pt(199, 1))
+        return p
+    }
+}
+
+/// First-run / landing screen — COMIGO logo on a solid violet field with the
+/// "Spanish." tagline and "Get started" CTA.
 struct LandingView: View {
+    var ctaTitle: String = "Get started"
     var onGetStarted: () -> Void = {}
 
     var body: some View {
         ZStack {
-            Brand.bg.ignoresSafeArea()
+            Brand.violet.ignoresSafeArea()
 
-            // 1) Comic mosaic backdrop (top ~66% of the screen)
-            GeometryReader { geo in
-                MosaicBackdrop()
-                    .frame(height: geo.size.height * 0.66)
-                    .clipped()
-                    // Soft warm wash over the panels.
-                    .overlay(
-                        LinearGradient(
-                            colors: [Brand.bg.opacity(0.18), Brand.bg.opacity(0.28)],
-                            startPoint: .top, endPoint: .bottom
-                        )
-                    )
-                    // Dissolve the bottom into the page: the mosaic fades to fully
-                    // transparent before its own edge, so there is no line — the
-                    // identical Brand.bg behind shows straight through.
-                    .mask(
-                        LinearGradient(
-                            stops: [
-                                .init(color: .white, location: 0.00),
-                                .init(color: .white, location: 0.66),
-                                .init(color: .clear, location: 0.96),
-                            ],
-                            startPoint: .top, endPoint: .bottom
-                        )
-                    )
-                    .ignoresSafeArea(edges: .top)
-            }
-
-            // 3) Content, pinned to the bottom
+            // Content, pinned to the bottom
             VStack(spacing: 0) {
                 Spacer()
 
-                Image("comigo-logo")
+                Image("comicgo_logo_yoni_1_alpha_layer_2")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 226)
+                    .frame(width: 271)
                     .shadow(color: Brand.textPrimary.opacity(0.12), radius: 12, x: 0, y: 6)
                     .padding(.bottom, 46)
+                    .offset(y: -125)
 
-                // Tagline — note the indigo period
-                VStack(spacing: 0) {
-                    Text("Spanish.")
-                    (Text("One comic at a time")
-                        + Text(".").foregroundColor(Brand.accent))
+                // Tagline — "Spanish." in Luckiest Guy (yellow period), the line
+                // below in Inter with a yellow squiggle underline.
+                VStack(spacing: 6) {
+                    (Text("Spanish").tracking(-1.5)
+                        + Text(".").font(Brand.display(42)).foregroundColor(Brand.yellow))
+                        .font(Brand.display(34))
+
+                    (Text("One comic at a time") + Text("."))
+                        .font(Brand.body(21, .heavy))
+                        .overlay(alignment: .bottom) {
+                            Squiggle()
+                                .stroke(Brand.yellow, style: StrokeStyle(lineWidth: 7, lineCap: .round))
+                                .frame(height: 10)
+                                .offset(y: 8)
+                        }
                 }
-                .font(Brand.rounded(27, .heavy))
-                .foregroundColor(Brand.textPrimary)
+                .foregroundColor(.white)
                 .multilineTextAlignment(.center)
 
                 Text("Read and listen to comics in Spanish, tap sentences and words to understand them and practice out loud.")
-                    .font(.system(size: 15.5))
-                    .foregroundColor(Brand.textSecondary)
+                    .font(Brand.body(15.5))
+                    .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                     .lineSpacing(3)
                     .frame(maxWidth: 280)
-                    .padding(.top, 14)
+                    .padding(.top, 24)
 
                 Button(action: onGetStarted) {
-                    Text("Get started")
-                        .font(Brand.rounded(16, .heavy))
-                        .foregroundColor(.white)
+                    Text(ctaTitle)
+                        .font(Brand.body(16, .heavy))
+                        .foregroundColor(Brand.ink)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Brand.accent)
-                        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
-                        .shadow(color: Brand.accent.opacity(0.30), radius: 11, x: 0, y: 10)
+                        .background(RoundedRectangle(cornerRadius: 15, style: .continuous).fill(Color.white))
+                        .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(Brand.ink, lineWidth: 3.5))
+                        .shadow(color: Brand.ink.opacity(0.25), radius: 10, x: 0, y: 8)
                 }
                 .padding(.top, 30)
             }
@@ -191,52 +224,11 @@ struct LandingView: View {
 //   MosaicTile { Image("cover_rey").resizable().scaledToFill() }
 // The warm gradient above handles the dimming, so tiles need no overlay of their own.
 private struct MosaicBackdrop: View {
+    // Primary violet from the v4 HTML mockup (--violet: #6E40F0).
+    private let panel = Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255)
     var body: some View {
-        HStack(spacing: 6) {
-            VStack(spacing: 6) {
-                MosaicTile(color: Color(red: 0x7C/255, green: 0x5A/255, blue: 0x3A/255)).frame(height: 188)
-                MosaicTile(color: Color(red: 0x3E/255, green: 0x56/255, blue: 0x41/255)).frame(height: 150)
-                MosaicTile(color: Color(red: 0x5C/255, green: 0x73/255, blue: 0x55/255)) // fills remainder
-            }
-            VStack(spacing: 6) {
-                MosaicTile(color: Color(red: 0x9A/255, green: 0x8C/255, blue: 0x72/255)).frame(height: 132)
-                MosaicTile(color: Color(red: 0x2F/255, green: 0x5D/255, blue: 0x62/255)).frame(height: 206)
-                MosaicTile(color: Color(red: 0x5A/255, green: 0x4A/255, blue: 0x6A/255)) // fills remainder
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-    }
-}
-
-private struct MosaicTile<Content: View>: View {
-    var color: Color = .gray
-    @ViewBuilder var content: () -> Content
-
-    init(color: Color, @ViewBuilder content: @escaping () -> Content = { EmptyView() }) {
-        self.color = color
-        self.content = content
-    }
-
-    var body: some View {
-        ZStack {
-            color
-            content()
-            // subtle hatch so placeholder tiles read as comic panels (remove with real art)
-            GeometryReader { g in
-                Path { p in
-                    let step: CGFloat = 16
-                    var x = -g.size.height
-                    while x < g.size.width {
-                        p.move(to: CGPoint(x: x, y: 0))
-                        p.addLine(to: CGPoint(x: x + g.size.height, y: g.size.height))
-                        x += step
-                    }
-                }
-                .stroke(Color.white.opacity(0.06), lineWidth: 8)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .clipped()
+        panel
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
 

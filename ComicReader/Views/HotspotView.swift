@@ -29,6 +29,10 @@ struct HotspotView: View {
     @ObservedObject private var whisperService = WhisperService.shared
     @StateObject private var help = HelpModeController()
 
+    // Explicit indigo so the toolbar buttons stay visible in dark mode (the
+    // default tint was blending into the dark navigation bar).
+    private let accent = Color(red: 91/255, green: 91/255, blue: 214/255)
+
     enum TestDirection: String, CaseIterable {
         case enToEs = "EN → Spanish"
         case esToEn = "Spanish → EN"
@@ -76,9 +80,20 @@ struct HotspotView: View {
                         }
                     }
             )
-            .navigationTitle(isTestMode ? "Speaking Test" : (hotspot.label ?? "Details"))
             .navigationBarTitleDisplayMode(.inline)
+            // Force a solid, mode-adaptive nav-bar background. Without this the bar
+            // is translucent and the dark reader/black-backed image behind it bleeds
+            // through, so in light mode the (black) title was invisible on a dark bar.
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(Color(.systemBackground), for: .navigationBar)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    // Render the title explicitly with an adaptive colour — the
+                    // system nav title was coming out white in light mode (invisible).
+                    Text(isTestMode ? "Speaking Test" : (hotspot.label ?? "Details"))
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                }
                 ToolbarItem(placement: .topBarLeading) {
                     if !testSlides.isEmpty {
                         Button(isTestMode ? "Back" : "Test") {
@@ -100,18 +115,19 @@ struct HotspotView: View {
                                     : "Start a speaking test on these phrases — speak each one and get instant feedback.")
                     }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 16) {
-                        Button {
-                            withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
-                        } label: {
-                            Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
-                        }
-                        Button("Done") {
-                            stopAudio()
-                            dismiss()
-                        }
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
+                    } label: {
+                        Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
                     }
+                    .foregroundColor(accent)
+                    Button("Done") {
+                        stopAudio()
+                        dismiss()
+                    }
+                    .foregroundColor(accent)
+                    .fontWeight(.semibold)
                 }
             }
             .popover(item: $selectedWord) { word in
