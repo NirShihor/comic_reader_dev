@@ -1143,6 +1143,9 @@ struct FloatingBubbleCard: View {
 
     @State private var offset: CGSize = .zero
     @State private var accumulated: CGSize = .zero
+    @State private var contentHeight: CGFloat = 0
+
+    private let maxContentHeight: CGFloat = 340
 
     var body: some View {
         card
@@ -1162,9 +1165,14 @@ struct FloatingBubbleCard: View {
                     BubbleContentView(comic: comic, bubble: bubbles[index])
                         .id(bubbles[index].id)   // reset per-bubble state when stepping
                         .padding(14)
+                        .background(GeometryReader { g in
+                            Color.clear.preference(key: PopupContentHeightKey.self, value: g.size.height)
+                        })
                 }
             }
-            .frame(maxHeight: 340)
+            // Hug the content: only as tall as it needs, capped so long bubbles scroll.
+            .frame(height: contentHeight > 0 ? min(contentHeight, maxContentHeight) : maxContentHeight)
+            .onPreferenceChange(PopupContentHeightKey.self) { contentHeight = $0 }
         }
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -1215,6 +1223,14 @@ struct FloatingBubbleCard: View {
                 }
                 .onEnded { _ in accumulated = offset }
         )
+    }
+}
+
+/// Reports the natural height of the bubble popup's content so the card can hug it.
+private struct PopupContentHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }
 
