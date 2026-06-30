@@ -15,12 +15,14 @@ struct ComicReaderApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var settingsManager = SettingsManager()
     @StateObject private var progressManager = ReadingProgressManager()
+    @StateObject private var notebookManager = NotebookManager()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(settingsManager)
                 .environmentObject(progressManager)
+                .environmentObject(notebookManager)
         }
     }
 }

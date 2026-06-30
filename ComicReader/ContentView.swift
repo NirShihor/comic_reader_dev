@@ -26,6 +26,7 @@ struct ContentView: View {
     enum Tab {
         case library
         case vocabulary
+        case notebook
         case settings
     }
 
@@ -90,6 +91,21 @@ struct ContentView: View {
                 Label("Vocabulary", systemImage: "bookmark.fill")
             }
             .tag(Tab.vocabulary)
+
+            NavigationStack {
+                NotebookView()
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button("Done") {
+                                selectedTab = .library
+                            }
+                        }
+                    }
+            }
+            .tabItem {
+                Label("Notebook", systemImage: "book.closed")
+            }
+            .tag(Tab.notebook)
 
             NavigationStack {
                 SettingsView()
@@ -305,3 +321,338 @@ struct CoachmarkPreviewHarness: View {
     }
 }
 #endif
+
+// MARK: - Notebook
+
+/// A single notebook page: a title and free-form body text the user writes.
+struct NotebookPage: Identifiable, Codable, Equatable {
+    var id: String = UUID().uuidString
+    var title: String = ""
+    var body: String = ""
+}
+
+// MARK: Admin notes (ship with the app)
+//
+// These pages are compiled into the app, so every user gets them and they're
+// always available offline. To EDIT them, just change the text below: start a
+// new page with a line beginning "# " (that becomes the page title); everything
+// until the next "# " is that page's body. Plain text, real line breaks — no
+// JSON escaping. (We can later move this to a server feed if you want to update
+// notes without shipping a new build.)
+private let adminNotesSource = """
+# Ser vs. Estar
+Both mean "to be", but:
+• SER — permanent / essential traits: who/what something is. "Soy de España." "Es médico."
+• ESTAR — states & locations that can change: how/where something is right now. "Estoy cansado." "Está en casa."
+
+# Por vs. Para
+• POR — reason, cause, exchange, duration, "through/by". "Gracias por la ayuda." "Por la mañana."
+• PARA — purpose, destination, deadline, recipient. "Es para ti." "Salgo para Madrid."
+
+# The Personal "a"
+When the direct object of a verb is a specific person (or a loved pet), add "a":
+"Veo a María." "Busco a mi hermano."
+No "a" for things: "Veo la casa."
+"""
+
+/// Global notebook store. Admin pages are authored in the generator and fetched
+/// from the server (cached on-device, so they stay available offline); the
+/// compiled `adminNotesSource` is only a fallback before the first fetch.
+/// User pages are device-local and editable, persisted to UserDefaults.
+final class NotebookManager: ObservableObject {
+    /// Read-only grammar pages from the server (cached). Updated on launch.
+    @Published var adminPages: [NotebookPage]
+    /// User-created pages, stored on this device.
+    @Published var userPages: [NotebookPage] { didSet { save() } }
+
+    private let storageKey = "notebookPages.v1"
+    private let adminCacheKey = "notebookAdminCache.v1"
+
+    init() {
+        // Admin: prefer the cached server copy; otherwise the compiled fallback.
+        if let cached = UserDefaults.standard.data(forKey: adminCacheKey),
+           let decoded = try? JSONDecoder().decode([NotebookPage].self, from: cached) {
+            adminPages = decoded
+        } else {
+            adminPages = NotebookManager.parseAdminNotes(adminNotesSource)
+        }
+        // User pages.
+        if let data = UserDefaults.standard.data(forKey: storageKey),
+           let decoded = try? JSONDecoder().decode([NotebookPage].self, from: data) {
+            userPages = decoded
+        } else {
+            userPages = []
+        }
+        // Refresh admin notes from the server in the background.
+        Task { await fetchAdminNotes() }
+    }
+
+    /// Fetch the global admin notebook from the server and cache it. On failure
+    /// (offline, etc.) the cached/fallback pages remain in place.
+    @MainActor
+    func fetchAdminNotes() async {
+        guard let url = URL(string: "\(Secrets.serverBaseURL)/api/reader/notebook") else { return }
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return }
+            struct Payload: Decodable {
+                struct Note: Decodable { let id: String; let title: String; let body: String }
+                let notes: [Note]
+            }
+            let payload = try JSONDecoder().decode(Payload.self, from: data)
+            let pages = payload.notes.map { NotebookPage(id: $0.id, title: $0.title, body: $0.body) }
+            if let encoded = try? JSONEncoder().encode(pages) {
+                UserDefaults.standard.set(encoded, forKey: adminCacheKey)
+            }
+            adminPages = pages
+        } catch {
+            // Keep whatever we already have (cache or fallback).
+        }
+    }
+
+    /// Insert a new user page or update an existing one (matched by id).
+    func upsert(_ page: NotebookPage) {
+        if let idx = userPages.firstIndex(where: { $0.id == page.id }) {
+            userPages[idx] = page
+        } else {
+            userPages.append(page)
+        }
+    }
+
+    func delete(_ page: NotebookPage) {
+        userPages.removeAll { $0.id == page.id }
+    }
+
+    private func save() {
+        if let data = try? JSONEncoder().encode(userPages) {
+            UserDefaults.standard.set(data, forKey: storageKey)
+        }
+    }
+
+    /// Split the admin source into pages on lines beginning with "# ".
+    static func parseAdminNotes(_ src: String) -> [NotebookPage] {
+        var pages: [NotebookPage] = []
+        var title: String?
+        var bodyLines: [String] = []
+        func flush() {
+            guard let t = title else { return }
+            let body = bodyLines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+            pages.append(NotebookPage(id: "admin-\(pages.count)", title: t, body: body))
+        }
+        for line in src.components(separatedBy: "\n") {
+            if line.hasPrefix("# ") {
+                flush()
+                title = String(line.dropFirst(2)).trimmingCharacters(in: .whitespaces)
+                bodyLines = []
+            } else {
+                bodyLines.append(line)
+            }
+        }
+        flush()
+        return pages
+    }
+}
+
+/// Handwritten-style notebook. Cream paper pages in the Comic Relief face.
+struct NotebookView: View {
+    @EnvironmentObject private var notebook: NotebookManager
+    @State private var editingPage: NotebookPage?
+    @State private var readingPage: NotebookPage?
+
+    private static let ink = Color(red: 0.14, green: 0.15, blue: 0.22)
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                if !notebook.adminPages.isEmpty {
+                    sectionHeader("Grammar")
+                    ForEach(notebook.adminPages) { page in
+                        NotebookPaper(page: page, locked: true)
+                            .onTapGesture { readingPage = page }
+                    }
+                }
+
+                sectionHeader("My notes")
+                if notebook.userPages.isEmpty {
+                    Text("Tap + to add your own page — notes, reminders, anything.")
+                        .font(.custom("ComicRelief-Regular", size: 16))
+                        .foregroundColor(Self.ink.opacity(0.55))
+                        .padding(.vertical, 4)
+                } else {
+                    ForEach(notebook.userPages) { page in
+                        NotebookPaper(page: page, locked: false)
+                            .onTapGesture { editingPage = page }
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    notebook.delete(page)
+                                } label: {
+                                    Label("Delete page", systemImage: "trash")
+                                }
+                            }
+                    }
+                }
+            }
+            .padding()
+        }
+        .background(Color(red: 0.93, green: 0.91, blue: 0.85).ignoresSafeArea())
+        .navigationTitle("Notebook")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    editingPage = NotebookPage()
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+        }
+        .sheet(item: $editingPage) { page in
+            NotebookPageEditor(page: page, onSave: { updated in
+                // Don't keep an entirely empty page.
+                if updated.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    && updated.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    notebook.delete(updated)
+                } else {
+                    notebook.upsert(updated)
+                }
+            }, onDelete: {
+                notebook.delete(page)
+            })
+        }
+        .sheet(item: $readingPage) { page in
+            NotebookPageReader(page: page)
+        }
+    }
+
+    private func sectionHeader(_ text: String) -> some View {
+        Text(text.uppercased())
+            .font(.custom("ComicRelief-Bold", size: 14))
+            .foregroundColor(Self.ink.opacity(0.5))
+            .padding(.top, 4)
+    }
+}
+
+/// One page rendered as cream paper with faint rules.
+private struct NotebookPaper: View {
+    let page: NotebookPage
+    var locked: Bool = false
+    private static let paper = Color(red: 0.99, green: 0.98, blue: 0.94)
+    private static let ink = Color(red: 0.14, green: 0.15, blue: 0.22)
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                if !page.title.isEmpty {
+                    Text(page.title)
+                        .font(.custom("ComicRelief-Bold", size: 24))
+                        .foregroundColor(Self.ink)
+                }
+                Spacer(minLength: 8)
+                if locked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(Self.ink.opacity(0.3))
+                }
+            }
+            Text(page.body.isEmpty ? "Tap to write…" : page.body)
+                .font(.custom("ComicRelief-Regular", size: 19))
+                .foregroundColor(page.body.isEmpty ? Self.ink.opacity(0.4) : Self.ink)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .lineSpacing(6)
+                .lineLimit(locked ? 6 : nil)
+        }
+        .padding(22)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Self.paper))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(Color.black.opacity(0.08), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.10), radius: 6, x: 0, y: 3)
+    }
+}
+
+/// Read-only viewer for bundled admin (grammar) pages.
+private struct NotebookPageReader: View {
+    @Environment(\.dismiss) private var dismiss
+    let page: NotebookPage
+    private static let paper = Color(red: 0.99, green: 0.98, blue: 0.94)
+    private static let ink = Color(red: 0.14, green: 0.15, blue: 0.22)
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
+                    Text(page.title)
+                        .font(.custom("ComicRelief-Bold", size: 28))
+                        .foregroundColor(Self.ink)
+                    Text(page.body)
+                        .font(.custom("ComicRelief-Regular", size: 20))
+                        .foregroundColor(Self.ink)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .lineSpacing(7)
+                }
+                .padding(24)
+            }
+            .background(Self.paper.ignoresSafeArea())
+            .navigationTitle("Grammar")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+/// Editor sheet for a single page.
+private struct NotebookPageEditor: View {
+    @Environment(\.dismiss) private var dismiss
+    @State var page: NotebookPage
+    var onSave: (NotebookPage) -> Void
+    var onDelete: (() -> Void)? = nil
+
+    private static let paper = Color(red: 0.99, green: 0.98, blue: 0.94)
+    private static let ink = Color(red: 0.14, green: 0.15, blue: 0.22)
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 12) {
+                TextField("Title", text: $page.title)
+                    .font(.custom("ComicRelief-Bold", size: 22))
+                    .foregroundColor(Self.ink)
+                Divider()
+                TextEditor(text: $page.body)
+                    .font(.custom("ComicRelief-Regular", size: 19))
+                    .foregroundColor(Self.ink)
+                    .scrollContentBackground(.hidden)
+                    .lineSpacing(6)
+
+                if let onDelete {
+                    Button(role: .destructive) {
+                        onDelete()
+                        dismiss()
+                    } label: {
+                        Label("Delete page", systemImage: "trash")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .padding(.vertical, 10)
+                }
+            }
+            .padding()
+            .background(Self.paper.ignoresSafeArea())
+            .navigationTitle("Edit page")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { onSave(page); dismiss() }
+                        .fontWeight(.semibold)
+                }
+            }
+        }
+    }
+}
