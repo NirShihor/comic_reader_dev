@@ -33,6 +33,7 @@ struct PageView: View {
     @State private var showSpeakingDonePrompt = false   // guided: speaking → listening
     @State private var showOnScreenComplete = false     // guided: all done
     @State private var selectedBubbleIndex: Int?   // open bubble in the floating card
+    @State private var revealedBubbleId: String?   // practice: bubble whose text is revealed onto the page
     @State private var pageImageAspect: CGFloat?   // width/height of the page artwork
     @StateObject private var help = HelpModeController()
     // First-run onboarding hints. Each pulses until the reader engages with that
@@ -144,6 +145,24 @@ struct PageView: View {
                 .opacity(0.35 + pulse * 0.65)
         }
         .frame(width: b.width * rect.width + 16, height: b.height * rect.height + 16)
+        .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
+                  y: rect.minY + (b.positionY + b.height / 2) * rect.height)
+        .allowsHitTesting(false)
+    }
+
+    // Slow-flashing dot at the centre of the open bubble, linking it to the popup.
+    private func selectedBubbleDot(_ b: Bubble, in rect: CGRect) -> some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
+            let seconds = timeline.date.timeIntervalSinceReferenceDate
+            let pulse = (sin(seconds * 2.5) + 1.0) / 2.0   // 0…1, ~2.5s cycle
+            // Per-comic colour (set in the generator); falls back to #409B08 green.
+            let dotColor = Color.fromHex(comic.bubbleDotColor, fallback: Color(red: 0x40/255, green: 0x9B/255, blue: 0x08/255))
+            Circle()
+                .fill(dotColor)
+                .frame(width: 14, height: 14)
+                .opacity(0.25 + pulse * 0.7)
+                .shadow(color: dotColor.opacity(pulse * 0.6), radius: 5)
+        }
         .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
                   y: rect.minY + (b.positionY + b.height / 2) * rect.height)
         .allowsHitTesting(false)
@@ -299,7 +318,9 @@ struct PageView: View {
                 // Page image. In practice modes show the empty-bubbles art (bubbles
                 // visible, text blank) so they're tappable; fall back to the no-text
                 // art, then the full page, for comics baked before that existed.
-                let imageName = isPracticeMode
+                // Practice shows the blank-bubble bake; tapping Reveal in the popup
+                // swaps to the full (with-text) bake, and Hide swaps back.
+                let imageName = (isPracticeMode && revealedBubbleId == nil)
                     ? (currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage)
                     : currentPage.masterImage
 
@@ -330,6 +351,12 @@ struct PageView: View {
                                             if currentPageIndex > 0 { onboardDidTapBubble = true }
                                             selectedBubbleIndex = i
                                         }
+                                }
+
+                                // Slow-flashing dot in the open bubble, linking it to
+                                // the popup (bubbles are baked into the art).
+                                if let sel = selectedBubbleIndex, pageTextBubbles.indices.contains(sel) {
+                                    selectedBubbleDot(pageTextBubbles[sel], in: rect)
                                 }
 
                                 // Hotspots: pulsing tap markers mapped into the same
@@ -423,11 +450,13 @@ struct PageView: View {
                 FloatingBubbleCard(
                     comic: comic,
                     bubbles: pageTextBubbles,
+                    panels: currentPage.panels,
                     index: Binding(
                         get: { selectedBubbleIndex ?? 0 },
-                        set: { selectedBubbleIndex = $0 }
+                        set: { selectedBubbleIndex = $0; revealedBubbleId = nil }   // stepping bubbles re-hides
                     ),
-                    onClose: { selectedBubbleIndex = nil }
+                    revealedBubbleId: $revealedBubbleId,
+                    onClose: { selectedBubbleIndex = nil; revealedBubbleId = nil }
                 )
                 .environmentObject(settingsManager)
                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
@@ -669,6 +698,7 @@ private struct BubblePracticeFeedback {
 struct BubbleContentView: View {
     let comic: Comic
     let bubble: Bubble
+    @Binding var revealedBubbleId: String?   // shared with the page so revealed text also shows in the bubble
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var audioManager = AudioManager.shared
     @StateObject private var whisperService = WhisperService.shared
@@ -677,7 +707,7 @@ struct BubbleContentView: View {
 
     @State private var translationRevealed: Set<String> = []
     @State private var grammarRevealed: Set<String> = []
-    @State private var textRevealed = false
+    private var textRevealed: Bool { revealedBubbleId == bubble.id }
     @State private var playingSentenceId: String?
     @State private var highlightedWordIndex: Int?
     @State private var recordingSentenceId: String?
@@ -966,14 +996,14 @@ struct BubbleContentView: View {
                 }
                 wordsLine(sentence, highlight: false)
                 Button {
-                    withAnimation { textRevealed = false }
+                    withAnimation { revealedBubbleId = nil }
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
                     Label("Hide", systemImage: "eye.slash").font(.subheadline).foregroundStyle(.blue)
                 }
             } else {
                 Button {
-                    withAnimation { textRevealed = true }
+                    withAnimation { revealedBubbleId = bubble.id }
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
                     Label("Reveal", systemImage: "eye").font(.subheadline).foregroundStyle(.blue)
@@ -1137,7 +1167,9 @@ struct BubbleContentView: View {
 struct FloatingBubbleCard: View {
     let comic: Comic
     let bubbles: [Bubble]
+    let panels: [Panel]
     @Binding var index: Int
+    @Binding var revealedBubbleId: String?
     var onClose: () -> Void
     @EnvironmentObject var settingsManager: SettingsManager
 
@@ -1151,9 +1183,29 @@ struct FloatingBubbleCard: View {
         card
             .frame(maxWidth: 380)
             .offset(offset)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: anchorTop ? .top : .bottom)
             .padding(.horizontal, 12)
-            .padding(.bottom, 30)
+            .padding(.top, anchorTop ? 14 : 0)
+            .padding(.bottom, anchorTop ? 0 : 30)
+    }
+
+    /// Place the card on the opposite vertical region from the current bubble's
+    /// panel: a bubble whose panel sits in the top half of the page → card at the
+    /// bottom, and vice versa. Decided by the panel's vertical centre (not the
+    /// bubble's), so a tall top panel still sends the card to the bottom even when
+    /// the bubble sits low within it. Falls back to the bubble's own position when
+    /// it isn't inside a sub-panel (e.g. a single full-page panel).
+    private var anchorTop: Bool {
+        guard bubbles.indices.contains(index) else { return false }
+        let bubble = bubbles[index]
+        let referenceY: Double
+        if let panel = panels.first(where: { $0.bubbles.contains(where: { $0.id == bubble.id }) }),
+           panel.tapZoneHeight <= 0.75 {
+            referenceY = panel.tapZoneY + panel.tapZoneHeight / 2
+        } else {
+            referenceY = bubble.positionY + bubble.height / 2
+        }
+        return referenceY >= 0.5   // bubble in the bottom half → show card at the top
     }
 
     private var card: some View {
@@ -1162,7 +1214,7 @@ struct FloatingBubbleCard: View {
             Divider()
             ScrollView {
                 if bubbles.indices.contains(index) {
-                    BubbleContentView(comic: comic, bubble: bubbles[index])
+                    BubbleContentView(comic: comic, bubble: bubbles[index], revealedBubbleId: $revealedBubbleId)
                         .id(bubbles[index].id)   // reset per-bubble state when stepping
                         .padding(14)
                         .background(GeometryReader { g in

@@ -135,6 +135,7 @@ struct Comic: Identifiable, Codable, Hashable {
     let coverImage: String
     var coverLandscape: String? = nil   // 3:2 banner for the detail view (falls back to coverImage)
     var bannerTitlePosition: String? = nil   // topLeft|topRight|bottomLeft|bottomRight|center|hidden
+    var bubbleDotColor: String? = nil        // hex for the open-bubble flashing dot (per comic)
     let level: DifficultyLevel
     let isPremium: Bool
     let pages: [Page]

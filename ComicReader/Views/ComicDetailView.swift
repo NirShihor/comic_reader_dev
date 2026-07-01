@@ -277,12 +277,28 @@ struct ComicDetailView: View {
             }
 
             // When the primary button is practice-focused, keep reading one tap away.
+            // Same width as "Continue practicing" and aligned under it: an invisible
+            // Restart-sized placeholder reserves the right column so this fills the left.
             if lastWasPractice {
-                Text("Continue reading instead")
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.secondary)
-                    .contentShape(Rectangle())
-                    .onTapGesture { startNormalReading(startingPage) }
+                HStack(spacing: 12) {
+                    Text("Continue reading instead")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.primary)
+                        .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity)
+                        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.comigoInk, lineWidth: 2))
+                        .shadow(color: .black.opacity(0.06), radius: 3, y: 1)
+                        .contentShape(Rectangle())
+                        .onTapGesture { startNormalReading(startingPage) }
+
+                    // Invisible, matches the Restart button's width to keep alignment.
+                    Text("Restart")
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .padding(.horizontal, 22)
+                        .frame(height: 0)
+                        .hidden()
+                }
             }
         }
     }

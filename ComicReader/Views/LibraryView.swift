@@ -294,9 +294,35 @@ struct LibraryView: View {
                 }
 
                 availableSection
+
+                // A level filter that has no comics yet (e.g. Advanced) — invite the
+                // reader back rather than showing a blank screen. Not shown for search
+                // misses (those aren't "coming soon").
+                if selectedLevel != nil && searchText.isEmpty
+                    && filteredLibraryItems.isEmpty && availableItems.isEmpty
+                    && !storeService.isLoadingCatalog {
+                    comingSoonPlaceholder
+                }
             }
             .padding()
         }
+    }
+
+    private var comingSoonPlaceholder: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 42))
+                .foregroundStyle(.secondary)
+            Text("Coming soon")
+                .font(.title3.weight(.bold))
+            Text("\((selectedLevel ?? "These").capitalized) comics are on the way — check back soon!")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 44)
+        .padding(.horizontal, 24)
     }
 
     /// Downloaded shelf filtered by the search box + level filter. Without this the
