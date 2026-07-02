@@ -105,6 +105,18 @@ struct Hotspot: Identifiable, Codable, Hashable {
     let height: Double
     var label: String?
     var borderColor: String?
+    // Optional traced outline (normalized page coords). When present (>=3 points)
+    // the reader draws this polygon instead of the x/y/width/height rectangle;
+    // x/y/width/height remain the bounding box used for hit-testing and layout.
+    var points: [CornerPoint]?
+    // How much the traced cut-out enlarges at the pulse peak, as a fraction
+    // (0.64 = grows 64%). Falls back to a default when unset.
+    var pulseScale: Double?
+    // Extra brightness added to the cut-out at the pulse peak (0.2 = +20%), so
+    // the enlarged image stands out. Falls back to a default when unset.
+    var pulseBrightness: Double?
+    // Optional glow tint (hex) washed over the cut-out at the pulse peak; nil/empty = none.
+    var pulseTint: String?
     let slides: [HotspotSlide]
 }
 

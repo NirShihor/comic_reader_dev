@@ -466,7 +466,19 @@ struct PanelView: View {
         let centerX = (item.relX + item.relW / 2) * geo.size.width
         let centerY = (item.relY + item.relH / 2) * geo.size.height
 
-        let frameColor = Color.fromHex(item.hotspot.borderColor)
+        // "transparent" hides the frame; otherwise the chosen colour, defaulting
+        // to the generator's cyan when unset.
+        let frameColor = item.hotspot.borderColor == "transparent"
+            ? Color.clear
+            : Color.fromHex(item.hotspot.borderColor, fallback: Color(red: 0, green: 188/255, blue: 212/255))
+        // Traced outline when >=3 points, otherwise the legacy rounded rectangle.
+        // Points are normalized page coords mapped into the frame via the hotspot's
+        // page-space bounding box, so this renders correctly in panel space too.
+        let outline: AnyShape = (item.hotspot.points?.count ?? 0) >= 3
+            ? AnyShape(HotspotPolygon(points: item.hotspot.points!,
+                                      box: CGRect(x: item.hotspot.x, y: item.hotspot.y,
+                                                  width: item.hotspot.width, height: item.hotspot.height)))
+            : AnyShape(RoundedRectangle(cornerRadius: 6))
 
         TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
             let seconds = timeline.date.timeIntervalSinceReferenceDate
@@ -474,10 +486,13 @@ struct PanelView: View {
 
             ZStack {
                 // Pulsing border
-                RoundedRectangle(cornerRadius: 6)
+                outline
                     .stroke(frameColor, lineWidth: 1.5 + pulse * 1.5)
                     .shadow(color: frameColor.opacity(pulse * 0.8), radius: 4 + pulse * 6)
                     .opacity(0.3 + pulse * 0.7)
+                    // Breathe: grow and shrink in time with the colour pulse so it
+                    // reads as an intentional "tap me" beacon, not a stray outline.
+                    .scaleEffect(1.0 + pulse * 0.15)
 
                 // Invisible tap target
                 Color.clear

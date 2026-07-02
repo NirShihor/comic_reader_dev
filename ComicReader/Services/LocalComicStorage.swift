@@ -264,6 +264,7 @@ struct ComicJSON: Codable {
     let coverImage: String
     let coverLandscape: String?
     let bannerTitlePosition: String?
+    let bubbleDotColor: String?
     let level: String
     let totalPages: Int
     let estimatedMinutes: Int
@@ -289,6 +290,7 @@ struct ComicJSON: Codable {
             coverImage: coverImage,
             coverLandscape: coverLandscape,
             bannerTitlePosition: bannerTitlePosition,
+            bubbleDotColor: bubbleDotColor,
             level: Comic.DifficultyLevel(rawValue: level) ?? .beginner,
             isPremium: false,
             pages: pages.map { $0.toPage() },
@@ -370,6 +372,10 @@ struct HotspotJSON: Codable {
     let height: Double
     let label: String?
     let borderColor: String?
+    let points: [CornerPointJSON]?
+    let pulseScale: Double?
+    let pulseBrightness: Double?
+    let pulseTint: String?
     let slides: [HotspotSlideJSON]
 
     func toHotspot() -> Hotspot {
@@ -381,6 +387,10 @@ struct HotspotJSON: Codable {
             height: height,
             label: label,
             borderColor: borderColor,
+            points: points?.map { CornerPoint(x: $0.x, y: $0.y) },
+            pulseScale: pulseScale,
+            pulseBrightness: pulseBrightness,
+            pulseTint: pulseTint,
             slides: slides.map { $0.toHotspotSlide() }
         )
     }

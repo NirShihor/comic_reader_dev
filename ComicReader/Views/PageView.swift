@@ -1,5 +1,44 @@
 import SwiftUI
 
+/// Draws a hotspot's traced outline. `points` are normalized page coordinates;
+/// `box` is the hotspot's normalized bounding box. Points are mapped into the
+/// shape's own frame relative to that box, so the same shape renders correctly
+/// whether the frame is placed in full-page space or panel-relative space.
+struct HotspotPolygon: Shape {
+    let points: [CornerPoint]
+    let box: CGRect
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        guard points.count >= 3, box.width > 0, box.height > 0 else { return path }
+        for (i, pt) in points.enumerated() {
+            let x = (pt.x - box.minX) / box.width * rect.width
+            let y = (pt.y - box.minY) / box.height * rect.height
+            let p = CGPoint(x: x, y: y)
+            if i == 0 { path.move(to: p) } else { path.addLine(to: p) }
+        }
+        path.closeSubpath()
+        return path
+    }
+}
+
+/// Like `HotspotPolygon` but maps normalized page points directly across the
+/// whole frame — used to clip a full-page image copy to the traced region.
+struct HotspotPolygonFull: Shape {
+    let points: [CornerPoint]
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        guard points.count >= 3 else { return path }
+        for (i, pt) in points.enumerated() {
+            let p = CGPoint(x: pt.x * rect.width, y: pt.y * rect.height)
+            if i == 0 { path.move(to: p) } else { path.addLine(to: p) }
+        }
+        path.closeSubpath()
+        return path
+    }
+}
+
 struct PageView: View {
     let comic: Comic
     let page: Page
@@ -112,24 +151,104 @@ struct PageView: View {
         let h = hotspot.height * rect.height
         let centerX = rect.minX + (hotspot.x + hotspot.width / 2) * rect.width
         let centerY = rect.minY + (hotspot.y + hotspot.height / 2) * rect.height
-        let frameColor = Color.fromHex(hotspot.borderColor)
+        // "transparent" hides the frame; otherwise the chosen colour, defaulting
+        // to the generator's cyan when unset.
+        let frameColor = hotspot.borderColor == "transparent"
+            ? Color.clear
+            : Color.fromHex(hotspot.borderColor, fallback: Color(red: 0, green: 188/255, blue: 212/255))
 
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
-            let seconds = timeline.date.timeIntervalSinceReferenceDate
-            let pulse = (sin(seconds * 2.5) + 1.0) / 2.0
-            ZStack {
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(frameColor, lineWidth: 1.5 + pulse * 1.5)
-                    .shadow(color: frameColor.opacity(pulse * 0.8), radius: 4 + pulse * 6)
-                    .opacity(0.3 + pulse * 0.7)
-                Color.clear.contentShape(Rectangle())
+        if (hotspot.points?.count ?? 0) >= 3 {
+            // Traced hotspots: the visible cue is the floating cut-out
+            // (hotspotFloatingCutout). Here we just need the tap target.
+            Color.clear
+                .contentShape(Rectangle())
+                .frame(width: w, height: h)
+                .position(x: centerX, y: centerY)
+                .onTapGesture {
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    selectedHotspot = hotspot
+                }
+        } else {
+            TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
+                let seconds = timeline.date.timeIntervalSinceReferenceDate
+                let pulse = (sin(seconds * 2.5) + 1.0) / 2.0
+                ZStack {
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(frameColor, lineWidth: 1.5 + pulse * 1.5)
+                        .shadow(color: frameColor.opacity(pulse * 0.8), radius: 4 + pulse * 6)
+                        .opacity(0.3 + pulse * 0.7)
+                        .scaleEffect(1.0 + pulse * 0.15)
+                    Color.clear.contentShape(Rectangle())
+                }
+            }
+            .frame(width: w, height: h)
+            .position(x: centerX, y: centerY)
+            .onTapGesture {
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                selectedHotspot = hotspot
             }
         }
-        .frame(width: w, height: h)
-        .position(x: centerX, y: centerY)
-        .onTapGesture {
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-            selectedHotspot = hotspot
+    }
+
+    // Traced hotspots only: a live copy of the page art, clipped to the polygon
+    // and gently scaled about the shape's centre so the region appears to lift /
+    // float toward the reader as it pulses. At rest (scale 1.0) it sits flush and
+    // is invisible; at the pulse peak it grows and casts a shadow.
+    @ViewBuilder
+    private func hotspotFloatingCutout(_ hotspot: Hotspot, in rect: CGRect) -> some View {
+        if let pts = hotspot.points, pts.count >= 3 {
+            let cx = pts.map { $0.x }.reduce(0, +) / Double(pts.count)
+            let cy = pts.map { $0.y }.reduce(0, +) / Double(pts.count)
+            let imageName = (isPracticeMode && revealedBubbleId == nil)
+                ? (currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage)
+                : currentPage.masterImage
+            // Border you dictate in the generator: chosen colour, transparent to
+            // hide, or the generator's default cyan when unset. It rides on the
+            // cut-out so it scales with the artwork.
+            let borderColor: Color = hotspot.borderColor == "transparent"
+                ? .clear
+                : Color.fromHex(hotspot.borderColor, fallback: Color(red: 0, green: 188/255, blue: 212/255))
+            // Per-hotspot peak enlargement (fraction); default 0.64 when unset.
+            let enlarge = hotspot.pulseScale ?? 0.64
+            // Extra brightness at the peak (default +20%) so the enlarged image
+            // reads clearly, and an optional glow tint washed over it.
+            let brighten = hotspot.pulseBrightness ?? 0.2
+            let tint: Color? = (hotspot.pulseTint?.isEmpty == false)
+                ? Color.fromHex(hotspot.pulseTint, fallback: .clear) : nil
+            TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
+                let seconds = timeline.date.timeIntervalSinceReferenceDate
+                // One breath (grow → shrink, starting and ending at normal size),
+                // then hold at normal size for `rest` seconds before the next
+                // pulse — so it pauses at rest rather than moving constantly.
+                let breath = 2.0 * Double.pi / 2.5   // ≈ 2.51s, matches the prior pace
+                let rest = 1.5                        // extra dwell at normal size
+                let t = seconds.truncatingRemainder(dividingBy: breath + rest)
+                let pulse = t < breath ? (1 - cos(t / breath * 2 * Double.pi)) / 2 : 0.0
+                ComicImage(imageName: imageName, comicId: comic.id)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: rect.width, height: rect.height)
+                    .clipShape(HotspotPolygonFull(points: pts))
+                    .brightness(pulse * brighten)
+                    .overlay {
+                        if let tint {
+                            HotspotPolygonFull(points: pts)
+                                .fill(tint)
+                                .opacity(pulse * 0.5)
+                                .blendMode(.plusLighter)
+                        }
+                    }
+                    .overlay(
+                        HotspotPolygonFull(points: pts)
+                            .stroke(borderColor, lineWidth: 1.5 + pulse * 1.5)
+                            .opacity(0.5 + pulse * 0.5)
+                    )
+                    .scaleEffect(1.0 + pulse * enlarge, anchor: UnitPoint(x: cx, y: cy))
+                    .shadow(color: .black.opacity(0.12 + pulse * 0.28),
+                            radius: 3 + pulse * 9, y: 1 + pulse * 5)
+                    .allowsHitTesting(false)
+            }
+            .frame(width: rect.width, height: rect.height)
+            .position(x: rect.midX, y: rect.midY)
         }
     }
 
@@ -357,6 +476,12 @@ struct PageView: View {
                                 // the popup (bubbles are baked into the art).
                                 if let sel = selectedBubbleIndex, pageTextBubbles.indices.contains(sel) {
                                     selectedBubbleDot(pageTextBubbles[sel], in: rect)
+                                }
+
+                                // Traced hotspots: the artwork inside the shape
+                                // lifts/floats toward the reader as it pulses.
+                                ForEach(currentPage.hotspots ?? [], id: \.id) { h in
+                                    hotspotFloatingCutout(h, in: rect)
                                 }
 
                                 // Hotspots: pulsing tap markers mapped into the same

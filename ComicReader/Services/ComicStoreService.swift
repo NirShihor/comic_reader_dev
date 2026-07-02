@@ -370,9 +370,19 @@ class DownloadHelper: NSObject, URLSessionDownloadDelegate {
             let config = URLSessionConfiguration.background(withIdentifier: identifier)
             config.isDiscretionary = false
             config.sessionSendsLaunchEvents = true
+            // Never serve a bundle from cache. The /bundle URL is fixed per comic,
+            // and the redirect target carries a long max-age, so without this the
+            // background session replays a stale cached zip on every re-download —
+            // a content update on the server would never reach the device.
+            // (URLCache.shared.removeAllCachedResponses() does NOT clear a background
+            // session's own cache, so disabling it here is the reliable fix.)
+            config.urlCache = nil
+            config.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
             let session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
             self.downloadSession = session
-            let task = session.downloadTask(with: url)
+            var request = URLRequest(url: url)
+            request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+            let task = session.downloadTask(with: request)
             task.resume()
         }
     }
