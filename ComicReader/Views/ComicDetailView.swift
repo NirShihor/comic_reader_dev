@@ -309,7 +309,8 @@ struct ComicDetailView: View {
         if restart { progressManager.clearPracticePosition(for: comic.id) }
         let mode = progressManager.lastPracticeMode(for: comic.id)
         if mode == "readSpeak" {
-            startReadAndSpeak()
+            // Continue = pick up where practice left off (saved page); Restart = cover.
+            startReadAndSpeak(from: restart ? firstPage : startingPage)
         } else if let dest = PracticeDestination(modeKey: mode) {
             practiceDestination = dest
         } else {
@@ -558,7 +559,7 @@ struct ComicDetailView: View {
             practiceModeCard(icon: "text.bubble.fill",
                              title: "Read & speak", tag: "ON SCREEN",
                              description: "Look at the English. Listen to the Spanish and repeat back. Reveal text if needed.",
-                             action: startReadAndSpeak)
+                             action: { startReadAndSpeak() })
             practiceModeCard(icon: "headphones",
                              title: "Listen & speak", tag: "OFF SCREEN",
                              description: "Screen off, eyes free. Hear each line, repeat it, say what it means.",
@@ -686,15 +687,22 @@ struct ComicDetailView: View {
         .buttonStyle(.plain)
     }
 
-    /// On-screen "Read & speak": text stays visible, learner speaks each line.
-    /// Mirrors the legacy On-Screen guided run.
+    /// On-screen "Read & speak" from the Practice menu: resume where the learner
+    /// left off (mirrors "Continue reading"); Restart routes through the `from:`
+    /// variant with the cover.
     private func startReadAndSpeak() {
+        startReadAndSpeak(from: startingPage)
+    }
+
+    /// On-screen "Read & speak": text stays visible, learner speaks each line.
+    /// Mirrors the legacy On-Screen guided run. Opens at `page`.
+    private func startReadAndSpeak(from page: Page) {
         settingsManager.speakingPracticeMode = true
         settingsManager.listeningPracticeMode = false
         guidedOnScreen = true
         showPracticeOptions = false
         progressManager.setPracticeMode(comic.id, mode: "readSpeak")
-        selectedPage = firstPage
+        selectedPage = page
     }
 
     // Pages sorted by pageNumber for navigation
