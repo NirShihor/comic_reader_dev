@@ -9,6 +9,9 @@ import UIKit
 /// border can't leak into the rest of the page.
 enum BubbleFill {
     static let cache = NSCache<NSString, UIImage>()
+    // Tight normalized bounding box of the flood, cached alongside interiorMask's
+    // image so a cache hit can still return it (used to cover a sound-effect balloon).
+    static let boundsCache = NSCache<NSString, NSValue>()
 
     /// `maskSource` (the blank/empty-bubbles bake) defines the bubble's full
     /// interior via flood fill; within that shape we paint `color` everywhere the
@@ -138,13 +141,16 @@ enum BubbleFill {
     /// happens to fall inside the padded crop rectangle. `region` is the normalized
     /// padded crop the mask image maps onto (same convention as `overlay`).
     static func interiorMask(maskSource: String, comicId: String, bubble nb: CGRect,
-                             cacheKey: String) -> (image: UIImage, region: CGRect)? {
+                             cacheKey: String) -> (image: UIImage, region: CGRect, bounds: CGRect)? {
         let pad = max(nb.width, nb.height) * 0.8
         let nx0 = max(0, nb.minX - pad), ny0 = max(0, nb.minY - pad)
         let nx1 = min(1, nb.maxX + pad), ny1 = min(1, nb.maxY + pad)
         let region = CGRect(x: nx0, y: ny0, width: nx1 - nx0, height: ny1 - ny0)
 
-        if let cached = cache.object(forKey: cacheKey as NSString) { return (cached, region) }
+        if let cached = cache.object(forKey: cacheKey as NSString),
+           let bv = boundsCache.object(forKey: cacheKey as NSString) {
+            return (cached, region, bv.cgRectValue)
+        }
 
         guard let maskImg = ComicImageLoader.shared.loadImage(named: maskSource, forComic: comicId),
               let maskCG = maskImg.cgImage else { return nil }
@@ -186,8 +192,11 @@ enum BubbleFill {
         filled[sy * cw + sx] = true; stack.append((sx, sy))
         var count = 0
         var edgePixels = 0
+        var minx = cw, miny = ch, maxx = 0, maxy = 0
         while let (x, y) = stack.popLast() {
             count += 1
+            if x < minx { minx = x }; if x > maxx { maxx = x }
+            if y < miny { miny = y }; if y > maxy { maxy = y }
             if x == 0 || y == 0 || x == cw - 1 || y == ch - 1 { edgePixels += 1 }
             if x > 0, !filled[y*cw + x-1], interior(x-1, y) { filled[y*cw + x-1] = true; stack.append((x-1, y)) }
             if x < cw-1, !filled[y*cw + x+1], interior(x+1, y) { filled[y*cw + x+1] = true; stack.append((x+1, y)) }
@@ -199,6 +208,10 @@ enum BubbleFill {
         let edgeLimit = max(24, min(cw, ch) / 5)
         if edgePixels > edgeLimit || count < Int(bubbleArea * 0.1) || count > Int(Double(total) * 0.9) { return nil }
 
+        // Tight normalized bbox of the flooded interior (inside the balloon border).
+        let bounds = CGRect(x: CGFloat(px0 + minx) / CGFloat(iw), y: CGFloat(py0 + miny) / CGFloat(ih),
+                            width: CGFloat(maxx - minx) / CGFloat(iw), height: CGFloat(maxy - miny) / CGFloat(ih))
+
         var out = [UInt8](repeating: 0, count: cw * ch * 4)
         for p in 0..<total where filled[p] {
             let i = p * 4
@@ -209,7 +222,8 @@ enum BubbleFill {
               let ocg = octx.makeImage() else { return nil }
         let img = UIImage(cgImage: ocg)
         cache.setObject(img, forKey: cacheKey as NSString)
-        return (img, region)
+        boundsCache.setObject(NSValue(cgRect: bounds), forKey: cacheKey as NSString)
+        return (img, region, bounds)
     }
 }
 
@@ -501,7 +515,7 @@ struct PageView: View {
     private func soundEffectOverlay(in rect: CGRect) -> some View {
         if isPracticeMode {
             ForEach(pageSoundEffectBubbles) { b in
-                bubbleMasterClip(b, in: rect)
+                bubbleMasterClip(b, in: rect, coverBorder: true)
             }
         }
     }
@@ -511,7 +525,7 @@ struct PageView: View {
     // which can overlap neighbours). Falls back to the padded text box when there's
     // no balloon to flood (borderless narration / sound effect painted on the art).
     @ViewBuilder
-    private func bubbleMasterClip(_ b: Bubble, in rect: CGRect) -> some View {
+    private func bubbleMasterClip(_ b: Bubble, in rect: CGRect, coverBorder: Bool = false) -> some View {
         let maskSource = currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage
         let nb = CGRect(x: b.positionX, y: b.positionY, width: b.width, height: b.height)
         let mkey = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(maskSource)|imask"
@@ -519,7 +533,27 @@ struct PageView: View {
         let master = ComicImage(imageName: currentPage.masterImage, comicId: comic.id)
             .aspectRatio(contentMode: .fit)
             .frame(width: rect.width, height: rect.height)
-        if let mask {
+        if let mask, coverBorder {
+            // Sound effect: the empty bake drew a full balloon (thick black border)
+            // where the master has borderless art — clipping to the interior shape
+            // leaves that border showing. Cover the WHOLE balloon with a rectangle over
+            // the flood bounds + a margin past the border. master==empty outside the
+            // balloon, so the generous rect is invisible everywhere but the effect.
+            let m: CGFloat = 0.025
+            let bx = mask.bounds
+            master
+                .mask(
+                    Color.clear
+                        .frame(width: rect.width, height: rect.height)
+                        .overlay(
+                            Rectangle()
+                                .frame(width: (bx.width + 2 * m) * rect.width, height: (bx.height + 2 * m) * rect.height)
+                                .position(x: bx.midX * rect.width, y: bx.midY * rect.height)
+                        )
+                )
+                .position(x: rect.midX, y: rect.midY)
+                .allowsHitTesting(false)
+        } else if let mask {
             master
                 .mask(
                     Image(uiImage: mask.image)
