@@ -317,6 +317,15 @@ struct PageView: View {
             .filter { $0.isSoundEffect != true && $0.type != .image && !$0.sentences.isEmpty }
     }
 
+    // Non-practised baked bubbles (sound effects / image bubbles). In practice mode
+    // the blank base hides these, so we overlay their master content to keep them
+    // looking like reading mode.
+    private var pageSoundEffectBubbles: [Bubble] {
+        currentPage.panels
+            .flatMap { $0.bubbles }
+            .filter { $0.isSoundEffect == true || $0.type == .image }
+    }
+
     private var isPracticeMode: Bool {
         settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode
     }
@@ -480,45 +489,61 @@ struct PageView: View {
     private func revealedBubbleOverlay(in rect: CGRect) -> some View {
         if isPracticeMode, let revId = revealedBubbleId,
            let b = pageTextBubbles.first(where: { $0.id == revId }) {
-            let maskSource = currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage
-            let nb = CGRect(x: b.positionX, y: b.positionY, width: b.width, height: b.height)
-            let mkey = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(maskSource)|imask"
-            let mask = BubbleFill.interiorMask(maskSource: maskSource, comicId: comic.id, bubble: nb, cacheKey: mkey)
-            let master = ComicImage(imageName: currentPage.masterImage, comicId: comic.id)
-                .aspectRatio(contentMode: .fit)
-                .frame(width: rect.width, height: rect.height)
-            if let mask {
-                // Uncover ONLY this bubble's balloon: clip the master (with-text) art
-                // to the flood-filled interior SHAPE (not its padded bounding box, which
-                // can overlap neighbours). The green highlight then punches its text
-                // holes onto real black text instead of the blank balloon.
-                master
-                    .mask(
-                        Image(uiImage: mask.image)
-                            .resizable()
-                            .interpolation(.none)
-                            .frame(width: mask.region.width * rect.width, height: mask.region.height * rect.height)
-                            .position(x: mask.region.midX * rect.width, y: mask.region.midY * rect.height)
-                    )
-                    .position(x: rect.midX, y: rect.midY)
-                    .allowsHitTesting(false)
-            } else {
-                // Borderless narration (no balloon to flood): fall back to the padded
-                // text box so at least the title/"continuará" text reveals.
-                master
-                    .mask(
-                        Color.clear
-                            .frame(width: rect.width, height: rect.height)
-                            .overlay(
-                                Rectangle()
-                                    .frame(width: b.width * 1.25 * rect.width, height: b.height * 1.25 * rect.height)
-                                    .position(x: (b.positionX + b.width / 2) * rect.width,
-                                              y: (b.positionY + b.height / 2) * rect.height)
-                            )
-                    )
-                    .position(x: rect.midX, y: rect.midY)
-                    .allowsHitTesting(false)
+            bubbleMasterClip(b, in: rect)
+        }
+    }
+
+    // Sound-effect / image bubbles have no audio and aren't practised, so blanking
+    // them in practice mode is wrong — they should read exactly like reading mode.
+    // Overlay their master (baked) content, clipped to each one's own shape, on top
+    // of the blank practice base.
+    @ViewBuilder
+    private func soundEffectOverlay(in rect: CGRect) -> some View {
+        if isPracticeMode {
+            ForEach(pageSoundEffectBubbles) { b in
+                bubbleMasterClip(b, in: rect)
             }
+        }
+    }
+
+    // Overlays the master (with-content) art for a single bubble, clipped to its
+    // real balloon SHAPE (flood-filled interior — never the padded bounding box,
+    // which can overlap neighbours). Falls back to the padded text box when there's
+    // no balloon to flood (borderless narration / sound effect painted on the art).
+    @ViewBuilder
+    private func bubbleMasterClip(_ b: Bubble, in rect: CGRect) -> some View {
+        let maskSource = currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage
+        let nb = CGRect(x: b.positionX, y: b.positionY, width: b.width, height: b.height)
+        let mkey = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(maskSource)|imask"
+        let mask = BubbleFill.interiorMask(maskSource: maskSource, comicId: comic.id, bubble: nb, cacheKey: mkey)
+        let master = ComicImage(imageName: currentPage.masterImage, comicId: comic.id)
+            .aspectRatio(contentMode: .fit)
+            .frame(width: rect.width, height: rect.height)
+        if let mask {
+            master
+                .mask(
+                    Image(uiImage: mask.image)
+                        .resizable()
+                        .interpolation(.none)
+                        .frame(width: mask.region.width * rect.width, height: mask.region.height * rect.height)
+                        .position(x: mask.region.midX * rect.width, y: mask.region.midY * rect.height)
+                )
+                .position(x: rect.midX, y: rect.midY)
+                .allowsHitTesting(false)
+        } else {
+            master
+                .mask(
+                    Color.clear
+                        .frame(width: rect.width, height: rect.height)
+                        .overlay(
+                            Rectangle()
+                                .frame(width: b.width * 1.25 * rect.width, height: b.height * 1.25 * rect.height)
+                                .position(x: (b.positionX + b.width / 2) * rect.width,
+                                          y: (b.positionY + b.height / 2) * rect.height)
+                        )
+                )
+                .position(x: rect.midX, y: rect.midY)
+                .allowsHitTesting(false)
         }
     }
 
@@ -749,7 +774,10 @@ struct PageView: View {
                         GeometryReader { imageGeometry in
                             let rect = fittedImageRect(in: imageGeometry.size)
                             ZStack {
-                                // Practice reveal: show ONLY the current bubble's text.
+                                // Practice: keep sound-effect / image bubbles baked
+                                // (they aren't practised), then reveal only the open
+                                // bubble's text on top.
+                                soundEffectOverlay(in: rect)
                                 revealedBubbleOverlay(in: rect)
 
                                 // One tap target per text bubble. Opens the floating
