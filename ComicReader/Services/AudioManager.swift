@@ -16,6 +16,11 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     /// Direct callback for playback completion — fires even in background (unlike SwiftUI .onChange)
     var onPlaybackFinished: (() -> Void)?
 
+    /// The comic currently being read. Set by the reader so `play` can resolve
+    /// audio directly from that comic's folder instead of recursively scanning
+    /// the whole downloaded library (which stalls the play tap).
+    var activeComicId: String?
+
     private var player: AVAudioPlayer?
     private var timer: Timer?
 
@@ -127,8 +132,19 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         // Try to find the file in multiple locations
         var url: URL?
 
+        // 0. Fast path: the active comic's own audio folder — a direct file check,
+        //    no full-library scan. Handles "words/<x>" filenames too.
+        if let cid = activeComicId, !cid.isEmpty {
+            let comicDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                .appendingPathComponent("Comics").appendingPathComponent(cid)
+            for candidate in [comicDir.appendingPathComponent("audio/\(filename).mp3"),
+                              comicDir.appendingPathComponent("\(filename).mp3")] {
+                if FileManager.default.fileExists(atPath: candidate.path) { url = candidate; break }
+            }
+        }
+
         // 1. Try BundledComics folder first (sentence audio - comic specific)
-        if let bundledComicsURL = Bundle.main.url(forResource: "BundledComics", withExtension: nil) {
+        if url == nil, let bundledComicsURL = Bundle.main.url(forResource: "BundledComics", withExtension: nil) {
             url = findAudioFile(named: filename, in: bundledComicsURL)
         }
 

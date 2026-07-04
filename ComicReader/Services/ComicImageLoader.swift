@@ -109,14 +109,32 @@ extension Image {
 struct ComicImage: View {
     let imageName: String
     let comicId: String
+    /// Catalog thumbnail path (e.g. "/api/reader/cover-thumbnail/<id>") shown when
+    /// the local image isn't on device yet — so covers appear before download.
+    var remoteFallbackPath: String? = nil
 
     @State private var uiImage: UIImage?
+    @State private var localMissing = false
 
     var body: some View {
         Group {
             if let uiImage = uiImage {
                 Image(uiImage: uiImage)
                     .resizable()
+            } else if localMissing,
+                      let path = remoteFallbackPath, !path.isEmpty,
+                      let url = URL(string: "\(Secrets.serverBaseURL)\(path)") {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image.resizable()
+                    case .failure:
+                        Rectangle().fill(Color.gray.opacity(0.2))
+                            .overlay(Image(systemName: "photo").foregroundStyle(.secondary))
+                    default:
+                        Rectangle().fill(Color.gray.opacity(0.2)).overlay(ProgressView())
+                    }
+                }
             } else {
                 Rectangle()
                     .fill(Color.gray.opacity(0.2))
@@ -129,10 +147,12 @@ struct ComicImage: View {
             // This runs when view appears AND when imageName changes
             // It also cancels the previous task automatically
             uiImage = nil
+            localMissing = false
             let image = await loadImageAsync(named: imageName, forComic: comicId)
             // Only update if this task wasn't cancelled
             if !Task.isCancelled {
                 uiImage = image
+                localMissing = (image == nil)
             }
         }
     }

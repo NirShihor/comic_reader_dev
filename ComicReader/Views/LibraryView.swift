@@ -157,7 +157,8 @@ struct LibraryView: View {
             NavigationLink(destination: ComicDetailView(comic: startedComic, autoResume: true)) {
                 heroCard(coverName: comic.coverImage, coverComicId: comic.id,
                          title: comic.title, subtitle: comic.titleEn,
-                         line: line, fraction: fraction, practicing: practicing)
+                         line: line, fraction: fraction, practicing: practicing,
+                         remoteFallback: thumbnailPath(forComic: comic.id))
             }
             .buttonStyle(.plain)
 
@@ -170,17 +171,33 @@ struct LibraryView: View {
             NavigationLink(destination: ComicDetailView(comic: startedComic, autoResume: true)) {
                 heroCard(coverName: collection.coverImage, coverComicId: collection.coverComicId,
                          title: collection.title, subtitle: collection.titleEn,
-                         line: line, fraction: fraction, practicing: practicing)
+                         line: line, fraction: fraction, practicing: practicing,
+                         remoteFallback: thumbnailPath(forCollection: collection.title))
             }
             .buttonStyle(.plain)
         }
     }
 
+    // Catalog thumbnail paths, used as a remote fallback when a cover asset
+    // isn't on device (e.g. a collection cover not bundled with an episode).
+    private func thumbnailPath(forComic comicId: String) -> String? {
+        let u = storeService.catalog.first(where: { $0.id == comicId })?.coverThumbnailUrl
+        return (u?.isEmpty == false) ? u : nil
+    }
+    private func thumbnailPath(forCollection title: String) -> String? {
+        let eps = storeService.catalog.filter { $0.collectionTitle == title }
+            .sorted { ($0.episodeNumber ?? 0) < ($1.episodeNumber ?? 0) }
+        if let u = eps.first?.collectionCoverThumbnailUrl, !u.isEmpty { return u }
+        if let u = eps.first?.coverThumbnailUrl, !u.isEmpty { return u }
+        return nil
+    }
+
     private func heroCard(coverName: String, coverComicId: String,
                           title: String, subtitle: String?,
-                          line: String, fraction: Double, practicing: Bool) -> some View {
+                          line: String, fraction: Double, practicing: Bool,
+                          remoteFallback: String? = nil) -> some View {
         HStack(alignment: .top, spacing: 14) {
-            ComicImage(imageName: coverName, comicId: coverComicId)
+            ComicImage(imageName: coverName, comicId: coverComicId, remoteFallbackPath: remoteFallback)
                 .aspectRatio(contentMode: .fill)
                 .frame(width: 106, height: 148)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -610,10 +627,20 @@ struct CollectionCard: View {
             ?? storeService.catalog.first(where: { $0.collectionTitle == collection.title })?.collectionTitleEn
     }
 
+    // Remote thumbnail to show when the collection's cover asset isn't on device
+    // (a collection cover isn't always bundled with a downloaded episode).
+    private var coverFallbackPath: String? {
+        let eps = storeService.catalog.filter { $0.collectionTitle == collection.title }
+            .sorted { ($0.episodeNumber ?? 0) < ($1.episodeNumber ?? 0) }
+        if let u = eps.first?.collectionCoverThumbnailUrl, !u.isEmpty { return u }
+        if let u = eps.first?.coverThumbnailUrl, !u.isEmpty { return u }
+        return nil
+    }
+
     var body: some View {
         HStack(spacing: 16) {
             // Cover Image (from first episode)
-            ComicImage(imageName: collection.coverImage, comicId: collection.coverComicId)
+            ComicImage(imageName: collection.coverImage, comicId: collection.coverComicId, remoteFallbackPath: coverFallbackPath)
                 .aspectRatio(contentMode: .fill)
                 .frame(width: 106, height: 159)
                 .clipShape(RoundedRectangle(cornerRadius: 8))

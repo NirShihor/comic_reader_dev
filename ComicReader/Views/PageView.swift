@@ -1,4 +1,217 @@
 import SwiftUI
+import UIKit
+
+/// Flood-fills a single speech-bubble's white interior (from its centre) to
+/// produce a green "the bubble is open" highlight that matches the bubble's real
+/// shape — the bubbles are baked into the page raster, so we can't recolour them
+/// directly; instead we bucket-fill the blank interior (like GIMP) on the
+/// empty-bubbles bake, bounded to the bubble's padded rect so a break in the
+/// border can't leak into the rest of the page.
+enum BubbleFill {
+    static let cache = NSCache<NSString, UIImage>()
+
+    /// `maskSource` (the blank/empty-bubbles bake) defines the bubble's full
+    /// interior via flood fill; within that shape we paint `color` everywhere the
+    /// `inkSource` (the on-screen, with-text image) is NOT dark — so the baked
+    /// text stays transparent while enclosed letter-counters (o, p, a, e) still
+    /// get filled. Returns a crop-sized overlay + the normalized region it covers,
+    /// or nil if it can't produce a clean fill (caller falls back to the dot).
+    static func overlay(maskSource: String, inkSource: String, comicId: String,
+                        bubble nb: CGRect, color: UIColor,
+                        cacheKey: String) -> (image: UIImage, region: CGRect)? {
+        // Padded region around the bubble, in normalized page coords. Pad by the
+        // LARGER dimension on both sides: the stored geometry is the text box, but
+        // the baked balloon can be much wider/taller than that (e.g. a narrow text
+        // column in a wide ellipse). A too-tight crop slices through the balloon
+        // so the fill runs off the crop edge and looks like a leak. This keeps the
+        // whole balloon (plus tail) inside the crop; the fill still stops at the
+        // bubble's own border, so a wide crop is safe.
+        let pad = max(nb.width, nb.height) * 0.8
+        let nx0 = max(0, nb.minX - pad), ny0 = max(0, nb.minY - pad)
+        let nx1 = min(1, nb.maxX + pad), ny1 = min(1, nb.maxY + pad)
+        let region = CGRect(x: nx0, y: ny0, width: nx1 - nx0, height: ny1 - ny0)
+
+        if let cached = cache.object(forKey: cacheKey as NSString) { return (cached, region) }
+
+        guard let maskImg = ComicImageLoader.shared.loadImage(named: maskSource, forComic: comicId),
+              let maskCG = maskImg.cgImage else { return nil }
+        let iw = maskCG.width, ih = maskCG.height
+        guard iw > 0, ih > 0 else { return nil }
+
+        let px0 = max(0, Int(nx0 * CGFloat(iw))), py0 = max(0, Int(ny0 * CGFloat(ih)))
+        let px1 = min(iw, Int(nx1 * CGFloat(iw))), py1 = min(ih, Int(ny1 * CGFloat(ih)))
+        let cw = px1 - px0, ch = py1 - py0
+        let cropRect = CGRect(x: px0, y: py0, width: cw, height: ch)
+        guard cw > 2, ch > 2, let maskCrop = maskCG.cropping(to: cropRect) else { return nil }
+
+        let space = CGColorSpaceCreateDeviceRGB()
+        let info = CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
+        func readPixels(_ crop: CGImage) -> [UInt8]? {
+            var b = [UInt8](repeating: 0, count: cw * ch * 4)
+            guard let c = CGContext(data: &b, width: cw, height: ch, bitsPerComponent: 8,
+                                    bytesPerRow: cw * 4, space: space, bitmapInfo: info) else { return nil }
+            c.draw(crop, in: CGRect(x: 0, y: 0, width: cw, height: ch))
+            return b
+        }
+        guard let maskBuf = readPixels(maskCrop) else { return nil }
+
+        // Ink image (the with-text bake) — same crop; nil if unavailable or a
+        // different size, in which case we just fill the whole interior.
+        var inkBuf: [UInt8]? = nil
+        if inkSource != maskSource,
+           let inkImg = ComicImageLoader.shared.loadImage(named: inkSource, forComic: comicId),
+           let inkCG = inkImg.cgImage, inkCG.width == iw, inkCG.height == ih,
+           let inkCrop = inkCG.cropping(to: cropRect) {
+            inkBuf = readPixels(inkCrop)
+        }
+
+        func interior(_ x: Int, _ y: Int) -> Bool {
+            let i = (y * cw + x) * 4
+            return maskBuf[i] > 190 && maskBuf[i + 1] > 190 && maskBuf[i + 2] > 190 && maskBuf[i + 3] > 40
+        }
+
+        // Seed at the bubble centre (crop-local); spiral out to the nearest
+        // interior pixel if the centre lands on ink.
+        var sx = min(max(Int(nb.midX * CGFloat(iw)) - px0, 0), cw - 1)
+        var sy = min(max(Int(nb.midY * CGFloat(ih)) - py0, 0), ch - 1)
+        if !interior(sx, sy) {
+            var found = false
+            search: for d in 1...(max(cw, ch) / 2) {
+                let x0 = max(0, sx - d), x1 = min(cw - 1, sx + d)
+                let y0 = max(0, sy - d), y1 = min(ch - 1, sy + d)
+                for yy in y0...y1 { for xx in x0...x1 where interior(xx, yy) { sx = xx; sy = yy; found = true; break search } }
+            }
+            if !found { return nil }
+        }
+
+        // BFS flood fill the interior shape on the mask.
+        var filled = [Bool](repeating: false, count: cw * ch)
+        var stack = [(Int, Int)](); stack.reserveCapacity(cw * ch / 4)
+        filled[sy * cw + sx] = true; stack.append((sx, sy))
+        var count = 0
+        var edgePixels = 0
+        while let (x, y) = stack.popLast() {
+            count += 1
+            if x == 0 || y == 0 || x == cw - 1 || y == ch - 1 { edgePixels += 1 }
+            if x > 0, !filled[y*cw + x-1], interior(x-1, y) { filled[y*cw + x-1] = true; stack.append((x-1, y)) }
+            if x < cw-1, !filled[y*cw + x+1], interior(x+1, y) { filled[y*cw + x+1] = true; stack.append((x+1, y)) }
+            if y > 0, !filled[(y-1)*cw + x], interior(x, y-1) { filled[(y-1)*cw + x] = true; stack.append((x, y-1)) }
+            if y < ch-1, !filled[(y+1)*cw + x], interior(x, y+1) { filled[(y+1)*cw + x] = true; stack.append((x, y+1)) }
+        }
+        // Reject the fill if:
+        // - it runs BROADLY along the crop edge — a borderless narration (title,
+        //   "continuará") that spilled onto the art. A speech-bubble tail only
+        //   *nicks* the edge (a handful of pixels), so that's allowed; a spill
+        //   touches a long run of it. Threshold scales with the crop size.
+        // - it's much smaller than the bubble (a single letter's enclosed counter
+        //   in borderless narration text), or
+        // - it's a gross leak filling most of the crop.
+        let total = cw * ch
+        let bubbleArea = nb.width * CGFloat(iw) * nb.height * CGFloat(ih)
+        let edgeLimit = max(24, min(cw, ch) / 5)
+        if edgePixels > edgeLimit || count < Int(bubbleArea * 0.1) || count > Int(Double(total) * 0.9) { return nil }
+
+        // Paint: green over the interior, but transparent where the ink image is
+        // dark (the baked text) so glyphs stay readable; letter-counters (white in
+        // the ink image) fall inside the shape and get filled.
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        color.getRed(&r, green: &g, blue: &b, alpha: &a)
+        let R = UInt8(max(0.0, min(255.0, r * 255))), G = UInt8(max(0.0, min(255.0, g * 255))), B = UInt8(max(0.0, min(255.0, b * 255)))
+        var out = [UInt8](repeating: 0, count: cw * ch * 4)
+        for p in 0..<total where filled[p] {
+            let i = p * 4
+            if let ink = inkBuf, ink[i] < 150, ink[i + 1] < 150, ink[i + 2] < 150 { continue } // dark = text
+            out[i] = R; out[i + 1] = G; out[i + 2] = B; out[i + 3] = 255
+        }
+        guard let octx = CGContext(data: &out, width: cw, height: ch, bitsPerComponent: 8,
+                                   bytesPerRow: cw * 4, space: space, bitmapInfo: info),
+              let ocg = octx.makeImage() else { return nil }
+        let img = UIImage(cgImage: ocg)
+        cache.setObject(img, forKey: cacheKey as NSString)
+        return (img, region)
+    }
+
+    /// Solid interior mask for a bubble: opaque (white) over the WHOLE flood-filled
+    /// balloon interior, transparent elsewhere — following the balloon's real shape,
+    /// NOT its padded bounding box. Used to clip the practice "reveal" so it uncovers
+    /// only the tapped bubble's own balloon and can't bleed into a neighbour that
+    /// happens to fall inside the padded crop rectangle. `region` is the normalized
+    /// padded crop the mask image maps onto (same convention as `overlay`).
+    static func interiorMask(maskSource: String, comicId: String, bubble nb: CGRect,
+                             cacheKey: String) -> (image: UIImage, region: CGRect)? {
+        let pad = max(nb.width, nb.height) * 0.8
+        let nx0 = max(0, nb.minX - pad), ny0 = max(0, nb.minY - pad)
+        let nx1 = min(1, nb.maxX + pad), ny1 = min(1, nb.maxY + pad)
+        let region = CGRect(x: nx0, y: ny0, width: nx1 - nx0, height: ny1 - ny0)
+
+        if let cached = cache.object(forKey: cacheKey as NSString) { return (cached, region) }
+
+        guard let maskImg = ComicImageLoader.shared.loadImage(named: maskSource, forComic: comicId),
+              let maskCG = maskImg.cgImage else { return nil }
+        let iw = maskCG.width, ih = maskCG.height
+        guard iw > 0, ih > 0 else { return nil }
+
+        let px0 = max(0, Int(nx0 * CGFloat(iw))), py0 = max(0, Int(ny0 * CGFloat(ih)))
+        let px1 = min(iw, Int(nx1 * CGFloat(iw))), py1 = min(ih, Int(ny1 * CGFloat(ih)))
+        let cw = px1 - px0, ch = py1 - py0
+        let cropRect = CGRect(x: px0, y: py0, width: cw, height: ch)
+        guard cw > 2, ch > 2, let maskCrop = maskCG.cropping(to: cropRect) else { return nil }
+
+        let space = CGColorSpaceCreateDeviceRGB()
+        let info = CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
+        var maskBuf = [UInt8](repeating: 0, count: cw * ch * 4)
+        guard let c = CGContext(data: &maskBuf, width: cw, height: ch, bitsPerComponent: 8,
+                                bytesPerRow: cw * 4, space: space, bitmapInfo: info) else { return nil }
+        c.draw(maskCrop, in: CGRect(x: 0, y: 0, width: cw, height: ch))
+
+        func interior(_ x: Int, _ y: Int) -> Bool {
+            let i = (y * cw + x) * 4
+            return maskBuf[i] > 190 && maskBuf[i + 1] > 190 && maskBuf[i + 2] > 190 && maskBuf[i + 3] > 40
+        }
+
+        var sx = min(max(Int(nb.midX * CGFloat(iw)) - px0, 0), cw - 1)
+        var sy = min(max(Int(nb.midY * CGFloat(ih)) - py0, 0), ch - 1)
+        if !interior(sx, sy) {
+            var found = false
+            search: for d in 1...(max(cw, ch) / 2) {
+                let x0 = max(0, sx - d), x1 = min(cw - 1, sx + d)
+                let y0 = max(0, sy - d), y1 = min(ch - 1, sy + d)
+                for yy in y0...y1 { for xx in x0...x1 where interior(xx, yy) { sx = xx; sy = yy; found = true; break search } }
+            }
+            if !found { return nil }
+        }
+
+        var filled = [Bool](repeating: false, count: cw * ch)
+        var stack = [(Int, Int)](); stack.reserveCapacity(cw * ch / 4)
+        filled[sy * cw + sx] = true; stack.append((sx, sy))
+        var count = 0
+        var edgePixels = 0
+        while let (x, y) = stack.popLast() {
+            count += 1
+            if x == 0 || y == 0 || x == cw - 1 || y == ch - 1 { edgePixels += 1 }
+            if x > 0, !filled[y*cw + x-1], interior(x-1, y) { filled[y*cw + x-1] = true; stack.append((x-1, y)) }
+            if x < cw-1, !filled[y*cw + x+1], interior(x+1, y) { filled[y*cw + x+1] = true; stack.append((x+1, y)) }
+            if y > 0, !filled[(y-1)*cw + x], interior(x, y-1) { filled[(y-1)*cw + x] = true; stack.append((x, y-1)) }
+            if y < ch-1, !filled[(y+1)*cw + x], interior(x, y+1) { filled[(y+1)*cw + x] = true; stack.append((x, y+1)) }
+        }
+        let total = cw * ch
+        let bubbleArea = nb.width * CGFloat(iw) * nb.height * CGFloat(ih)
+        let edgeLimit = max(24, min(cw, ch) / 5)
+        if edgePixels > edgeLimit || count < Int(bubbleArea * 0.1) || count > Int(Double(total) * 0.9) { return nil }
+
+        var out = [UInt8](repeating: 0, count: cw * ch * 4)
+        for p in 0..<total where filled[p] {
+            let i = p * 4
+            out[i] = 255; out[i + 1] = 255; out[i + 2] = 255; out[i + 3] = 255
+        }
+        guard let octx = CGContext(data: &out, width: cw, height: ch, bitsPerComponent: 8,
+                                   bytesPerRow: cw * 4, space: space, bitmapInfo: info),
+              let ocg = octx.makeImage() else { return nil }
+        let img = UIImage(cgImage: ocg)
+        cache.setObject(img, forKey: cacheKey as NSString)
+        return (img, region)
+    }
+}
 
 /// Draws a hotspot's traced outline. `points` are normalized page coordinates;
 /// `box` is the hotspot's normalized bounding box. Points are mapped into the
@@ -199,7 +412,9 @@ struct PageView: View {
         if let pts = hotspot.points, pts.count >= 3 {
             let cx = pts.map { $0.x }.reduce(0, +) / Double(pts.count)
             let cy = pts.map { $0.y }.reduce(0, +) / Double(pts.count)
-            let imageName = (isPracticeMode && revealedBubbleId == nil)
+            // Match the displayed page base: blank bake in practice (a single
+            // revealed bubble is handled separately), full art otherwise.
+            let imageName = isPracticeMode
                 ? (currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage)
                 : currentPage.masterImage
             // Border you dictate in the generator: chosen colour, transparent to
@@ -208,8 +423,8 @@ struct PageView: View {
             let borderColor: Color = hotspot.borderColor == "transparent"
                 ? .clear
                 : Color.fromHex(hotspot.borderColor, fallback: Color(red: 0, green: 188/255, blue: 212/255))
-            // Per-hotspot peak enlargement (fraction); default 0.64 when unset.
-            let enlarge = hotspot.pulseScale ?? 0.64
+            // Per-hotspot peak enlargement (fraction); small default when unset.
+            let enlarge = hotspot.pulseScale ?? 0.12
             // Extra brightness at the peak (default +20%) so the enlarged image
             // reads clearly, and an optional glow tint washed over it.
             let brighten = hotspot.pulseBrightness ?? 0.2
@@ -217,13 +432,17 @@ struct PageView: View {
                 ? Color.fromHex(hotspot.pulseTint, fallback: .clear) : nil
             TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
                 let seconds = timeline.date.timeIntervalSinceReferenceDate
-                // One breath (grow → shrink, starting and ending at normal size),
-                // then hold at normal size for `rest` seconds before the next
-                // pulse — so it pauses at rest rather than moving constantly.
-                let breath = 2.0 * Double.pi / 2.5   // ≈ 2.51s, matches the prior pace
-                let rest = 1.5                        // extra dwell at normal size
-                let t = seconds.truncatingRemainder(dividingBy: breath + rest)
-                let pulse = t < breath ? (1 - cos(t / breath * 2 * Double.pi)) / 2 : 0.0
+                // Heartbeat: two quick pulses (lub-dub), then a pause, repeating
+                // each cycle. Each beat is a fast grow→shrink; the gap and long
+                // pause give it the double-thump-then-rest rhythm of a heart.
+                let cycle = 2.6      // full heartbeat cycle (seconds)
+                let beatDur = 0.26   // one quick grow→shrink (fast)
+                let gap = 0.14       // pause between the two beats
+                let t = seconds.truncatingRemainder(dividingBy: cycle)
+                // Local time within whichever beat is active (-1 during the pause).
+                let localT: Double = t < beatDur ? t
+                    : ((t >= beatDur + gap && t < 2 * beatDur + gap) ? t - beatDur - gap : -1)
+                let pulse = localT >= 0 ? (1 - cos(localT / beatDur * 2 * Double.pi)) / 2 : 0.0
                 ComicImage(imageName: imageName, comicId: comic.id)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: rect.width, height: rect.height)
@@ -252,6 +471,57 @@ struct PageView: View {
         }
     }
 
+    // Practice reveal: when the reader taps "Reveal" on the open popup, uncover
+    // ONLY that one bubble's text (not the whole page). The page stays on the
+    // blank-bubble bake; here we overlay the master (with-text) art masked to the
+    // revealed bubble's box. The two bakes are pixel-identical outside the bubbles,
+    // so only this bubble's text appears and the mask edges are invisible.
+    @ViewBuilder
+    private func revealedBubbleOverlay(in rect: CGRect) -> some View {
+        if isPracticeMode, let revId = revealedBubbleId,
+           let b = pageTextBubbles.first(where: { $0.id == revId }) {
+            let maskSource = currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage
+            let nb = CGRect(x: b.positionX, y: b.positionY, width: b.width, height: b.height)
+            let mkey = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(maskSource)|imask"
+            let mask = BubbleFill.interiorMask(maskSource: maskSource, comicId: comic.id, bubble: nb, cacheKey: mkey)
+            let master = ComicImage(imageName: currentPage.masterImage, comicId: comic.id)
+                .aspectRatio(contentMode: .fit)
+                .frame(width: rect.width, height: rect.height)
+            if let mask {
+                // Uncover ONLY this bubble's balloon: clip the master (with-text) art
+                // to the flood-filled interior SHAPE (not its padded bounding box, which
+                // can overlap neighbours). The green highlight then punches its text
+                // holes onto real black text instead of the blank balloon.
+                master
+                    .mask(
+                        Image(uiImage: mask.image)
+                            .resizable()
+                            .interpolation(.none)
+                            .frame(width: mask.region.width * rect.width, height: mask.region.height * rect.height)
+                            .position(x: mask.region.midX * rect.width, y: mask.region.midY * rect.height)
+                    )
+                    .position(x: rect.midX, y: rect.midY)
+                    .allowsHitTesting(false)
+            } else {
+                // Borderless narration (no balloon to flood): fall back to the padded
+                // text box so at least the title/"continuará" text reveals.
+                master
+                    .mask(
+                        Color.clear
+                            .frame(width: rect.width, height: rect.height)
+                            .overlay(
+                                Rectangle()
+                                    .frame(width: b.width * 1.25 * rect.width, height: b.height * 1.25 * rect.height)
+                                    .position(x: (b.positionX + b.width / 2) * rect.width,
+                                              y: (b.positionY + b.height / 2) * rect.height)
+                            )
+                    )
+                    .position(x: rect.midX, y: rect.midY)
+                    .allowsHitTesting(false)
+            }
+        }
+    }
+
     // A pulsing indigo frame around a text bubble, nudging the reader to tap it.
     // Decorative only — the real tap target sits beneath it.
     private func onboardingBubbleFrame(_ b: Bubble, in rect: CGRect) -> some View {
@@ -269,22 +539,48 @@ struct PageView: View {
         .allowsHitTesting(false)
     }
 
-    // Slow-flashing dot at the centre of the open bubble, linking it to the popup.
+    // Highlights the open bubble, linking it to the popup. Fills the bubble's
+    // interior with a solid, slightly-brighter green (flood-filled to match its
+    // real shape). Shows nothing when it can't fill cleanly (e.g. a borderless
+    // narration such as a title or "continuará"). Static — no flashing.
+    @ViewBuilder
     private func selectedBubbleDot(_ b: Bubble, in rect: CGRect) -> some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
-            let seconds = timeline.date.timeIntervalSinceReferenceDate
-            let pulse = (sin(seconds * 2.5) + 1.0) / 2.0   // 0…1, ~2.5s cycle
-            // Per-comic colour (set in the generator); falls back to #409B08 green.
-            let dotColor = Color.fromHex(comic.bubbleDotColor, fallback: Color(red: 0x40/255, green: 0x9B/255, blue: 0x08/255))
-            Circle()
-                .fill(dotColor)
-                .frame(width: 14, height: 14)
-                .opacity(0.25 + pulse * 0.7)
-                .shadow(color: dotColor.opacity(pulse * 0.6), radius: 5)
+        // Per-comic colour (set in the generator); falls back to #61F527 green.
+        let dotColor = Color.fromHex(comic.bubbleDotColor, fallback: Color(red: 0x61/255, green: 0xF5/255, blue: 0x27/255))
+        // Shape from the blank bake (clean interior, reaches everywhere incl.
+        // letter-counters); text/ink from whatever image is on screen so glyphs
+        // stay readable. In blank practice mode both are the empty bake, so the
+        // whole interior fills.
+        let maskSource = currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage
+        // Preserve the baked text (transparent glyphs) ONLY when this exact bubble is
+        // revealed — then the revealedBubbleOverlay sits behind it showing real black
+        // text. Otherwise fill the whole interior solid (blank practice bubble); using
+        // the with-text image here would punch text-shaped holes onto the blank balloon
+        // and read as "white text". In normal reading (not practice) always preserve.
+        let inkSource = (isPracticeMode && revealedBubbleId != b.id)
+            ? (currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage)
+            : currentPage.masterImage
+        let nb = CGRect(x: b.positionX, y: b.positionY, width: b.width, height: b.height)
+        let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(maskSource)|\(inkSource)|\(comic.bubbleDotColor ?? "def")"
+        let fill = BubbleFill.overlay(maskSource: maskSource, inkSource: inkSource, comicId: comic.id,
+                                      bubble: nb, color: UIColor(dotColor), cacheKey: key)
+
+        if let fill {
+            // Solid green over the white interior — partial opacity so the white
+            // beneath keeps it a bright green rather than a flat dark one.
+            Image(uiImage: fill.image)
+                .resizable()
+                .frame(width: fill.region.width * rect.width, height: fill.region.height * rect.height)
+                .position(x: rect.minX + fill.region.midX * rect.width,
+                          y: rect.minY + fill.region.midY * rect.height)
+                .opacity(0.65)
+                .allowsHitTesting(false)
+                // Appear instantly on touch — don't inherit the card's fade-in.
+                .transition(.identity)
+                .animation(nil, value: selectedBubbleIndex)
         }
-        .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
-                  y: rect.minY + (b.positionY + b.height / 2) * rect.height)
-        .allowsHitTesting(false)
+        // No fill possible (e.g. borderless narration like a title or
+        // "continuará") → show nothing at all.
     }
 
     // Cover hint: a left-nudging arrow on the right edge (clear of the title)
@@ -437,9 +733,10 @@ struct PageView: View {
                 // Page image. In practice modes show the empty-bubbles art (bubbles
                 // visible, text blank) so they're tappable; fall back to the no-text
                 // art, then the full page, for comics baked before that existed.
-                // Practice shows the blank-bubble bake; tapping Reveal in the popup
-                // swaps to the full (with-text) bake, and Hide swaps back.
-                let imageName = (isPracticeMode && revealedBubbleId == nil)
+                // Practice always shows the blank-bubble bake; tapping Reveal overlays
+                // ONLY the current bubble's text (revealedBubbleOverlay), so the rest
+                // stay blank.
+                let imageName = isPracticeMode
                     ? (currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage)
                     : currentPage.masterImage
 
@@ -452,6 +749,9 @@ struct PageView: View {
                         GeometryReader { imageGeometry in
                             let rect = fittedImageRect(in: imageGeometry.size)
                             ZStack {
+                                // Practice reveal: show ONLY the current bubble's text.
+                                revealedBubbleOverlay(in: rect)
+
                                 // One tap target per text bubble. Opens the floating
                                 // card — the same interaction for normal reading and
                                 // for practice (the card shows practice controls when
@@ -666,6 +966,7 @@ struct PageView: View {
         .toolbarBackground(.visible, for: .tabBar)
         .toolbarColorScheme(.light, for: .tabBar)
         .onAppear {
+            AudioManager.shared.activeComicId = comic.id   // fast, direct audio lookup
             loadPageAspect()
             // Guided run starts in speaking practice (safety net if not already set).
             if guidedOnScreenPractice && !settingsManager.speakingPracticeMode && !settingsManager.listeningPracticeMode {
@@ -706,6 +1007,13 @@ struct PageView: View {
                     asPractice: guidedOnScreenPractice
                 )
             }
+        }
+        .onChange(of: selectedBubbleIndex) { _, _ in
+            // Changing which bubble is open (stepping with the card arrows, tapping a
+            // different bubble, or closing) always re-hides the revealed text — the
+            // reveal only ever applies to the bubble you're currently on. Single
+            // source of truth so a stale reveal can't linger on the bubble you left.
+            revealedBubbleId = nil
         }
         .onChange(of: navigateToPage) { _, newPageIndex in
             guard let newPageIndex = newPageIndex else { return }
@@ -891,6 +1199,7 @@ struct BubbleContentView: View {
             }
         }
         .onAppear {
+            audioManager.activeComicId = comic.id   // fast, direct audio lookup
             audioManager.setPlaybackRate(Float(settingsManager.playbackSpeed))
             // In listening mode, auto-play the first sentence so the learner has
             // something to recall the meaning of.
@@ -901,7 +1210,9 @@ struct BubbleContentView: View {
             }
         }
         .onDisappear {
-            audioManager.stop()
+            // Audio stop is handled by the card's close + the nav arrows. Doing it
+            // here too would fire late while stepping bubbles and kill the freshly
+            // started play (green flash → cut out). So only cancel recording here.
             whisperService.cancelRecording()
         }
         .alert("Speech Recognition Error", isPresented: $showingError) {
@@ -1312,6 +1623,9 @@ struct FloatingBubbleCard: View {
             .padding(.horizontal, 12)
             .padding(.top, anchorTop ? 14 : 0)
             .padding(.bottom, anchorTop ? 0 : 30)
+            // Stop audio when the whole card closes (not while stepping bubbles —
+            // the card persists across steps, only the inner content is rebuilt).
+            .onDisappear { AudioManager.shared.stop() }
     }
 
     /// Place the card on the opposite vertical region from the current bubble's
@@ -1363,7 +1677,7 @@ struct FloatingBubbleCard: View {
     // Drag this bar to move the whole card around the page.
     private var header: some View {
         HStack(spacing: 12) {
-            Button { if index > 0 { withAnimation { index -= 1 } } } label: {
+            Button { if index > 0 { AudioManager.shared.stop(); withAnimation { index -= 1 } } } label: {
                 Image(systemName: "chevron.left.circle.fill").font(.title3)
             }
             .disabled(index <= 0)
@@ -1379,7 +1693,7 @@ struct FloatingBubbleCard: View {
 
             Spacer(minLength: 0)
 
-            Button { if index < bubbles.count - 1 { withAnimation { index += 1 } } } label: {
+            Button { if index < bubbles.count - 1 { AudioManager.shared.stop(); withAnimation { index += 1 } } } label: {
                 Image(systemName: "chevron.right.circle.fill").font(.title3)
             }
             .disabled(index >= bubbles.count - 1)

@@ -1186,7 +1186,7 @@ struct WordButton: View {
                 .font(fontSize.map { .system(size: $0) } ?? .body)
                 .padding(.horizontal, 4)
                 .padding(.vertical, 4)
-                .background(isHighlighted ? Color.yellow.opacity(0.3) : Color(.systemGray6))
+                .background(isHighlighted ? Color(red: 0x61/255, green: 0xF5/255, blue: 0x27/255).opacity(0.45) : Color(.systemGray6))
                 .clipShape(RoundedRectangle(cornerRadius: 6))
         }
         .buttonStyle(.plain)
