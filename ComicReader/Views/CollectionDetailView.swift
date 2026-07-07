@@ -79,6 +79,18 @@ struct CollectionDetailView: View {
         }
         .helpTooltipLayer()
         .environmentObject(help)
+        .task {
+            // Load the catalog here too, not just from the Library. Opening a
+            // collection before the Library's fetch has landed (or if it failed)
+            // otherwise leaves this view showing only the downloaded episodes
+            // (e.g. just episode 1) until some later navigation re-fetches.
+            if storeService.catalog.isEmpty && !storeService.isLoadingCatalog {
+                await storeService.fetchCatalog()
+            }
+        }
+        .refreshable {
+            await storeService.fetchCatalog()
+        }
     }
 
     private var header: some View {
@@ -177,7 +189,8 @@ struct CollectionDetailView: View {
             }
             .padding(.horizontal)
         } else if !downloadedEpisodes.isEmpty {
-            // Offline (catalog not loaded) — show what's downloaded, open-only.
+            // Catalog not loaded yet — show what's downloaded, open-only. If the
+            // catalog is still loading, hint that more episodes may appear.
             LazyVStack(spacing: 12) {
                 ForEach(Array(downloadedEpisodes.enumerated()), id: \.element.id) { index, comic in
                     NavigationLink(destination: ComicDetailView(comic: comic)) {
@@ -187,6 +200,13 @@ struct CollectionDetailView: View {
                     .explainsIf(index == 0, "Open a comic",
                                 "Tap a comic here to open it and start reading.",
                                 id: "collection.firstComic")
+                }
+                if storeService.isLoadingCatalog {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text("Loading episodes…").font(.caption).foregroundStyle(.secondary)
+                    }
+                    .padding(.top, 4)
                 }
             }
             .padding(.horizontal)

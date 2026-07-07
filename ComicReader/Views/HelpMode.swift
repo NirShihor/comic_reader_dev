@@ -105,7 +105,10 @@ private struct ExplainsModifier: ViewModifier {
 extension View {
     /// Draws the active explanation bubble. Apply at the screen root, after
     /// `.environmentObject(help)`, so it sits above every tagged control.
-    func helpTooltipLayer() -> some View {
+    /// `bannerEdge` chooses which edge the "help is on" strip sits on — pass `.top`
+    /// on screens where a panel occupies the bottom (e.g. the reader's bubble popup),
+    /// so the strip doesn't cover it.
+    func helpTooltipLayer(bannerEdge: VerticalEdge = .bottom) -> some View {
         overlayPreferenceValue(HelpAnchorKey.self) { anchors in
             GeometryReader { proxy in
                 HelpTooltipOverlay(anchors: anchors, proxy: proxy)
@@ -114,13 +117,14 @@ extension View {
         }
         // A persistent banner (respecting the safe area) telling the user how to
         // close help — otherwise the auto-opened explainers look stuck.
-        .overlay(alignment: .bottom) { HelpCloseBanner() }
+        .overlay(alignment: bannerEdge == .top ? .top : .bottom) { HelpCloseBanner(edge: bannerEdge) }
     }
 }
 
 /// Shown at the top while help mode is on, so users know to tap "?" to close.
 /// Tapping the banner itself also closes help.
 private struct HelpCloseBanner: View {
+    var edge: VerticalEdge = .bottom
     @EnvironmentObject private var help: HelpModeController
 
     var body: some View {
@@ -144,8 +148,8 @@ private struct HelpCloseBanner: View {
                 .shadow(color: .black.opacity(0.2), radius: 6, y: 2)
             }
             .buttonStyle(.plain)
-            .padding(.bottom, 10)
-            .transition(.move(edge: .bottom).combined(with: .opacity))
+            .padding(edge == .top ? .top : .bottom, 10)
+            .transition(.move(edge: edge == .top ? .top : .bottom).combined(with: .opacity))
             .zIndex(100)
         }
     }

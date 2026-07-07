@@ -1166,6 +1166,8 @@ struct WordButton: View {
     let word: Word
     let isHighlighted: Bool
     var fontSize: CGFloat? = nil
+    var font: Font? = nil      // takes precedence over fontSize when set
+    var weight: Font.Weight = .regular
     /// Optional: notified when the word is tapped (used to clear the first-run
     /// "tap a word" onboarding hint).
     var onTap: (() -> Void)? = nil
@@ -1183,7 +1185,8 @@ struct WordButton: View {
             isSaved = vocabularyManager.savedWords.contains { $0.word.id == word.id }
         } label: {
             Text(word.text)
-                .font(fontSize.map { .system(size: $0) } ?? .body)
+                .font(font ?? (fontSize.map { .system(size: $0) } ?? .body))
+                .fontWeight(weight)
                 .padding(.horizontal, 4)
                 .padding(.vertical, 4)
                 .background(isHighlighted ? Color(red: 0x61/255, green: 0xF5/255, blue: 0x27/255).opacity(0.45) : Color(.systemGray6))

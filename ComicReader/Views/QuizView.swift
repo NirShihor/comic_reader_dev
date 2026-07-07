@@ -3,6 +3,7 @@ import SwiftUI
 struct QuizView: View {
     let comic: Comic
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var progressManager: ReadingProgressManager
 
     @State private var currentIndex = 0
     @State private var userAnswer = ""
@@ -87,9 +88,18 @@ struct QuizView: View {
             }
         }
         .onAppear {
+            // Resume at the word the learner left off on (Continue practicing).
+            let saved = progressManager.wordStartIndex(for: comic.id)
+            if saved > 0 && saved < reviewWords.count { currentIndex = saved }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 isAnswerFocused = true
             }
+        }
+        .onChange(of: currentIndex) { _, _ in
+            if !quizComplete { progressManager.saveWordPosition(comicId: comic.id, index: currentIndex) }
+        }
+        .onChange(of: quizComplete) { _, done in
+            if done { progressManager.clearWordPosition(for: comic.id) }
         }
         .sheet(isPresented: $showingContext) {
             if let page = contextPage, let panel = contextPanel {
@@ -478,6 +488,7 @@ struct QuizView: View {
     }
 
     private func restartQuiz() {
+        progressManager.clearWordPosition(for: comic.id)
         currentIndex = 0
         userAnswer = ""
         showResult = false

@@ -4,6 +4,7 @@ struct ListeningTestView: View {
     let comic: Comic
 
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var progressManager: ReadingProgressManager
     @ObservedObject private var whisperService = WhisperService.shared
     @ObservedObject private var audioManager = AudioManager.shared
 
@@ -197,16 +198,25 @@ struct ListeningTestView: View {
         }
         .padding()
         .onAppear {
+            // Resume at the word the learner left off on (Continue practicing).
+            let saved = progressManager.wordStartIndex(for: comic.id)
+            if saved > 0 && saved < reviewWords.count { currentIndex = saved }
             // Auto-play the Spanish word when the card first appears
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 playWordAudio()
             }
         }
         .onChange(of: currentIndex) { _, _ in
+            // Remember the spot so "Continue practicing" resumes here.
+            if !testComplete { progressManager.saveWordPosition(comicId: comic.id, index: currentIndex) }
             // Auto-play when advancing to next word
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 playWordAudio()
             }
+        }
+        .onChange(of: testComplete) { _, done in
+            // Finished the whole set → next launch starts fresh.
+            if done { progressManager.clearWordPosition(for: comic.id) }
         }
     }
 
@@ -454,17 +464,17 @@ struct ListeningTestView: View {
             return true
         }
 
-        // Fuzzy match with relaxed threshold
-        let (isMatch, matchScore) = whisperService.compareText(spoken: spokenNorm, expected: expectedNorm)
-        if isMatch || matchScore >= 0.8 { return true }
+        // Tolerate only a tiny spelling/plural slip (1 edit) — NOT a loose fuzzy
+        // threshold. The relaxed single-word fuzzy accepts near-opposites like
+        // "grandad"/"grandma" (2 edits) as correct, which is wrong for a meaning test.
+        if editDistance(spokenNorm, expectedNorm) <= 1 { return true }
 
         // Handle comma-separated alternatives (e.g., meaning = "house, home")
         let commaAlts = expected.split(separator: ",").map { normalizeMeaning(String($0)) }
         for alt in commaAlts where !alt.isEmpty {
             if spokenNorm == alt { return true }
             if spokenNorm.contains(alt) || alt.contains(spokenNorm) { return true }
-            let (altMatch, altScore) = whisperService.compareText(spoken: spokenNorm, expected: alt)
-            if altMatch || altScore >= 0.8 { return true }
+            if editDistance(spokenNorm, alt) <= 1 { return true }
         }
 
         // Handle semicolon-separated alternatives (e.g., "to be; to exist")
@@ -482,6 +492,25 @@ struct ListeningTestView: View {
         }
 
         return false
+    }
+
+    /// Levenshtein edit distance — used to tolerate a single spelling/plural slip
+    /// in the meaning check (strict, so near-opposites don't match).
+    private func editDistance(_ a: String, _ b: String) -> Int {
+        let s = Array(a), t = Array(b)
+        if s.isEmpty { return t.count }
+        if t.isEmpty { return s.count }
+        var prev = Array(0...t.count)
+        var curr = [Int](repeating: 0, count: t.count + 1)
+        for i in 1...s.count {
+            curr[0] = i
+            for j in 1...t.count {
+                let cost = s[i - 1] == t[j - 1] ? 0 : 1
+                curr[j] = min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost)
+            }
+            swap(&prev, &curr)
+        }
+        return prev[t.count]
     }
 
     /// Normalize English meaning text for comparison
@@ -548,6 +577,7 @@ struct ListeningTestView: View {
     }
 
     private func restartTest() {
+        progressManager.clearWordPosition(for: comic.id)
         currentIndex = 0
         spokenText = ""
         showResult = false

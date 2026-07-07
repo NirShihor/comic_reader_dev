@@ -29,6 +29,7 @@ enum OriginListenState: Equatable {
 struct OriginListenView: View {
     let comic: Comic
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var progressManager: ReadingProgressManager
     @ObservedObject private var audioManager = AudioManager.shared
     @StateObject private var help = HelpModeController()
 
@@ -337,7 +338,9 @@ struct OriginListenView: View {
 
     private func startListening() {
         guard !sentences.isEmpty else { return }
-        currentIndex = 0
+        // Resume at the sentence the learner left off on (Continue practicing).
+        let saved = progressManager.practiceStartIndex(for: comic.id)
+        currentIndex = saved < sentences.count ? saved : 0
         playCurrentSentence()
     }
 
@@ -348,6 +351,8 @@ struct OriginListenView: View {
 
     private func playCurrentSentence() {
         state = .playingSpanish
+        // Remember the spot so "Continue practicing" resumes here.
+        progressManager.savePracticePosition(comicId: comic.id, index: currentIndex, total: sentences.count)
         resetAudioSessionForPlayback()
         let sentence = sentences[currentIndex]
         audioManager.play(sentence.audioUrl)
@@ -375,6 +380,7 @@ struct OriginListenView: View {
         currentIndex += 1
         if currentIndex >= sentences.count {
             state = .completed
+            progressManager.clearPracticePosition(for: comic.id)   // finished → start fresh next time
             updateNowPlaying()
         } else {
             playCurrentSentence()
@@ -386,6 +392,7 @@ struct OriginListenView: View {
         currentIndex += 1
         if currentIndex >= sentences.count {
             state = .completed
+            progressManager.clearPracticePosition(for: comic.id)   // finished → start fresh next time
             updateNowPlaying()
         } else {
             playCurrentSentence()

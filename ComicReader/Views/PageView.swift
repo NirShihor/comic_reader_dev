@@ -344,6 +344,26 @@ struct PageView: View {
         settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode
     }
 
+    /// Where the open bubble's card sits (mirrors FloatingBubbleCard.anchorTop), so
+    /// the help banner can be placed on the opposite edge and not cover the card.
+    private var openCardAnchorTop: Bool {
+        guard let idx = selectedBubbleIndex, pageTextBubbles.indices.contains(idx) else { return false }
+        let bubble = pageTextBubbles[idx]
+        let referenceY: Double
+        if let panel = currentPage.panels.first(where: { $0.bubbles.contains(where: { $0.id == bubble.id }) }),
+           panel.tapZoneHeight <= 0.75 {
+            referenceY = panel.tapZoneY + panel.tapZoneHeight / 2
+        } else {
+            referenceY = bubble.positionY + bubble.height / 2
+        }
+        return referenceY >= 0.5
+    }
+
+    /// The card sits at the bottom → put the help strip at the top (and vice versa).
+    private var helpBannerEdge: VerticalEdge {
+        (selectedBubbleIndex != nil && !openCardAnchorTop) ? .top : .bottom
+    }
+
     init(comic: Comic, page: Page, guidedOnScreenPractice: Bool = false, onRequestPractice: (() -> Void)? = nil,
          initialBubbleId: String? = nil, savesProgress: Bool = true, presentedModally: Bool = false) {
         self.comic = comic
@@ -621,8 +641,12 @@ struct PageView: View {
             : currentPage.masterImage
         let nb = CGRect(x: b.positionX, y: b.positionY, width: b.width, height: b.height)
         let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(maskSource)|\(inkSource)|\(comic.bubbleDotColor ?? "def")"
-        let fill = BubbleFill.overlay(maskSource: maskSource, inkSource: inkSource, comicId: comic.id,
-                                      bubble: nb, color: UIColor(dotColor), cacheKey: key)
+        // Transparent/borderless narration (e.g. "continuará") has no balloon interior
+        // to fill — flood-filling it would tint the text and a stray patch of art green.
+        // Skip the highlight entirely for these.
+        let fill = (b.bgTransparent == true) ? nil
+            : BubbleFill.overlay(maskSource: maskSource, inkSource: inkSource, comicId: comic.id,
+                                 bubble: nb, color: UIColor(dotColor), cacheKey: key)
 
         if let fill {
             // Solid green over the white interior — partial opacity so the white
@@ -931,8 +955,8 @@ struct PageView: View {
             }
 
             // Floating, draggable card showing one bubble's content (normal reading).
-            // Lives over the page so the artwork stays visible; drag its header to
-            // move it out of the way.
+            // Lives over the page so the artwork stays visible; swipe it (or tap the
+            // side arrows) to step bubbles and turn pages.
             if let idx = selectedBubbleIndex, pageTextBubbles.indices.contains(idx) {
                 FloatingBubbleCard(
                     comic: comic,
@@ -943,7 +967,12 @@ struct PageView: View {
                         set: { selectedBubbleIndex = $0; revealedBubbleId = nil }   // stepping bubbles re-hides
                     ),
                     revealedBubbleId: $revealedBubbleId,
-                    onClose: { selectedBubbleIndex = nil; revealedBubbleId = nil }
+                    onClose: { selectedBubbleIndex = nil; revealedBubbleId = nil },
+                    // Past the last/first bubble, step to the next/previous page. The
+                    // page change closes the card (onChange of currentPageIndex clears
+                    // the selection) until the reader taps a bubble on the new page.
+                    onRequestNextPage: { goToNextPage() },
+                    onRequestPrevPage: { goToPreviousPage() }
                 )
                 .environmentObject(settingsManager)
                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
@@ -977,7 +1006,7 @@ struct PageView: View {
                     }
                 }
                 ToolbarItem(placement: .principal) {
-                    HStack(spacing: 20) {
+                    HStack(spacing: 14) {
                         Button {
                             goToPreviousPage()
                         } label: {
@@ -986,8 +1015,11 @@ struct PageView: View {
                         }
                         .disabled(currentPageIndex == 0)
 
-                        Text("\(currentPage.pageNumber) / \(sortedPages.count)")
+                        Text("\(currentPage.pageNumber)/\(sortedPages.count)")
                             .foregroundStyle(.white)
+                            .monospacedDigit()
+                            .lineLimit(1)
+                            .fixedSize()   // never truncate to "9/..."
 
                         Button {
                             goToNextPage()
@@ -997,9 +1029,10 @@ struct PageView: View {
                         }
                         .disabled(currentPageIndex >= sortedPages.count - 1)
                     }
+                    .fixedSize()   // size the whole indicator to its content
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 12) {
+                    HStack(spacing: 8) {
                         Button {
                             withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
                         } label: {
@@ -1022,7 +1055,7 @@ struct PageView: View {
                 }
             }
         }
-        .helpTooltipLayer()
+        .helpTooltipLayer(bannerEdge: helpBannerEdge)
         .environmentObject(help)
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarBackground(.visible, for: .tabBar)
@@ -1070,12 +1103,17 @@ struct PageView: View {
                 )
             }
         }
-        .onChange(of: selectedBubbleIndex) { _, _ in
+        .onChange(of: selectedBubbleIndex) { _, newValue in
             // Changing which bubble is open (stepping with the card arrows, tapping a
             // different bubble, or closing) always re-hides the revealed text — the
             // reveal only ever applies to the bubble you're currently on. Single
             // source of truth so a stale reveal can't linger on the bubble you left.
             revealedBubbleId = nil
+            // Remember the open bubble during on-screen practice so "Continue
+            // practicing" reopens the same page at the same bubble.
+            if guidedOnScreenPractice, let idx = newValue, pageTextBubbles.indices.contains(idx) {
+                progressManager.savePracticeBubble(comicId: comic.id, bubbleId: pageTextBubbles[idx].id)
+            }
         }
         .onChange(of: navigateToPage) { _, newPageIndex in
             guard let newPageIndex = newPageIndex else { return }
@@ -1304,9 +1342,11 @@ struct BubbleContentView: View {
             if word.startTimeMs == nil && word.text.contains(" ") { return false }
             return true
         }
-        let textFont: Font = bubble.fontSize.map { .system(size: CGFloat($0)) } ?? .title3
+        // Use the SAME font as the practice prompt (.title3 medium) regardless of the
+        // comic's small baked bubble font size, so reading mode reads just as large
+        // and clear, and both scale together with Dynamic Type.
         if displayWords.isEmpty {
-            Text(sentence.text).font(textFont).fontWeight(.medium)
+            Text(sentence.text).font(.title3).fontWeight(.medium)
         } else {
             FlowLayout(spacing: 2) {
                 ForEach(displayWords) { word in
@@ -1314,7 +1354,8 @@ struct BubbleContentView: View {
                     WordButton(
                         word: word,
                         isHighlighted: highlight && playingSentenceId == sentence.id && highlightedWordIndex == originalIndex,
-                        fontSize: bubble.fontSize.map { CGFloat($0) },
+                        font: .title3,
+                        weight: .medium,
                         onTap: { onboardDidTapWord = true }
                     )
                     .overlay {
@@ -1407,9 +1448,9 @@ struct BubbleContentView: View {
                 } else {
                     playButton(sentence, audioUrl: audioUrl)
                 }
+                speedMenu   // sits right next to the listen/play control
                 if processingSentenceId == sentence.id { ProgressView() }
                 Spacer()
-                speedMenu
             }
         }
     }
@@ -1426,6 +1467,7 @@ struct BubbleContentView: View {
                 .padding(.horizontal, 12).padding(.vertical, 8)
                 .background(Color(.systemGray5)).clipShape(Capsule())
         }
+        .explains("Playback speed", "Tap to slow the audio down or speed it up (0.5×–1.25×).", id: "bubble.speed")
     }
 
     private func playButton(_ sentence: Sentence, audioUrl: String) -> some View {
@@ -1444,6 +1486,7 @@ struct BubbleContentView: View {
                 .background(isThis ? Color.red : Color.blue)
                 .clipShape(Capsule())
         }
+        .explains("Play", "Play the sentence aloud — the words highlight as they're spoken.", id: "bubble.play")
     }
 
     private func micButton(_ sentence: Sentence, listening: Bool) -> some View {
@@ -1461,6 +1504,7 @@ struct BubbleContentView: View {
                 .background(isThisRecording ? Color.red : Color.blue)
                 .clipShape(Capsule())
         }
+        .explains("Speak", "Record yourself saying the line, then get pronunciation feedback.", id: "bubble.speak")
         .disabled(processingSentenceId != nil || (recordingSentenceId != nil && !isThisRecording))
     }
 
@@ -1480,6 +1524,7 @@ struct BubbleContentView: View {
                 .clipShape(Circle())
                 .foregroundStyle(.white)
         }
+        .explains("Listen", "Hear the sentence spoken in Spanish.", id: "bubble.listen")
         .disabled(recordingSentenceId == sentence.id || processingSentenceId != nil)
     }
 
@@ -1499,6 +1544,7 @@ struct BubbleContentView: View {
                 } label: {
                     Label("Hide", systemImage: "eye.slash").font(.subheadline).foregroundStyle(.blue)
                 }
+                .explains("Hide", "Hide the text again for this bubble.", id: "bubble.reveal")
             } else {
                 Button {
                     withAnimation { revealedBubbleId = bubble.id }
@@ -1506,6 +1552,7 @@ struct BubbleContentView: View {
                 } label: {
                     Label("Reveal", systemImage: "eye").font(.subheadline).foregroundStyle(.blue)
                 }
+                .explains("Reveal", "Show this bubble's text on the page when you're stuck. Only this bubble is revealed.", id: "bubble.reveal")
             }
         }
     }
@@ -1669,10 +1716,10 @@ struct FloatingBubbleCard: View {
     @Binding var index: Int
     @Binding var revealedBubbleId: String?
     var onClose: () -> Void
+    var onRequestNextPage: () -> Void = {}
+    var onRequestPrevPage: () -> Void = {}
     @EnvironmentObject var settingsManager: SettingsManager
 
-    @State private var offset: CGSize = .zero
-    @State private var accumulated: CGSize = .zero
     @State private var contentHeight: CGFloat = 0
 
     private let maxContentHeight: CGFloat = 340
@@ -1680,7 +1727,6 @@ struct FloatingBubbleCard: View {
     var body: some View {
         card
             .frame(maxWidth: 380)
-            .offset(offset)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: anchorTop ? .top : .bottom)
             .padding(.horizontal, 12)
             .padding(.top, anchorTop ? 14 : 0)
@@ -1688,6 +1734,36 @@ struct FloatingBubbleCard: View {
             // Stop audio when the whole card closes (not while stepping bubbles —
             // the card persists across steps, only the inner content is rebuilt).
             .onDisappear { AudioManager.shared.stop() }
+    }
+
+    // Step to the previous bubble, or (past the first) the previous page.
+    private func goPrev() {
+        AudioManager.shared.stop()
+        if index > 0 { withAnimation { index -= 1 } } else { onRequestPrevPage() }
+    }
+    // Step to the next bubble, or (past the last) the next page.
+    private func goNext() {
+        AudioManager.shared.stop()
+        if index < bubbles.count - 1 { withAnimation { index += 1 } } else { onRequestNextPage() }
+    }
+
+    // Prominent circular step arrow, placed on the card's side at mid-height.
+    private func sideArrow(next: Bool) -> some View {
+        Button { next ? goNext() : goPrev() } label: {
+            Image(systemName: next ? "chevron.right" : "chevron.left")
+                .font(.system(size: 20, weight: .heavy))
+                .foregroundStyle(.white)
+                .frame(width: 44, height: 44)
+                .background(Color.accentColor, in: Circle())
+                .overlay(Circle().stroke(.white.opacity(0.85), lineWidth: 2))
+                .shadow(color: .black.opacity(0.3), radius: 5, y: 2)
+        }
+        .buttonStyle(.plain)
+        .padding(next ? .trailing : .leading, 4)
+        .explains(next ? "Next bubble" : "Previous bubble",
+                  next ? "Move to the next bubble. On the last bubble it turns to the next page and closes this panel."
+                       : "Move to the previous bubble. On the first bubble it goes back a page.",
+                  id: next ? "card.next" : "card.prev")
     }
 
     /// Place the card on the opposite vertical region from the current bubble's
@@ -1711,13 +1787,18 @@ struct FloatingBubbleCard: View {
 
     private var card: some View {
         VStack(spacing: 0) {
-            header
-            Divider()
             ScrollView {
                 if bubbles.indices.contains(index) {
                     BubbleContentView(comic: comic, bubble: bubbles[index], revealedBubbleId: $revealedBubbleId)
                         .id(bubbles[index].id)   // reset per-bubble state when stepping
-                        .padding(14)
+                        // Extra horizontal inset so the side step-arrows (~48pt in from
+                        // each edge, at mid-height) never sit on top of the text/controls,
+                        // with a bit more breathing room on the left. Extra top room for
+                        // the floating close button.
+                        .padding(.leading, 60)
+                        .padding(.trailing, 48)
+                        .padding(.top, 34)
+                        .padding(.bottom, 16)
                         .background(GeometryReader { g in
                             Color.clear.preference(key: PopupContentHeightKey.self, value: g.size.height)
                         })
@@ -1734,49 +1815,41 @@ struct FloatingBubbleCard: View {
                 .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.25), radius: 14, y: 6)
-    }
-
-    // Drag this bar to move the whole card around the page.
-    private var header: some View {
-        HStack(spacing: 12) {
-            Button { if index > 0 { AudioManager.shared.stop(); withAnimation { index -= 1 } } } label: {
-                Image(systemName: "chevron.left.circle.fill").font(.title3)
-            }
-            .disabled(index <= 0)
-
-            Spacer(minLength: 0)
-
-            VStack(spacing: 2) {
-                Image(systemName: "line.3.horizontal")
-                    .font(.caption2).foregroundStyle(.secondary)
-                Text("\(index + 1) of \(bubbles.count)")
-                    .font(.caption).foregroundStyle(.secondary)
-            }
-
-            Spacer(minLength: 0)
-
-            Button { if index < bubbles.count - 1 { AudioManager.shared.stop(); withAnimation { index += 1 } } } label: {
-                Image(systemName: "chevron.right.circle.fill").font(.title3)
-            }
-            .disabled(index >= bubbles.count - 1)
-
+        // Just a close button, floating in the top-right (no banner / no bubble count).
+        .overlay(alignment: .topTrailing) {
             Button { onClose() } label: {
-                Image(systemName: "xmark.circle.fill").font(.title3).foregroundStyle(.secondary)
+                Image(systemName: "xmark.circle.fill")
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+                    .padding(8)
             }
+            .explains("Close", "Close this panel. Tap any bubble on the page to open it again.", id: "card.close")
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(Color(.secondarySystemBackground))
-        .contentShape(Rectangle())
-        .gesture(
-            DragGesture()
-                .onChanged { v in
-                    offset = CGSize(width: accumulated.width + v.translation.width,
-                                    height: accumulated.height + v.translation.height)
+        // Help-mode hint for the swipe gesture (only visible while help is on).
+        .overlay(alignment: .top) {
+            HelpHint(icon: "hand.draw",
+                     label: "Swipe",
+                     title: "Swipe the panel",
+                     text: "Swipe left or right anywhere on the panel to move between bubbles — the same as the side arrows.",
+                     animatedSwipe: true)
+                .padding(.top, 6)
+        }
+        // Prominent step arrows on the sides, at mid-height.
+        .overlay(alignment: .leading) { sideArrow(next: false) }
+        .overlay(alignment: .trailing) { sideArrow(next: true) }
+        // Swipe the whole card left/right to step bubbles (and turn pages at the ends),
+        // same as the arrows. Simultaneous so it doesn't fight the content scroll: it
+        // only acts on a clearly horizontal swipe.
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 24)
+                .onEnded { v in
+                    guard abs(v.translation.width) > abs(v.translation.height),
+                          abs(v.translation.width) > 50 else { return }
+                    if v.translation.width < 0 { goNext() } else { goPrev() }
                 }
-                .onEnded { _ in accumulated = offset }
         )
     }
+
 }
 
 /// Reports the natural height of the bubble popup's content so the card can hug it.

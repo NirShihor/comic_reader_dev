@@ -54,6 +54,7 @@ struct ComicDetailView: View {
     @State private var showPracticeOptions = false
     @State private var showingDrillChooser = false
     @State private var guidedOnScreen = false   // next PageView push is a guided practice run
+    @State private var pendingBubbleId: String? = nil   // bubble to resume the guided run at
     @State private var openPracticeAfterReading = false  // end-of-episode "Practice" tapped
     @State private var scrollTopToken = 0                 // bump to scroll the page to the top
     @StateObject private var help = HelpModeController()
@@ -99,7 +100,8 @@ struct ComicDetailView: View {
             }
             .navigationDestination(item: $selectedPage) { page in
                 PageView(comic: comic, page: page, guidedOnScreenPractice: guidedOnScreen,
-                         onRequestPractice: { openPracticeAfterReading = true })
+                         onRequestPractice: { openPracticeAfterReading = true },
+                         initialBubbleId: pendingBubbleId)
                     .id(page.id)  // Force new view instance for each page
             }
             .onChange(of: selectedPage) { _, newValue in
@@ -306,11 +308,20 @@ struct ComicDetailView: View {
     // Launch the last-used practice mode. `restart` clears the saved spot so it
     // begins from the first sentence; otherwise it resumes where it left off.
     private func launchPractice(restart: Bool) {
-        if restart { progressManager.clearPracticePosition(for: comic.id) }
+        if restart {
+            progressManager.clearPracticePosition(for: comic.id)
+            progressManager.clearWordPosition(for: comic.id)
+            progressManager.clearPracticeBubble(for: comic.id)
+        }
         let mode = progressManager.lastPracticeMode(for: comic.id)
         if mode == "readSpeak" {
-            // Continue = pick up where practice left off (saved page); Restart = cover.
-            startReadAndSpeak(from: restart ? firstPage : startingPage)
+            // Continue = pick up where practice left off (same page + bubble);
+            // Restart = cover, no bubble.
+            if restart {
+                startReadAndSpeak(from: firstPage, bubbleId: nil)
+            } else {
+                startReadAndSpeak(from: startingPage, bubbleId: progressManager.practiceBubbleId(for: comic.id))
+            }
         } else if let dest = PracticeDestination(modeKey: mode) {
             practiceDestination = dest
         } else {
@@ -569,6 +580,10 @@ struct ComicDetailView: View {
                              title: "Just listen", tag: "OFF SCREEN",
                              description: "Screen off, eyes free. Hear each line and its meaning — no speaking.",
                              action: { practiceDestination = .repeatListen })
+            practiceModeCard(icon: "play.circle",
+                             title: "Listen in Spanish", tag: "OFF SCREEN",
+                             description: "Screen off, eyes free. Play the whole comic in Spanish, start to finish — no English, no speaking.",
+                             action: { practiceDestination = .originListen })
             speakingOffNote
         }
 
@@ -688,18 +703,19 @@ struct ComicDetailView: View {
     }
 
     /// On-screen "Read & speak" from the Practice menu: resume where the learner
-    /// left off (mirrors "Continue reading"); Restart routes through the `from:`
-    /// variant with the cover.
+    /// left off — same page AND same bubble (mirrors "Continue reading"). Restart
+    /// routes through the `from:` variant with the cover and no bubble.
     private func startReadAndSpeak() {
-        startReadAndSpeak(from: startingPage)
+        startReadAndSpeak(from: startingPage, bubbleId: progressManager.practiceBubbleId(for: comic.id))
     }
 
     /// On-screen "Read & speak": text stays visible, learner speaks each line.
-    /// Mirrors the legacy On-Screen guided run. Opens at `page`.
-    private func startReadAndSpeak(from page: Page) {
+    /// Mirrors the legacy On-Screen guided run. Opens at `page`, at `bubbleId` when set.
+    private func startReadAndSpeak(from page: Page, bubbleId: String? = nil) {
         settingsManager.speakingPracticeMode = true
         settingsManager.listeningPracticeMode = false
         guidedOnScreen = true
+        pendingBubbleId = bubbleId
         showPracticeOptions = false
         progressManager.setPracticeMode(comic.id, mode: "readSpeak")
         selectedPage = page
@@ -721,6 +737,7 @@ struct ComicDetailView: View {
         settingsManager.speakingPracticeMode = false
         settingsManager.listeningPracticeMode = false
         guidedOnScreen = false
+        pendingBubbleId = nil   // plain reading never auto-opens a bubble
         selectedPage = page
     }
 

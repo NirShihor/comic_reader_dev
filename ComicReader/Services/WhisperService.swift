@@ -525,8 +525,17 @@ class WhisperService: ObservableObject {
     private func isAnchorEcho(_ text: String, language: String) -> Bool {
         guard let anchor = languageAnchorPrompt(language) else { return false }
         let t = wordsOnly(text), a = wordsOnly(anchor)
-        guard !a.isEmpty else { return false }
-        return t == a || t.contains(a) || a.contains(t)
+        guard !a.isEmpty, !t.isEmpty else { return false }
+        // Full echo: the model handed our whole anchor prompt back.
+        if t == a || t.contains(a) { return true }
+        // Partial echo: a long run of the anchor. Require several anchor words so a
+        // legitimate SHORT answer that merely happens to be an anchor word (e.g.
+        // "the", "is", "a" — all in the English anchor) isn't discarded as an echo.
+        // Real answers in the meaning/word drills are only 1–3 words.
+        if a.contains(t) {
+            return t.split(separator: " ").count >= 4
+        }
+        return false
     }
 
     /// Lowercased, letters-only, single-spaced — for loose text comparison.

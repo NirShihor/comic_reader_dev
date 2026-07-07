@@ -46,6 +46,7 @@ struct Bubble: Identifiable, Codable, Hashable {
     let id: String
     let type: BubbleType
     var isSoundEffect: Bool?
+    var bgTransparent: Bool?   // borderless/transparent narration (e.g. "continuará") — no green highlight
     var imageUrl: String?
     var fontSize: Double?
     let positionX: Double  // percentage 0-1

@@ -4,6 +4,7 @@ struct SpeakingTestView: View {
     let comic: Comic
 
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var progressManager: ReadingProgressManager
     @ObservedObject private var whisperService = WhisperService.shared
     @ObservedObject private var audioManager = AudioManager.shared
 
@@ -77,6 +78,17 @@ struct SpeakingTestView: View {
         }
         .navigationTitle("Speaking Practice")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            // Resume at the word the learner left off on (Continue practicing).
+            let saved = progressManager.wordStartIndex(for: comic.id)
+            if saved > 0 && saved < reviewWords.count { currentIndex = saved }
+        }
+        .onChange(of: currentIndex) { _, _ in
+            if !testComplete { progressManager.saveWordPosition(comicId: comic.id, index: currentIndex) }
+        }
+        .onChange(of: testComplete) { _, done in
+            if done { progressManager.clearWordPosition(for: comic.id) }
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -600,6 +612,7 @@ struct SpeakingTestView: View {
     }
 
     private func restartTest() {
+        progressManager.clearWordPosition(for: comic.id)
         currentIndex = 0
         spokenText = ""
         showResult = false

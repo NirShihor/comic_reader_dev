@@ -167,14 +167,35 @@ struct LibraryView: View {
                                     collection.episodeCount)
             let episodeLine = "Episode \(startedComic.episodeNumber ?? 1) of \(totalEpisodes)"
             let line = practicing ? (practiceLine ?? episodeLine) : episodeLine
-            // Resume the exact episode the user left off in, at its spot and mode.
-            NavigationLink(destination: ComicDetailView(comic: startedComic, autoResume: true)) {
-                heroCard(coverName: collection.coverImage, coverComicId: collection.coverComicId,
-                         title: collection.title, subtitle: collection.titleEn,
-                         line: line, fraction: fraction, practicing: practicing,
-                         remoteFallback: thumbnailPath(forCollection: collection.title))
+            VStack(spacing: 8) {
+                // Primary: resume the exact episode the reader left off in.
+                NavigationLink(destination: ComicDetailView(comic: startedComic, autoResume: true)) {
+                    heroCard(coverName: collection.coverImage, coverComicId: collection.coverComicId,
+                             title: collection.title, subtitle: collection.titleEn,
+                             line: line, fraction: fraction, practicing: practicing,
+                             remoteFallback: thumbnailPath(forCollection: collection.title))
+                }
+                .buttonStyle(.plain)
+                // Secondary: reach the whole collection (all episodes) — the hero
+                // otherwise only offers the in-progress episode, so a series' other
+                // episodes were unreachable from here.
+                NavigationLink(destination: CollectionDetailView(title: collection.title)) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "books.vertical.fill").font(.system(size: 13, weight: .semibold))
+                        Text("View all episodes")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.system(size: 12, weight: .bold))
+                    }
+                    .foregroundStyle(accentColor)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity)
+                    .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(borderInk, lineWidth: 2))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
     }
 
