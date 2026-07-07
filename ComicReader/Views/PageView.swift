@@ -1,6 +1,71 @@
 import SwiftUI
 import UIKit
 
+/// The page artwork, animated with a Core Animation slide when the page changes.
+/// The comic's bubbles/text are baked into the image, so a page turn is just an
+/// image swap — done at the CA layer so it's reliable regardless of SwiftUI's
+/// animation quirks in this view. Invisible SwiftUI tap targets sit on top and
+/// realign the instant the new page settles.
+struct PagedImageView: UIViewRepresentable {
+    let imageName: String
+    let comicId: String
+    let pageKey: Int     // changes on a real page turn (drives the slide)
+    let forward: Bool    // turn direction
+
+    final class Coordinator {
+        weak var imageView: UIImageView?
+        var lastKey: Int?
+        var lastImageName: String?
+    }
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    // Plain container (no intrinsic size) so SwiftUI's frame drives the size; the
+    // image view is pinned to fill it and aspect-fits the artwork within.
+    func makeUIView(context: Context) -> UIView {
+        let container = UIView()
+        container.backgroundColor = .black
+        container.clipsToBounds = true
+        let iv = UIImageView()
+        iv.contentMode = .scaleAspectFit
+        iv.clipsToBounds = true
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(iv)
+        NSLayoutConstraint.activate([
+            iv.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            iv.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            iv.topAnchor.constraint(equalTo: container.topAnchor),
+            iv.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        ])
+        iv.image = ComicImageLoader.shared.loadImage(named: imageName, forComic: comicId)
+        context.coordinator.imageView = iv
+        context.coordinator.lastKey = pageKey
+        context.coordinator.lastImageName = imageName
+        return container
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        let coord = context.coordinator
+        guard let iv = coord.imageView else { return }
+        let newImage = ComicImageLoader.shared.loadImage(named: imageName, forComic: comicId)
+        if coord.lastKey != pageKey {
+            // Real page turn → slide the artwork in from the side we're heading toward.
+            let t = CATransition()
+            t.type = .push
+            t.subtype = forward ? .fromRight : .fromLeft
+            t.duration = 0.35
+            t.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            iv.layer.add(t, forKey: "pageTurn")
+            iv.image = newImage
+            coord.lastKey = pageKey
+            coord.lastImageName = imageName
+        } else if coord.lastImageName != imageName {
+            // Same page, different bake (e.g. a practice-mode toggle) → swap, no slide.
+            iv.image = newImage
+            coord.lastImageName = imageName
+        }
+    }
+}
+
 /// Flood-fills a single speech-bubble's white interior (from its centre) to
 /// produce a green "the bubble is open" highlight that matches the bubble's real
 /// shape — the bubbles are baked into the page raster, so we can't recolour them
@@ -292,6 +357,7 @@ struct PageView: View {
     @State private var selectedPanel: Panel?
     @State private var selectedHotspot: Hotspot?
     @State private var currentPageIndex: Int
+    @State private var navForward = true   // last page-turn direction (drives the slide)
     @State private var navigateToPage: Int?
     @State private var showingVocabulary = false
     @State private var showingSettings = false
@@ -709,10 +775,9 @@ struct PageView: View {
             return
         }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        withAnimation {
-            currentPageIndex += 1
-            textRevealed = false
-        }
+        navForward = true                       // PagedImageView slides the artwork
+        currentPageIndex += 1
+        textRevealed = false
     }
 
     // MARK: - Guided "On Screen" practice (speaking → listening)
@@ -802,10 +867,9 @@ struct PageView: View {
     private func goToPreviousPage() {
         guard currentPageIndex > 0 else { return }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        withAnimation {
-            currentPageIndex -= 1
-            textRevealed = false
-        }
+        navForward = false                      // PagedImageView slides the artwork
+        currentPageIndex -= 1
+        textRevealed = false
     }
 
     var body: some View {
@@ -823,8 +887,8 @@ struct PageView: View {
                     ? (currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage)
                     : currentPage.masterImage
 
-                ComicImage(imageName: imageName, comicId: comic.id)
-                    .aspectRatio(contentMode: .fit)
+                PagedImageView(imageName: imageName, comicId: comic.id,
+                               pageKey: currentPageIndex, forward: navForward)
                     .frame(width: geometry.size.width, height: geometry.size.height)
                     .overlay {
                         // Tap targets, mapped into the actual aspect-fit image rect
