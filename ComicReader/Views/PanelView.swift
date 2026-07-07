@@ -159,11 +159,17 @@ struct PanelView: View {
                 .gesture(
                     DragGesture(minimumDistance: 50)
                         .onEnded { value in
-                            let horizontalDistance = value.translation.width
-                            if horizontalDistance > 50 {
+                            let dx = value.translation.width
+                            let dy = value.translation.height
+                            if abs(dy) > abs(dx) {
+                                // Predominantly vertical: swipe down to close the
+                                // panel (works even in fullScreenCover, which has
+                                // no native swipe-to-dismiss).
+                                if dy > 90 { closePanel() }
+                            } else if dx > 50 {
                                 // Swiped right → previous panel/page
                                 goToPrevious()
-                            } else if horizontalDistance < -50 {
+                            } else if dx < -50 {
                                 // Swiped left → next panel/page
                                 goToNext()
                             }
