@@ -380,9 +380,21 @@ struct QuizView: View {
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    // For MATCHING answers only (not display): also fold acute accents so "que"
+    // counts for "qué" — typing accents is hard. Keep ñ (a distinct Spanish letter).
+    private func normalizeForComparison(_ text: String) -> String {
+        stripPunctuation(text)
+            .replacingOccurrences(of: "á", with: "a")
+            .replacingOccurrences(of: "é", with: "e")
+            .replacingOccurrences(of: "í", with: "i")
+            .replacingOccurrences(of: "ó", with: "o")
+            .replacingOccurrences(of: "ú", with: "u")
+            .replacingOccurrences(of: "ü", with: "u")
+    }
+
     private func checkAnswer() {
-        let normalizedAnswer = stripPunctuation(userAnswer)
-        let normalizedCorrect = stripPunctuation(currentWord?.word.text ?? "")
+        let normalizedAnswer = normalizeForComparison(userAnswer)
+        let normalizedCorrect = normalizeForComparison(currentWord?.word.text ?? "")
 
         isCorrect = normalizedAnswer == normalizedCorrect
         isGenderVariant = false
@@ -418,7 +430,7 @@ struct QuizView: View {
         var candidates: [String] = []
         if let baseForm = word.baseForm { candidates.append(baseForm) }
         if let forms = word.forms { candidates.append(contentsOf: forms.map { $0.text }) }
-        return candidates.contains { stripPunctuation($0) == answer }
+        return candidates.contains { normalizeForComparison($0) == answer }
     }
 
     /// Check if two words are gendered variants of each other (e.g. uno/una, bueno/buena)
