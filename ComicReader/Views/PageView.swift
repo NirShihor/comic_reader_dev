@@ -391,10 +391,23 @@ struct PageView: View {
     // then the bubble order within each panel). These are the tap targets for the
     // per-bubble reading sheet; sound effects and image bubbles are excluded.
     private var pageTextBubbles: [Bubble] {
-        currentPage.panels
+        var bubbles = currentPage.panels
             .sorted { $0.panelOrder < $1.panelOrder }
             .flatMap { $0.bubbles }
-            .filter { $0.isSoundEffect != true && $0.type != .image && !$0.sentences.isEmpty }
+            // Skip borderless/transparent narration — decorative markers like
+            // "continuará…" and cover titles — so they aren't tappable popup bubbles
+            // you have to step through before "End of Episode".
+            .filter { $0.isSoundEffect != true && $0.type != .image
+                      && $0.bgTransparent != true && !$0.sentences.isEmpty }
+        // On the final page, also drop any trailing narration (e.g. a "continuará…"
+        // marker that predates the bgTransparent flag) so the flow ends on the last
+        // line of dialogue — no clunky extra step that doesn't highlight and lags.
+        if currentPageIndex == sortedPages.count - 1 {
+            while let last = bubbles.last, last.type == .narration {
+                bubbles.removeLast()
+            }
+        }
+        return bubbles
     }
 
     // Non-practised baked bubbles (sound effects / image bubbles). In practice mode
