@@ -627,7 +627,9 @@ struct PageView: View {
     private func bubbleMasterClip(_ b: Bubble, in rect: CGRect, coverBorder: Bool = false) -> some View {
         let maskSource = currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage
         let nb = CGRect(x: b.positionX, y: b.positionY, width: b.width, height: b.height)
-        let mkey = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(maskSource)|imask"
+        // Include geometry so a moved/resized bubble invalidates the cached interior mask.
+        let geo = "\(Int(b.positionX*1e4))_\(Int(b.positionY*1e4))_\(Int(b.width*1e4))_\(Int(b.height*1e4))"
+        let mkey = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|imask"
         let mask = BubbleFill.interiorMask(maskSource: maskSource, comicId: comic.id, bubble: nb, cacheKey: mkey)
         let master = ComicImage(imageName: currentPage.masterImage, comicId: comic.id)
             .aspectRatio(contentMode: .fit)
@@ -719,7 +721,11 @@ struct PageView: View {
             ? (currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage)
             : currentPage.masterImage
         let nb = CGRect(x: b.positionX, y: b.positionY, width: b.width, height: b.height)
-        let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(maskSource)|\(inkSource)|\(comic.bubbleDotColor ?? "def")"
+        // Geometry is part of the key: the flood fill is driven by nb, so a moved or
+        // resized bubble MUST invalidate the cached overlay (otherwise it returns the
+        // stale fill from the old position — showing the wrong shape / a neighbour's text).
+        let geo = "\(Int(b.positionX*1e4))_\(Int(b.positionY*1e4))_\(Int(b.width*1e4))_\(Int(b.height*1e4))"
+        let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|\(inkSource)|\(comic.bubbleDotColor ?? "def")"
         // Transparent/borderless narration (e.g. "continuará") has no balloon interior
         // to fill — flood-filling it would tint the text and a stray patch of art green.
         // Skip the highlight entirely for these.
