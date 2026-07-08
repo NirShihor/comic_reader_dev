@@ -391,14 +391,18 @@ struct PageView: View {
     // then the bubble order within each panel). These are the tap targets for the
     // per-bubble reading sheet; sound effects and image bubbles are excluded.
     private var pageTextBubbles: [Bubble] {
+        // On story pages, skip borderless/transparent narration — decorative markers
+        // like "continuará…" — so they aren't tappable popup bubbles you have to step
+        // through before "End of Episode". EXCEPTION: the cover title is also
+        // transparent/borderless, but there we WANT it tappable so it opens the popup
+        // and plays its audio. It still gets no green fill — selectedBubbleDot skips
+        // bgTransparent bubbles — so the cover just pops up with audio, no highlight.
+        let onCover = currentPageIndex == 0
         var bubbles = currentPage.panels
             .sorted { $0.panelOrder < $1.panelOrder }
             .flatMap { $0.bubbles }
-            // Skip borderless/transparent narration — decorative markers like
-            // "continuará…" and cover titles — so they aren't tappable popup bubbles
-            // you have to step through before "End of Episode".
             .filter { $0.isSoundEffect != true && $0.type != .image
-                      && $0.bgTransparent != true && !$0.sentences.isEmpty }
+                      && (onCover || $0.bgTransparent != true) && !$0.sentences.isEmpty }
         // On the final page, also drop any trailing narration (e.g. a "continuará…"
         // marker that predates the bgTransparent flag) so the flow ends on the last
         // line of dialogue — no clunky extra step that doesn't highlight and lags.
