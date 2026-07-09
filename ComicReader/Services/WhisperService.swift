@@ -56,15 +56,40 @@ class WhisperService: ObservableObject {
         transcribedText = ""
         error = nil
 
-        // Setup audio session for recording. Skip when already configured —
-        // redundant setCategory calls reconfigure the running capture engine,
-        // which can silence the mic while the phone is locked.
+        // Activating the RECORD session while audio is playing fails with
+        // insufficientPriority (OSStatus 561017449) — the "complete blocker" audio
+        // error. Practice mode auto-plays, so it was easy to hit. Stop our own
+        // playback first so the session is free.
+        AudioManager.shared.stop()
+
+        // Setup audio session for recording. Skip a redundant setCategory (it
+        // reconfigures the running capture engine and can silence the mic while the
+        // phone is locked), but ALWAYS (re)activate — the category may already be
+        // right while the session sits inactive.
         do {
             let audioSession = AVAudioSession.sharedInstance()
             if audioSession.category != .playAndRecord {
                 try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP])
-                try audioSession.setActive(true)
             }
+            // Activation can still be refused for a moment if audio is winding down
+            // or another app briefly holds the session — retry a few times so the
+            // mic isn't blocked outright. The awaits yield the main actor, so there
+            // is no UI stall.
+            var activationError: Error?
+            for attempt in 0..<5 {
+                do {
+                    try audioSession.setActive(true)
+                    activationError = nil
+                    break
+                } catch {
+                    activationError = error
+                    if attempt < 4 {
+                        try? audioSession.setActive(false, options: .notifyOthersOnDeactivation)
+                        try? await Task.sleep(nanoseconds: 200_000_000) // 0.2s
+                    }
+                }
+            }
+            if let activationError { throw activationError }
         } catch {
             self.error = "Failed to setup audio session: \(error.localizedDescription)"
             return
