@@ -1536,7 +1536,6 @@ struct BubbleContentView: View {
                     playButton(sentence, audioUrl: audioUrl)
                 }
                 speedMenu   // sits right next to the listen/play control
-                if processingSentenceId == sentence.id { ProgressView() }
                 Spacer()
             }
         }
@@ -1585,11 +1584,18 @@ struct BubbleContentView: View {
                 startRecording(for: sentence)
             }
         } label: {
+            let isProcessingThis = processingSentenceId == sentence.id
             Label(isThisRecording ? "Stop" : "Speak", systemImage: isThisRecording ? "stop.fill" : "mic.fill")
                 .font(.subheadline).fontWeight(.medium).foregroundStyle(.white)
+                .lineLimit(1).fixedSize(horizontal: true, vertical: false)
+                // While the recording is being checked, hide the label (keeping its
+                // size so the button doesn't reflow) and show a spinner over it —
+                // this used to be an inline spinner that squashed the Speak button.
+                .opacity(isProcessingThis ? 0 : 1)
                 .padding(.horizontal, 16).padding(.vertical, 10)
                 .background(isThisRecording ? Color.red : Color.blue)
                 .clipShape(Capsule())
+                .overlay { if isProcessingThis { ProgressView().tint(.white) } }
         }
         .explains("Speak", "Record yourself saying the line, then get pronunciation feedback.", id: "bubble.speak")
         .disabled(processingSentenceId != nil || (recordingSentenceId != nil && !isThisRecording))
