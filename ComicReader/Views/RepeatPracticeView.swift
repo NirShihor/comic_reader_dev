@@ -686,14 +686,14 @@ struct RepeatPracticeView: View {
                 return
             }
 
-            // Compare with expected text (85%)
-            let result = whisperService.compareText(spoken: transcription, expected: sentence.text, passThreshold: 0.85)
+            // Compare with expected text (89%)
+            let result = whisperService.compareText(spoken: transcription, expected: sentence.text, passThreshold: 0.89)
             var isCorrect = result.isCorrect
 
             // Check alternative texts
             if !isCorrect {
                 for alt in sentence.alternativeTexts {
-                    let altResult = whisperService.compareText(spoken: transcription, expected: alt, passThreshold: 0.85)
+                    let altResult = whisperService.compareText(spoken: transcription, expected: alt, passThreshold: 0.89)
                     if altResult.isCorrect {
                         isCorrect = true
                         break
