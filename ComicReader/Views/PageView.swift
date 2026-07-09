@@ -1450,6 +1450,8 @@ struct BubbleContentView: View {
                         isHighlighted: highlight && playingSentenceId == sentence.id && highlightedWordIndex == originalIndex,
                         font: .title3,
                         weight: .medium,
+                        sentenceText: sentence.text,
+                        sentenceTranslation: sentence.translation,
                         onTap: { onboardDidTapWord = true }
                     )
                     .overlay {

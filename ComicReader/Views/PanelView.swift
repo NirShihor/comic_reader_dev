@@ -1174,11 +1174,16 @@ struct WordButton: View {
     var fontSize: CGFloat? = nil
     var font: Font? = nil      // takes precedence over fontSize when set
     var weight: Font.Weight = .regular
+    /// Optional sentence context, used by "Explain further" to explain the word
+    /// AS USED in its sentence (and its English meaning).
+    var sentenceText: String? = nil
+    var sentenceTranslation: String? = nil
     /// Optional: notified when the word is tapped (used to clear the first-run
     /// "tap a word" onboarding hint).
     var onTap: (() -> Void)? = nil
     @State private var showingDefinition = false
     @State private var showingForms = false
+    @State private var showingExplain = false
     @State private var isSaved = false
     @StateObject private var vocabularyManager = VocabularyManager()
     @StateObject private var audioManager = AudioManager.shared
@@ -1302,6 +1307,17 @@ struct WordButton: View {
                     }
                 }
 
+                // A fuller, AI-generated explanation of the word in its sentence.
+                Button {
+                    showingDefinition = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        showingExplain = true
+                    }
+                } label: {
+                    Label("Explain further", systemImage: "sparkles")
+                        .font(.subheadline)
+                        .foregroundStyle(.purple)
+                }
             }
             .padding()
             .presentationCompactAdaptation(.popover)
@@ -1309,6 +1325,103 @@ struct WordButton: View {
         .sheet(isPresented: $showingForms) {
             WordFormsView(word: word)
         }
+        .sheet(isPresented: $showingExplain) {
+            WordExplainView(word: word.displayText,
+                            sentence: sentenceText,
+                            translation: sentenceTranslation)
+        }
+    }
+}
+
+// MARK: - Explain Further (AI grammar explanation)
+
+/// A short, contextual grammar explanation of a word as used in its sentence.
+/// Fetched from the reader backend (`/api/reader/explain`, cheap model). Cached
+/// per word+sentence for the app session so re-opening is instant and free.
+struct WordExplainView: View {
+    let word: String
+    let sentence: String?
+    let translation: String?
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var text: String = ""
+    @State private var loading = true
+    @State private var errorMessage: String?
+
+    private static var cache: [String: String] = [:]
+    private var cacheKey: String { "\(word)|\(sentence ?? "")" }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                if loading {
+                    VStack(spacing: 12) {
+                        ProgressView()
+                        Text("Explaining “\(word)”…").font(.subheadline).foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity).padding(.top, 60)
+                } else if let errorMessage {
+                    VStack(spacing: 10) {
+                        Image(systemName: "wifi.exclamationmark").font(.largeTitle).foregroundStyle(.secondary)
+                        Text(errorMessage).font(.subheadline).foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                        Button("Try again") { Task { await load(force: true) } }
+                            .buttonStyle(.bordered)
+                    }
+                    .frame(maxWidth: .infinity).padding(.top, 60).padding(.horizontal)
+                } else {
+                    Text(text)
+                        .font(.body)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                }
+            }
+            .navigationTitle(word)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } } }
+        }
+        .task { await load(force: false) }
+    }
+
+    private func load(force: Bool) async {
+        if !force, let cached = Self.cache[cacheKey] {
+            text = cached; loading = false; errorMessage = nil; return
+        }
+        loading = true; errorMessage = nil
+        do {
+            let explanation = try await fetchExplanation()
+            Self.cache[cacheKey] = explanation
+            text = explanation
+        } catch {
+            errorMessage = "Couldn't load an explanation. Check your connection and try again."
+        }
+        loading = false
+    }
+
+    private func fetchExplanation() async throws -> String {
+        guard let url = URL(string: "\(Secrets.serverBaseURL)/api/reader/explain") else {
+            throw URLError(.badURL)
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 30
+        let body: [String: Any] = [
+            "word": word,
+            "sentence": sentence ?? "",
+            "translation": translation ?? ""
+        ]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+        let obj = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        guard let explanation = obj?["explanation"] as? String, !explanation.isEmpty else {
+            throw URLError(.cannotParseResponse)
+        }
+        return explanation
     }
 }
 
