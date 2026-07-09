@@ -631,16 +631,33 @@ class WhisperService: ObservableObject {
         let spokenClean = normalizeText(spoken)
         let expectedClean = normalizeText(expected)
 
-        let spokenWords = spokenClean.split(separator: " ").map { String($0) }
-        let expectedWords = expectedClean.split(separator: " ").map { String($0) }
+        var spokenWords = spokenClean.split(separator: " ").map { String($0) }
+        var expectedWords = expectedClean.split(separator: " ").map { String($0) }
 
         // Identify proper nouns from the original text (capitalized, not first word)
         let originalWords = expected
             .replacingOccurrences(of: "¿", with: "").replacingOccurrences(of: "¡", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .split(separator: " ").map { String($0) }
-        let properNounIndices: Set<Int> = Set(originalWords.indices.filter { idx in
-            guard idx > 0, let first = originalWords[idx].first else { return false }
+        var alignedOriginal = originalWords
+
+        // Non-word sounds (interjections/fillers like "mmmm", "ah", "eh") are
+        // OPTIONAL: drop them from BOTH the expected and the spoken text so
+        // "Mmmm... no lo sé" accepts both "no lo sé" and "Mmmm no lo sé". Only
+        // strip when real words remain (an interjection-only line stays a real
+        // target), and strip the expected in lockstep with originalWords so the
+        // proper-noun indices below stay aligned.
+        if expectedWords.count == originalWords.count {
+            let keep = expectedWords.indices.filter { !isNonWordSound(expectedWords[$0]) }
+            if !keep.isEmpty && keep.count < expectedWords.count {
+                expectedWords = keep.map { expectedWords[$0] }
+                alignedOriginal = keep.map { originalWords[$0] }
+                spokenWords = spokenWords.filter { !isNonWordSound($0) }
+            }
+        }
+
+        let properNounIndices: Set<Int> = Set(alignedOriginal.indices.filter { idx in
+            guard idx > 0, let first = alignedOriginal[idx].first else { return false }
             return first.isUppercase
         })
 
@@ -738,6 +755,32 @@ class WhisperService: ObservableObject {
             .replacingOccurrences(of: ",", with: "")
             .replacingOccurrences(of: ".", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// True when a normalized token is a non-word sound — an interjection, hum or
+    /// filler ("mmmm", "hmm", "ah", "eh", "oh", "uf", "ay", laughter…) rather than
+    /// a real Spanish word. Deliberately conservative: single-letter tokens are
+    /// never treated as sounds (a, o, y, e, u are real words), and real short
+    /// words like "he"/"ha" are excluded.
+    private func isNonWordSound(_ w: String) -> Bool {
+        guard w.count >= 2 else { return false }
+        let sounds: Set<String> = [
+            "mm", "mmm", "mmmm", "mmmmm", "hm", "hmm", "hmmm", "um", "umm", "ummm",
+            "em", "emm", "ah", "aah", "ahh", "ahhh", "eh", "ehh", "ehhh",
+            "oh", "ohh", "ohhh", "uh", "uhh", "uf", "uff", "ay", "ayy", "uy", "uyy",
+            "oy", "bah", "pff", "pfff", "ugh", "argh", "brr", "grr", "grrr",
+            "psst", "pst", "sh", "shh", "shhh",
+            "jaja", "jajaja", "jajajaja", "jeje", "jejeje", "jiji", "jijiji"
+        ]
+        if sounds.contains(w) { return true }
+        // Arbitrary-length repeats of the same hum/interjection/laughter.
+        let patterns = ["^m+$", "^h+m+$", "^u+m+$", "^e+m+$", "^a+h+$", "^e+h+$",
+                        "^o+h+$", "^u+f+$", "^a+y+$", "^u+y+$", "^b+r+$", "^g+r+$",
+                        "^(ja|je|ji|jo){2,}$"]
+        for p in patterns where w.range(of: p, options: .regularExpression) != nil {
+            return true
+        }
+        return false
     }
 }
 
