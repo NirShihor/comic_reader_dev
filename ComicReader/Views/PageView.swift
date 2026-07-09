@@ -1347,24 +1347,31 @@ struct BubbleContentView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ForEach(bubble.sentences) { sentence in
-                VStack(alignment: .leading, spacing: 8) {
-                    mainText(sentence)
-                    if !isPracticeMode {
-                        translationRow(sentence)
-                        grammarRow(sentence)
+        Group {
+            if let fb = practiceFeedback {
+                // Test mode: the result REPLACES the popup content (stays compact)
+                // rather than being appended below it, which grew the card tall and
+                // made it scroll.
+                feedbackCard(fb)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(bubble.sentences) { sentence in
+                        VStack(alignment: .leading, spacing: 8) {
+                            mainText(sentence)
+                            if !isPracticeMode {
+                                translationRow(sentence)
+                                grammarRow(sentence)
+                            }
+                            audioRow(sentence)
+                            revealedContent(sentence)
+                            if sentence.id != bubble.sentences.last?.id { Divider() }
+                        }
                     }
-                    audioRow(sentence)
-                    revealedContent(sentence)
-                    if let fb = practiceFeedback, fb.sentenceId == sentence.id {
-                        feedbackCard(fb)
-                    }
-                    if sentence.id != bubble.sentences.last?.id { Divider() }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .onChange(of: audioManager.currentTime) { _, _ in
             if audioManager.isSentencePlayback, let s = playingSentence {
                 highlightedWordIndex = audioManager.currentWordIndex(for: s.words)
