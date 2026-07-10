@@ -139,12 +139,12 @@ struct ComicDetailView: View {
             .helpTooltipLayer()
             .environmentObject(help)
             .anchoredCallout(
-                targetID: "comic.cockpit",
-                text: "This is the comic cockpit. Decide if you want to simply read and listen, or practise with any of the different practice modes.",
+                targetID: cockpitTarget,
+                text: cockpitText,
                 icon: nil,
-                showArrow: false,
-                placeBelow: true,
-                isPresented: cockpitStep == 1
+                showArrow: cockpitStep >= 2,     // step 1 floats under the cover, no arrow
+                placeBelow: cockpitStep == 1,
+                isPresented: cockpitStep != 0
             ) { advanceCockpitTips() }
             .onChange(of: help.isActive) { _, active in
                 if active, cockpitStep != 0 { withAnimation { cockpitStep = 0 } }
@@ -166,6 +166,22 @@ struct ComicDetailView: View {
     }
 
     // MARK: - Cockpit onboarding sequence
+    private var cockpitTarget: String {
+        switch cockpitStep {
+        case 1: return "comic.cockpit"
+        case 2: return "comic.speaking"
+        default: return ""
+        }
+    }
+
+    private var cockpitText: String {
+        switch cockpitStep {
+        case 1: return "This is the comic cockpit. Decide if you want to simply read and listen, or practise with any of the different practice modes."
+        case 2: return "Prefer not to have to speak out loud? Change to silent exercises."
+        default: return ""
+        }
+    }
+
     private func startCockpitTips() {
         // Skip when auto-resuming straight into the reader — the screen is leaving.
         guard !autoResume, cockpitStep == 0 else { return }
@@ -179,8 +195,14 @@ struct ComicDetailView: View {
     private func advanceCockpitTips() {
         // Step through the sequence; end (and mark seen) after the last callout.
         // Additional steps get chained here as they're added.
-        withAnimation(.easeInOut(duration: 0.2)) { cockpitStep = 0 }
-        seenCockpitTips = true
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if cockpitStep < 2 {
+                cockpitStep += 1
+            } else {
+                cockpitStep = 0
+                seenCockpitTips = true
+            }
+        }
     }
 
     // Extracted so the `body` modifier chain stays short enough for the Swift
@@ -205,6 +227,7 @@ struct ComicDetailView: View {
 
                     practiceSection
                         .padding(.horizontal, 16)
+                        .id("practice")
 
                     pagesGrid
                 }
@@ -212,6 +235,10 @@ struct ComicDetailView: View {
             }
             .onChange(of: scrollTopToken) { _, _ in
                 withAnimation { proxy.scrollTo("top", anchor: .top) }
+            }
+            .onChange(of: cockpitStep) { _, step in
+                // Reveal the Speaking-exercises toggle when its callout opens.
+                if step == 2 { withAnimation { proxy.scrollTo("practice", anchor: .top) } }
             }
         }
     }
@@ -649,6 +676,7 @@ struct ComicDetailView: View {
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.comigoInk, lineWidth: 2))
         .shadow(color: .black.opacity(0.06), radius: 3, y: 1)
+        .calloutAnchor("comic.speaking")
     }
 
     private func practiceModeCard(icon: String, title: String, tag: String,
