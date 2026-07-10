@@ -320,11 +320,9 @@ enum HelpDebug {
     /// release/TestFlight always behaves once-only, so nothing leaks to users.
     /// To test real once-only behaviour in a debug build, flip this to false.
     static var forceShowTooltips: Bool {
-        #if DEBUG
-        return true
-        #else
+        // Set to true (DEBUG only) to review every tooltip without reinstalling.
+        // Left false so tooltips behave once-only, matching release/TestFlight.
         return false
-        #endif
     }
 }
 
