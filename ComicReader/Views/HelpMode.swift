@@ -361,6 +361,114 @@ private struct HelpFirstVisit: ViewModifier {
     }
 }
 
+// MARK: - Anchored callout (amber bubble that points at a specific element)
+//
+// Unlike HelpIntroCallout (manually placed at a screen corner), this one reads
+// the exact on-screen frame of a tagged element via anchor preferences and draws
+// an amber bubble with an arrow pointing right at it — so it tracks the element
+// even inside a scroll view. Tag the target with `.calloutAnchor("id")` and draw
+// the bubble at the screen root with `.anchoredCallout(...)`.
+
+private struct CalloutAnchorKey: PreferenceKey {
+    static var defaultValue: [String: Anchor<CGRect>] = [:]
+    static func reduce(value: inout [String: Anchor<CGRect>],
+                       nextValue: () -> [String: Anchor<CGRect>]) {
+        value.merge(nextValue()) { current, _ in current }
+    }
+}
+
+extension View {
+    /// Mark this view as a target that an `.anchoredCallout` can point at.
+    func calloutAnchor(_ id: String) -> some View {
+        anchorPreference(key: CalloutAnchorKey.self, value: .bounds) { [id: $0] }
+    }
+
+    /// Draw an amber callout bubble pointing at the `targetID` element while
+    /// `isPresented` is true. Apply at the screen root, above the content that
+    /// carries the matching `.calloutAnchor(targetID)`. Tap the bubble to dismiss.
+    func anchoredCallout(targetID: String,
+                         text: String,
+                         icon: String? = "arrow.down.circle.fill",
+                         isPresented: Bool,
+                         onDismiss: @escaping () -> Void) -> some View {
+        overlayPreferenceValue(CalloutAnchorKey.self) { anchors in
+            GeometryReader { proxy in
+                if isPresented, let anchor = anchors[targetID] {
+                    AnchoredCalloutBubble(rect: proxy[anchor], container: proxy.size,
+                                          text: text, icon: icon, onDismiss: onDismiss)
+                        .transition(.opacity)
+                }
+            }
+            .ignoresSafeArea()
+        }
+    }
+}
+
+private struct AnchoredCalloutBubble: View {
+    let rect: CGRect
+    let container: CGSize
+    let text: String
+    var icon: String?
+    let onDismiss: () -> Void
+
+    @State private var size: CGSize = .zero
+
+    private let accent = Color(red: 240/255, green: 187/255, blue: 41/255)   // #F0BB29
+    private let arrowH: CGFloat = 10
+    private let arrowW: CGFloat = 20
+    private let gap: CGFloat = 4
+    private let margin: CGFloat = 12
+
+    var body: some View {
+        let placeAbove = rect.midY > container.height / 2
+        let halfW = size.width / 2
+        let centerX = min(max(rect.midX, margin + halfW), container.width - margin - halfW)
+        let centerY = placeAbove
+            ? rect.minY - gap - arrowH - size.height / 2
+            : rect.maxY + gap + arrowH + size.height / 2
+        let arrowX = min(max(rect.midX, centerX - halfW + 14), centerX + halfW - 14)
+
+        ZStack(alignment: .topLeading) {
+            Triangle()
+                .fill(accent)
+                .frame(width: arrowW, height: arrowH)
+                .rotationEffect(.degrees(placeAbove ? 180 : 0))
+                .position(
+                    x: arrowX,
+                    y: placeAbove
+                        ? centerY + size.height / 2 + arrowH / 2 - 0.5
+                        : centerY - size.height / 2 - arrowH / 2 + 0.5
+                )
+
+            HStack(alignment: .top, spacing: 8) {
+                if let icon {
+                    Image(systemName: icon).font(.subheadline)
+                }
+                Text(text)
+                    .font(.subheadline).fontWeight(.medium)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .foregroundStyle(Color(red: 0.24, green: 0.15, blue: 0.02))
+            .padding(.horizontal, 14).padding(.vertical, 11)
+            .frame(maxWidth: 250, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(accent)
+                    .shadow(color: .black.opacity(0.22), radius: 10, y: 4)
+            )
+            .background(
+                GeometryReader { g in Color.clear.preference(key: SizeKey.self, value: g.size) }
+            )
+            .onPreferenceChange(SizeKey.self) { size = $0 }
+            .contentShape(Rectangle())
+            .onTapGesture { onDismiss() }
+            .position(x: centerX, y: centerY)
+        }
+        .frame(width: container.width, height: container.height)
+    }
+}
+
 // MARK: - Help intro callout
 
 /// A one-time callout that points up at the "?" help button (top-right), telling

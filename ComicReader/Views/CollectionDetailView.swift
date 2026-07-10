@@ -11,6 +11,9 @@ struct CollectionDetailView: View {
     @StateObject private var storeService = ComicStoreService.shared
     @StateObject private var help = HelpModeController()
 
+    @AppStorage("help.seen.collection-download") private var seenDownloadTip = false
+    @State private var showDownloadTip = false
+
     // All episodes from the catalog (when loaded), in episode order.
     private var catalogEpisodes: [StoreComic] {
         storeService.catalog
@@ -61,6 +64,20 @@ struct CollectionDetailView: View {
         localStorage.downloadedComics.first { $0.id == id }
     }
 
+    // First episode that still needs downloading — the onboarding callout points here.
+    private var firstDownloadableID: String? {
+        catalogEpisodes.first { downloadedComic($0.id) == nil }?.id
+    }
+
+    private func maybeShowDownloadTip() {
+        guard firstDownloadableID != nil, !showDownloadTip else { return }
+        if !HelpDebug.forceShowTooltips { guard !seenDownloadTip else { return } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            guard firstDownloadableID != nil else { return }
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showDownloadTip = true }
+        }
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -79,6 +96,19 @@ struct CollectionDetailView: View {
         }
         .helpTooltipLayer()
         .environmentObject(help)
+        .anchoredCallout(
+            targetID: "collection.download",
+            text: "You need to download comics to be able to read them.",
+            isPresented: showDownloadTip
+        ) {
+            withAnimation(.easeInOut(duration: 0.2)) { showDownloadTip = false }
+            seenDownloadTip = true
+        }
+        .onAppear { maybeShowDownloadTip() }
+        .onChange(of: firstDownloadableID) { _, _ in maybeShowDownloadTip() }
+        .onChange(of: help.isActive) { _, active in
+            if active, showDownloadTip { withAnimation { showDownloadTip = false } }
+        }
         .task {
             // Load the catalog here too, not just from the Library. Opening a
             // collection before the Library's fetch has landed (or if it failed)
@@ -179,7 +209,8 @@ struct CollectionDetailView: View {
                             comic: ep,
                             onOpenComic: nil,
                             compact: true,
-                            episodeLabel: "Ep. \(ep.episodeNumber ?? index + 1)"
+                            episodeLabel: "Ep. \(ep.episodeNumber ?? index + 1)",
+                            downloadAnchorID: ep.id == firstDownloadableID ? "collection.download" : nil
                         )
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
