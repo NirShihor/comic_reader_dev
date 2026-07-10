@@ -1017,9 +1017,9 @@ struct PageView: View {
                 .environmentObject(settingsManager)
                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
                 .zIndex(2)
-                // First time a bubble popup opens, auto-show its help (Speak /
-                // Listen / Speed / tap-a-word). The "?" still toggles it after.
-                .helpFirstVisit("reader-popup", help)
+                // No first-run auto-help here — the bordered highlights + "Swipe"/
+                // "Tap" chips are shown only on demand via the "?" button now.
+                // Onboarding is handled by the amber callouts instead.
             }
 
             endOfEpisodeOverlay
