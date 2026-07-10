@@ -370,7 +370,7 @@ private struct HelpFirstVisit: ViewModifier {
 struct HelpIntroCallout: View {
     let text: String
     var icon: String? = "questionmark.circle.fill"
-    var accent: Color = Color(red: 232/255, green: 169/255, blue: 60/255)   // #E8A93C amber
+    var accent: Color = Color(red: 240/255, green: 187/255, blue: 41/255)   // #F0BB29 amber
     var arrowEdge: HorizontalAlignment = .trailing   // which side the up-arrow sits on
     var arrowInset: CGFloat = 16                     // how far in from that edge
     var maxWidth: CGFloat = 250
