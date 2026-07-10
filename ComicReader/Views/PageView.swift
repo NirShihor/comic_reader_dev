@@ -369,6 +369,11 @@ struct PageView: View {
     @State private var pageImageAspect: CGFloat?   // width/height of the page artwork
     @StateObject private var help = HelpModeController()
 
+    // First-visit callout on the cover: "Click on the text." — points at the
+    // tappable cover title bubble. Once-only (or always under forceShowTooltips).
+    @AppStorage("help.seen.cover-text") private var seenCoverTip = false
+    @State private var showCoverTip = false
+
     // Pages sorted by pageNumber for consistent navigation
     private var sortedPages: [Page] {
         comic.pages.sorted { $0.pageNumber < $1.pageNumber }
@@ -412,6 +417,21 @@ struct PageView: View {
 
     private var isPracticeMode: Bool {
         settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode
+    }
+
+    // MARK: - Cover "Click on the text." callout
+    private func maybeShowCoverTip() {
+        guard currentPageIndex == 0, !isPracticeMode, selectedBubbleIndex == nil else { return }
+        if !HelpDebug.forceShowTooltips { guard !seenCoverTip else { return } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            guard currentPageIndex == 0, selectedBubbleIndex == nil else { return }
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showCoverTip = true }
+        }
+    }
+
+    private func dismissCoverTip() {
+        seenCoverTip = true
+        if showCoverTip { withAnimation(.easeInOut(duration: 0.2)) { showCoverTip = false } }
     }
 
     /// Where the open bubble's card sits (mirrors FloatingBubbleCard.anchorTop), so
@@ -889,6 +909,8 @@ struct PageView: View {
                                             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                                             selectedBubbleIndex = i
                                         }
+                                        // Anchor the "Click on the text." cover callout to the title bubble.
+                                        .calloutAnchorIf(currentPageIndex == 0 && i == 0, "cover.text")
                                 }
 
                                 // Slow-flashing dot in the open bubble, linking it to
@@ -1078,12 +1100,22 @@ struct PageView: View {
         }
         .helpTooltipLayer(bannerEdge: helpBannerEdge)
         .environmentObject(help)
+        .anchoredCallout(
+            targetID: "cover.text",
+            text: "Click on the text.",
+            icon: "hand.tap.fill",
+            isPresented: showCoverTip && selectedBubbleIndex == nil && selectedPanel == nil
+        ) { dismissCoverTip() }
+        .onChange(of: help.isActive) { _, active in
+            if active, showCoverTip { withAnimation { showCoverTip = false } }
+        }
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarBackground(.visible, for: .tabBar)
         .toolbarColorScheme(.light, for: .tabBar)
         .onAppear {
             AudioManager.shared.activeComicId = comic.id   // fast, direct audio lookup
             loadPageAspect()
+            maybeShowCoverTip()
             // Guided run starts in speaking practice (safety net if not already set).
             if guidedOnScreenPractice && !settingsManager.speakingPracticeMode && !settingsManager.listeningPracticeMode {
                 settingsManager.speakingPracticeMode = true
@@ -1114,6 +1146,9 @@ struct PageView: View {
             // Close the bubble card and refresh the artwork aspect for the new page
             selectedBubbleIndex = nil
             loadPageAspect()
+            // Leaving the cover hides the cover callout; returning to it re-offers it.
+            if currentPageIndex == 0 { maybeShowCoverTip() }
+            else if showCoverTip { withAnimation { showCoverTip = false } }
             // Save progress when page changes (skipped for transient context views).
             if savesProgress {
                 progressManager.saveProgress(
@@ -1130,6 +1165,8 @@ struct PageView: View {
             // reveal only ever applies to the bubble you're currently on. Single
             // source of truth so a stale reveal can't linger on the bubble you left.
             revealedBubbleId = nil
+            // Opening any bubble means they got the hint — retire the cover callout.
+            if newValue != nil { dismissCoverTip() }
             // Remember the open bubble during on-screen practice so "Continue
             // practicing" reopens the same page at the same bubble.
             if guidedOnScreenPractice, let idx = newValue, pageTextBubbles.indices.contains(idx) {

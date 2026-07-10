@@ -383,6 +383,12 @@ extension View {
         anchorPreference(key: CalloutAnchorKey.self, value: .bounds) { [id: $0] }
     }
 
+    /// Conditionally tag — e.g. only the cover's title bubble inside a ForEach.
+    @ViewBuilder
+    func calloutAnchorIf(_ condition: Bool, _ id: String) -> some View {
+        if condition { calloutAnchor(id) } else { self }
+    }
+
     /// Draw an amber callout bubble pointing at the `targetID` element while
     /// `isPresented` is true. Apply at the screen root, above the content that
     /// carries the matching `.calloutAnchor(targetID)`. Tap the bubble to dismiss.
