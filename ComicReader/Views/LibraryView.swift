@@ -58,8 +58,10 @@ struct LibraryView: View {
         }
         .onAppear {
             // First visit to the Library → point out the "?" help button, once.
-            guard !seenLibraryIntro else { return }
-            seenLibraryIntro = true
+            if !HelpDebug.forceShowTooltips {
+                guard !seenLibraryIntro else { return }
+                seenLibraryIntro = true
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryIntro = true }
             }

@@ -314,6 +314,20 @@ struct HelpModeButton: View {
 
 // MARK: - First-visit auto-trigger
 
+enum HelpDebug {
+    /// While true, first-run tooltips show EVERY time (ignoring their "seen"
+    /// memory) so they can be reviewed without reinstalling. DEBUG builds only —
+    /// release/TestFlight always behaves once-only, so nothing leaks to users.
+    /// To test real once-only behaviour in a debug build, flip this to false.
+    static var forceShowTooltips: Bool {
+        #if DEBUG
+        return true
+        #else
+        return false
+        #endif
+    }
+}
+
 extension View {
     /// Auto-open help mode the FIRST time this screen/element is seen (per `key`,
     /// remembered forever), then never again automatically — the "?" button still
@@ -335,8 +349,10 @@ private struct HelpFirstVisit: ViewModifier {
 
     func body(content: Content) -> some View {
         content.onAppear {
-            guard !seen else { return }
-            seen = true
+            if !HelpDebug.forceShowTooltips {
+                guard !seen else { return }
+                seen = true
+            }
             // Let the screen settle before the highlights appear.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 withAnimation(.easeInOut(duration: 0.2)) { help.isActive = true }
