@@ -368,19 +368,6 @@ struct PageView: View {
     @State private var revealedBubbleId: String?   // practice: bubble whose text is revealed onto the page
     @State private var pageImageAspect: CGFloat?   // width/height of the page artwork
     @StateObject private var help = HelpModeController()
-    // First-run onboarding hints. Each pulses until the reader engages with that
-    // feature, then stops for good: swipe a page, tap a bubble, tap a word.
-    @AppStorage("onboardDidSwipe") private var onboardDidSwipe = false
-    @AppStorage("onboardDidTapBubble") private var onboardDidTapBubble = false
-
-    // Indigo brand accent for the onboarding frames.
-    private let onboardAccent = Color(red: 91/255, green: 91/255, blue: 214/255)
-
-    // Hints only apply to the real reading flow (not the guided practice run,
-    // practice modes, or transient context views like Vocabulary).
-    private var onboardingActive: Bool {
-        savesProgress && !guidedOnScreenPractice && !isPracticeMode
-    }
 
     // Pages sorted by pageNumber for consistent navigation
     private var sortedPages: [Page] {
@@ -686,23 +673,6 @@ struct PageView: View {
         }
     }
 
-    // A pulsing indigo frame around a text bubble, nudging the reader to tap it.
-    // Decorative only — the real tap target sits beneath it.
-    private func onboardingBubbleFrame(_ b: Bubble, in rect: CGRect) -> some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
-            let seconds = timeline.date.timeIntervalSinceReferenceDate
-            let pulse = (sin(seconds * 2.5) + 1.0) / 2.0
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(onboardAccent, lineWidth: 2 + pulse * 2)
-                .shadow(color: onboardAccent.opacity(pulse * 0.7), radius: 4 + pulse * 6)
-                .opacity(0.35 + pulse * 0.65)
-        }
-        .frame(width: b.width * rect.width + 16, height: b.height * rect.height + 16)
-        .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
-                  y: rect.minY + (b.positionY + b.height / 2) * rect.height)
-        .allowsHitTesting(false)
-    }
-
     // Highlights the open bubble, linking it to the popup. Fills the bubble's
     // interior with a solid, slightly-brighter green (flood-filled to match its
     // real shape). Shows nothing when it can't fill cleanly (e.g. a borderless
@@ -753,27 +723,6 @@ struct PageView: View {
         }
         // No fill possible (e.g. borderless narration like a title or
         // "continuará") → show nothing at all.
-    }
-
-    // Cover hint: a left-nudging arrow on the right edge (clear of the title)
-    // telling the reader to swipe into the comic.
-    private var onboardingSwipeHint: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
-            let seconds = timeline.date.timeIntervalSinceReferenceDate
-            let pulse = (sin(seconds * 2.2) + 1.0) / 2.0
-            HStack {
-                Spacer()
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 34, weight: .heavy))
-                    .foregroundStyle(.white)
-                    .padding(16)
-                    .background(.black.opacity(0.45), in: Circle())
-                    .offset(x: -pulse * 14)
-                    .opacity(0.55 + pulse * 0.45)
-                    .padding(.trailing, 18)
-            }
-        }
-        .allowsHitTesting(false)
     }
 
     private func loadPageAspect() {
@@ -938,9 +887,6 @@ struct PageView: View {
                                                   y: rect.minY + (b.positionY + b.height / 2) * rect.height)
                                         .onTapGesture {
                                             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                            // Tapping a bubble on the cover doesn't count —
-                                            // keep highlighting bubbles on the real pages.
-                                            if currentPageIndex > 0 { onboardDidTapBubble = true }
                                             selectedBubbleIndex = i
                                         }
                                 }
@@ -963,13 +909,6 @@ struct PageView: View {
                                     hotspotIndicator(h, in: rect)
                                 }
 
-                                // First-run: pulse a frame around every text bubble
-                                // so the reader knows the bubbles are tappable.
-                                if onboardingActive && !onboardDidTapBubble && selectedBubbleIndex == nil {
-                                    ForEach(pageTextBubbles) { b in
-                                        onboardingBubbleFrame(b, in: rect)
-                                    }
-                                }
                             }
                         }
                     }
@@ -979,21 +918,13 @@ struct PageView: View {
                             let horizontalDistance = value.translation.width
                             if horizontalDistance > 50 {
                                 // Swiped right → previous page
-                                onboardDidSwipe = true
                                 goToPreviousPage()
                             } else if horizontalDistance < -50 {
                                 // Swiped left → next page
-                                onboardDidSwipe = true
                                 goToNextPage()
                             }
                         }
                 )
-            }
-
-            // First-run: on the cover, nudge the reader to swipe into the comic.
-            if onboardingActive && !onboardDidSwipe && currentPageIndex == 0
-                && selectedPanel == nil && selectedBubbleIndex == nil {
-                onboardingSwipeHint
             }
 
             // Help hints over the page (help mode only, while nothing is open)
@@ -1322,8 +1253,6 @@ struct BubbleContentView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var audioManager = AudioManager.shared
     @StateObject private var whisperService = WhisperService.shared
-    // First-run: frame each word until the reader taps one.
-    @AppStorage("onboardDidTapWord") private var onboardDidTapWord = false
 
     @State private var translationRevealed: Set<String> = []
     @State private var grammarRevealed: Set<String> = []
@@ -1451,22 +1380,8 @@ struct BubbleContentView: View {
                         font: .title3,
                         weight: .medium,
                         sentenceText: sentence.text,
-                        sentenceTranslation: sentence.translation,
-                        onTap: { onboardDidTapWord = true }
+                        sentenceTranslation: sentence.translation
                     )
-                    .overlay {
-                        if !onboardDidTapWord {
-                            TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
-                                let seconds = timeline.date.timeIntervalSinceReferenceDate
-                                let pulse = (sin(seconds * 2.6) + 1.0) / 2.0
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color(red: 91/255, green: 91/255, blue: 214/255),
-                                            lineWidth: 1.5 + pulse * 1.5)
-                                    .opacity(0.4 + pulse * 0.6)
-                            }
-                            .allowsHitTesting(false)
-                        }
-                    }
                     .explains("Tap a word",
                               "Tap any word to see its meaning and base form, hear it spoken, and save it to your vocabulary.",
                               id: "bubbleword.\(word.id)")
