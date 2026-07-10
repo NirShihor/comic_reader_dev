@@ -150,6 +150,10 @@ struct ComicDetailView: View {
             .onChange(of: help.isActive) { _, active in
                 if active, cockpitStep != 0 { withAnimation { cockpitStep = 0 } }
             }
+            .onChange(of: settingsManager.speakingEnabled) { _, _ in
+                // Its callout's action was taken — retire it.
+                if cockpitStep == 2 { advanceCockpitTips() }
+            }
             .onAppear {
                 startCockpitTips()
                 // Opened via the Library "Continue" card: pick up exactly where the

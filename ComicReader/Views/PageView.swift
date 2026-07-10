@@ -1292,6 +1292,7 @@ struct BubbleContentView: View {
     let comic: Comic
     let bubble: Bubble
     @Binding var revealedBubbleId: String?   // shared with the page so revealed text also shows in the bubble
+    var onWordTap: (() -> Void)? = nil       // notified when any word is tapped (clears the "Click on a word." tip)
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var audioManager = AudioManager.shared
     @StateObject private var whisperService = WhisperService.shared
@@ -1422,7 +1423,8 @@ struct BubbleContentView: View {
                         font: .title3,
                         weight: .medium,
                         sentenceText: sentence.text,
-                        sentenceTranslation: sentence.translation
+                        sentenceTranslation: sentence.translation,
+                        onTap: onWordTap
                     )
                     .explains("Tap a word",
                               "Tap any word to see its meaning and base form, hear it spoken, and save it to your vocabulary.",
@@ -1883,7 +1885,8 @@ struct FloatingBubbleCard: View {
         VStack(spacing: 0) {
             ScrollView {
                 if bubbles.indices.contains(index) {
-                    BubbleContentView(comic: comic, bubble: bubbles[index], revealedBubbleId: $revealedBubbleId)
+                    BubbleContentView(comic: comic, bubble: bubbles[index], revealedBubbleId: $revealedBubbleId,
+                                      onWordTap: { dismissWordTip() })
                         .id(bubbles[index].id)   // reset per-bubble state when stepping
                         // Extra horizontal inset so the side step-arrows (~48pt in from
                         // each edge, at mid-height) never sit on top of the text/controls,
