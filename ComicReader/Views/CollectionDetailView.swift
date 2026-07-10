@@ -117,6 +117,8 @@ struct CollectionDetailView: View {
             if storeService.catalog.isEmpty && !storeService.isLoadingCatalog {
                 await storeService.fetchCatalog()
             }
+            // Catalog may have only just landed — re-check now that episodes exist.
+            maybeShowDownloadTip()
         }
         .refreshable {
             await storeService.fetchCatalog()
