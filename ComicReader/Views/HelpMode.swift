@@ -353,7 +353,7 @@ private struct HelpFirstVisit: ViewModifier {
 /// `.overlay(alignment: .topTrailing)`.
 struct HelpIntroCallout: View {
     let text: String
-    var accent: Color = Color(red: 91/255, green: 91/255, blue: 214/255)
+    var accent: Color = Color(red: 232/255, green: 169/255, blue: 60/255)   // #E8A93C amber
     let onDismiss: () -> Void
 
     var body: some View {
@@ -370,7 +370,7 @@ struct HelpIntroCallout: View {
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(Color(red: 0.24, green: 0.15, blue: 0.02))   // dark, readable on the amber
             .padding(.horizontal, 14).padding(.vertical, 11)
             .background(accent)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
