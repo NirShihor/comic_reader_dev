@@ -373,6 +373,9 @@ struct PageView: View {
     // tappable cover title bubble. Once-only (or always under forceShowTooltips).
     @AppStorage("help.seen.cover-text") private var seenCoverTip = false
     @State private var showCoverTip = false
+    // Swipe-to-turn hint, chained after the word-popup guidance is closed.
+    @AppStorage("help.seen.page-swipe") private var seenSwipeTip = false
+    @State private var showSwipeTip = false
 
     // Pages sorted by pageNumber for consistent navigation
     private var sortedPages: [Page] {
@@ -432,6 +435,19 @@ struct PageView: View {
     private func dismissCoverTip() {
         seenCoverTip = true
         if showCoverTip { withAnimation(.easeInOut(duration: 0.2)) { showCoverTip = false } }
+    }
+
+    // MARK: - "Swipe to the next page" hint (chained after the word-popup guidance)
+    private func maybeShowSwipeTip() {
+        if !HelpDebug.forceShowTooltips { guard !seenSwipeTip else { return } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showSwipeTip = true }
+        }
+    }
+
+    private func dismissSwipeTip() {
+        seenSwipeTip = true
+        if showSwipeTip { withAnimation(.easeInOut(duration: 0.2)) { showSwipeTip = false } }
     }
 
     /// Where the open bubble's card sits (mirrors FloatingBubbleCard.anchorTop), so
@@ -1014,7 +1030,8 @@ struct PageView: View {
                     // page change closes the card (onChange of currentPageIndex clears
                     // the selection) until the reader taps a bubble on the new page.
                     onRequestNextPage: { goToNextPage() },
-                    onRequestPrevPage: { goToPreviousPage() }
+                    onRequestPrevPage: { goToPreviousPage() },
+                    onWordTipDismissed: { maybeShowSwipeTip() }
                 )
                 .environmentObject(settingsManager)
                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
@@ -1108,8 +1125,25 @@ struct PageView: View {
             icon: "hand.tap.fill",
             isPresented: showCoverTip && selectedBubbleIndex == nil && selectedPanel == nil
         ) { dismissCoverTip() }
+        // Swipe-to-turn hint, chained after the word-popup guidance closes. Floats
+        // opposite the open card (or at the top once the card is closed).
+        .overlay(alignment: openCardAnchorTop ? .bottom : .top) {
+            if showSwipeTip {
+                HelpIntroCallout(
+                    text: "To move to the next page swipe to the left.",
+                    icon: "hand.draw.fill",
+                    showArrow: false
+                ) { dismissSwipeTip() }
+                .padding(openCardAnchorTop ? .bottom : .top, openCardAnchorTop ? 60 : 8)
+                .transition(.opacity.combined(with: .move(edge: openCardAnchorTop ? .bottom : .top)))
+                .zIndex(60)
+            }
+        }
         .onChange(of: help.isActive) { _, active in
-            if active, showCoverTip { withAnimation { showCoverTip = false } }
+            if active {
+                if showCoverTip { withAnimation { showCoverTip = false } }
+                if showSwipeTip { withAnimation { showSwipeTip = false } }
+            }
         }
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarBackground(.visible, for: .tabBar)
@@ -1151,6 +1185,8 @@ struct PageView: View {
             // Leaving the cover hides the cover callout; returning to it re-offers it.
             if currentPageIndex == 0 { maybeShowCoverTip() }
             else if showCoverTip { withAnimation { showCoverTip = false } }
+            // They turned the page — the swipe hint's action is done.
+            if showSwipeTip { dismissSwipeTip() }
             // Save progress when page changes (skipped for transient context views).
             if savesProgress {
                 progressManager.saveProgress(
@@ -1779,6 +1815,9 @@ struct FloatingBubbleCard: View {
     var onClose: () -> Void
     var onRequestNextPage: () -> Void = {}
     var onRequestPrevPage: () -> Void = {}
+    /// Notified when the word-popup guidance is dismissed — the page uses it to
+    /// chain the next onboarding hint (swipe to turn the page).
+    var onWordTipDismissed: () -> Void = {}
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var help: HelpModeController
 
@@ -1868,7 +1907,10 @@ struct FloatingBubbleCard: View {
 
     private func dismissWordDetailTip() {
         seenWordDetailTip = true
-        if showWordDetailTip { withAnimation(.easeInOut(duration: 0.2)) { showWordDetailTip = false } }
+        if showWordDetailTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showWordDetailTip = false }
+            onWordTipDismissed()   // chain: the page shows the swipe hint next
+        }
     }
 
     // Step to the previous bubble, or (past the first) the previous page.
