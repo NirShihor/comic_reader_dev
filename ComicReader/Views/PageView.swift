@@ -1427,6 +1427,9 @@ struct BubbleContentView: View {
                     .explains("Tap a word",
                               "Tap any word to see its meaning and base form, hear it spoken, and save it to your vocabulary.",
                               id: "bubbleword.\(word.id)")
+                    // Anchor the "Click on a word." onboarding callout to the very first word.
+                    .calloutAnchorIf(sentence.id == bubble.sentences.first?.id
+                                     && word.id == displayWords.first?.id, "bubble.word")
                 }
             }
         }
@@ -1778,10 +1781,19 @@ struct FloatingBubbleCard: View {
     var onRequestNextPage: () -> Void = {}
     var onRequestPrevPage: () -> Void = {}
     @EnvironmentObject var settingsManager: SettingsManager
+    @EnvironmentObject var help: HelpModeController
 
     @State private var contentHeight: CGFloat = 0
 
+    // First-open callout: "Click on a word." — points at the first word. Once-only.
+    @AppStorage("help.seen.bubble-word") private var seenWordTip = false
+    @State private var showWordTip = false
+
     private let maxContentHeight: CGFloat = 340
+
+    private var isPracticeMode: Bool {
+        settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode
+    }
 
     var body: some View {
         card
@@ -1790,9 +1802,32 @@ struct FloatingBubbleCard: View {
             .padding(.horizontal, 12)
             .padding(.top, anchorTop ? 14 : 0)
             .padding(.bottom, anchorTop ? 0 : 30)
+            .anchoredCallout(
+                targetID: "bubble.word",
+                text: "Click on a word.",
+                icon: "hand.tap.fill",
+                isPresented: showWordTip
+            ) { dismissWordTip() }
+            .onAppear { maybeShowWordTip() }
+            .onChange(of: help.isActive) { _, active in
+                if active, showWordTip { withAnimation { showWordTip = false } }
+            }
             // Stop audio when the whole card closes (not while stepping bubbles —
             // the card persists across steps, only the inner content is rebuilt).
             .onDisappear { AudioManager.shared.stop() }
+    }
+
+    private func maybeShowWordTip() {
+        guard !isPracticeMode else { return }   // words are only tappable in normal reading
+        if !HelpDebug.forceShowTooltips { guard !seenWordTip else { return } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showWordTip = true }
+        }
+    }
+
+    private func dismissWordTip() {
+        seenWordTip = true
+        if showWordTip { withAnimation(.easeInOut(duration: 0.2)) { showWordTip = false } }
     }
 
     // Step to the previous bubble, or (past the first) the previous page.
