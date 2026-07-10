@@ -167,6 +167,8 @@ struct StoreComicCard: View {
     var episodeLabel: String? = nil
     /// When set, tags the download button so an onboarding callout can point at it.
     var downloadAnchorID: String? = nil
+    /// Called when the user taps Download — lets a host dismiss onboarding hints.
+    var onDownloadStart: (() -> Void)? = nil
     @StateObject private var storeService = ComicStoreService.shared
     @StateObject private var localStorage = LocalComicStorage.shared
 
@@ -317,6 +319,7 @@ struct StoreComicCard: View {
         switch downloadState {
         case .notDownloaded:
             Button {
+                onDownloadStart?()
                 Task {
                     await storeService.downloadComic(comic)
                 }

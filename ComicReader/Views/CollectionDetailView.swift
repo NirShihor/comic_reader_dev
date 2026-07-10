@@ -13,6 +13,9 @@ struct CollectionDetailView: View {
 
     @AppStorage("help.seen.collection-download") private var seenDownloadTip = false
     @State private var showDownloadTip = false
+    // Once the user taps any Download, suppress the advice for the rest of this
+    // collection — don't re-point it at the next episode's Download button.
+    @State private var downloadTipDismissed = false
 
     // All episodes from the catalog (when loaded), in episode order.
     private var catalogEpisodes: [StoreComic] {
@@ -70,11 +73,21 @@ struct CollectionDetailView: View {
     }
 
     private func maybeShowDownloadTip() {
-        guard firstDownloadableID != nil, !showDownloadTip else { return }
+        guard firstDownloadableID != nil, !showDownloadTip, !downloadTipDismissed else { return }
         if !HelpDebug.forceShowTooltips { guard !seenDownloadTip else { return } }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-            guard firstDownloadableID != nil else { return }
+            guard firstDownloadableID != nil, !downloadTipDismissed else { return }
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showDownloadTip = true }
+        }
+    }
+
+    // Tapping any Download dismisses the advice and stops it reappearing for the
+    // next episode in this collection.
+    private func dismissDownloadTip() {
+        downloadTipDismissed = true
+        seenDownloadTip = true
+        if showDownloadTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showDownloadTip = false }
         }
     }
 
@@ -101,8 +114,7 @@ struct CollectionDetailView: View {
             text: "You need to download comics to be able to read them.",
             isPresented: showDownloadTip
         ) {
-            withAnimation(.easeInOut(duration: 0.2)) { showDownloadTip = false }
-            seenDownloadTip = true
+            dismissDownloadTip()
         }
         .onAppear { maybeShowDownloadTip() }
         .onChange(of: firstDownloadableID) { _, _ in maybeShowDownloadTip() }
@@ -212,7 +224,8 @@ struct CollectionDetailView: View {
                             onOpenComic: nil,
                             compact: true,
                             episodeLabel: "Ep. \(ep.episodeNumber ?? index + 1)",
-                            downloadAnchorID: ep.id == firstDownloadableID ? "collection.download" : nil
+                            downloadAnchorID: ep.id == firstDownloadableID ? "collection.download" : nil,
+                            onDownloadStart: { dismissDownloadTip() }
                         )
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
