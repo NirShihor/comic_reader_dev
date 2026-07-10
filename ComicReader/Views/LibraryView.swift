@@ -18,6 +18,8 @@ struct LibraryView: View {
     @State private var showLibraryIntro = false
     @AppStorage("help.seen.library-title") private var seenLibraryTitleTip = false
     @State private var showLibraryTitleTip = false
+    @AppStorage("help.seen.choose-collection") private var seenChooseCollection = false
+    @State private var showChooseCollection = false
 
     private var showInitialLoader: Bool {
         localStorage.isLoading && localStorage.downloadedComics.isEmpty
@@ -77,6 +79,12 @@ struct LibraryView: View {
                 ) {
                     withAnimation(.easeInOut(duration: 0.2)) { showLibraryTitleTip = false }
                     seenLibraryTitleTip = true
+                    // Sequence: the "Choose a collection." prompt follows the title tip.
+                    if HelpDebug.forceShowTooltips || !seenChooseCollection {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showChooseCollection = true }
+                        }
+                    }
                 }
                 .padding(.leading, 10)
                 .offset(y: -8)   // pull up toward the "Library" title
@@ -84,9 +92,21 @@ struct LibraryView: View {
                 .zIndex(50)
             }
         }
+        .overlay(alignment: .top) {
+            if showChooseCollection {
+                HelpIntroCallout(text: "Choose a collection.", icon: nil, showArrow: false) {
+                    withAnimation(.easeInOut(duration: 0.2)) { showChooseCollection = false }
+                    seenChooseCollection = true
+                }
+                .padding(.top, 8)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+                .zIndex(50)
+            }
+        }
         .onAppear {
             // Show the "?" intro first. The library-title tip only opens once the
-            // "?" intro has been seen — this session (via its dismiss) or a prior one.
+            // "?" intro has been seen — this session (via its dismiss) or a prior one;
+            // the "Choose a collection." prompt is last.
             if HelpDebug.forceShowTooltips || !seenLibraryIntro {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryIntro = true }
@@ -95,6 +115,10 @@ struct LibraryView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryTitleTip = true }
                 }
+            } else if !seenChooseCollection {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showChooseCollection = true }
+                }
             }
         }
         .onChange(of: help.isActive) { _, active in
@@ -102,6 +126,7 @@ struct LibraryView: View {
             if active {
                 if showLibraryIntro { withAnimation { showLibraryIntro = false } }
                 if showLibraryTitleTip { withAnimation { showLibraryTitleTip = false } }
+                if showChooseCollection { withAnimation { showChooseCollection = false } }
             }
         }
         .task {

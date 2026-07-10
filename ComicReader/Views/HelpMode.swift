@@ -508,14 +508,17 @@ struct HelpIntroCallout: View {
     var arrowEdge: HorizontalAlignment = .trailing   // which side the up-arrow sits on
     var arrowInset: CGFloat = 16                     // how far in from that edge
     var maxWidth: CGFloat = 250
+    var showArrow: Bool = true                       // false = a plain floating bubble
     let onDismiss: () -> Void
 
     var body: some View {
         VStack(alignment: arrowEdge, spacing: 0) {
-            Triangle()
-                .fill(accent)
-                .frame(width: 20, height: 10)
-                .padding(arrowEdge == .leading ? Edge.Set.leading : Edge.Set.trailing, arrowInset)
+            if showArrow {
+                Triangle()
+                    .fill(accent)
+                    .frame(width: 20, height: 10)
+                    .padding(arrowEdge == .leading ? Edge.Set.leading : Edge.Set.trailing, arrowInset)
+            }
             HStack(alignment: .top, spacing: 8) {
                 if let icon {
                     Image(systemName: icon).font(.subheadline)
