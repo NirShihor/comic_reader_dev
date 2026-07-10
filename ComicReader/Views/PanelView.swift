@@ -1319,6 +1319,9 @@ struct WordButton: View {
                         .foregroundStyle(.purple)
                 }
             }
+            // Matches the width the popover already takes when it opens above/below the
+            // word, so the full "Add to Vocabulary" also fits when it attaches sideways.
+            .frame(minWidth: 300, alignment: .leading)
             .padding()
             .presentationCompactAdaptation(.popover)
         }
