@@ -369,18 +369,23 @@ private struct HelpFirstVisit: ViewModifier {
 /// `.overlay(alignment: .topTrailing)`.
 struct HelpIntroCallout: View {
     let text: String
+    var icon: String? = "questionmark.circle.fill"
     var accent: Color = Color(red: 232/255, green: 169/255, blue: 60/255)   // #E8A93C amber
+    var arrowEdge: HorizontalAlignment = .trailing   // which side the up-arrow sits on
+    var arrowInset: CGFloat = 16                     // how far in from that edge
+    var maxWidth: CGFloat = 250
     let onDismiss: () -> Void
 
     var body: some View {
-        VStack(alignment: .trailing, spacing: 0) {
+        VStack(alignment: arrowEdge, spacing: 0) {
             Triangle()
                 .fill(accent)
                 .frame(width: 20, height: 10)
-                .padding(.trailing, 16)   // sit the arrow under the "?" in the nav bar
+                .padding(arrowEdge == .leading ? Edge.Set.leading : Edge.Set.trailing, arrowInset)
             HStack(alignment: .top, spacing: 8) {
-                Image(systemName: "questionmark.circle.fill")
-                    .font(.subheadline)
+                if let icon {
+                    Image(systemName: icon).font(.subheadline)
+                }
                 Text(text)
                     .font(.subheadline).fontWeight(.medium)
                     .multilineTextAlignment(.leading)
@@ -391,7 +396,7 @@ struct HelpIntroCallout: View {
             .background(accent)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .shadow(color: .black.opacity(0.22), radius: 10, y: 4)
-            .frame(maxWidth: 250)
+            .frame(maxWidth: maxWidth)
         }
         .contentShape(Rectangle())
         .onTapGesture { onDismiss() }

@@ -16,6 +16,8 @@ struct LibraryView: View {
     @StateObject private var help = HelpModeController()
     @AppStorage("help.seen.library-intro") private var seenLibraryIntro = false
     @State private var showLibraryIntro = false
+    @AppStorage("help.seen.library-title") private var seenLibraryTitleTip = false
+    @State private var showLibraryTitleTip = false
 
     private var showInitialLoader: Bool {
         localStorage.isLoading && localStorage.downloadedComics.isEmpty
@@ -49,6 +51,13 @@ struct LibraryView: View {
             if showLibraryIntro {
                 HelpIntroCallout(text: "Help is on hand at any point. Just click here. You can click me to close.") {
                     withAnimation(.easeInOut(duration: 0.2)) { showLibraryIntro = false }
+                    seenLibraryIntro = true
+                    // Sequence: reveal the library-title tip once the "?" intro is done.
+                    if HelpDebug.forceShowTooltips || !seenLibraryTitleTip {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryTitleTip = true }
+                        }
+                    }
                 }
                 .padding(.trailing, 10)
                 .padding(.top, 0)
@@ -57,19 +66,43 @@ struct LibraryView: View {
                 .zIndex(50)
             }
         }
-        .onAppear {
-            // First visit to the Library → point out the "?" help button, once.
-            if !HelpDebug.forceShowTooltips {
-                guard !seenLibraryIntro else { return }
-                seenLibraryIntro = true
+        .overlay(alignment: .topLeading) {
+            if showLibraryTitleTip {
+                HelpIntroCallout(
+                    text: "This is your library. It contains collections of comics. A collection is a series of comics that use the same theme, characters and story line.",
+                    icon: "books.vertical.fill",
+                    arrowEdge: .leading,
+                    arrowInset: 22,
+                    maxWidth: 280
+                ) {
+                    withAnimation(.easeInOut(duration: 0.2)) { showLibraryTitleTip = false }
+                    seenLibraryTitleTip = true
+                }
+                .padding(.leading, 10)
+                .offset(y: -8)   // pull up toward the "Library" title
+                .transition(.opacity.combined(with: .move(edge: .top)))
+                .zIndex(50)
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryIntro = true }
+        }
+        .onAppear {
+            // Show the "?" intro first. The library-title tip only opens once the
+            // "?" intro has been seen — this session (via its dismiss) or a prior one.
+            if HelpDebug.forceShowTooltips || !seenLibraryIntro {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryIntro = true }
+                }
+            } else if !seenLibraryTitleTip {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryTitleTip = true }
+                }
             }
         }
         .onChange(of: help.isActive) { _, active in
-            // If they tap "?" the callout has done its job — dismiss it.
-            if active, showLibraryIntro { withAnimation { showLibraryIntro = false } }
+            // If they tap "?" the callouts have done their job — dismiss them.
+            if active {
+                if showLibraryIntro { withAnimation { showLibraryIntro = false } }
+                if showLibraryTitleTip { withAnimation { showLibraryTitleTip = false } }
+            }
         }
         .task {
             // Pull the catalog so available comics + author-set order load.
