@@ -995,6 +995,9 @@ struct PageView: View {
                 .environmentObject(settingsManager)
                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
                 .zIndex(2)
+                // First time a bubble popup opens, auto-show its help (Speak /
+                // Listen / Speed / tap-a-word). The "?" still toggles it after.
+                .helpFirstVisit("reader-popup", help)
             }
 
             endOfEpisodeOverlay

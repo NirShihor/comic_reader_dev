@@ -311,3 +311,36 @@ struct HelpModeButton: View {
         .accessibilityLabel(help.isActive ? "Exit help" : "Help")
     }
 }
+
+// MARK: - First-visit auto-trigger
+
+extension View {
+    /// Auto-open help mode the FIRST time this screen/element is seen (per `key`,
+    /// remembered forever), then never again automatically — the "?" button still
+    /// toggles it on demand as usual. Apply AFTER `.environmentObject(help)`, and
+    /// pass the same `help` controller so it flips the right one.
+    func helpFirstVisit(_ key: String, _ help: HelpModeController) -> some View {
+        modifier(HelpFirstVisit(key: key, help: help))
+    }
+}
+
+private struct HelpFirstVisit: ViewModifier {
+    let help: HelpModeController
+    @AppStorage private var seen: Bool
+
+    init(key: String, help: HelpModeController) {
+        self.help = help
+        _seen = AppStorage(wrappedValue: false, "help.seen.\(key)")
+    }
+
+    func body(content: Content) -> some View {
+        content.onAppear {
+            guard !seen else { return }
+            seen = true
+            // Let the screen settle before the highlights appear.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                withAnimation(.easeInOut(duration: 0.2)) { help.isActive = true }
+            }
+        }
+    }
+}
