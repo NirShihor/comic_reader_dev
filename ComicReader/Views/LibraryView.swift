@@ -14,6 +14,8 @@ struct LibraryView: View {
     @State private var searchText = ""
     @State private var selectedLevel: String? = nil
     @StateObject private var help = HelpModeController()
+    @AppStorage("help.seen.library-intro") private var seenLibraryIntro = false
+    @State private var showLibraryIntro = false
 
     private var showInitialLoader: Bool {
         localStorage.isLoading && localStorage.downloadedComics.isEmpty
@@ -43,6 +45,29 @@ struct LibraryView: View {
         }
         .helpTooltipLayer()
         .environmentObject(help)
+        .overlay(alignment: .topTrailing) {
+            if showLibraryIntro {
+                HelpIntroCallout(text: "Help is on hand at any point. Just click here.") {
+                    withAnimation(.easeInOut(duration: 0.2)) { showLibraryIntro = false }
+                }
+                .padding(.trailing, 10)
+                .padding(.top, 4)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+                .zIndex(50)
+            }
+        }
+        .onAppear {
+            // First visit to the Library → point out the "?" help button, once.
+            guard !seenLibraryIntro else { return }
+            seenLibraryIntro = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryIntro = true }
+            }
+        }
+        .onChange(of: help.isActive) { _, active in
+            // If they tap "?" the callout has done its job — dismiss it.
+            if active, showLibraryIntro { withAnimation { showLibraryIntro = false } }
+        }
         .task {
             // Pull the catalog so available comics + author-set order load.
             await storeService.fetchCatalog()

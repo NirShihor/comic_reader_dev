@@ -344,3 +344,42 @@ private struct HelpFirstVisit: ViewModifier {
         }
     }
 }
+
+// MARK: - Help intro callout
+
+/// A one-time callout that points up at the "?" help button (top-right), telling
+/// the reader help is available. Colour-matched to the button's indigo accent so
+/// the two read as linked. Tapping it dismisses. Place with
+/// `.overlay(alignment: .topTrailing)`.
+struct HelpIntroCallout: View {
+    let text: String
+    var accent: Color = Color(red: 91/255, green: 91/255, blue: 214/255)
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 0) {
+            Triangle()
+                .fill(accent)
+                .frame(width: 20, height: 10)
+                .padding(.trailing, 16)   // sit the arrow under the "?" in the nav bar
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: "questionmark.circle.fill")
+                    .font(.subheadline)
+                Text(text)
+                    .font(.subheadline).fontWeight(.medium)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14).padding(.vertical, 11)
+            .background(accent)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .shadow(color: .black.opacity(0.22), radius: 10, y: 4)
+            .frame(maxWidth: 250)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { onDismiss() }
+        .accessibilityAddTraits(.isButton)
+        .accessibilityLabel(text)
+    }
+}
