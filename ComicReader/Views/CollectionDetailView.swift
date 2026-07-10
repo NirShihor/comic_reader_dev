@@ -11,10 +11,6 @@ struct CollectionDetailView: View {
     @StateObject private var storeService = ComicStoreService.shared
     @StateObject private var help = HelpModeController()
 
-    @AppStorage("help.seen.choose-comic") private var seenChooseComic = false
-    @State private var showChooseComic = false
-    // The download advice only unlocks once the "Choose a comic." prompt is done.
-    @State private var downloadTipUnlocked = false
     @AppStorage("help.seen.collection-download") private var seenDownloadTip = false
     @State private var showDownloadTip = false
     // Once the user taps any Download, suppress the advice for the rest of this
@@ -77,32 +73,12 @@ struct CollectionDetailView: View {
     }
 
     private func maybeShowDownloadTip() {
-        guard downloadTipUnlocked else { return }   // wait for "Choose a comic." first
         guard firstDownloadableID != nil, !showDownloadTip, !downloadTipDismissed else { return }
         if !HelpDebug.forceShowTooltips { guard !seenDownloadTip else { return } }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             guard firstDownloadableID != nil, !downloadTipDismissed else { return }
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showDownloadTip = true }
         }
-    }
-
-    // "Choose a comic." shows first; the download advice unlocks after it's done.
-    private func startCollectionTips() {
-        if HelpDebug.forceShowTooltips || !seenChooseComic {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showChooseComic = true }
-            }
-        } else {
-            downloadTipUnlocked = true
-            maybeShowDownloadTip()
-        }
-    }
-
-    private func dismissChooseComic() {
-        seenChooseComic = true
-        withAnimation(.easeInOut(duration: 0.2)) { showChooseComic = false }
-        downloadTipUnlocked = true
-        maybeShowDownloadTip()
     }
 
     // Tapping any Download dismisses the advice and stops it reappearing for the
@@ -140,23 +116,10 @@ struct CollectionDetailView: View {
         ) {
             dismissDownloadTip()
         }
-        .overlay(alignment: .top) {
-            if showChooseComic {
-                HelpIntroCallout(text: "Choose a comic.", icon: nil, showArrow: false) {
-                    dismissChooseComic()
-                }
-                .padding(.top, 8)
-                .transition(.opacity.combined(with: .move(edge: .top)))
-                .zIndex(50)
-            }
-        }
-        .onAppear { startCollectionTips() }
+        .onAppear { maybeShowDownloadTip() }
         .onChange(of: firstDownloadableID) { _, _ in maybeShowDownloadTip() }
         .onChange(of: help.isActive) { _, active in
-            if active {
-                if showChooseComic { withAnimation { showChooseComic = false } }
-                if showDownloadTip { withAnimation { showDownloadTip = false } }
-            }
+            if active, showDownloadTip { withAnimation { showDownloadTip = false } }
         }
         .task {
             // Load the catalog here too, not just from the Library. Opening a
