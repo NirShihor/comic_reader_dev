@@ -903,14 +903,16 @@ struct PageView: View {
                                         .contentShape(Rectangle())
                                         .frame(width: b.width * rect.width + 16,
                                                height: b.height * rect.height + 16)
+                                        // Anchor the "Click on the text." cover callout to the title
+                                        // bubble — BEFORE .position (a positioned view fills its parent,
+                                        // which would make the anchor capture the whole page instead).
+                                        .calloutAnchorIf(currentPageIndex == 0 && i == 0, "cover.text")
                                         .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
                                                   y: rect.minY + (b.positionY + b.height / 2) * rect.height)
                                         .onTapGesture {
                                             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                                             selectedBubbleIndex = i
                                         }
-                                        // Anchor the "Click on the text." cover callout to the title bubble.
-                                        .calloutAnchorIf(currentPageIndex == 0 && i == 0, "cover.text")
                                 }
 
                                 // Slow-flashing dot in the open bubble, linking it to
