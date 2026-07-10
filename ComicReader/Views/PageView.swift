@@ -1820,7 +1820,7 @@ struct FloatingBubbleCard: View {
             .overlay(alignment: anchorTop ? .bottom : .top) {
                 if showWordDetailTip {
                     HelpIntroCallout(
-                        text: "Here you can listen to the word and read and listen to its other forms by clicking More. You can get more explanation about the word and its use, and also add it to your personal vocabulary if you wish. Click me to close.",
+                        text: "Here you can listen to the word and read and listen to its other forms by clicking More. You can learn more about the word and its use by clicking Explain further. You can also add it to your personal vocabulary collection if you wish. Click me to close.",
                         icon: "hand.tap.fill",
                         maxWidth: 300,
                         showArrow: false
