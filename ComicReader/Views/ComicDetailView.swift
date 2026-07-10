@@ -59,6 +59,12 @@ struct ComicDetailView: View {
     @State private var scrollTopToken = 0                 // bump to scroll the page to the top
     @StateObject private var help = HelpModeController()
 
+    // First-visit onboarding callouts for this "comic cockpit" screen. `cockpitStep`
+    // walks a short sequence (0 = none). Gated once-only by `seenCockpitTips`, unless
+    // HelpDebug.forceShowTooltips is on.
+    @AppStorage("help.seen.comic-cockpit") private var seenCockpitTips = false
+    @State private var cockpitStep = 0
+
     private let columns = [
         GridItem(.flexible(), spacing: 12),
         GridItem(.flexible(), spacing: 12)
@@ -132,7 +138,19 @@ struct ComicDetailView: View {
             }
             .helpTooltipLayer()
             .environmentObject(help)
+            .anchoredCallout(
+                targetID: "comic.cockpit",
+                text: "This is the comic cockpit. Decide if you want to simply read and listen, or practise with any of the different practice modes.",
+                icon: nil,
+                showArrow: false,
+                placeBelow: true,
+                isPresented: cockpitStep == 1
+            ) { advanceCockpitTips() }
+            .onChange(of: help.isActive) { _, active in
+                if active, cockpitStep != 0 { withAnimation { cockpitStep = 0 } }
+            }
             .onAppear {
+                startCockpitTips()
                 // Opened via the Library "Continue" card: pick up exactly where the
                 // user left off (same spot and mode as the primary button here).
                 guard autoResume, !didAutoResume else { return }
@@ -147,6 +165,24 @@ struct ComicDetailView: View {
             }
     }
 
+    // MARK: - Cockpit onboarding sequence
+    private func startCockpitTips() {
+        // Skip when auto-resuming straight into the reader — the screen is leaving.
+        guard !autoResume, cockpitStep == 0 else { return }
+        if !HelpDebug.forceShowTooltips { guard !seenCockpitTips else { return } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            guard cockpitStep == 0 else { return }
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { cockpitStep = 1 }
+        }
+    }
+
+    private func advanceCockpitTips() {
+        // Step through the sequence; end (and mark seen) after the last callout.
+        // Additional steps get chained here as they're added.
+        withAnimation(.easeInOut(duration: 0.2)) { cockpitStep = 0 }
+        seenCockpitTips = true
+    }
+
     // Extracted so the `body` modifier chain stays short enough for the Swift
     // type-checker (a long chain + the destination switch was timing out).
     private var scrollContent: some View {
@@ -154,6 +190,7 @@ struct ComicDetailView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     coverBanner
+                        .calloutAnchor("comic.cockpit")
                         .padding(.horizontal, 16)
                         .id("top")
 

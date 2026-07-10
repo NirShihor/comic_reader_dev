@@ -389,13 +389,17 @@ extension View {
     func anchoredCallout(targetID: String,
                          text: String,
                          icon: String? = "arrow.down.circle.fill",
+                         showArrow: Bool = true,
+                         placeBelow: Bool = false,
                          isPresented: Bool,
                          onDismiss: @escaping () -> Void) -> some View {
         overlayPreferenceValue(CalloutAnchorKey.self) { anchors in
             GeometryReader { proxy in
                 if isPresented, let anchor = anchors[targetID] {
                     AnchoredCalloutBubble(rect: proxy[anchor], container: proxy.size,
-                                          text: text, icon: icon, onDismiss: onDismiss)
+                                          text: text, icon: icon,
+                                          showArrow: showArrow, forceBelow: placeBelow,
+                                          onDismiss: onDismiss)
                         .transition(.opacity)
                 }
             }
@@ -409,6 +413,9 @@ private struct AnchoredCalloutBubble: View {
     let container: CGSize
     let text: String
     var icon: String?
+    var showArrow: Bool = true
+    /// Force the bubble below the target (used for arrowless "floating under" callouts).
+    var forceBelow: Bool = false
     let onDismiss: () -> Void
 
     @State private var size: CGSize = .zero
@@ -416,56 +423,63 @@ private struct AnchoredCalloutBubble: View {
     private let accent = Color(red: 240/255, green: 187/255, blue: 41/255)   // #F0BB29
     private let arrowH: CGFloat = 10
     private let arrowW: CGFloat = 20
-    private let gap: CGFloat = 4
     private let margin: CGFloat = 12
 
     var body: some View {
-        let placeAbove = rect.midY > container.height / 2
+        let placeAbove = forceBelow ? false : (rect.midY > container.height / 2)
+        let arrowSpace: CGFloat = showArrow ? arrowH : 0
+        let gap: CGFloat = showArrow ? 4 : 12
         let halfW = size.width / 2
         let centerX = min(max(rect.midX, margin + halfW), container.width - margin - halfW)
         let centerY = placeAbove
-            ? rect.minY - gap - arrowH - size.height / 2
-            : rect.maxY + gap + arrowH + size.height / 2
+            ? rect.minY - gap - arrowSpace - size.height / 2
+            : rect.maxY + gap + arrowSpace + size.height / 2
         let arrowX = min(max(rect.midX, centerX - halfW + 14), centerX + halfW - 14)
 
         ZStack(alignment: .topLeading) {
-            Triangle()
-                .fill(accent)
-                .frame(width: arrowW, height: arrowH)
-                .rotationEffect(.degrees(placeAbove ? 180 : 0))
-                .position(
-                    x: arrowX,
-                    y: placeAbove
-                        ? centerY + size.height / 2 + arrowH / 2 - 0.5
-                        : centerY - size.height / 2 - arrowH / 2 + 0.5
-                )
-
-            HStack(alignment: .top, spacing: 8) {
-                if let icon {
-                    Image(systemName: icon).font(.subheadline)
-                }
-                Text(text)
-                    .font(.subheadline).fontWeight(.medium)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .foregroundStyle(Color(red: 0.24, green: 0.15, blue: 0.02))
-            .padding(.horizontal, 14).padding(.vertical, 11)
-            .frame(maxWidth: 250, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+            if showArrow {
+                Triangle()
                     .fill(accent)
-                    .shadow(color: .black.opacity(0.22), radius: 10, y: 4)
-            )
-            .background(
-                GeometryReader { g in Color.clear.preference(key: SizeKey.self, value: g.size) }
-            )
-            .onPreferenceChange(SizeKey.self) { size = $0 }
-            .contentShape(Rectangle())
-            .onTapGesture { onDismiss() }
-            .position(x: centerX, y: centerY)
+                    .frame(width: arrowW, height: arrowH)
+                    .rotationEffect(.degrees(placeAbove ? 180 : 0))
+                    .position(
+                        x: arrowX,
+                        y: placeAbove
+                            ? centerY + size.height / 2 + arrowH / 2 - 0.5
+                            : centerY - size.height / 2 - arrowH / 2 + 0.5
+                    )
+            }
+
+            bubbleBody
+                .background(
+                    GeometryReader { g in Color.clear.preference(key: SizeKey.self, value: g.size) }
+                )
+                .onPreferenceChange(SizeKey.self) { size = $0 }
+                .position(x: centerX, y: centerY)
         }
         .frame(width: container.width, height: container.height)
+    }
+
+    private var bubbleBody: some View {
+        HStack(alignment: .top, spacing: 8) {
+            if let icon {
+                Image(systemName: icon).font(.subheadline)
+            }
+            Text(text)
+                .font(.subheadline).fontWeight(.medium)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(Color(red: 0.24, green: 0.15, blue: 0.02))
+        .padding(.horizontal, 14).padding(.vertical, 11)
+        .frame(maxWidth: 260, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(accent)
+                .shadow(color: .black.opacity(0.22), radius: 10, y: 4)
+        )
+        .contentShape(Rectangle())
+        .onTapGesture { onDismiss() }
     }
 }
 
