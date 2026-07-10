@@ -376,6 +376,10 @@ struct PageView: View {
     // Swipe-to-turn hint, chained after the word-popup guidance is closed.
     @AppStorage("help.seen.page-swipe") private var seenSwipeTip = false
     @State private var showSwipeTip = false
+    // "Click on a bubble." — points at the first bubble on the first story page
+    // the reader swipes to. Chained after the swipe hint's action.
+    @AppStorage("help.seen.page-bubble") private var seenBubbleTip = false
+    @State private var showBubbleTip = false
 
     // Pages sorted by pageNumber for consistent navigation
     private var sortedPages: [Page] {
@@ -448,6 +452,21 @@ struct PageView: View {
     private func dismissSwipeTip() {
         seenSwipeTip = true
         if showSwipeTip { withAnimation(.easeInOut(duration: 0.2)) { showSwipeTip = false } }
+    }
+
+    // MARK: - "Click on a bubble." hint (first story page after the swipe)
+    private func maybeShowBubbleTip() {
+        guard currentPageIndex > 0, !isPracticeMode, selectedBubbleIndex == nil else { return }
+        if !HelpDebug.forceShowTooltips { guard !seenBubbleTip else { return } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            guard currentPageIndex > 0, selectedBubbleIndex == nil else { return }
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showBubbleTip = true }
+        }
+    }
+
+    private func dismissBubbleTip() {
+        seenBubbleTip = true
+        if showBubbleTip { withAnimation(.easeInOut(duration: 0.2)) { showBubbleTip = false } }
     }
 
     /// Where the open bubble's card sits (mirrors FloatingBubbleCard.anchorTop), so
@@ -923,6 +942,8 @@ struct PageView: View {
                                         // bubble — BEFORE .position (a positioned view fills its parent,
                                         // which would make the anchor capture the whole page instead).
                                         .calloutAnchorIf(currentPageIndex == 0 && i == 0, "cover.text")
+                                        // ...and "Click on a bubble." to the first bubble on story pages.
+                                        .calloutAnchorIf(currentPageIndex > 0 && i == 0, "page.bubble")
                                         .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
                                                   y: rect.minY + (b.positionY + b.height / 2) * rect.height)
                                         .onTapGesture {
@@ -1125,6 +1146,12 @@ struct PageView: View {
             icon: "hand.tap.fill",
             isPresented: showCoverTip && selectedBubbleIndex == nil && selectedPanel == nil
         ) { dismissCoverTip() }
+        .anchoredCallout(
+            targetID: "page.bubble",
+            text: "Click on a bubble.",
+            icon: "hand.tap.fill",
+            isPresented: showBubbleTip && selectedBubbleIndex == nil && selectedPanel == nil
+        ) { dismissBubbleTip() }
         // Swipe-to-turn hint, chained after the word-popup guidance closes. Floats
         // opposite the open card (or at the top once the card is closed).
         .overlay(alignment: openCardAnchorTop ? .bottom : .top) {
@@ -1143,6 +1170,7 @@ struct PageView: View {
             if active {
                 if showCoverTip { withAnimation { showCoverTip = false } }
                 if showSwipeTip { withAnimation { showSwipeTip = false } }
+                if showBubbleTip { withAnimation { showBubbleTip = false } }
             }
         }
         .toolbarBackground(.hidden, for: .navigationBar)
@@ -1185,8 +1213,10 @@ struct PageView: View {
             // Leaving the cover hides the cover callout; returning to it re-offers it.
             if currentPageIndex == 0 { maybeShowCoverTip() }
             else if showCoverTip { withAnimation { showCoverTip = false } }
-            // They turned the page — the swipe hint's action is done.
+            // They turned the page — the swipe hint's action is done; next up,
+            // prompt them to open a bubble on the story page.
             if showSwipeTip { dismissSwipeTip() }
+            maybeShowBubbleTip()
             // Save progress when page changes (skipped for transient context views).
             if savesProgress {
                 progressManager.saveProgress(
@@ -1203,8 +1233,11 @@ struct PageView: View {
             // reveal only ever applies to the bubble you're currently on. Single
             // source of truth so a stale reveal can't linger on the bubble you left.
             revealedBubbleId = nil
-            // Opening any bubble means they got the hint — retire the cover callout.
-            if newValue != nil { dismissCoverTip() }
+            // Opening any bubble means they got the hint — retire the tap callouts.
+            if newValue != nil {
+                dismissCoverTip()
+                dismissBubbleTip()
+            }
             // Remember the open bubble during on-screen practice so "Continue
             // practicing" reopens the same page at the same bubble.
             if guidedOnScreenPractice, let idx = newValue, pageTextBubbles.indices.contains(idx) {
@@ -1830,6 +1863,10 @@ struct FloatingBubbleCard: View {
     // edge opposite the card, clear of the system popover.
     @AppStorage("help.seen.word-detail") private var seenWordDetailTip = false
     @State private var showWordDetailTip = false
+    // On the next panel open (after the "Click on a bubble." step): the arrows.
+    @AppStorage("help.seen.page-bubble") private var seenBubbleTip = false
+    @AppStorage("help.seen.bubble-arrows") private var seenArrowsTip = false
+    @State private var showArrowsTip = false
 
     private let maxContentHeight: CGFloat = 340
 
@@ -1854,6 +1891,13 @@ struct FloatingBubbleCard: View {
                 showArrow: false,
                 isPresented: showPanelTip
             ) { dismissPanelTip() }
+            .anchoredCallout(
+                targetID: "bubble.panel",
+                text: "Once you have finished interacting with this bubble, you can navigate to the next one by using the arrows.",
+                icon: nil,
+                showArrow: false,
+                isPresented: showArrowsTip
+            ) { dismissArrowsTip() }
             // Word-popup guidance: floats on the opposite screen edge from the card,
             // so it clears the system popover (which opens off the card's words).
             .overlay(alignment: anchorTop ? .bottom : .top) {
@@ -1874,6 +1918,7 @@ struct FloatingBubbleCard: View {
                 if active {
                     if showPanelTip { withAnimation { showPanelTip = false } }
                     if showWordDetailTip { withAnimation { showWordDetailTip = false } }
+                    if showArrowsTip { withAnimation { showArrowsTip = false } }
                 }
             }
             // Stop audio when the whole card closes (not while stepping bubbles —
@@ -1882,11 +1927,23 @@ struct FloatingBubbleCard: View {
     }
 
     private func startCardTips() {
-        guard !isPracticeMode else { return }   // the hint is for normal reading
-        if !HelpDebug.forceShowTooltips { guard !seenPanelTip else { return } }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showPanelTip = true }
+        guard !isPracticeMode else { return }   // the hints are for normal reading
+        if HelpDebug.forceShowTooltips || !seenPanelTip {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showPanelTip = true }
+            }
+        } else if seenBubbleTip, !seenArrowsTip {
+            // They've done the first-panel walkthrough and tapped a bubble on a
+            // story page — point out the step arrows on this panel.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showArrowsTip = true }
+            }
         }
+    }
+
+    private func dismissArrowsTip() {
+        seenArrowsTip = true
+        if showArrowsTip { withAnimation(.easeInOut(duration: 0.2)) { showArrowsTip = false } }
     }
 
     // Dismissed by tapping it, tapping a word, or opening "?".
@@ -1915,11 +1972,13 @@ struct FloatingBubbleCard: View {
 
     // Step to the previous bubble, or (past the first) the previous page.
     private func goPrev() {
+        dismissArrowsTip()   // they used the arrows — the hint's job is done
         AudioManager.shared.stop()
         if index > 0 { withAnimation { index -= 1 } } else { onRequestPrevPage() }
     }
     // Step to the next bubble, or (past the last) the next page.
     private func goNext() {
+        dismissArrowsTip()   // they used the arrows — the hint's job is done
         AudioManager.shared.stop()
         if index < bubbles.count - 1 { withAnimation { index += 1 } } else { onRequestNextPage() }
     }
