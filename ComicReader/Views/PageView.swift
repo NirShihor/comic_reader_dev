@@ -378,7 +378,9 @@ struct PageView: View {
     @State private var showSwipeTip = false
     // "Click on a bubble." — points at the first bubble on the first story page
     // the reader swipes to. Chained after the swipe hint's action.
-    @AppStorage("help.seen.page-bubble") private var seenBubbleTip = false
+    // (Key renamed from page-bubble: the old flag could be burned by a cover tap
+    // before the fix that only marks it seen while actually showing.)
+    @AppStorage("help.seen.story-bubble") private var seenBubbleTip = false
     @State private var showBubbleTip = false
 
     // Pages sorted by pageNumber for consistent navigation
@@ -1206,7 +1208,7 @@ struct PageView: View {
                 settingsManager.listeningPracticeMode = false
             }
         }
-        .onChange(of: currentPageIndex) { _, _ in
+        .onChange(of: currentPageIndex) { oldPage, newPage in
             // Close the bubble card and refresh the artwork aspect for the new page
             selectedBubbleIndex = nil
             loadPageAspect()
@@ -1214,9 +1216,10 @@ struct PageView: View {
             if currentPageIndex == 0 { maybeShowCoverTip() }
             else if showCoverTip { withAnimation { showCoverTip = false } }
             // They turned the page — the swipe hint's action is done; next up,
-            // prompt them to open a bubble on the story page.
+            // prompt them to open a bubble, but ONLY on the first swipe from the
+            // cover to the first story page.
             if showSwipeTip { dismissSwipeTip() }
-            maybeShowBubbleTip()
+            if oldPage == 0 && newPage == 1 { maybeShowBubbleTip() }
             // Save progress when page changes (skipped for transient context views).
             if savesProgress {
                 progressManager.saveProgress(
@@ -1234,9 +1237,11 @@ struct PageView: View {
             // source of truth so a stale reveal can't linger on the bubble you left.
             revealedBubbleId = nil
             // Opening any bubble means they got the hint — retire the tap callouts.
+            // The bubble tip is only marked seen if it was actually on screen;
+            // otherwise a cover-bubble tap would silently burn it before its turn.
             if newValue != nil {
                 dismissCoverTip()
-                dismissBubbleTip()
+                if showBubbleTip { dismissBubbleTip() }
             }
             // Remember the open bubble during on-screen practice so "Continue
             // practicing" reopens the same page at the same bubble.
@@ -1864,8 +1869,8 @@ struct FloatingBubbleCard: View {
     @AppStorage("help.seen.word-detail") private var seenWordDetailTip = false
     @State private var showWordDetailTip = false
     // On the next panel open (after the "Click on a bubble." step): the arrows.
-    @AppStorage("help.seen.page-bubble") private var seenBubbleTip = false
-    @AppStorage("help.seen.bubble-arrows") private var seenArrowsTip = false
+    @AppStorage("help.seen.story-bubble") private var seenBubbleTip = false
+    @AppStorage("help.seen.story-arrows") private var seenArrowsTip = false
     @State private var showArrowsTip = false
 
     private let maxContentHeight: CGFloat = 340
