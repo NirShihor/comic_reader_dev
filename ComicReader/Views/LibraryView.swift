@@ -52,6 +52,7 @@ struct LibraryView: View {
                 }
                 .padding(.trailing, 10)
                 .padding(.top, 0)
+                .offset(y: -14)   // pull up toward the "?" in the nav bar
                 .transition(.opacity.combined(with: .move(edge: .top)))
                 .zIndex(50)
             }

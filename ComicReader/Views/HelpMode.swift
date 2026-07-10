@@ -161,9 +161,9 @@ private struct HelpTooltipOverlay: View {
     @EnvironmentObject private var help: HelpModeController
     @State private var size: CGSize = .zero
 
-    private let arrowH: CGFloat = 8
+    private let arrowH: CGFloat = 4
     private let arrowW: CGFloat = 18
-    private let gap: CGFloat = 2   // hug the target element
+    private let gap: CGFloat = 0   // hug the target element
     private let margin: CGFloat = 12
 
     var body: some View {
