@@ -47,7 +47,7 @@ struct LibraryView: View {
         .environmentObject(help)
         .overlay(alignment: .topTrailing) {
             if showLibraryIntro {
-                HelpIntroCallout(text: "Help is on hand at any point. Just click here.") {
+                HelpIntroCallout(text: "Help is on hand at any point. Just click here. You can click me to close.") {
                     withAnimation(.easeInOut(duration: 0.2)) { showLibraryIntro = false }
                 }
                 .padding(.trailing, 10)
