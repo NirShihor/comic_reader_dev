@@ -1185,9 +1185,6 @@ struct WordButton: View {
     @State private var showingForms = false
     @State private var showingExplain = false
     @State private var isSaved = false
-    // First-open guidance shown inside the word popover. Once-only per user.
-    @AppStorage("help.seen.word-detail") private var seenWordDetailTip = false
-    @State private var showWordDetailTip = false
     @StateObject private var vocabularyManager = VocabularyManager()
     @StateObject private var audioManager = AudioManager.shared
 
@@ -1197,11 +1194,6 @@ struct WordButton: View {
             showingDefinition = true
             // Check if word is already saved
             isSaved = vocabularyManager.savedWords.contains { $0.word.id == word.id }
-            // First-open coach mark inside the popover (once per user).
-            if HelpDebug.forceShowTooltips || !seenWordDetailTip {
-                showWordDetailTip = true
-                seenWordDetailTip = true
-            }
         } label: {
             Text(word.text)
                 .font(font ?? (fontSize.map { .system(size: $0) } ?? .body))
@@ -1325,25 +1317,6 @@ struct WordButton: View {
                     Label("Explain further", systemImage: "sparkles")
                         .font(.subheadline)
                         .foregroundStyle(.purple)
-                }
-
-                if showWordDetailTip {
-                    HStack(alignment: .top, spacing: 8) {
-                        Image(systemName: "hand.tap.fill").font(.footnote)
-                        Text("Here you can listen to the word and read and listen to its other forms by clicking More. You can get more explanation about the word and its use, and also add it to your personal vocabulary if you wish. Click me to close.")
-                            .font(.footnote).fontWeight(.medium)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .foregroundStyle(Color(red: 0.24, green: 0.15, blue: 0.02))
-                    .padding(.horizontal, 12).padding(.vertical, 10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(Color(red: 240/255, green: 187/255, blue: 41/255))   // #F0BB29
-                    )
-                    .contentShape(Rectangle())
-                    .onTapGesture { withAnimation(.easeInOut(duration: 0.2)) { showWordDetailTip = false } }
-                    .transition(.opacity)
                 }
             }
             // Matches the width the popover already takes when it opens above/below the

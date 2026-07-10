@@ -1787,6 +1787,10 @@ struct FloatingBubbleCard: View {
     // First-open callout: a panel overview that ends by prompting a word tap.
     @AppStorage("help.seen.bubble-panel") private var seenPanelTip = false
     @State private var showPanelTip = false
+    // After the first word tap: what the word popup offers. Floats on the screen
+    // edge opposite the card, clear of the system popover.
+    @AppStorage("help.seen.word-detail") private var seenWordDetailTip = false
+    @State private var showWordDetailTip = false
 
     private let maxContentHeight: CGFloat = 340
 
@@ -1811,9 +1815,27 @@ struct FloatingBubbleCard: View {
                 showArrow: false,
                 isPresented: showPanelTip
             ) { dismissPanelTip() }
+            // Word-popup guidance: floats on the opposite screen edge from the card,
+            // so it clears the system popover (which opens off the card's words).
+            .overlay(alignment: anchorTop ? .bottom : .top) {
+                if showWordDetailTip {
+                    HelpIntroCallout(
+                        text: "Here you can listen to the word and read and listen to its other forms by clicking More. You can get more explanation about the word and its use, and also add it to your personal vocabulary if you wish. Click me to close.",
+                        icon: "hand.tap.fill",
+                        maxWidth: 300,
+                        showArrow: false
+                    ) { dismissWordDetailTip() }
+                    .padding(anchorTop ? .bottom : .top, anchorTop ? 40 : 8)
+                    .transition(.opacity.combined(with: .move(edge: anchorTop ? .bottom : .top)))
+                    .zIndex(60)
+                }
+            }
             .onAppear { startCardTips() }
             .onChange(of: help.isActive) { _, active in
-                if active, showPanelTip { withAnimation { showPanelTip = false } }
+                if active {
+                    if showPanelTip { withAnimation { showPanelTip = false } }
+                    if showWordDetailTip { withAnimation { showWordDetailTip = false } }
+                }
             }
             // Stop audio when the whole card closes (not while stepping bubbles —
             // the card persists across steps, only the inner content is rebuilt).
@@ -1832,6 +1854,21 @@ struct FloatingBubbleCard: View {
     private func dismissPanelTip() {
         seenPanelTip = true
         if showPanelTip { withAnimation(.easeInOut(duration: 0.2)) { showPanelTip = false } }
+    }
+
+    // A word was tapped: retire the panel tip, then explain the word popup (once).
+    private func handleWordTap() {
+        dismissPanelTip()
+        guard !isPracticeMode else { return }
+        if !HelpDebug.forceShowTooltips { guard !seenWordDetailTip else { return } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showWordDetailTip = true }
+        }
+    }
+
+    private func dismissWordDetailTip() {
+        seenWordDetailTip = true
+        if showWordDetailTip { withAnimation(.easeInOut(duration: 0.2)) { showWordDetailTip = false } }
     }
 
     // Step to the previous bubble, or (past the first) the previous page.
@@ -1888,7 +1925,7 @@ struct FloatingBubbleCard: View {
             ScrollView {
                 if bubbles.indices.contains(index) {
                     BubbleContentView(comic: comic, bubble: bubbles[index], revealedBubbleId: $revealedBubbleId,
-                                      onWordTap: { dismissPanelTip() })
+                                      onWordTap: { handleWordTap() })
                         .id(bubbles[index].id)   // reset per-bubble state when stepping
                         // Extra horizontal inset so the side step-arrows (~48pt in from
                         // each edge, at mid-height) never sit on top of the text/controls,
