@@ -1787,7 +1787,9 @@ struct FloatingBubbleCard: View {
 
     @State private var contentHeight: CGFloat = 0
 
-    // First-open callout: "Click on a word." — points at the first word. Once-only.
+    // First-open callouts, in order: a panel overview, then "Click on a word.".
+    @AppStorage("help.seen.bubble-panel") private var seenPanelTip = false
+    @State private var showPanelTip = false
     @AppStorage("help.seen.bubble-word") private var seenWordTip = false
     @State private var showWordTip = false
 
@@ -1800,29 +1802,60 @@ struct FloatingBubbleCard: View {
     var body: some View {
         card
             .frame(maxWidth: 380)
+            // Anchor the panel-overview callout to the card itself (arrowless, auto-
+            // placed on the card's inner edge — opposite the screen edge it hugs).
+            .calloutAnchor("bubble.panel")
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: anchorTop ? .top : .bottom)
             .padding(.horizontal, 12)
             .padding(.top, anchorTop ? 14 : 0)
             .padding(.bottom, anchorTop ? 0 : 30)
+            .anchoredCallout(
+                targetID: "bubble.panel",
+                text: "Here you can see the translation, listen to the audio and, if you wish, have the grammar explained.",
+                icon: nil,
+                showArrow: false,
+                isPresented: showPanelTip
+            ) { dismissPanelTip() }
             .anchoredCallout(
                 targetID: "bubble.word",
                 text: "Click on a word.",
                 icon: "hand.tap.fill",
                 isPresented: showWordTip
             ) { dismissWordTip() }
-            .onAppear { maybeShowWordTip() }
+            .onAppear { startCardTips() }
             .onChange(of: help.isActive) { _, active in
-                if active, showWordTip { withAnimation { showWordTip = false } }
+                if active {
+                    if showPanelTip { withAnimation { showPanelTip = false } }
+                    if showWordTip { withAnimation { showWordTip = false } }
+                }
             }
             // Stop audio when the whole card closes (not while stepping bubbles —
             // the card persists across steps, only the inner content is rebuilt).
             .onDisappear { AudioManager.shared.stop() }
     }
 
+    // Sequence: the panel overview first, then "Click on a word.".
+    private func startCardTips() {
+        guard !isPracticeMode else { return }   // both hints are for normal reading
+        if HelpDebug.forceShowTooltips || !seenPanelTip {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showPanelTip = true }
+            }
+        } else {
+            maybeShowWordTip()
+        }
+    }
+
+    private func dismissPanelTip() {
+        seenPanelTip = true
+        withAnimation(.easeInOut(duration: 0.2)) { showPanelTip = false }
+        maybeShowWordTip()   // then the word hint
+    }
+
     private func maybeShowWordTip() {
         guard !isPracticeMode else { return }   // words are only tappable in normal reading
         if !HelpDebug.forceShowTooltips { guard !seenWordTip else { return } }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showWordTip = true }
         }
     }
@@ -1830,6 +1863,15 @@ struct FloatingBubbleCard: View {
     private func dismissWordTip() {
         seenWordTip = true
         if showWordTip { withAnimation(.easeInOut(duration: 0.2)) { showWordTip = false } }
+    }
+
+    // Tapping a word satisfies both onboarding hints at once.
+    private func dismissCardTips() {
+        if showPanelTip {
+            seenPanelTip = true
+            withAnimation(.easeInOut(duration: 0.2)) { showPanelTip = false }
+        }
+        dismissWordTip()
     }
 
     // Step to the previous bubble, or (past the first) the previous page.
@@ -1886,7 +1928,7 @@ struct FloatingBubbleCard: View {
             ScrollView {
                 if bubbles.indices.contains(index) {
                     BubbleContentView(comic: comic, bubble: bubbles[index], revealedBubbleId: $revealedBubbleId,
-                                      onWordTap: { dismissWordTip() })
+                                      onWordTap: { dismissCardTips() })
                         .id(bubbles[index].id)   // reset per-bubble state when stepping
                         // Extra horizontal inset so the side step-arrows (~48pt in from
                         // each edge, at mid-height) never sit on top of the text/controls,
