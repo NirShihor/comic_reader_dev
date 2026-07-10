@@ -178,7 +178,7 @@ struct ComicDetailView: View {
     private var cockpitText: String {
         switch cockpitStep {
         case 1: return "This is the comic cockpit. Decide if you want to simply read and listen, or practise with any of the different practice modes."
-        case 2: return "Prefer not to have to speak out loud? Change to silent exercises."
+        case 2: return "Prefer not to have to speak out loud? Change to silent exercises. You can close me to see the different exercise modes."
         default: return ""
         }
     }
