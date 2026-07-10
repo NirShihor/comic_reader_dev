@@ -51,7 +51,7 @@ struct LibraryView: View {
                     withAnimation(.easeInOut(duration: 0.2)) { showLibraryIntro = false }
                 }
                 .padding(.trailing, 10)
-                .padding(.top, 4)
+                .padding(.top, 0)
                 .transition(.opacity.combined(with: .move(edge: .top)))
                 .zIndex(50)
             }

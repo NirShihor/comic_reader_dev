@@ -163,7 +163,7 @@ private struct HelpTooltipOverlay: View {
 
     private let arrowH: CGFloat = 8
     private let arrowW: CGFloat = 18
-    private let gap: CGFloat = 8
+    private let gap: CGFloat = 2   // hug the target element
     private let margin: CGFloat = 12
 
     var body: some View {
