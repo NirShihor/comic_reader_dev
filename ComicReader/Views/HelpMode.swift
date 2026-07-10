@@ -391,7 +391,7 @@ extension View {
                          icon: String? = "arrow.down.circle.fill",
                          showArrow: Bool = true,
                          placeBelow: Bool = false,
-                         arrowLeading: Bool = false,
+                         arrowTrailing: Bool = false,
                          isPresented: Bool,
                          onDismiss: @escaping () -> Void) -> some View {
         overlayPreferenceValue(CalloutAnchorKey.self) { anchors in
@@ -400,7 +400,7 @@ extension View {
                     AnchoredCalloutBubble(rect: proxy[anchor], container: proxy.size,
                                           text: text, icon: icon,
                                           showArrow: showArrow, forceBelow: placeBelow,
-                                          arrowLeading: arrowLeading,
+                                          arrowTrailing: arrowTrailing,
                                           onDismiss: onDismiss)
                         .transition(.opacity)
                 }
@@ -418,8 +418,8 @@ private struct AnchoredCalloutBubble: View {
     var showArrow: Bool = true
     /// Force the bubble below the target (used for arrowless "floating under" callouts).
     var forceBelow: Bool = false
-    /// Pin the arrow near the bubble's leading edge instead of over the target's centre.
-    var arrowLeading: Bool = false
+    /// Pin the arrow near the bubble's trailing edge instead of over the target's centre.
+    var arrowTrailing: Bool = false
     let onDismiss: () -> Void
 
     @State private var size: CGSize = .zero
@@ -438,8 +438,8 @@ private struct AnchoredCalloutBubble: View {
         let centerY = placeAbove
             ? rect.minY - gap - arrowSpace - size.height / 2
             : rect.maxY + gap + arrowSpace + size.height / 2
-        let arrowX = arrowLeading
-            ? centerX - halfW + 22
+        let arrowX = arrowTrailing
+            ? centerX + halfW - 22
             : min(max(rect.midX, centerX - halfW + 14), centerX + halfW - 14)
 
         ZStack(alignment: .topLeading) {

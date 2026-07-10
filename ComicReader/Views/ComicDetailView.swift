@@ -144,7 +144,7 @@ struct ComicDetailView: View {
                 icon: nil,
                 showArrow: cockpitStep >= 2,     // step 1 floats under the cover, no arrow
                 placeBelow: cockpitStep == 1,
-                arrowLeading: cockpitStep == 2,  // point at the toggle label on the left
+                arrowTrailing: cockpitStep == 2,  // point at the toggle switch on the right
                 isPresented: cockpitStep != 0
             ) { advanceCockpitTips() }
             .onChange(of: help.isActive) { _, active in
