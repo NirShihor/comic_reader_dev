@@ -1852,7 +1852,7 @@ struct BubbleContentView: View {
         if s.isEmpty { return false }
         if s == e || s.contains(e) || e.contains(s) { return true }
         let (isMatch, score) = whisperService.compareText(spoken: s, expected: e)
-        return isMatch || score >= 0.67
+        return isMatch || score >= 0.66
     }
 
     private func normalizeEnglish(_ text: String) -> String {

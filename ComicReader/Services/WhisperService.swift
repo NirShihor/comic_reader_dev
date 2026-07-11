@@ -654,9 +654,8 @@ class WhisperService: ObservableObject {
     /// fraction of expected words that must match.
     // Default pass threshold for spoken-Spanish grading (compareText is used
     // only for spoken Spanish; meaning/translation use compareMeaning).
-    // History: 0.85 → 0.89 (tighten), then 0.89 → 0.86 (ease all speaking checks
-    // by 3 points).
-    func compareText(spoken: String, expected: String, passThreshold: Double = 0.86) -> (isCorrect: Bool, score: Double) {
+    // History: 0.85 → 0.89 (tighten), 0.89 → 0.86, then 0.86 → 0.85 (eased).
+    func compareText(spoken: String, expected: String, passThreshold: Double = 0.85) -> (isCorrect: Bool, score: Double) {
         let spokenClean = normalizeText(spoken)
         let expectedClean = normalizeText(expected)
 

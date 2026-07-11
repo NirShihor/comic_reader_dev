@@ -686,14 +686,14 @@ struct RepeatPracticeView: View {
                 return
             }
 
-            // Compare with expected text (86%)
-            let result = whisperService.compareText(spoken: transcription, expected: sentence.text, passThreshold: 0.86)
+            // Compare with expected text (85%)
+            let result = whisperService.compareText(spoken: transcription, expected: sentence.text, passThreshold: 0.85)
             var isCorrect = result.isCorrect
 
             // Check alternative texts
             if !isCorrect {
                 for alt in sentence.alternativeTexts {
-                    let altResult = whisperService.compareText(spoken: transcription, expected: alt, passThreshold: 0.86)
+                    let altResult = whisperService.compareText(spoken: transcription, expected: alt, passThreshold: 0.85)
                     if altResult.isCorrect {
                         isCorrect = true
                         break
@@ -1166,10 +1166,10 @@ struct RepeatPracticeView: View {
         }
 
         let score = Double(matchCount) / Double(expectedWords.count)
-        // Require 72%+ exact word match for English (lower than Spanish —
+        // Require 71%+ exact word match for English (lower than Spanish —
         // Whisper is less accurate with English in noisy/mobile conditions,
         // and the meaning check shouldn't punish loose-but-correct phrasing)
-        return score >= 0.72
+        return score >= 0.71
     }
 
     private func normalizeEnglish(_ text: String) -> String {
