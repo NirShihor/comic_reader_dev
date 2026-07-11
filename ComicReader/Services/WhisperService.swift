@@ -706,19 +706,22 @@ class WhisperService: ObservableObject {
         var usedSpokenIndices = Set<Int>()
 
         for (wordIdx, expectedWord) in expectedWords.enumerated() {
+            let isProperNoun = properNounIndices.contains(wordIdx)
+            var matched = false
+
             // Try exact match first
             if let idx = spokenWords.indices.first(where: { !usedSpokenIndices.contains($0) && spokenWords[$0] == expectedWord }) {
-                matchedCount += 1
+                matched = true
                 usedSpokenIndices.insert(idx)
             } else {
-                let isProperNoun = properNounIndices.contains(wordIdx)
                 // Fuzzy match: lenient for names, moderate for regular words
                 for (idx, spokenWord) in spokenWords.enumerated() where !usedSpokenIndices.contains(idx) {
                     let distance = levenshteinDistance(expectedWord, spokenWord)
                     let maxLen = max(expectedWord.count, spokenWord.count)
                     let matches: Bool
                     if isProperNoun {
-                        // Names: allow up to 50% difference (handles "Zik"/"Zeke", "Mía"/"Mia")
+                        // Names: generous, but only to CONSUME the spoken token so
+                        // the word counts stay aligned — they're never graded.
                         matches = maxLen > 0 && Double(distance) / Double(maxLen) <= 0.5
                     } else if singleWord {
                         // Single-word target: allow ~40% difference (handles
@@ -732,11 +735,18 @@ class WhisperService: ObservableObject {
                         matches = distance <= 1 || (maxLen >= 8 && distance <= 2)
                     }
                     if matches {
-                        matchedCount += 1
+                        matched = true
                         usedSpokenIndices.insert(idx)
                         break
                     }
                 }
+            }
+
+            // Proper names are never penalized: Whisper's spelling of a name is
+            // arbitrary ("Ollie" → "Oli"/"Olly") and names aren't the learning
+            // target — the line is graded on its Spanish words only.
+            if matched || isProperNoun {
+                matchedCount += 1
             }
         }
 
