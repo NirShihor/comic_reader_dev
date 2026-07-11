@@ -1937,16 +1937,15 @@ struct FloatingBubbleCard: View {
                 showArrow: false,
                 isPresented: showArrowsTip
             ) { dismissArrowsTip() }
-            // Walkthrough closer: an up-arrow callout under the "?" icon in the nav
-            // bar (the ? sits third from the trailing edge, hence the arrow inset).
+            // Walkthrough closer: an up-arrow callout under the "?" icon, placed
+            // exactly like the Library's "?" intro at the start of the flow.
             .overlay(alignment: .topTrailing) {
                 if showHelpReminderTip {
                     HelpIntroCallout(
-                        text: "Lastly, just a reminder that you can click here at any point if you need a reminder.",
-                        arrowInset: 100
+                        text: "Lastly, just a reminder that you can click here at any point if you need a reminder."
                     ) { dismissHelpReminderTip() }
                     .padding(.trailing, 10)
-                    .offset(y: -8)   // hug the nav bar
+                    .offset(y: -24)   // pull up toward the "?" (matches the Library intro)
                     .transition(.opacity.combined(with: .move(edge: .top)))
                     .zIndex(60)
                 }
