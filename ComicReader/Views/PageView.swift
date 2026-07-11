@@ -1901,6 +1901,9 @@ struct FloatingBubbleCard: View {
     @AppStorage("help.seen.story-bubble") private var seenBubbleTip = false
     @AppStorage("help.seen.story-arrows") private var seenArrowsTip = false
     @State private var showArrowsTip = false
+    // Closing chapter: after the arrows tip, point up at the "?" icon.
+    @AppStorage("help.seen.help-reminder") private var seenHelpReminderTip = false
+    @State private var showHelpReminderTip = false
     // True while "?" is replaying the card's tooltips — bypasses "seen" flags.
     @State private var helpReplay = false
 
@@ -1934,6 +1937,20 @@ struct FloatingBubbleCard: View {
                 showArrow: false,
                 isPresented: showArrowsTip
             ) { dismissArrowsTip() }
+            // Walkthrough closer: an up-arrow callout under the "?" icon in the nav
+            // bar (the ? sits third from the trailing edge, hence the arrow inset).
+            .overlay(alignment: .topTrailing) {
+                if showHelpReminderTip {
+                    HelpIntroCallout(
+                        text: "Lastly, just a reminder that you can click here at any point if you need a reminder.",
+                        arrowInset: 100
+                    ) { dismissHelpReminderTip() }
+                    .padding(.trailing, 10)
+                    .offset(y: -8)   // hug the nav bar
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .zIndex(60)
+                }
+            }
             // Word-popup guidance: hosted in its own window ABOVE the system word
             // popover (which draws over any in-view overlay, so a plain .overlay
             // here would be covered by it). Floats opposite the card as before.
@@ -1965,11 +1982,11 @@ struct FloatingBubbleCard: View {
                 if active {
                     helpReplay = true
                     if showWordDetailTip { showWordDetailTip = false }
-                    withAnimation { showArrowsTip = false }
+                    withAnimation { showArrowsTip = false; showHelpReminderTip = false }
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showPanelTip = true }
                 } else {
                     helpReplay = false
-                    withAnimation { showPanelTip = false; showArrowsTip = false }
+                    withAnimation { showPanelTip = false; showArrowsTip = false; showHelpReminderTip = false }
                     if showWordDetailTip { showWordDetailTip = false }
                 }
             }
@@ -2014,7 +2031,20 @@ struct FloatingBubbleCard: View {
         seenArrowsTip = true
         if showArrowsTip {
             withAnimation(.easeInOut(duration: 0.2)) { showArrowsTip = false }
-            // Last step of the card's sequence — end the "?" replay.
+            // Chain: close the walkthrough by pointing out the "?" icon.
+            if HelpDebug.forceShowTooltips || helpReplay || !seenHelpReminderTip {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showHelpReminderTip = true }
+                }
+            }
+        }
+    }
+
+    private func dismissHelpReminderTip() {
+        seenHelpReminderTip = true
+        if showHelpReminderTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showHelpReminderTip = false }
+            // Very last step — end the "?" replay.
             if helpReplay {
                 helpReplay = false
                 withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
