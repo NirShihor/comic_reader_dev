@@ -94,7 +94,7 @@ struct LibraryView: View {
         }
         .overlay(alignment: .top) {
             if showChooseCollection {
-                HelpIntroCallout(text: "Choose a collection.", icon: nil, showArrow: false) {
+                HelpIntroCallout(text: "Now choose a collection.", icon: nil, showArrow: false) {
                     withAnimation(.easeInOut(duration: 0.2)) { showChooseCollection = false }
                     seenChooseCollection = true
                 }

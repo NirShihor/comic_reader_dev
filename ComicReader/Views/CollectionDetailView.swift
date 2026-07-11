@@ -111,7 +111,7 @@ struct CollectionDetailView: View {
         .environmentObject(help)
         .anchoredCallout(
             targetID: "collection.download",
-            text: "You need to download comics to be able to read them.",
+            text: "You'll need to download the comics you wish to read, listen and learn from. Wait for the download to complete, then click on the comic.",
             isPresented: showDownloadTip
         ) {
             dismissDownloadTip()
