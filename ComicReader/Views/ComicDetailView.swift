@@ -182,7 +182,7 @@ struct ComicDetailView: View {
     private var cockpitText: String {
         switch cockpitStep {
         case 1: return "This is the Spanish learning comic cockpit. Decide if you want to simply read and listen, or practise with any of the different practice modes. It is recommended to read and listen to the comic at least once before starting to practise."
-        case 2: return "Prefer not to have to speak out loud? Change to silent exercises. You can close me to see the different exercise modes or scroll up and click the Start reading button."
+        case 2: return "Prefer not to speak at this time? Change to silent exercises. You can close me to see the different exercise modes or scroll up and click the Start reading button."
         default: return ""
         }
     }
