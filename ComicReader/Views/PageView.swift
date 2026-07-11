@@ -116,10 +116,17 @@ enum BubbleFill {
         let info = CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
         func readPixels(_ crop: CGImage) -> [UInt8]? {
             var b = [UInt8](repeating: 0, count: cw * ch * 4)
-            guard let c = CGContext(data: &b, width: cw, height: ch, bitsPerComponent: 8,
-                                    bytesPerRow: cw * 4, space: space, bitmapInfo: info) else { return nil }
-            c.draw(crop, in: CGRect(x: 0, y: 0, width: cw, height: ch))
-            return b
+            // The CGContext must live entirely inside withUnsafeMutableBytes: a
+            // pointer passed as `&array` is only valid for that ONE call, but the
+            // context STORES it — using the context afterwards read a dangling
+            // pointer (Release-only TestFlight crash in memmove/makeImage).
+            let ok = b.withUnsafeMutableBytes { buf -> Bool in
+                guard let c = CGContext(data: buf.baseAddress, width: cw, height: ch, bitsPerComponent: 8,
+                                        bytesPerRow: cw * 4, space: space, bitmapInfo: info) else { return false }
+                c.draw(crop, in: CGRect(x: 0, y: 0, width: cw, height: ch))
+                return true
+            }
+            return ok ? b : nil
         }
         guard let maskBuf = readPixels(maskCrop) else { return nil }
 
@@ -191,9 +198,14 @@ enum BubbleFill {
             if let ink = inkBuf, ink[i] < 150, ink[i + 1] < 150, ink[i + 2] < 150 { continue } // dark = text
             out[i] = R; out[i + 1] = G; out[i + 2] = B; out[i + 3] = 255
         }
-        guard let octx = CGContext(data: &out, width: cw, height: ch, bitsPerComponent: 8,
-                                   bytesPerRow: cw * 4, space: space, bitmapInfo: info),
-              let ocg = octx.makeImage() else { return nil }
+        // Create + snapshot the context inside withUnsafeMutableBytes so the
+        // buffer pointer stays valid for makeImage (see readPixels above).
+        let ocgOpt: CGImage? = out.withUnsafeMutableBytes { buf in
+            guard let octx = CGContext(data: buf.baseAddress, width: cw, height: ch, bitsPerComponent: 8,
+                                       bytesPerRow: cw * 4, space: space, bitmapInfo: info) else { return nil }
+            return octx.makeImage()
+        }
+        guard let ocg = ocgOpt else { return nil }
         let img = UIImage(cgImage: ocg)
         cache.setObject(img, forKey: cacheKey as NSString)
         return (img, region)
@@ -231,9 +243,14 @@ enum BubbleFill {
         let space = CGColorSpaceCreateDeviceRGB()
         let info = CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
         var maskBuf = [UInt8](repeating: 0, count: cw * ch * 4)
-        guard let c = CGContext(data: &maskBuf, width: cw, height: ch, bitsPerComponent: 8,
-                                bytesPerRow: cw * 4, space: space, bitmapInfo: info) else { return nil }
-        c.draw(maskCrop, in: CGRect(x: 0, y: 0, width: cw, height: ch))
+        // Context scoped inside withUnsafeMutableBytes — see BubbleFill.overlay.
+        let drewMask = maskBuf.withUnsafeMutableBytes { buf -> Bool in
+            guard let c = CGContext(data: buf.baseAddress, width: cw, height: ch, bitsPerComponent: 8,
+                                    bytesPerRow: cw * 4, space: space, bitmapInfo: info) else { return false }
+            c.draw(maskCrop, in: CGRect(x: 0, y: 0, width: cw, height: ch))
+            return true
+        }
+        guard drewMask else { return nil }
 
         func interior(_ x: Int, _ y: Int) -> Bool {
             let i = (y * cw + x) * 4
@@ -282,9 +299,13 @@ enum BubbleFill {
             let i = p * 4
             out[i] = 255; out[i + 1] = 255; out[i + 2] = 255; out[i + 3] = 255
         }
-        guard let octx = CGContext(data: &out, width: cw, height: ch, bitsPerComponent: 8,
-                                   bytesPerRow: cw * 4, space: space, bitmapInfo: info),
-              let ocg = octx.makeImage() else { return nil }
+        // Context scoped inside withUnsafeMutableBytes — see BubbleFill.overlay.
+        let ocgOpt: CGImage? = out.withUnsafeMutableBytes { buf in
+            guard let octx = CGContext(data: buf.baseAddress, width: cw, height: ch, bitsPerComponent: 8,
+                                       bytesPerRow: cw * 4, space: space, bitmapInfo: info) else { return nil }
+            return octx.makeImage()
+        }
+        guard let ocg = ocgOpt else { return nil }
         let img = UIImage(cgImage: ocg)
         cache.setObject(img, forKey: cacheKey as NSString)
         boundsCache.setObject(NSValue(cgRect: bounds), forKey: cacheKey as NSString)
