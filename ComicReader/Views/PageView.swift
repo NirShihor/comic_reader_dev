@@ -1943,11 +1943,11 @@ struct FloatingBubbleCard: View {
                     CalloutOverWindow.shared.show(AnyView(
                         VStack(spacing: 0) {
                             if atTop {
-                                wordDetailCallout
+                                wordDetailCallout.calloutWindowTappable()
                                 Spacer(minLength: 0)
                             } else {
                                 Spacer(minLength: 0)
-                                wordDetailCallout
+                                wordDetailCallout.calloutWindowTappable()
                             }
                         }
                         .padding(.top, atTop ? 64 : 0)

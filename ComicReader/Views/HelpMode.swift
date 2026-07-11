@@ -489,13 +489,38 @@ final class CalloutOverWindow {
         window?.isHidden = true
         window = nil
     }
+
+    /// The region (window coordinates) that should receive touches — the callout
+    /// itself. Everything else falls through to the app (and any popover) below.
+    func setTappable(_ frame: CGRect) {
+        window?.tappableFrame = frame
+    }
 }
 
 private final class PassthroughWindow: UIWindow {
+    var tappableFrame: CGRect = .zero
+
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        guard let view = super.hitTest(point, with: event) else { return nil }
-        // Empty (transparent) areas fall through to the app window below.
-        return view == rootViewController?.view ? nil : view
+        // SwiftUI hosts all content in ONE view, so "which subview was hit" can't
+        // distinguish the callout from empty space — gate on the reported frame.
+        guard tappableFrame.contains(point) else { return nil }
+        return super.hitTest(point, with: event)
+    }
+}
+
+extension View {
+    /// Report this view's frame as the tappable region of the CalloutOverWindow.
+    /// Apply to the callout content passed to `CalloutOverWindow.show`.
+    func calloutWindowTappable() -> some View {
+        background(
+            GeometryReader { g in
+                Color.clear
+                    .onAppear { CalloutOverWindow.shared.setTappable(g.frame(in: .global)) }
+                    .onChange(of: g.frame(in: .global)) { _, f in
+                        CalloutOverWindow.shared.setTappable(f)
+                    }
+            }
+        )
     }
 }
 
