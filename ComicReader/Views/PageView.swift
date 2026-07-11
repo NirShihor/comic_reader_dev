@@ -1943,10 +1943,10 @@ struct FloatingBubbleCard: View {
                 if showHelpReminderTip {
                     HelpIntroCallout(
                         text: "Lastly, just a reminder that you can click here at any point if you need a reminder.",
-                        arrowInset: 100   // the reader's "?" sits ~120pt in from the trailing edge
+                        arrowInset: 100   // the reader's "?" sits ~129pt in from the trailing edge
                     ) { dismissHelpReminderTip() }
-                    .padding(.trailing, 10)
-                    .offset(y: -8)   // hug the nav bar, arrow visible below it
+                    .padding(.trailing, 19)
+                    .offset(y: 10)   // just below the nav bar, arrow under the "?"
                     .transition(.opacity.combined(with: .move(edge: .top)))
                     .zIndex(60)
                 }
