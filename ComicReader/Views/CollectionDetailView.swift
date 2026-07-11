@@ -16,6 +16,8 @@ struct CollectionDetailView: View {
     // Once the user taps any Download, suppress the advice for the rest of this
     // collection — don't re-point it at the next episode's Download button.
     @State private var downloadTipDismissed = false
+    // True while "?" is replaying this screen's tooltip — bypasses the "seen" flags.
+    @State private var helpReplay = false
 
     // All episodes from the catalog (when loaded), in episode order.
     private var catalogEpisodes: [StoreComic] {
@@ -88,6 +90,11 @@ struct CollectionDetailView: View {
         seenDownloadTip = true
         if showDownloadTip {
             withAnimation(.easeInOut(duration: 0.2)) { showDownloadTip = false }
+            // Only tooltip on this screen — dismissing it ends the "?" replay.
+            if helpReplay {
+                helpReplay = false
+                withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+            }
         }
     }
 
@@ -119,7 +126,16 @@ struct CollectionDetailView: View {
         .onAppear { maybeShowDownloadTip() }
         .onChange(of: firstDownloadableID) { _, _ in maybeShowDownloadTip() }
         .onChange(of: help.isActive) { _, active in
-            if active, showDownloadTip { withAnimation { showDownloadTip = false } }
+            // "?" replays the download advice (when something is downloadable);
+            // turning help off hides it.
+            if active {
+                helpReplay = true
+                downloadTipDismissed = false
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showDownloadTip = true }
+            } else {
+                helpReplay = false
+                if showDownloadTip { withAnimation { showDownloadTip = false } }
+            }
         }
         .task {
             // Load the catalog here too, not just from the Library. Opening a

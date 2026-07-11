@@ -64,6 +64,8 @@ struct ComicDetailView: View {
     // HelpDebug.forceShowTooltips is on.
     @AppStorage("help.seen.comic-cockpit") private var seenCockpitTips = false
     @State private var cockpitStep = 0
+    // True while "?" is replaying the sequence — bypasses the "seen" flag.
+    @State private var helpReplay = false
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -148,7 +150,14 @@ struct ComicDetailView: View {
                 isPresented: cockpitStep != 0
             ) { advanceCockpitTips() }
             .onChange(of: help.isActive) { _, active in
-                if active, cockpitStep != 0 { withAnimation { cockpitStep = 0 } }
+                // "?" replays the cockpit sequence from step 1; off dismisses it.
+                if active {
+                    helpReplay = true
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { cockpitStep = 1 }
+                } else {
+                    helpReplay = false
+                    if cockpitStep != 0 { withAnimation { cockpitStep = 0 } }
+                }
             }
             .onChange(of: settingsManager.speakingEnabled) { _, _ in
                 // Its callout's action was taken — retire it.
@@ -206,6 +215,11 @@ struct ComicDetailView: View {
             } else {
                 cockpitStep = 0
                 seenCockpitTips = true
+                // End of a "?" replay — close help mode too.
+                if helpReplay {
+                    helpReplay = false
+                    help.isActive = false
+                }
             }
         }
     }

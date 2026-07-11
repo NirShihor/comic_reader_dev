@@ -382,6 +382,8 @@ struct PageView: View {
     // before the fix that only marks it seen while actually showing.)
     @AppStorage("help.seen.story-bubble") private var seenBubbleTip = false
     @State private var showBubbleTip = false
+    // True while "?" is replaying the page-level tooltips — bypasses "seen" flags.
+    @State private var helpReplay = false
 
     // Pages sorted by pageNumber for consistent navigation
     private var sortedPages: [Page] {
@@ -440,12 +442,15 @@ struct PageView: View {
 
     private func dismissCoverTip() {
         seenCoverTip = true
-        if showCoverTip { withAnimation(.easeInOut(duration: 0.2)) { showCoverTip = false } }
+        if showCoverTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showCoverTip = false }
+            if helpReplay { maybeShowSwipeTip() }   // replay: swipe hint is next
+        }
     }
 
     // MARK: - "Swipe to the next page" hint (chained after the word-popup guidance)
     private func maybeShowSwipeTip() {
-        if !HelpDebug.forceShowTooltips { guard !seenSwipeTip else { return } }
+        if !HelpDebug.forceShowTooltips && !helpReplay { guard !seenSwipeTip else { return } }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showSwipeTip = true }
         }
@@ -453,7 +458,14 @@ struct PageView: View {
 
     private func dismissSwipeTip() {
         seenSwipeTip = true
-        if showSwipeTip { withAnimation(.easeInOut(duration: 0.2)) { showSwipeTip = false } }
+        if showSwipeTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showSwipeTip = false }
+            // Last page-level step — end the "?" replay.
+            if helpReplay {
+                helpReplay = false
+                withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+            }
+        }
     }
 
     // MARK: - "Click on a bubble." hint (first story page after the swipe)
@@ -468,7 +480,10 @@ struct PageView: View {
 
     private func dismissBubbleTip() {
         seenBubbleTip = true
-        if showBubbleTip { withAnimation(.easeInOut(duration: 0.2)) { showBubbleTip = false } }
+        if showBubbleTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showBubbleTip = false }
+            if helpReplay { maybeShowSwipeTip() }   // replay: swipe hint is next
+        }
     }
 
     /// Where the open bubble's card sits (mirrors FloatingBubbleCard.anchorTop), so
@@ -1169,10 +1184,24 @@ struct PageView: View {
             }
         }
         .onChange(of: help.isActive) { _, active in
+            // "?" replays the page-level sequence (cover text / bubble → swipe).
+            // With a bubble card or panel open, the card runs its own sequence.
             if active {
-                if showCoverTip { withAnimation { showCoverTip = false } }
-                if showSwipeTip { withAnimation { showSwipeTip = false } }
-                if showBubbleTip { withAnimation { showBubbleTip = false } }
+                guard selectedBubbleIndex == nil, selectedPanel == nil else { return }
+                helpReplay = true
+                withAnimation { showSwipeTip = false }
+                if currentPageIndex == 0 {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showCoverTip = true }
+                } else {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showBubbleTip = true }
+                }
+            } else {
+                helpReplay = false
+                withAnimation {
+                    showCoverTip = false
+                    showSwipeTip = false
+                    showBubbleTip = false
+                }
             }
         }
         .toolbarBackground(.hidden, for: .navigationBar)
@@ -1872,6 +1901,8 @@ struct FloatingBubbleCard: View {
     @AppStorage("help.seen.story-bubble") private var seenBubbleTip = false
     @AppStorage("help.seen.story-arrows") private var seenArrowsTip = false
     @State private var showArrowsTip = false
+    // True while "?" is replaying the card's tooltips — bypasses "seen" flags.
+    @State private var helpReplay = false
 
     private let maxContentHeight: CGFloat = 340
 
@@ -1929,10 +1960,17 @@ struct FloatingBubbleCard: View {
             }
             .onAppear { startCardTips() }
             .onChange(of: help.isActive) { _, active in
+                // "?" while the card is open replays its sequence: panel overview →
+                // word-popup guidance → arrows. Off dismisses whatever is showing.
                 if active {
-                    if showPanelTip { withAnimation { showPanelTip = false } }
-                    if showWordDetailTip { withAnimation { showWordDetailTip = false } }
-                    if showArrowsTip { withAnimation { showArrowsTip = false } }
+                    helpReplay = true
+                    if showWordDetailTip { showWordDetailTip = false }
+                    withAnimation { showArrowsTip = false }
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showPanelTip = true }
+                } else {
+                    helpReplay = false
+                    withAnimation { showPanelTip = false; showArrowsTip = false }
+                    if showWordDetailTip { showWordDetailTip = false }
                 }
             }
             // Stop audio when the whole card closes (not while stepping bubbles —
@@ -1940,6 +1978,11 @@ struct FloatingBubbleCard: View {
             .onDisappear {
                 AudioManager.shared.stop()
                 if showWordDetailTip { dismissWordDetailTip() }
+                // The card's replay can't continue without the card — end help.
+                if helpReplay {
+                    helpReplay = false
+                    help.isActive = false
+                }
             }
     }
 
@@ -1969,13 +2012,28 @@ struct FloatingBubbleCard: View {
 
     private func dismissArrowsTip() {
         seenArrowsTip = true
-        if showArrowsTip { withAnimation(.easeInOut(duration: 0.2)) { showArrowsTip = false } }
+        if showArrowsTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showArrowsTip = false }
+            // Last step of the card's sequence — end the "?" replay.
+            if helpReplay {
+                helpReplay = false
+                withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+            }
+        }
     }
 
     // Dismissed by tapping it, tapping a word, or opening "?".
     private func dismissPanelTip() {
         seenPanelTip = true
-        if showPanelTip { withAnimation(.easeInOut(duration: 0.2)) { showPanelTip = false } }
+        if showPanelTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showPanelTip = false }
+            // Replay: the word-popup guidance is next in the card's sequence.
+            if helpReplay {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showWordDetailTip = true }
+                }
+            }
+        }
     }
 
     // A word was tapped: retire the panel tip, then explain the word popup (once).
@@ -1992,7 +2050,14 @@ struct FloatingBubbleCard: View {
         seenWordDetailTip = true
         if showWordDetailTip {
             withAnimation(.easeInOut(duration: 0.2)) { showWordDetailTip = false }
-            onWordTipDismissed()   // chain: the page shows the swipe hint next
+            if helpReplay {
+                // Replay: the arrows tip is next in the card's sequence.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showArrowsTip = true }
+                }
+            } else {
+                onWordTipDismissed()   // chain: the page shows the swipe hint next
+            }
         }
     }
 

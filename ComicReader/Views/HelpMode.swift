@@ -76,26 +76,10 @@ private struct ExplainsModifier: ViewModifier {
     let text: String
 
     func body(content: Content) -> some View {
+        // The bordered tap-to-explain highlights are retired — help mode now
+        // replays each screen's amber onboarding callouts instead. The tag is
+        // kept as a pass-through so call sites (and the anchors) stay in place.
         content
-            .overlay {
-                if help.isActive {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(Color.accentColor.opacity(0.16))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                .strokeBorder(Color.accentColor, lineWidth: 1.5)
-                        )
-                        .padding(-3)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            withAnimation(.easeInOut(duration: 0.15)) {
-                                help.tap(id, title, text)
-                            }
-                        }
-                        .transition(.opacity)
-                }
-            }
             .anchorPreference(key: HelpAnchorKey.self, value: .bounds) { [id: $0] }
     }
 }
@@ -274,27 +258,9 @@ struct HelpHint: View {
     @State private var nudge = false
 
     var body: some View {
-        if help.isActive {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .offset(x: animatedSwipe ? (nudge ? 5 : -5) : 0)
-                Text(label)
-                    .fontWeight(.semibold)
-            }
-            .font(.caption)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 7)
-            .background(Capsule().fill(.ultraThinMaterial))
-            .explains(title, text, id: "hint.\(title)")
-            .transition(.scale.combined(with: .opacity))
-            .onAppear {
-                if animatedSwipe {
-                    withAnimation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true)) {
-                        nudge = true
-                    }
-                }
-            }
-        }
+        // Retired along with the bordered highlights — help mode now replays the
+        // amber onboarding callouts, so the old gesture chips draw nothing.
+        EmptyView()
     }
 }
 

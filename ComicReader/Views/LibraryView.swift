@@ -20,6 +20,8 @@ struct LibraryView: View {
     @State private var showLibraryTitleTip = false
     @AppStorage("help.seen.choose-collection") private var seenChooseCollection = false
     @State private var showChooseCollection = false
+    // True while "?" is replaying the sequence — bypasses the "seen" flags.
+    @State private var helpReplay = false
 
     private var showInitialLoader: Bool {
         localStorage.isLoading && localStorage.downloadedComics.isEmpty
@@ -55,7 +57,7 @@ struct LibraryView: View {
                     withAnimation(.easeInOut(duration: 0.2)) { showLibraryIntro = false }
                     seenLibraryIntro = true
                     // Sequence: reveal the library-title tip once the "?" intro is done.
-                    if HelpDebug.forceShowTooltips || !seenLibraryTitleTip {
+                    if HelpDebug.forceShowTooltips || helpReplay || !seenLibraryTitleTip {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryTitleTip = true }
                         }
@@ -80,7 +82,7 @@ struct LibraryView: View {
                     withAnimation(.easeInOut(duration: 0.2)) { showLibraryTitleTip = false }
                     seenLibraryTitleTip = true
                     // Sequence: the "Choose a collection." prompt follows the title tip.
-                    if HelpDebug.forceShowTooltips || !seenChooseCollection {
+                    if HelpDebug.forceShowTooltips || helpReplay || !seenChooseCollection {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showChooseCollection = true }
                         }
@@ -97,6 +99,11 @@ struct LibraryView: View {
                 HelpIntroCallout(text: "Now choose a collection.", icon: nil, showArrow: false) {
                     withAnimation(.easeInOut(duration: 0.2)) { showChooseCollection = false }
                     seenChooseCollection = true
+                    // Last step of the replay — close help mode.
+                    if helpReplay {
+                        helpReplay = false
+                        withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+                    }
                 }
                 .padding(.top, 8)
                 .transition(.opacity.combined(with: .move(edge: .top)))
@@ -122,11 +129,19 @@ struct LibraryView: View {
             }
         }
         .onChange(of: help.isActive) { _, active in
-            // If they tap "?" the callouts have done their job — dismiss them.
+            // "?" (or the blue strip) replays this screen's tooltip sequence from
+            // the start; turning help off dismisses whatever is showing.
             if active {
-                if showLibraryIntro { withAnimation { showLibraryIntro = false } }
-                if showLibraryTitleTip { withAnimation { showLibraryTitleTip = false } }
-                if showChooseCollection { withAnimation { showChooseCollection = false } }
+                helpReplay = true
+                withAnimation { showLibraryTitleTip = false; showChooseCollection = false }
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryIntro = true }
+            } else {
+                helpReplay = false
+                withAnimation {
+                    showLibraryIntro = false
+                    showLibraryTitleTip = false
+                    showChooseCollection = false
+                }
             }
         }
         .task {
