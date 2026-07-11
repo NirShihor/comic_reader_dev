@@ -1942,7 +1942,7 @@ struct FloatingBubbleCard: View {
             .overlay(alignment: .topTrailing) {
                 if showHelpReminderTip {
                     HelpIntroCallout(
-                        text: "Lastly, just a reminder that you can click here at any point if you need a reminder.",
+                        text: "Lastly, just a reminder that you can click here at any point if you need to revisit any of these help items.",
                         arrowInset: 100   // the reader's "?" sits ~129pt in from the trailing edge
                     ) { dismissHelpReminderTip() }
                     .padding(.trailing, 19)
