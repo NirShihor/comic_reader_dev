@@ -1903,19 +1903,28 @@ struct FloatingBubbleCard: View {
                 showArrow: false,
                 isPresented: showArrowsTip
             ) { dismissArrowsTip() }
-            // Word-popup guidance: floats on the opposite screen edge from the card,
-            // so it clears the system popover (which opens off the card's words).
-            .overlay(alignment: anchorTop ? .bottom : .top) {
-                if showWordDetailTip {
-                    HelpIntroCallout(
-                        text: "Here you can listen and see the meaning of individual words and learn about their different forms (if they have any) by clicking More. If you want to find out more about the word - click on Explain further. You can also add words to your personal vocabulary collection. Now click me to close.",
-                        icon: "hand.tap.fill",
-                        maxWidth: 300,
-                        showArrow: false
-                    ) { dismissWordDetailTip() }
-                    .padding(anchorTop ? .bottom : .top, anchorTop ? 40 : 8)
-                    .transition(.opacity.combined(with: .move(edge: anchorTop ? .bottom : .top)))
-                    .zIndex(60)
+            // Word-popup guidance: hosted in its own window ABOVE the system word
+            // popover (which draws over any in-view overlay, so a plain .overlay
+            // here would be covered by it). Floats opposite the card as before.
+            .onChange(of: showWordDetailTip) { _, show in
+                if show {
+                    let atTop = !anchorTop   // card at the bottom → tip at the top
+                    CalloutOverWindow.shared.show(AnyView(
+                        VStack(spacing: 0) {
+                            if atTop {
+                                wordDetailCallout
+                                Spacer(minLength: 0)
+                            } else {
+                                Spacer(minLength: 0)
+                                wordDetailCallout
+                            }
+                        }
+                        .padding(.top, atTop ? 64 : 0)
+                        .padding(.bottom, atTop ? 0 : 90)   // clear the tab bar
+                        .frame(maxWidth: .infinity)
+                    ))
+                } else {
+                    CalloutOverWindow.shared.hide()
                 }
             }
             .onAppear { startCardTips() }
@@ -1928,7 +1937,19 @@ struct FloatingBubbleCard: View {
             }
             // Stop audio when the whole card closes (not while stepping bubbles —
             // the card persists across steps, only the inner content is rebuilt).
-            .onDisappear { AudioManager.shared.stop() }
+            .onDisappear {
+                AudioManager.shared.stop()
+                if showWordDetailTip { dismissWordDetailTip() }
+            }
+    }
+
+    private var wordDetailCallout: some View {
+        HelpIntroCallout(
+            text: "You can listen and see the meaning of individual words and learn about their different forms (if they have any) by clicking More. If you want to find out more about the word - click on Explain further. You can also add words to your personal vocabulary collection. Now click me to close.",
+            icon: "hand.tap.fill",
+            maxWidth: 300,
+            showArrow: false
+        ) { dismissWordDetailTip() }
     }
 
     private func startCardTips() {

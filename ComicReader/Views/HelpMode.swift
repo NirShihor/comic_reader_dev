@@ -493,6 +493,46 @@ private struct AnchoredCalloutBubble: View {
     }
 }
 
+// MARK: - Above-popover callout window
+
+/// Hosts a callout in its own UIWindow ABOVE system presentations (popovers,
+/// sheets), so onboarding stays visible when a system popup opens on top of the
+/// app. Touches on transparent areas pass through to whatever is underneath
+/// (including the popover); only the callout itself is tappable.
+@MainActor
+final class CalloutOverWindow {
+    static let shared = CalloutOverWindow()
+
+    private var window: PassthroughWindow?
+
+    func show(_ view: AnyView) {
+        hide()
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        guard let scene = scenes.first(where: { $0.activationState == .foregroundActive }) ?? scenes.first
+        else { return }
+        let host = UIHostingController(rootView: view)
+        host.view.backgroundColor = .clear
+        let w = PassthroughWindow(windowScene: scene)
+        w.windowLevel = .alert + 1
+        w.rootViewController = host
+        w.isHidden = false
+        window = w
+    }
+
+    func hide() {
+        window?.isHidden = true
+        window = nil
+    }
+}
+
+private final class PassthroughWindow: UIWindow {
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard let view = super.hitTest(point, with: event) else { return nil }
+        // Empty (transparent) areas fall through to the app window below.
+        return view == rootViewController?.view ? nil : view
+    }
+}
+
 // MARK: - Help intro callout
 
 /// A one-time callout that points up at the "?" help button (top-right), telling
