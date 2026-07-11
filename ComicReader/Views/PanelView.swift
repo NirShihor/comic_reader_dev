@@ -1129,7 +1129,7 @@ struct PanelView: View {
 
         // Fuzzy match with relaxed threshold
         let (isMatch, matchScore) = whisperService.compareText(spoken: spokenNorm, expected: expectedNorm)
-        if isMatch || matchScore >= 0.7 { return true }
+        if isMatch || matchScore >= 0.67 { return true }
 
         return false
     }
