@@ -11,6 +11,14 @@ struct CollectionDetailView: View {
     @StateObject private var storeService = ComicStoreService.shared
     @StateObject private var help = HelpModeController()
 
+    @AppStorage("help.seen.collection-download") private var seenDownloadTip = false
+    @State private var showDownloadTip = false
+    // Once the user taps any Download, suppress the advice for the rest of this
+    // collection — don't re-point it at the next episode's Download button.
+    @State private var downloadTipDismissed = false
+    // True while "?" is replaying this screen's tooltip — bypasses the "seen" flags.
+    @State private var helpReplay = false
+
     // All episodes from the catalog (when loaded), in episode order.
     private var catalogEpisodes: [StoreComic] {
         storeService.catalog
@@ -61,6 +69,35 @@ struct CollectionDetailView: View {
         localStorage.downloadedComics.first { $0.id == id }
     }
 
+    // First episode that still needs downloading — the onboarding callout points here.
+    private var firstDownloadableID: String? {
+        catalogEpisodes.first { downloadedComic($0.id) == nil }?.id
+    }
+
+    private func maybeShowDownloadTip() {
+        guard firstDownloadableID != nil, !showDownloadTip, !downloadTipDismissed else { return }
+        if !HelpDebug.forceShowTooltips { guard !seenDownloadTip else { return } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            guard firstDownloadableID != nil, !downloadTipDismissed else { return }
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showDownloadTip = true }
+        }
+    }
+
+    // Tapping any Download dismisses the advice and stops it reappearing for the
+    // next episode in this collection.
+    private func dismissDownloadTip() {
+        downloadTipDismissed = true
+        seenDownloadTip = true
+        if showDownloadTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showDownloadTip = false }
+            // Only tooltip on this screen — dismissing it ends the "?" replay.
+            if helpReplay {
+                helpReplay = false
+                withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+            }
+        }
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -79,6 +116,27 @@ struct CollectionDetailView: View {
         }
         .helpTooltipLayer()
         .environmentObject(help)
+        .anchoredCallout(
+            targetID: "collection.download",
+            text: "You'll need to download the comics you wish to read, listen and learn from. Wait for the download to complete, then click on the comic.",
+            isPresented: showDownloadTip
+        ) {
+            dismissDownloadTip()
+        }
+        .onAppear { maybeShowDownloadTip() }
+        .onChange(of: firstDownloadableID) { _, _ in maybeShowDownloadTip() }
+        .onChange(of: help.isActive) { _, active in
+            // "?" replays the download advice (when something is downloadable);
+            // turning help off hides it.
+            if active {
+                helpReplay = true
+                downloadTipDismissed = false
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showDownloadTip = true }
+            } else {
+                helpReplay = false
+                if showDownloadTip { withAnimation { showDownloadTip = false } }
+            }
+        }
         .task {
             // Load the catalog here too, not just from the Library. Opening a
             // collection before the Library's fetch has landed (or if it failed)
@@ -87,6 +145,8 @@ struct CollectionDetailView: View {
             if storeService.catalog.isEmpty && !storeService.isLoadingCatalog {
                 await storeService.fetchCatalog()
             }
+            // Catalog may have only just landed — re-check now that episodes exist.
+            maybeShowDownloadTip()
         }
         .refreshable {
             await storeService.fetchCatalog()
@@ -179,7 +239,9 @@ struct CollectionDetailView: View {
                             comic: ep,
                             onOpenComic: nil,
                             compact: true,
-                            episodeLabel: "Ep. \(ep.episodeNumber ?? index + 1)"
+                            episodeLabel: "Ep. \(ep.episodeNumber ?? index + 1)",
+                            downloadAnchorID: ep.id == firstDownloadableID ? "collection.download" : nil,
+                            onDownloadStart: { dismissDownloadTip() }
                         )
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 12))

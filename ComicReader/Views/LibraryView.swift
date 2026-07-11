@@ -14,6 +14,14 @@ struct LibraryView: View {
     @State private var searchText = ""
     @State private var selectedLevel: String? = nil
     @StateObject private var help = HelpModeController()
+    @AppStorage("help.seen.library-intro") private var seenLibraryIntro = false
+    @State private var showLibraryIntro = false
+    @AppStorage("help.seen.library-title") private var seenLibraryTitleTip = false
+    @State private var showLibraryTitleTip = false
+    @AppStorage("help.seen.choose-collection") private var seenChooseCollection = false
+    @State private var showChooseCollection = false
+    // True while "?" is replaying the sequence — bypasses the "seen" flags.
+    @State private var helpReplay = false
 
     private var showInitialLoader: Bool {
         localStorage.isLoading && localStorage.downloadedComics.isEmpty
@@ -43,6 +51,99 @@ struct LibraryView: View {
         }
         .helpTooltipLayer()
         .environmentObject(help)
+        .overlay(alignment: .topTrailing) {
+            if showLibraryIntro {
+                HelpIntroCallout(text: "Help is on hand at any point. Just click here. You can click me to close.") {
+                    withAnimation(.easeInOut(duration: 0.2)) { showLibraryIntro = false }
+                    seenLibraryIntro = true
+                    // Sequence: reveal the library-title tip once the "?" intro is done.
+                    if HelpDebug.forceShowTooltips || helpReplay || !seenLibraryTitleTip {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryTitleTip = true }
+                        }
+                    }
+                }
+                .padding(.trailing, 10)
+                .padding(.top, 0)
+                .offset(y: -24)   // pull up toward the "?" in the nav bar (~50% closer)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+                .zIndex(50)
+            }
+        }
+        .overlay(alignment: .topLeading) {
+            if showLibraryTitleTip {
+                HelpIntroCallout(
+                    text: "This is your library. It contains collections of comics. A collection is a series of comics that use the same theme, characters and story line.",
+                    icon: "books.vertical.fill",
+                    arrowEdge: .leading,
+                    arrowInset: 22,
+                    maxWidth: 280
+                ) {
+                    withAnimation(.easeInOut(duration: 0.2)) { showLibraryTitleTip = false }
+                    seenLibraryTitleTip = true
+                    // Sequence: the "Choose a collection." prompt follows the title tip.
+                    if HelpDebug.forceShowTooltips || helpReplay || !seenChooseCollection {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showChooseCollection = true }
+                        }
+                    }
+                }
+                .padding(.leading, 10)
+                .offset(y: -8)   // pull up toward the "Library" title
+                .transition(.opacity.combined(with: .move(edge: .top)))
+                .zIndex(50)
+            }
+        }
+        .overlay(alignment: .top) {
+            if showChooseCollection {
+                HelpIntroCallout(text: "Now choose a collection.", icon: nil, showArrow: false) {
+                    withAnimation(.easeInOut(duration: 0.2)) { showChooseCollection = false }
+                    seenChooseCollection = true
+                    // Last step of the replay — close help mode.
+                    if helpReplay {
+                        helpReplay = false
+                        withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+                    }
+                }
+                .padding(.top, 8)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+                .zIndex(50)
+            }
+        }
+        .onAppear {
+            // Show the "?" intro first. The library-title tip only opens once the
+            // "?" intro has been seen — this session (via its dismiss) or a prior one;
+            // the "Choose a collection." prompt is last.
+            if HelpDebug.forceShowTooltips || !seenLibraryIntro {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryIntro = true }
+                }
+            } else if !seenLibraryTitleTip {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryTitleTip = true }
+                }
+            } else if !seenChooseCollection {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showChooseCollection = true }
+                }
+            }
+        }
+        .onChange(of: help.isActive) { _, active in
+            // "?" (or the blue strip) replays this screen's tooltip sequence from
+            // the start; turning help off dismisses whatever is showing.
+            if active {
+                helpReplay = true
+                withAnimation { showLibraryTitleTip = false; showChooseCollection = false }
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryIntro = true }
+            } else {
+                helpReplay = false
+                withAnimation {
+                    showLibraryIntro = false
+                    showLibraryTitleTip = false
+                    showChooseCollection = false
+                }
+            }
+        }
         .task {
             // Pull the catalog so available comics + author-set order load.
             await storeService.fetchCatalog()

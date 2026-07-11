@@ -76,26 +76,10 @@ private struct ExplainsModifier: ViewModifier {
     let text: String
 
     func body(content: Content) -> some View {
+        // The bordered tap-to-explain highlights are retired — help mode now
+        // replays each screen's amber onboarding callouts instead. The tag is
+        // kept as a pass-through so call sites (and the anchors) stay in place.
         content
-            .overlay {
-                if help.isActive {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(Color.accentColor.opacity(0.16))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                .strokeBorder(Color.accentColor, lineWidth: 1.5)
-                        )
-                        .padding(-3)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            withAnimation(.easeInOut(duration: 0.15)) {
-                                help.tap(id, title, text)
-                            }
-                        }
-                        .transition(.opacity)
-                }
-            }
             .anchorPreference(key: HelpAnchorKey.self, value: .bounds) { [id: $0] }
     }
 }
@@ -109,48 +93,14 @@ extension View {
     /// on screens where a panel occupies the bottom (e.g. the reader's bubble popup),
     /// so the strip doesn't cover it.
     func helpTooltipLayer(bannerEdge: VerticalEdge = .bottom) -> some View {
+        // (bannerEdge kept for call-site compatibility — the blue "help is on"
+        // banner is retired now that ? replays the amber tooltip sequences,
+        // which close themselves and can be dismissed by tapping ? again.)
         overlayPreferenceValue(HelpAnchorKey.self) { anchors in
             GeometryReader { proxy in
                 HelpTooltipOverlay(anchors: anchors, proxy: proxy)
             }
             .ignoresSafeArea()
-        }
-        // A persistent banner (respecting the safe area) telling the user how to
-        // close help — otherwise the auto-opened explainers look stuck.
-        .overlay(alignment: bannerEdge == .top ? .top : .bottom) { HelpCloseBanner(edge: bannerEdge) }
-    }
-}
-
-/// Shown at the top while help mode is on, so users know to tap "?" to close.
-/// Tapping the banner itself also closes help.
-private struct HelpCloseBanner: View {
-    var edge: VerticalEdge = .bottom
-    @EnvironmentObject private var help: HelpModeController
-
-    var body: some View {
-        if help.isActive {
-            Button {
-                withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "questionmark")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.blue)
-                        .frame(width: 20, height: 20)
-                        .background(Circle().fill(.white))
-                    Text("Help is on — tap ? (top right) or here to close")
-                        .font(.footnote.weight(.medium))
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(Capsule().fill(Color.blue))
-                .shadow(color: .black.opacity(0.2), radius: 6, y: 2)
-            }
-            .buttonStyle(.plain)
-            .padding(edge == .top ? .top : .bottom, 10)
-            .transition(.move(edge: edge == .top ? .top : .bottom).combined(with: .opacity))
-            .zIndex(100)
         }
     }
 }
@@ -161,9 +111,9 @@ private struct HelpTooltipOverlay: View {
     @EnvironmentObject private var help: HelpModeController
     @State private var size: CGSize = .zero
 
-    private let arrowH: CGFloat = 8
+    private let arrowH: CGFloat = 4
     private let arrowW: CGFloat = 18
-    private let gap: CGFloat = 8
+    private let gap: CGFloat = 0   // hug the target element
     private let margin: CGFloat = 12
 
     var body: some View {
@@ -274,27 +224,9 @@ struct HelpHint: View {
     @State private var nudge = false
 
     var body: some View {
-        if help.isActive {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .offset(x: animatedSwipe ? (nudge ? 5 : -5) : 0)
-                Text(label)
-                    .fontWeight(.semibold)
-            }
-            .font(.caption)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 7)
-            .background(Capsule().fill(.ultraThinMaterial))
-            .explains(title, text, id: "hint.\(title)")
-            .transition(.scale.combined(with: .opacity))
-            .onAppear {
-                if animatedSwipe {
-                    withAnimation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true)) {
-                        nudge = true
-                    }
-                }
-            }
-        }
+        // Retired along with the bordered highlights — help mode now replays the
+        // amber onboarding callouts, so the old gesture chips draw nothing.
+        EmptyView()
     }
 }
 
@@ -309,5 +241,298 @@ struct HelpModeButton: View {
             Image(systemName: help.isActive ? "questionmark.circle.fill" : "questionmark.circle")
         }
         .accessibilityLabel(help.isActive ? "Exit help" : "Help")
+    }
+}
+
+// MARK: - First-visit auto-trigger
+
+enum HelpDebug {
+    /// While true, first-run tooltips show EVERY time (ignoring their "seen"
+    /// memory) so they can be reviewed without reinstalling. DEBUG builds only —
+    /// release/TestFlight always behaves once-only, so nothing leaks to users.
+    /// To test real once-only behaviour in a debug build, flip this to false.
+    static var forceShowTooltips: Bool {
+        // Set to true (DEBUG only) to review every tooltip without reinstalling.
+        // Left false so tooltips behave once-only, matching release/TestFlight.
+        return false
+    }
+}
+
+extension View {
+    /// Auto-open help mode the FIRST time this screen/element is seen (per `key`,
+    /// remembered forever), then never again automatically — the "?" button still
+    /// toggles it on demand as usual. Apply AFTER `.environmentObject(help)`, and
+    /// pass the same `help` controller so it flips the right one.
+    func helpFirstVisit(_ key: String, _ help: HelpModeController) -> some View {
+        modifier(HelpFirstVisit(key: key, help: help))
+    }
+}
+
+private struct HelpFirstVisit: ViewModifier {
+    let help: HelpModeController
+    @AppStorage private var seen: Bool
+
+    init(key: String, help: HelpModeController) {
+        self.help = help
+        _seen = AppStorage(wrappedValue: false, "help.seen.\(key)")
+    }
+
+    func body(content: Content) -> some View {
+        content.onAppear {
+            if !HelpDebug.forceShowTooltips {
+                guard !seen else { return }
+                seen = true
+            }
+            // Let the screen settle before the highlights appear.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                withAnimation(.easeInOut(duration: 0.2)) { help.isActive = true }
+            }
+        }
+    }
+}
+
+// MARK: - Anchored callout (amber bubble that points at a specific element)
+//
+// Unlike HelpIntroCallout (manually placed at a screen corner), this one reads
+// the exact on-screen frame of a tagged element via anchor preferences and draws
+// an amber bubble with an arrow pointing right at it — so it tracks the element
+// even inside a scroll view. Tag the target with `.calloutAnchor("id")` and draw
+// the bubble at the screen root with `.anchoredCallout(...)`.
+
+private struct CalloutAnchorKey: PreferenceKey {
+    static var defaultValue: [String: Anchor<CGRect>] = [:]
+    static func reduce(value: inout [String: Anchor<CGRect>],
+                       nextValue: () -> [String: Anchor<CGRect>]) {
+        value.merge(nextValue()) { current, _ in current }
+    }
+}
+
+extension View {
+    /// Mark this view as a target that an `.anchoredCallout` can point at.
+    func calloutAnchor(_ id: String) -> some View {
+        anchorPreference(key: CalloutAnchorKey.self, value: .bounds) { [id: $0] }
+    }
+
+    /// Conditionally tag — e.g. only the cover's title bubble inside a ForEach.
+    @ViewBuilder
+    func calloutAnchorIf(_ condition: Bool, _ id: String) -> some View {
+        if condition { calloutAnchor(id) } else { self }
+    }
+
+    /// Draw an amber callout bubble pointing at the `targetID` element while
+    /// `isPresented` is true. Apply at the screen root, above the content that
+    /// carries the matching `.calloutAnchor(targetID)`. Tap the bubble to dismiss.
+    func anchoredCallout(targetID: String,
+                         text: String,
+                         icon: String? = "arrow.down.circle.fill",
+                         showArrow: Bool = true,
+                         placeBelow: Bool = false,
+                         arrowTrailing: Bool = false,
+                         isPresented: Bool,
+                         onDismiss: @escaping () -> Void) -> some View {
+        overlayPreferenceValue(CalloutAnchorKey.self) { anchors in
+            GeometryReader { proxy in
+                if isPresented, let anchor = anchors[targetID] {
+                    AnchoredCalloutBubble(rect: proxy[anchor], container: proxy.size,
+                                          text: text, icon: icon,
+                                          showArrow: showArrow, forceBelow: placeBelow,
+                                          arrowTrailing: arrowTrailing,
+                                          onDismiss: onDismiss)
+                        .transition(.opacity)
+                }
+            }
+            .ignoresSafeArea()
+        }
+    }
+}
+
+private struct AnchoredCalloutBubble: View {
+    let rect: CGRect
+    let container: CGSize
+    let text: String
+    var icon: String?
+    var showArrow: Bool = true
+    /// Force the bubble below the target (used for arrowless "floating under" callouts).
+    var forceBelow: Bool = false
+    /// Pin the arrow near the bubble's trailing edge instead of over the target's centre.
+    var arrowTrailing: Bool = false
+    let onDismiss: () -> Void
+
+    @State private var size: CGSize = .zero
+
+    private let accent = Color(red: 240/255, green: 187/255, blue: 41/255)   // #F0BB29
+    private let arrowH: CGFloat = 10
+    private let arrowW: CGFloat = 20
+    private let margin: CGFloat = 12
+
+    var body: some View {
+        let placeAbove = forceBelow ? false : (rect.midY > container.height / 2)
+        let arrowSpace: CGFloat = showArrow ? arrowH : 0
+        let gap: CGFloat = showArrow ? 4 : 12
+        let halfW = size.width / 2
+        let centerX = min(max(rect.midX, margin + halfW), container.width - margin - halfW)
+        let centerY = placeAbove
+            ? rect.minY - gap - arrowSpace - size.height / 2
+            : rect.maxY + gap + arrowSpace + size.height / 2
+        let arrowX = arrowTrailing
+            ? centerX + halfW - 22
+            : min(max(rect.midX, centerX - halfW + 14), centerX + halfW - 14)
+
+        ZStack(alignment: .topLeading) {
+            if showArrow {
+                Triangle()
+                    .fill(accent)
+                    .frame(width: arrowW, height: arrowH)
+                    .rotationEffect(.degrees(placeAbove ? 180 : 0))
+                    .position(
+                        x: arrowX,
+                        y: placeAbove
+                            ? centerY + size.height / 2 + arrowH / 2 - 0.5
+                            : centerY - size.height / 2 - arrowH / 2 + 0.5
+                    )
+            }
+
+            bubbleBody
+                .background(
+                    GeometryReader { g in Color.clear.preference(key: SizeKey.self, value: g.size) }
+                )
+                .onPreferenceChange(SizeKey.self) { size = $0 }
+                .position(x: centerX, y: centerY)
+        }
+        .frame(width: container.width, height: container.height)
+    }
+
+    private var bubbleBody: some View {
+        HStack(alignment: .top, spacing: 8) {
+            if let icon {
+                Image(systemName: icon).font(.subheadline)
+            }
+            Text(text)
+                .font(.subheadline).fontWeight(.medium)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(Color(red: 0.24, green: 0.15, blue: 0.02))
+        .padding(.horizontal, 14).padding(.vertical, 11)
+        .frame(maxWidth: 260, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(accent)
+                .shadow(color: .black.opacity(0.22), radius: 10, y: 4)
+        )
+        .contentShape(Rectangle())
+        .onTapGesture { onDismiss() }
+    }
+}
+
+// MARK: - Above-popover callout window
+
+/// Hosts a callout in its own UIWindow ABOVE system presentations (popovers,
+/// sheets), so onboarding stays visible when a system popup opens on top of the
+/// app. Touches on transparent areas pass through to whatever is underneath
+/// (including the popover); only the callout itself is tappable.
+@MainActor
+final class CalloutOverWindow {
+    static let shared = CalloutOverWindow()
+
+    private var window: PassthroughWindow?
+
+    func show(_ view: AnyView) {
+        hide()
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        guard let scene = scenes.first(where: { $0.activationState == .foregroundActive }) ?? scenes.first
+        else { return }
+        let host = UIHostingController(rootView: view)
+        host.view.backgroundColor = .clear
+        let w = PassthroughWindow(windowScene: scene)
+        w.windowLevel = .alert + 1
+        w.rootViewController = host
+        w.isHidden = false
+        window = w
+    }
+
+    func hide() {
+        window?.isHidden = true
+        window = nil
+    }
+
+    /// The region (window coordinates) that should receive touches — the callout
+    /// itself. Everything else falls through to the app (and any popover) below.
+    func setTappable(_ frame: CGRect) {
+        window?.tappableFrame = frame
+    }
+}
+
+private final class PassthroughWindow: UIWindow {
+    var tappableFrame: CGRect = .zero
+
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        // SwiftUI hosts all content in ONE view, so "which subview was hit" can't
+        // distinguish the callout from empty space — gate on the reported frame.
+        guard tappableFrame.contains(point) else { return nil }
+        return super.hitTest(point, with: event)
+    }
+}
+
+extension View {
+    /// Report this view's frame as the tappable region of the CalloutOverWindow.
+    /// Apply to the callout content passed to `CalloutOverWindow.show`.
+    func calloutWindowTappable() -> some View {
+        background(
+            GeometryReader { g in
+                Color.clear
+                    .onAppear { CalloutOverWindow.shared.setTappable(g.frame(in: .global)) }
+                    .onChange(of: g.frame(in: .global)) { _, f in
+                        CalloutOverWindow.shared.setTappable(f)
+                    }
+            }
+        )
+    }
+}
+
+// MARK: - Help intro callout
+
+/// A one-time callout that points up at the "?" help button (top-right), telling
+/// the reader help is available. Colour-matched to the button's indigo accent so
+/// the two read as linked. Tapping it dismisses. Place with
+/// `.overlay(alignment: .topTrailing)`.
+struct HelpIntroCallout: View {
+    let text: String
+    var icon: String? = "questionmark.circle.fill"
+    var accent: Color = Color(red: 240/255, green: 187/255, blue: 41/255)   // #F0BB29 amber
+    var arrowEdge: HorizontalAlignment = .trailing   // which side the up-arrow sits on
+    var arrowInset: CGFloat = 16                     // how far in from that edge
+    var maxWidth: CGFloat = 250
+    var showArrow: Bool = true                       // false = a plain floating bubble
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(alignment: arrowEdge, spacing: 0) {
+            if showArrow {
+                Triangle()
+                    .fill(accent)
+                    .frame(width: 20, height: 10)
+                    .padding(arrowEdge == .leading ? Edge.Set.leading : Edge.Set.trailing, arrowInset)
+            }
+            HStack(alignment: .top, spacing: 8) {
+                if let icon {
+                    Image(systemName: icon).font(.subheadline)
+                }
+                Text(text)
+                    .font(.subheadline).fontWeight(.medium)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .foregroundStyle(Color(red: 0.24, green: 0.15, blue: 0.02))   // dark, readable on the amber
+            .padding(.horizontal, 14).padding(.vertical, 11)
+            .background(accent)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .shadow(color: .black.opacity(0.22), radius: 10, y: 4)
+            .frame(maxWidth: maxWidth)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { onDismiss() }
+        .accessibilityAddTraits(.isButton)
+        .accessibilityLabel(text)
     }
 }

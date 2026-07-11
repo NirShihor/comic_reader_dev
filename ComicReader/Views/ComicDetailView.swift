@@ -59,6 +59,14 @@ struct ComicDetailView: View {
     @State private var scrollTopToken = 0                 // bump to scroll the page to the top
     @StateObject private var help = HelpModeController()
 
+    // First-visit onboarding callouts for this "comic cockpit" screen. `cockpitStep`
+    // walks a short sequence (0 = none). Gated once-only by `seenCockpitTips`, unless
+    // HelpDebug.forceShowTooltips is on.
+    @AppStorage("help.seen.comic-cockpit") private var seenCockpitTips = false
+    @State private var cockpitStep = 0
+    // True while "?" is replaying the sequence — bypasses the "seen" flag.
+    @State private var helpReplay = false
+
     private let columns = [
         GridItem(.flexible(), spacing: 12),
         GridItem(.flexible(), spacing: 12)
@@ -132,7 +140,31 @@ struct ComicDetailView: View {
             }
             .helpTooltipLayer()
             .environmentObject(help)
+            .anchoredCallout(
+                targetID: cockpitTarget,
+                text: cockpitText,
+                icon: nil,
+                showArrow: cockpitStep >= 2,     // step 1 floats under the cover, no arrow
+                placeBelow: cockpitStep == 1,
+                arrowTrailing: cockpitStep == 2,  // point at the toggle switch on the right
+                isPresented: cockpitStep != 0
+            ) { advanceCockpitTips() }
+            .onChange(of: help.isActive) { _, active in
+                // "?" replays the cockpit sequence from step 1; off dismisses it.
+                if active {
+                    helpReplay = true
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { cockpitStep = 1 }
+                } else {
+                    helpReplay = false
+                    if cockpitStep != 0 { withAnimation { cockpitStep = 0 } }
+                }
+            }
+            .onChange(of: settingsManager.speakingEnabled) { _, _ in
+                // Its callout's action was taken — retire it.
+                if cockpitStep == 2 { advanceCockpitTips() }
+            }
             .onAppear {
+                startCockpitTips()
                 // Opened via the Library "Continue" card: pick up exactly where the
                 // user left off (same spot and mode as the primary button here).
                 guard autoResume, !didAutoResume else { return }
@@ -147,6 +179,51 @@ struct ComicDetailView: View {
             }
     }
 
+    // MARK: - Cockpit onboarding sequence
+    private var cockpitTarget: String {
+        switch cockpitStep {
+        case 1: return "comic.cockpit"
+        case 2: return "comic.speaking"
+        default: return ""
+        }
+    }
+
+    private var cockpitText: String {
+        switch cockpitStep {
+        case 1: return "This is the Spanish learning comic cockpit. Decide if you want to simply read and listen, or practise with any of the different practice modes. It is recommended to read and listen to the comic at least once before starting to practise."
+        case 2: return "Prefer not to speak at this time? Change to silent exercises. You can close me to see the different exercise modes or scroll up and click the Start reading button."
+        default: return ""
+        }
+    }
+
+    private func startCockpitTips() {
+        // Skip when auto-resuming straight into the reader — the screen is leaving.
+        guard !autoResume, cockpitStep == 0 else { return }
+        if !HelpDebug.forceShowTooltips { guard !seenCockpitTips else { return } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            guard cockpitStep == 0 else { return }
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { cockpitStep = 1 }
+        }
+    }
+
+    private func advanceCockpitTips() {
+        // Step through the sequence; end (and mark seen) after the last callout.
+        // Additional steps get chained here as they're added.
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if cockpitStep < 2 {
+                cockpitStep += 1
+            } else {
+                cockpitStep = 0
+                seenCockpitTips = true
+                // End of a "?" replay — close help mode too.
+                if helpReplay {
+                    helpReplay = false
+                    help.isActive = false
+                }
+            }
+        }
+    }
+
     // Extracted so the `body` modifier chain stays short enough for the Swift
     // type-checker (a long chain + the destination switch was timing out).
     private var scrollContent: some View {
@@ -154,6 +231,7 @@ struct ComicDetailView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     coverBanner
+                        .calloutAnchor("comic.cockpit")
                         .padding(.horizontal, 16)
                         .id("top")
 
@@ -168,6 +246,7 @@ struct ComicDetailView: View {
 
                     practiceSection
                         .padding(.horizontal, 16)
+                        .id("practice")
 
                     pagesGrid
                 }
@@ -175,6 +254,10 @@ struct ComicDetailView: View {
             }
             .onChange(of: scrollTopToken) { _, _ in
                 withAnimation { proxy.scrollTo("top", anchor: .top) }
+            }
+            .onChange(of: cockpitStep) { _, step in
+                // Reveal the Speaking-exercises toggle when its callout opens.
+                if step == 2 { withAnimation { proxy.scrollTo("practice", anchor: .top) } }
             }
         }
     }
@@ -612,6 +695,7 @@ struct ComicDetailView: View {
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.comigoInk, lineWidth: 2))
         .shadow(color: .black.opacity(0.06), radius: 3, y: 1)
+        .calloutAnchor("comic.speaking")
     }
 
     private func practiceModeCard(icon: String, title: String, tag: String,

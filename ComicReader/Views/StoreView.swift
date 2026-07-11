@@ -165,6 +165,10 @@ struct StoreComicCard: View {
     var onOpenComic: ((Comic) -> Void)?
     var compact: Bool = false
     var episodeLabel: String? = nil
+    /// When set, tags the download button so an onboarding callout can point at it.
+    var downloadAnchorID: String? = nil
+    /// Called when the user taps Download — lets a host dismiss onboarding hints.
+    var onDownloadStart: (() -> Void)? = nil
     @StateObject private var storeService = ComicStoreService.shared
     @StateObject private var localStorage = LocalComicStorage.shared
 
@@ -293,7 +297,11 @@ struct StoreComicCard: View {
             }
 
             // Download button / status
-            downloadButton
+            if let downloadAnchorID {
+                downloadButton.calloutAnchor(downloadAnchorID)
+            } else {
+                downloadButton
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(compact ? 12 : 16)
@@ -311,6 +319,7 @@ struct StoreComicCard: View {
         switch downloadState {
         case .notDownloaded:
             Button {
+                onDownloadStart?()
                 Task {
                     await storeService.downloadComic(comic)
                 }

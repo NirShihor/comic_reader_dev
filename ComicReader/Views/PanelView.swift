@@ -1129,7 +1129,7 @@ struct PanelView: View {
 
         // Fuzzy match with relaxed threshold
         let (isMatch, matchScore) = whisperService.compareText(spoken: spokenNorm, expected: expectedNorm)
-        if isMatch || matchScore >= 0.7 { return true }
+        if isMatch || matchScore >= 0.66 { return true }
 
         return false
     }
@@ -1319,6 +1319,9 @@ struct WordButton: View {
                         .foregroundStyle(.purple)
                 }
             }
+            // Matches the width the popover already takes when it opens above/below the
+            // word, so the full "Add to Vocabulary" also fits when it attaches sideways.
+            .frame(minWidth: 300, alignment: .leading)
             .padding()
             .presentationCompactAdaptation(.popover)
         }

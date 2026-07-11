@@ -651,11 +651,11 @@ class WhisperService: ObservableObject {
     }
 
     /// Compare spoken text with expected text. `passThreshold` is the
-    /// fraction of expected words that must match (default 0.85).
-    // Default pass threshold for spoken-Spanish grading. Raised 0.85 -> 0.89 to
-    // tighten acceptance a little across every speaking check (compareText is used
+    /// fraction of expected words that must match.
+    // Default pass threshold for spoken-Spanish grading (compareText is used
     // only for spoken Spanish; meaning/translation use compareMeaning).
-    func compareText(spoken: String, expected: String, passThreshold: Double = 0.89) -> (isCorrect: Bool, score: Double) {
+    // History: 0.85 → 0.89 (tighten), 0.89 → 0.86, then 0.86 → 0.85 (eased).
+    func compareText(spoken: String, expected: String, passThreshold: Double = 0.85) -> (isCorrect: Bool, score: Double) {
         let spokenClean = normalizeText(spoken)
         let expectedClean = normalizeText(expected)
 
@@ -667,27 +667,33 @@ class WhisperService: ObservableObject {
             .replacingOccurrences(of: "¿", with: "").replacingOccurrences(of: "¡", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .split(separator: " ").map { String($0) }
-        var alignedOriginal = originalWords
+        // Proper-noun flags are decided on the ORIGINAL word positions (idx > 0 —
+        // the first word of a sentence is capitalized anyway, so position 0 can't
+        // distinguish a name), and BEFORE the interjection-stripping below.
+        // Deciding them after used to slide a name into position 0 when a leading
+        // "Ay," was stripped ("Ay, Ollie, hoy…"), so "Ollie" lost its name
+        // leniency and Whisper's phonetic spelling ("Oli") failed the whole line.
+        var properFlags: [Bool] = originalWords.indices.map { idx in
+            guard idx > 0, let first = originalWords[idx].first else { return false }
+            return first.isUppercase
+        }
 
         // Non-word sounds (interjections/fillers like "mmmm", "ah", "eh") are
         // OPTIONAL: drop them from BOTH the expected and the spoken text so
         // "Mmmm... no lo sé" accepts both "no lo sé" and "Mmmm no lo sé". Only
         // strip when real words remain (an interjection-only line stays a real
-        // target), and strip the expected in lockstep with originalWords so the
-        // proper-noun indices below stay aligned.
+        // target), and strip the proper-noun flags in lockstep so they stay
+        // aligned with expectedWords.
         if expectedWords.count == originalWords.count {
             let keep = expectedWords.indices.filter { !isNonWordSound(expectedWords[$0]) }
             if !keep.isEmpty && keep.count < expectedWords.count {
                 expectedWords = keep.map { expectedWords[$0] }
-                alignedOriginal = keep.map { originalWords[$0] }
+                properFlags = keep.map { properFlags[$0] }
                 spokenWords = spokenWords.filter { !isNonWordSound($0) }
             }
         }
 
-        let properNounIndices: Set<Int> = Set(alignedOriginal.indices.filter { idx in
-            guard idx > 0, let first = alignedOriginal[idx].first else { return false }
-            return first.isUppercase
-        })
+        let properNounIndices: Set<Int> = Set(properFlags.indices.filter { properFlags[$0] })
 
         guard !expectedWords.isEmpty else { return (true, 1.0) }
 
@@ -700,19 +706,22 @@ class WhisperService: ObservableObject {
         var usedSpokenIndices = Set<Int>()
 
         for (wordIdx, expectedWord) in expectedWords.enumerated() {
+            let isProperNoun = properNounIndices.contains(wordIdx)
+            var matched = false
+
             // Try exact match first
             if let idx = spokenWords.indices.first(where: { !usedSpokenIndices.contains($0) && spokenWords[$0] == expectedWord }) {
-                matchedCount += 1
+                matched = true
                 usedSpokenIndices.insert(idx)
             } else {
-                let isProperNoun = properNounIndices.contains(wordIdx)
                 // Fuzzy match: lenient for names, moderate for regular words
                 for (idx, spokenWord) in spokenWords.enumerated() where !usedSpokenIndices.contains(idx) {
                     let distance = levenshteinDistance(expectedWord, spokenWord)
                     let maxLen = max(expectedWord.count, spokenWord.count)
                     let matches: Bool
                     if isProperNoun {
-                        // Names: allow up to 50% difference (handles "Zik"/"Zeke", "Mía"/"Mia")
+                        // Names: generous, but only to CONSUME the spoken token so
+                        // the word counts stay aligned — they're never graded.
                         matches = maxLen > 0 && Double(distance) / Double(maxLen) <= 0.5
                     } else if singleWord {
                         // Single-word target: allow ~40% difference (handles
@@ -726,11 +735,18 @@ class WhisperService: ObservableObject {
                         matches = distance <= 1 || (maxLen >= 8 && distance <= 2)
                     }
                     if matches {
-                        matchedCount += 1
+                        matched = true
                         usedSpokenIndices.insert(idx)
                         break
                     }
                 }
+            }
+
+            // Proper names are never penalized: Whisper's spelling of a name is
+            // arbitrary ("Ollie" → "Oli"/"Olly") and names aren't the learning
+            // target — the line is graded on its Spanish words only.
+            if matched || isProperNoun {
+                matchedCount += 1
             }
         }
 

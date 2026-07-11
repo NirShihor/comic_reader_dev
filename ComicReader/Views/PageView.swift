@@ -368,19 +368,22 @@ struct PageView: View {
     @State private var revealedBubbleId: String?   // practice: bubble whose text is revealed onto the page
     @State private var pageImageAspect: CGFloat?   // width/height of the page artwork
     @StateObject private var help = HelpModeController()
-    // First-run onboarding hints. Each pulses until the reader engages with that
-    // feature, then stops for good: swipe a page, tap a bubble, tap a word.
-    @AppStorage("onboardDidSwipe") private var onboardDidSwipe = false
-    @AppStorage("onboardDidTapBubble") private var onboardDidTapBubble = false
 
-    // Indigo brand accent for the onboarding frames.
-    private let onboardAccent = Color(red: 91/255, green: 91/255, blue: 214/255)
-
-    // Hints only apply to the real reading flow (not the guided practice run,
-    // practice modes, or transient context views like Vocabulary).
-    private var onboardingActive: Bool {
-        savesProgress && !guidedOnScreenPractice && !isPracticeMode
-    }
+    // First-visit callout on the cover: "Click on the text." — points at the
+    // tappable cover title bubble. Once-only (or always under forceShowTooltips).
+    @AppStorage("help.seen.cover-text") private var seenCoverTip = false
+    @State private var showCoverTip = false
+    // Swipe-to-turn hint, chained after the word-popup guidance is closed.
+    @AppStorage("help.seen.page-swipe") private var seenSwipeTip = false
+    @State private var showSwipeTip = false
+    // "Click on a bubble." — points at the first bubble on the first story page
+    // the reader swipes to. Chained after the swipe hint's action.
+    // (Key renamed from page-bubble: the old flag could be burned by a cover tap
+    // before the fix that only marks it seen while actually showing.)
+    @AppStorage("help.seen.story-bubble") private var seenBubbleTip = false
+    @State private var showBubbleTip = false
+    // True while "?" is replaying the page-level tooltips — bypasses "seen" flags.
+    @State private var helpReplay = false
 
     // Pages sorted by pageNumber for consistent navigation
     private var sortedPages: [Page] {
@@ -425,6 +428,62 @@ struct PageView: View {
 
     private var isPracticeMode: Bool {
         settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode
+    }
+
+    // MARK: - Cover "Click on the text." callout
+    private func maybeShowCoverTip() {
+        guard currentPageIndex == 0, !isPracticeMode, selectedBubbleIndex == nil else { return }
+        if !HelpDebug.forceShowTooltips { guard !seenCoverTip else { return } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            guard currentPageIndex == 0, selectedBubbleIndex == nil else { return }
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showCoverTip = true }
+        }
+    }
+
+    private func dismissCoverTip() {
+        seenCoverTip = true
+        if showCoverTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showCoverTip = false }
+            if helpReplay { maybeShowSwipeTip() }   // replay: swipe hint is next
+        }
+    }
+
+    // MARK: - "Swipe to the next page" hint (chained after the word-popup guidance)
+    private func maybeShowSwipeTip() {
+        if !HelpDebug.forceShowTooltips && !helpReplay { guard !seenSwipeTip else { return } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showSwipeTip = true }
+        }
+    }
+
+    private func dismissSwipeTip() {
+        seenSwipeTip = true
+        if showSwipeTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showSwipeTip = false }
+            // Last page-level step — end the "?" replay.
+            if helpReplay {
+                helpReplay = false
+                withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+            }
+        }
+    }
+
+    // MARK: - "Click on a bubble." hint (first story page after the swipe)
+    private func maybeShowBubbleTip() {
+        guard currentPageIndex > 0, !isPracticeMode, selectedBubbleIndex == nil else { return }
+        if !HelpDebug.forceShowTooltips { guard !seenBubbleTip else { return } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            guard currentPageIndex > 0, selectedBubbleIndex == nil else { return }
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showBubbleTip = true }
+        }
+    }
+
+    private func dismissBubbleTip() {
+        seenBubbleTip = true
+        if showBubbleTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showBubbleTip = false }
+            if helpReplay { maybeShowSwipeTip() }   // replay: swipe hint is next
+        }
     }
 
     /// Where the open bubble's card sits (mirrors FloatingBubbleCard.anchorTop), so
@@ -686,23 +745,6 @@ struct PageView: View {
         }
     }
 
-    // A pulsing indigo frame around a text bubble, nudging the reader to tap it.
-    // Decorative only — the real tap target sits beneath it.
-    private func onboardingBubbleFrame(_ b: Bubble, in rect: CGRect) -> some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
-            let seconds = timeline.date.timeIntervalSinceReferenceDate
-            let pulse = (sin(seconds * 2.5) + 1.0) / 2.0
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(onboardAccent, lineWidth: 2 + pulse * 2)
-                .shadow(color: onboardAccent.opacity(pulse * 0.7), radius: 4 + pulse * 6)
-                .opacity(0.35 + pulse * 0.65)
-        }
-        .frame(width: b.width * rect.width + 16, height: b.height * rect.height + 16)
-        .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
-                  y: rect.minY + (b.positionY + b.height / 2) * rect.height)
-        .allowsHitTesting(false)
-    }
-
     // Highlights the open bubble, linking it to the popup. Fills the bubble's
     // interior with a solid, slightly-brighter green (flood-filled to match its
     // real shape). Shows nothing when it can't fill cleanly (e.g. a borderless
@@ -753,27 +795,6 @@ struct PageView: View {
         }
         // No fill possible (e.g. borderless narration like a title or
         // "continuará") → show nothing at all.
-    }
-
-    // Cover hint: a left-nudging arrow on the right edge (clear of the title)
-    // telling the reader to swipe into the comic.
-    private var onboardingSwipeHint: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
-            let seconds = timeline.date.timeIntervalSinceReferenceDate
-            let pulse = (sin(seconds * 2.2) + 1.0) / 2.0
-            HStack {
-                Spacer()
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 34, weight: .heavy))
-                    .foregroundStyle(.white)
-                    .padding(16)
-                    .background(.black.opacity(0.45), in: Circle())
-                    .offset(x: -pulse * 14)
-                    .opacity(0.55 + pulse * 0.45)
-                    .padding(.trailing, 18)
-            }
-        }
-        .allowsHitTesting(false)
     }
 
     private func loadPageAspect() {
@@ -934,13 +955,16 @@ struct PageView: View {
                                         .contentShape(Rectangle())
                                         .frame(width: b.width * rect.width + 16,
                                                height: b.height * rect.height + 16)
+                                        // Anchor the "Click on the text." cover callout to the title
+                                        // bubble — BEFORE .position (a positioned view fills its parent,
+                                        // which would make the anchor capture the whole page instead).
+                                        .calloutAnchorIf(currentPageIndex == 0 && i == 0, "cover.text")
+                                        // ...and "Click on a bubble." to the first bubble on story pages.
+                                        .calloutAnchorIf(currentPageIndex > 0 && i == 0, "page.bubble")
                                         .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
                                                   y: rect.minY + (b.positionY + b.height / 2) * rect.height)
                                         .onTapGesture {
                                             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                            // Tapping a bubble on the cover doesn't count —
-                                            // keep highlighting bubbles on the real pages.
-                                            if currentPageIndex > 0 { onboardDidTapBubble = true }
                                             selectedBubbleIndex = i
                                         }
                                 }
@@ -963,13 +987,6 @@ struct PageView: View {
                                     hotspotIndicator(h, in: rect)
                                 }
 
-                                // First-run: pulse a frame around every text bubble
-                                // so the reader knows the bubbles are tappable.
-                                if onboardingActive && !onboardDidTapBubble && selectedBubbleIndex == nil {
-                                    ForEach(pageTextBubbles) { b in
-                                        onboardingBubbleFrame(b, in: rect)
-                                    }
-                                }
                             }
                         }
                     }
@@ -979,21 +996,13 @@ struct PageView: View {
                             let horizontalDistance = value.translation.width
                             if horizontalDistance > 50 {
                                 // Swiped right → previous page
-                                onboardDidSwipe = true
                                 goToPreviousPage()
                             } else if horizontalDistance < -50 {
                                 // Swiped left → next page
-                                onboardDidSwipe = true
                                 goToNextPage()
                             }
                         }
                 )
-            }
-
-            // First-run: on the cover, nudge the reader to swipe into the comic.
-            if onboardingActive && !onboardDidSwipe && currentPageIndex == 0
-                && selectedPanel == nil && selectedBubbleIndex == nil {
-                onboardingSwipeHint
             }
 
             // Help hints over the page (help mode only, while nothing is open)
@@ -1059,11 +1068,15 @@ struct PageView: View {
                     // page change closes the card (onChange of currentPageIndex clears
                     // the selection) until the reader taps a bubble on the new page.
                     onRequestNextPage: { goToNextPage() },
-                    onRequestPrevPage: { goToPreviousPage() }
+                    onRequestPrevPage: { goToPreviousPage() },
+                    onWordTipDismissed: { maybeShowSwipeTip() }
                 )
                 .environmentObject(settingsManager)
                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
                 .zIndex(2)
+                // No first-run auto-help here — the bordered highlights + "Swipe"/
+                // "Tap" chips are shown only on demand via the "?" button now.
+                // Onboarding is handled by the amber callouts instead.
             }
 
             endOfEpisodeOverlay
@@ -1144,12 +1157,60 @@ struct PageView: View {
         }
         .helpTooltipLayer(bannerEdge: helpBannerEdge)
         .environmentObject(help)
+        .anchoredCallout(
+            targetID: "cover.text",
+            text: "Click on the text.",
+            icon: "hand.tap.fill",
+            isPresented: showCoverTip && selectedBubbleIndex == nil && selectedPanel == nil
+        ) { dismissCoverTip() }
+        .anchoredCallout(
+            targetID: "page.bubble",
+            text: "Click on a bubble.",
+            icon: "hand.tap.fill",
+            isPresented: showBubbleTip && selectedBubbleIndex == nil && selectedPanel == nil
+        ) { dismissBubbleTip() }
+        // Swipe-to-turn hint, chained after the word-popup guidance closes. Floats
+        // opposite the open card (or at the top once the card is closed).
+        .overlay(alignment: openCardAnchorTop ? .bottom : .top) {
+            if showSwipeTip {
+                HelpIntroCallout(
+                    text: "To move to the next page swipe to the left.",
+                    icon: "hand.draw.fill",
+                    showArrow: false
+                ) { dismissSwipeTip() }
+                .padding(openCardAnchorTop ? .bottom : .top, openCardAnchorTop ? 60 : 8)
+                .transition(.opacity.combined(with: .move(edge: openCardAnchorTop ? .bottom : .top)))
+                .zIndex(60)
+            }
+        }
+        .onChange(of: help.isActive) { _, active in
+            // "?" replays the page-level sequence (cover text / bubble → swipe).
+            // With a bubble card or panel open, the card runs its own sequence.
+            if active {
+                guard selectedBubbleIndex == nil, selectedPanel == nil else { return }
+                helpReplay = true
+                withAnimation { showSwipeTip = false }
+                if currentPageIndex == 0 {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showCoverTip = true }
+                } else {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showBubbleTip = true }
+                }
+            } else {
+                helpReplay = false
+                withAnimation {
+                    showCoverTip = false
+                    showSwipeTip = false
+                    showBubbleTip = false
+                }
+            }
+        }
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarBackground(.visible, for: .tabBar)
         .toolbarColorScheme(.light, for: .tabBar)
         .onAppear {
             AudioManager.shared.activeComicId = comic.id   // fast, direct audio lookup
             loadPageAspect()
+            maybeShowCoverTip()
             // Guided run starts in speaking practice (safety net if not already set).
             if guidedOnScreenPractice && !settingsManager.speakingPracticeMode && !settingsManager.listeningPracticeMode {
                 settingsManager.speakingPracticeMode = true
@@ -1176,10 +1237,18 @@ struct PageView: View {
                 settingsManager.listeningPracticeMode = false
             }
         }
-        .onChange(of: currentPageIndex) { _, _ in
+        .onChange(of: currentPageIndex) { oldPage, newPage in
             // Close the bubble card and refresh the artwork aspect for the new page
             selectedBubbleIndex = nil
             loadPageAspect()
+            // Leaving the cover hides the cover callout; returning to it re-offers it.
+            if currentPageIndex == 0 { maybeShowCoverTip() }
+            else if showCoverTip { withAnimation { showCoverTip = false } }
+            // They turned the page — the swipe hint's action is done; next up,
+            // prompt them to open a bubble, but ONLY on the first swipe from the
+            // cover to the first story page.
+            if showSwipeTip { dismissSwipeTip() }
+            if oldPage == 0 && newPage == 1 { maybeShowBubbleTip() }
             // Save progress when page changes (skipped for transient context views).
             if savesProgress {
                 progressManager.saveProgress(
@@ -1196,6 +1265,13 @@ struct PageView: View {
             // reveal only ever applies to the bubble you're currently on. Single
             // source of truth so a stale reveal can't linger on the bubble you left.
             revealedBubbleId = nil
+            // Opening any bubble means they got the hint — retire the tap callouts.
+            // The bubble tip is only marked seen if it was actually on screen;
+            // otherwise a cover-bubble tap would silently burn it before its turn.
+            if newValue != nil {
+                dismissCoverTip()
+                if showBubbleTip { dismissBubbleTip() }
+            }
             // Remember the open bubble during on-screen practice so "Continue
             // practicing" reopens the same page at the same bubble.
             if guidedOnScreenPractice, let idx = newValue, pageTextBubbles.indices.contains(idx) {
@@ -1319,11 +1395,10 @@ struct BubbleContentView: View {
     let comic: Comic
     let bubble: Bubble
     @Binding var revealedBubbleId: String?   // shared with the page so revealed text also shows in the bubble
+    var onWordTap: (() -> Void)? = nil       // notified when any word is tapped (clears the "Click on a word." tip)
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var audioManager = AudioManager.shared
     @StateObject private var whisperService = WhisperService.shared
-    // First-run: frame each word until the reader taps one.
-    @AppStorage("onboardDidTapWord") private var onboardDidTapWord = false
 
     @State private var translationRevealed: Set<String> = []
     @State private var grammarRevealed: Set<String> = []
@@ -1452,21 +1527,8 @@ struct BubbleContentView: View {
                         weight: .medium,
                         sentenceText: sentence.text,
                         sentenceTranslation: sentence.translation,
-                        onTap: { onboardDidTapWord = true }
+                        onTap: onWordTap
                     )
-                    .overlay {
-                        if !onboardDidTapWord {
-                            TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
-                                let seconds = timeline.date.timeIntervalSinceReferenceDate
-                                let pulse = (sin(seconds * 2.6) + 1.0) / 2.0
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color(red: 91/255, green: 91/255, blue: 214/255),
-                                            lineWidth: 1.5 + pulse * 1.5)
-                                    .opacity(0.4 + pulse * 0.6)
-                            }
-                            .allowsHitTesting(false)
-                        }
-                    }
                     .explains("Tap a word",
                               "Tap any word to see its meaning and base form, hear it spoken, and save it to your vocabulary.",
                               id: "bubbleword.\(word.id)")
@@ -1790,7 +1852,7 @@ struct BubbleContentView: View {
         if s.isEmpty { return false }
         if s == e || s.contains(e) || e.contains(s) { return true }
         let (isMatch, score) = whisperService.compareText(spoken: s, expected: e)
-        return isMatch || score >= 0.7
+        return isMatch || score >= 0.66
     }
 
     private func normalizeEnglish(_ text: String) -> String {
@@ -1820,31 +1882,224 @@ struct FloatingBubbleCard: View {
     var onClose: () -> Void
     var onRequestNextPage: () -> Void = {}
     var onRequestPrevPage: () -> Void = {}
+    /// Notified when the word-popup guidance is dismissed — the page uses it to
+    /// chain the next onboarding hint (swipe to turn the page).
+    var onWordTipDismissed: () -> Void = {}
     @EnvironmentObject var settingsManager: SettingsManager
+    @EnvironmentObject var help: HelpModeController
 
     @State private var contentHeight: CGFloat = 0
 
+    // First-open callout: a panel overview that ends by prompting a word tap.
+    @AppStorage("help.seen.bubble-panel") private var seenPanelTip = false
+    @State private var showPanelTip = false
+    // After the first word tap: what the word popup offers. Floats on the screen
+    // edge opposite the card, clear of the system popover.
+    @AppStorage("help.seen.word-detail") private var seenWordDetailTip = false
+    @State private var showWordDetailTip = false
+    // On the next panel open (after the "Click on a bubble." step): the arrows.
+    @AppStorage("help.seen.story-bubble") private var seenBubbleTip = false
+    @AppStorage("help.seen.story-arrows") private var seenArrowsTip = false
+    @State private var showArrowsTip = false
+    // Closing chapter: after the arrows tip, point up at the "?" icon.
+    @AppStorage("help.seen.help-reminder") private var seenHelpReminderTip = false
+    @State private var showHelpReminderTip = false
+    // True while "?" is replaying the card's tooltips — bypasses "seen" flags.
+    @State private var helpReplay = false
+
     private let maxContentHeight: CGFloat = 340
+
+    private var isPracticeMode: Bool {
+        settingsManager.speakingPracticeMode || settingsManager.listeningPracticeMode
+    }
 
     var body: some View {
         card
             .frame(maxWidth: 380)
+            // Anchor the panel-overview callout to the card itself (arrowless, auto-
+            // placed on the card's inner edge — opposite the screen edge it hugs).
+            .calloutAnchor("bubble.panel")
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: anchorTop ? .top : .bottom)
             .padding(.horizontal, 12)
             .padding(.top, anchorTop ? 14 : 0)
             .padding(.bottom, anchorTop ? 0 : 30)
+            .anchoredCallout(
+                targetID: "bubble.panel",
+                text: "Here you can see the translation, listen to the audio and, if you wish, have the grammar explained. Now click on a word.",
+                icon: nil,
+                showArrow: false,
+                isPresented: showPanelTip
+            ) { dismissPanelTip() }
+            .anchoredCallout(
+                targetID: "bubble.panel",
+                text: "Once you have finished interacting with this bubble, you can navigate to the next one by using the arrows.",
+                icon: nil,
+                showArrow: false,
+                isPresented: showArrowsTip
+            ) { dismissArrowsTip() }
+            // Walkthrough closer: an up-arrow callout under the "?" icon, placed
+            // exactly like the Library's "?" intro at the start of the flow.
+            .overlay(alignment: .topTrailing) {
+                if showHelpReminderTip {
+                    HelpIntroCallout(
+                        text: "Lastly, just a reminder that you can click here at any point if you need to revisit any of these help items.",
+                        arrowInset: 100   // the reader's "?" sits ~129pt in from the trailing edge
+                    ) { dismissHelpReminderTip() }
+                    .padding(.trailing, 19)
+                    .offset(y: 10)   // just below the nav bar, arrow under the "?"
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .zIndex(60)
+                }
+            }
+            // Word-popup guidance: hosted in its own window ABOVE the system word
+            // popover (which draws over any in-view overlay, so a plain .overlay
+            // here would be covered by it). Floats opposite the card as before.
+            .onChange(of: showWordDetailTip) { _, show in
+                if show {
+                    let atTop = !anchorTop   // card at the bottom → tip at the top
+                    CalloutOverWindow.shared.show(AnyView(
+                        VStack(spacing: 0) {
+                            if atTop {
+                                wordDetailCallout.calloutWindowTappable()
+                                Spacer(minLength: 0)
+                            } else {
+                                Spacer(minLength: 0)
+                                wordDetailCallout.calloutWindowTappable()
+                            }
+                        }
+                        .padding(.top, atTop ? 64 : 0)
+                        .padding(.bottom, atTop ? 0 : 90)   // clear the tab bar
+                        .frame(maxWidth: .infinity)
+                    ))
+                } else {
+                    CalloutOverWindow.shared.hide()
+                }
+            }
+            .onAppear { startCardTips() }
+            .onChange(of: help.isActive) { _, active in
+                // "?" while the card is open replays its sequence: panel overview →
+                // word-popup guidance → arrows. Off dismisses whatever is showing.
+                if active {
+                    helpReplay = true
+                    if showWordDetailTip { showWordDetailTip = false }
+                    withAnimation { showArrowsTip = false; showHelpReminderTip = false }
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showPanelTip = true }
+                } else {
+                    helpReplay = false
+                    withAnimation { showPanelTip = false; showArrowsTip = false; showHelpReminderTip = false }
+                    if showWordDetailTip { showWordDetailTip = false }
+                }
+            }
             // Stop audio when the whole card closes (not while stepping bubbles —
             // the card persists across steps, only the inner content is rebuilt).
-            .onDisappear { AudioManager.shared.stop() }
+            .onDisappear {
+                AudioManager.shared.stop()
+                if showWordDetailTip { dismissWordDetailTip() }
+                // The card's replay can't continue without the card — end help.
+                if helpReplay {
+                    helpReplay = false
+                    help.isActive = false
+                }
+            }
+    }
+
+    private var wordDetailCallout: some View {
+        HelpIntroCallout(
+            text: "You can listen and see the meaning of individual words and learn about their different forms (if they have any) by clicking More. If you want to find out more about the word - click on Explain further. You can also add words to your personal vocabulary collection. Now click me to close.",
+            icon: "hand.tap.fill",
+            maxWidth: 300,
+            showArrow: false
+        ) { dismissWordDetailTip() }
+    }
+
+    private func startCardTips() {
+        guard !isPracticeMode else { return }   // the hints are for normal reading
+        if HelpDebug.forceShowTooltips || !seenPanelTip {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showPanelTip = true }
+            }
+        } else if seenBubbleTip, !seenArrowsTip {
+            // They've done the first-panel walkthrough and tapped a bubble on a
+            // story page — point out the step arrows on this panel.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showArrowsTip = true }
+            }
+        }
+    }
+
+    private func dismissArrowsTip() {
+        seenArrowsTip = true
+        if showArrowsTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showArrowsTip = false }
+            // Chain: close the walkthrough by pointing out the "?" icon.
+            if HelpDebug.forceShowTooltips || helpReplay || !seenHelpReminderTip {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showHelpReminderTip = true }
+                }
+            }
+        }
+    }
+
+    private func dismissHelpReminderTip() {
+        seenHelpReminderTip = true
+        if showHelpReminderTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showHelpReminderTip = false }
+            // Very last step — end the "?" replay.
+            if helpReplay {
+                helpReplay = false
+                withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+            }
+        }
+    }
+
+    // Dismissed by tapping it, tapping a word, or opening "?".
+    private func dismissPanelTip() {
+        seenPanelTip = true
+        if showPanelTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showPanelTip = false }
+            // Replay: the word-popup guidance is next in the card's sequence.
+            if helpReplay {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showWordDetailTip = true }
+                }
+            }
+        }
+    }
+
+    // A word was tapped: retire the panel tip, then explain the word popup (once).
+    private func handleWordTap() {
+        dismissPanelTip()
+        guard !isPracticeMode else { return }
+        if !HelpDebug.forceShowTooltips { guard !seenWordDetailTip else { return } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showWordDetailTip = true }
+        }
+    }
+
+    private func dismissWordDetailTip() {
+        seenWordDetailTip = true
+        if showWordDetailTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showWordDetailTip = false }
+            if helpReplay {
+                // Replay: the arrows tip is next in the card's sequence.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showArrowsTip = true }
+                }
+            } else {
+                onWordTipDismissed()   // chain: the page shows the swipe hint next
+            }
+        }
     }
 
     // Step to the previous bubble, or (past the first) the previous page.
     private func goPrev() {
+        dismissArrowsTip()   // they used the arrows — the hint's job is done
         AudioManager.shared.stop()
         if index > 0 { withAnimation { index -= 1 } } else { onRequestPrevPage() }
     }
     // Step to the next bubble, or (past the last) the next page.
     private func goNext() {
+        dismissArrowsTip()   // they used the arrows — the hint's job is done
         AudioManager.shared.stop()
         if index < bubbles.count - 1 { withAnimation { index += 1 } } else { onRequestNextPage() }
     }
@@ -1891,7 +2146,8 @@ struct FloatingBubbleCard: View {
         VStack(spacing: 0) {
             ScrollView {
                 if bubbles.indices.contains(index) {
-                    BubbleContentView(comic: comic, bubble: bubbles[index], revealedBubbleId: $revealedBubbleId)
+                    BubbleContentView(comic: comic, bubble: bubbles[index], revealedBubbleId: $revealedBubbleId,
+                                      onWordTap: { handleWordTap() })
                         .id(bubbles[index].id)   // reset per-bubble state when stepping
                         // Extra horizontal inset so the side step-arrows (~48pt in from
                         // each edge, at mid-height) never sit on top of the text/controls,
