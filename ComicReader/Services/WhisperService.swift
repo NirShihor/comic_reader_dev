@@ -667,27 +667,33 @@ class WhisperService: ObservableObject {
             .replacingOccurrences(of: "¿", with: "").replacingOccurrences(of: "¡", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .split(separator: " ").map { String($0) }
-        var alignedOriginal = originalWords
+        // Proper-noun flags are decided on the ORIGINAL word positions (idx > 0 —
+        // the first word of a sentence is capitalized anyway, so position 0 can't
+        // distinguish a name), and BEFORE the interjection-stripping below.
+        // Deciding them after used to slide a name into position 0 when a leading
+        // "Ay," was stripped ("Ay, Ollie, hoy…"), so "Ollie" lost its name
+        // leniency and Whisper's phonetic spelling ("Oli") failed the whole line.
+        var properFlags: [Bool] = originalWords.indices.map { idx in
+            guard idx > 0, let first = originalWords[idx].first else { return false }
+            return first.isUppercase
+        }
 
         // Non-word sounds (interjections/fillers like "mmmm", "ah", "eh") are
         // OPTIONAL: drop them from BOTH the expected and the spoken text so
         // "Mmmm... no lo sé" accepts both "no lo sé" and "Mmmm no lo sé". Only
         // strip when real words remain (an interjection-only line stays a real
-        // target), and strip the expected in lockstep with originalWords so the
-        // proper-noun indices below stay aligned.
+        // target), and strip the proper-noun flags in lockstep so they stay
+        // aligned with expectedWords.
         if expectedWords.count == originalWords.count {
             let keep = expectedWords.indices.filter { !isNonWordSound(expectedWords[$0]) }
             if !keep.isEmpty && keep.count < expectedWords.count {
                 expectedWords = keep.map { expectedWords[$0] }
-                alignedOriginal = keep.map { originalWords[$0] }
+                properFlags = keep.map { properFlags[$0] }
                 spokenWords = spokenWords.filter { !isNonWordSound($0) }
             }
         }
 
-        let properNounIndices: Set<Int> = Set(alignedOriginal.indices.filter { idx in
-            guard idx > 0, let first = alignedOriginal[idx].first else { return false }
-            return first.isUppercase
-        })
+        let properNounIndices: Set<Int> = Set(properFlags.indices.filter { properFlags[$0] })
 
         guard !expectedWords.isEmpty else { return (true, 1.0) }
 
