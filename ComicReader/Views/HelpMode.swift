@@ -93,48 +93,14 @@ extension View {
     /// on screens where a panel occupies the bottom (e.g. the reader's bubble popup),
     /// so the strip doesn't cover it.
     func helpTooltipLayer(bannerEdge: VerticalEdge = .bottom) -> some View {
+        // (bannerEdge kept for call-site compatibility — the blue "help is on"
+        // banner is retired now that ? replays the amber tooltip sequences,
+        // which close themselves and can be dismissed by tapping ? again.)
         overlayPreferenceValue(HelpAnchorKey.self) { anchors in
             GeometryReader { proxy in
                 HelpTooltipOverlay(anchors: anchors, proxy: proxy)
             }
             .ignoresSafeArea()
-        }
-        // A persistent banner (respecting the safe area) telling the user how to
-        // close help — otherwise the auto-opened explainers look stuck.
-        .overlay(alignment: bannerEdge == .top ? .top : .bottom) { HelpCloseBanner(edge: bannerEdge) }
-    }
-}
-
-/// Shown at the top while help mode is on, so users know to tap "?" to close.
-/// Tapping the banner itself also closes help.
-private struct HelpCloseBanner: View {
-    var edge: VerticalEdge = .bottom
-    @EnvironmentObject private var help: HelpModeController
-
-    var body: some View {
-        if help.isActive {
-            Button {
-                withAnimation(.easeInOut(duration: 0.2)) { help.toggle() }
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "questionmark")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.blue)
-                        .frame(width: 20, height: 20)
-                        .background(Circle().fill(.white))
-                    Text("Help is on — tap ? (top right) or here to close")
-                        .font(.footnote.weight(.medium))
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(Capsule().fill(Color.blue))
-                .shadow(color: .black.opacity(0.2), radius: 6, y: 2)
-            }
-            .buttonStyle(.plain)
-            .padding(edge == .top ? .top : .bottom, 10)
-            .transition(.move(edge: edge == .top ? .top : .bottom).combined(with: .opacity))
-            .zIndex(100)
         }
     }
 }
