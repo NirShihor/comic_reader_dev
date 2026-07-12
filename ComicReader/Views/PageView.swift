@@ -2000,6 +2000,9 @@ struct FloatingBubbleCard: View {
             .onChange(of: help.isActive) { _, active in
                 // "?" while the card is open replays its sequence: panel overview →
                 // word-popup guidance → arrows. Off dismisses whatever is showing.
+                // The window is hidden DIRECTLY (not just via state) so it can never
+                // be stranded if the card's state identity was reset mid-replay.
+                CalloutOverWindow.shared.hide()
                 if active {
                     helpReplay = true
                     if showWordDetailTip { showWordDetailTip = false }
@@ -2015,6 +2018,7 @@ struct FloatingBubbleCard: View {
             // the card persists across steps, only the inner content is rebuilt).
             .onDisappear {
                 AudioManager.shared.stop()
+                CalloutOverWindow.shared.hide()   // never leave the window behind
                 if showWordDetailTip { dismissWordDetailTip() }
                 // The card's replay can't continue without the card — end help.
                 if helpReplay {
@@ -2098,6 +2102,11 @@ struct FloatingBubbleCard: View {
     }
 
     private func dismissWordDetailTip() {
+        // Hide the window DIRECTLY and unconditionally, before any state checks.
+        // The tip lives in its own UIWindow; hiding it only via the state observer
+        // left it stranded (an unclosable full blocker) whenever the card's state
+        // identity had been reset under it — seen with the "?" replay flow.
+        CalloutOverWindow.shared.hide()
         seenWordDetailTip = true
         if showWordDetailTip {
             withAnimation(.easeInOut(duration: 0.2)) { showWordDetailTip = false }

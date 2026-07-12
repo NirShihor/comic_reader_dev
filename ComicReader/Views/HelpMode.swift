@@ -469,7 +469,10 @@ private final class PassthroughWindow: UIWindow {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         // SwiftUI hosts all content in ONE view, so "which subview was hit" can't
         // distinguish the callout from empty space — gate on the reported frame.
-        guard tappableFrame.contains(point) else { return nil }
+        // Safety net: if the frame was never reported (.zero), accept ALL touches
+        // rather than none — the callout stays closable instead of becoming an
+        // untouchable blocker floating over the app.
+        guard tappableFrame == .zero || tappableFrame.contains(point) else { return nil }
         return super.hitTest(point, with: event)
     }
 }
