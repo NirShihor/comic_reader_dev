@@ -1204,7 +1204,10 @@ struct WordButton: View {
                 .clipShape(RoundedRectangle(cornerRadius: 6))
         }
         .buttonStyle(.plain)
-        .popover(isPresented: $showingDefinition) {
+        // arrowEdge locks the popover to the vertical axis: it presents above or
+        // below the word (flipping as space demands) but never sideways — a side
+        // attachment near the screen edge cropped the content off-screen.
+        .popover(isPresented: $showingDefinition, arrowEdge: .top) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text(word.displayText)
