@@ -403,6 +403,10 @@ struct PageView: View {
     // before the fix that only marks it seen while actually showing.)
     @AppStorage("help.seen.story-bubble") private var seenBubbleTip = false
     @State private var showBubbleTip = false
+    // Hotspot explainer — shows once, on the first page that actually HAS a
+    // hotspot (contextual: the flashing pulse is on screen when it appears).
+    @AppStorage("help.seen.hotspot-info") private var seenHotspotTip = false
+    @State private var showHotspotTip = false
     // True while "?" is replaying the page-level tooltips — bypasses "seen" flags.
     @State private var helpReplay = false
 
@@ -504,6 +508,25 @@ struct PageView: View {
         if showBubbleTip {
             withAnimation(.easeInOut(duration: 0.2)) { showBubbleTip = false }
             if helpReplay { maybeShowSwipeTip() }   // replay: swipe hint is next
+        }
+    }
+
+    // MARK: - Hotspot explainer (first page that actually has a hotspot)
+    private func maybeShowHotspotTip() {
+        guard !isPracticeMode, selectedHotspot == nil,
+              !(currentPage.hotspots ?? []).isEmpty else { return }
+        if !HelpDebug.forceShowTooltips { guard !seenHotspotTip else { return } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            guard !(currentPage.hotspots ?? []).isEmpty, selectedHotspot == nil else { return }
+            seenHotspotTip = true   // one-shot: marked at display (races lose otherwise)
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showHotspotTip = true }
+        }
+    }
+
+    private func dismissHotspotTip() {
+        seenHotspotTip = true
+        if showHotspotTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showHotspotTip = false }
         }
     }
 
@@ -1204,13 +1227,27 @@ struct PageView: View {
                 .zIndex(60)
             }
         }
+        // Hotspot explainer: first landing on a page with a hotspot — the flashing
+        // pulse is on screen, so the tip talks about "this page". Floats centred.
+        .overlay {
+            if showHotspotTip && selectedBubbleIndex == nil && selectedPanel == nil {
+                HelpIntroCallout(
+                    text: "This page has a hotspot — the object with the flashing pulse. Clicking on it provides a list-type learning experience, such as colors or numbers. You can save it to your Notes section (the Notebook link at the bottom of the screen) by clicking the save link, for speedy reference if you ever require it. Click me to close.",
+                    icon: nil,
+                    maxWidth: 300,
+                    showArrow: false
+                ) { dismissHotspotTip() }
+                .transition(.opacity)
+                .zIndex(60)
+            }
+        }
         .onChange(of: help.isActive) { _, active in
             // "?" replays the page-level sequence (cover text / bubble → swipe).
             // With a bubble card or panel open, the card runs its own sequence.
             if active {
                 guard selectedBubbleIndex == nil, selectedPanel == nil else { return }
                 helpReplay = true
-                withAnimation { showSwipeTip = false }
+                withAnimation { showSwipeTip = false; showHotspotTip = false }
                 if currentPageIndex == 0 {
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showCoverTip = true }
                 } else {
@@ -1222,8 +1259,13 @@ struct PageView: View {
                     showCoverTip = false
                     showSwipeTip = false
                     showBubbleTip = false
+                    showHotspotTip = false
                 }
             }
+        }
+        .onChange(of: selectedHotspot) { _, opened in
+            // Opening a hotspot IS the tip's action — retire it.
+            if opened != nil { dismissHotspotTip() }
         }
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarBackground(.visible, for: .tabBar)
@@ -1232,6 +1274,7 @@ struct PageView: View {
             AudioManager.shared.activeComicId = comic.id   // fast, direct audio lookup
             loadPageAspect()
             maybeShowCoverTip()
+            maybeShowHotspotTip()
             // Guided run starts in speaking practice (safety net if not already set).
             if guidedOnScreenPractice && !settingsManager.speakingPracticeMode && !settingsManager.listeningPracticeMode {
                 settingsManager.speakingPracticeMode = true
@@ -1270,6 +1313,10 @@ struct PageView: View {
             // cover to the first story page.
             if showSwipeTip { dismissSwipeTip() }
             if oldPage == 0 && newPage == 1 { maybeShowBubbleTip() }
+            // Hotspot explainer: hide when leaving the page; offer on a page that
+            // has a hotspot (once ever — flag burns at display).
+            if showHotspotTip { withAnimation { showHotspotTip = false } }
+            maybeShowHotspotTip()
             // Save progress when page changes (skipped for transient context views).
             if savesProgress {
                 progressManager.saveProgress(
@@ -1922,10 +1969,7 @@ struct FloatingBubbleCard: View {
     @AppStorage("help.seen.story-bubble") private var seenBubbleTip = false
     @AppStorage("help.seen.story-arrows") private var seenArrowsTip = false
     @State private var showArrowsTip = false
-    // After the arrows tip: what hotspots are and that they save to notes.
-    @AppStorage("help.seen.hotspot-info") private var seenHotspotTip = false
-    @State private var showHotspotTip = false
-    // Closing chapter: after the hotspot tip, point up at the "?" icon.
+    // Closing chapter: after the arrows tip, point up at the "?" icon.
     @AppStorage("help.seen.help-reminder") private var seenHelpReminderTip = false
     @State private var showHelpReminderTip = false
     // True while "?" is replaying the card's tooltips — bypasses "seen" flags.
@@ -1961,21 +2005,6 @@ struct FloatingBubbleCard: View {
                 showArrow: false,
                 isPresented: showArrowsTip
             ) { dismissArrowsTip() }
-            // Hotspot explainer: long text + unrelated to the card's content, so it
-            // floats dead-centre of the screen (covering the card if needed) instead
-            // of anchoring to the card — anchored, it climbed into the nav bar.
-            .overlay {
-                if showHotspotTip {
-                    HelpIntroCallout(
-                        text: "Nearly done! In some comics you will find hotspots. These are objects that have a flashing pulse. Clicking on these provides a list-type learning experience, such as colors or numbers. You can save these to your Notes section (the Notebook link at the bottom of the screen) by clicking the save link, for speedy reference if you ever require it. Click me to close.",
-                        icon: nil,
-                        maxWidth: 300,
-                        showArrow: false
-                    ) { dismissHotspotTip() }
-                    .transition(.opacity)
-                    .zIndex(60)
-                }
-            }
             // Walkthrough closer: an up-arrow callout under the "?" icon. This is
             // the walkthrough's ONLY mention of the ? button (the old Library
             // intro was retired), so it introduces it rather than reminding.
@@ -2036,11 +2065,11 @@ struct FloatingBubbleCard: View {
                     }
                     helpReplay = true
                     if showWordDetailTip { showWordDetailTip = false }
-                    withAnimation { showArrowsTip = false; showHotspotTip = false; showHelpReminderTip = false }
+                    withAnimation { showArrowsTip = false; showHelpReminderTip = false }
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showPanelTip = true }
                 } else {
                     helpReplay = false
-                    withAnimation { showPanelTip = false; showArrowsTip = false; showHotspotTip = false; showHelpReminderTip = false }
+                    withAnimation { showPanelTip = false; showArrowsTip = false; showHelpReminderTip = false }
                     if showWordDetailTip { showWordDetailTip = false }
                 }
             }
@@ -2086,24 +2115,9 @@ struct FloatingBubbleCard: View {
         seenArrowsTip = true
         if showArrowsTip {
             withAnimation(.easeInOut(duration: 0.2)) { showArrowsTip = false }
-            // Chain: explain hotspots next (then the "?" reminder closes the tour).
-            if HelpDebug.forceShowTooltips || helpReplay || !seenHotspotTip {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showHotspotTip = true }
-                }
-            } else if !seenHelpReminderTip {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showHelpReminderTip = true }
-                }
-            }
-        }
-    }
-
-    private func dismissHotspotTip() {
-        seenHotspotTip = true
-        if showHotspotTip {
-            withAnimation(.easeInOut(duration: 0.2)) { showHotspotTip = false }
-            // Chain: close the walkthrough by pointing out the "?" icon.
+            // Chain: close the walkthrough by pointing out the "?" icon. (The
+            // hotspot explainer now shows contextually, on the first page that
+            // actually has a hotspot — see the page-level hotspot tip.)
             if HelpDebug.forceShowTooltips || helpReplay || !seenHelpReminderTip {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showHelpReminderTip = true }
