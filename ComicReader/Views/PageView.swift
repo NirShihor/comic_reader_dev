@@ -1934,7 +1934,10 @@ struct FloatingBubbleCard: View {
     @AppStorage("help.seen.story-bubble") private var seenBubbleTip = false
     @AppStorage("help.seen.story-arrows") private var seenArrowsTip = false
     @State private var showArrowsTip = false
-    // Closing chapter: after the arrows tip, point up at the "?" icon.
+    // After the arrows tip: what hotspots are and that they save to notes.
+    @AppStorage("help.seen.hotspot-info") private var seenHotspotTip = false
+    @State private var showHotspotTip = false
+    // Closing chapter: after the hotspot tip, point up at the "?" icon.
     @AppStorage("help.seen.help-reminder") private var seenHelpReminderTip = false
     @State private var showHelpReminderTip = false
     // True while "?" is replaying the card's tooltips — bypasses "seen" flags.
@@ -1970,6 +1973,13 @@ struct FloatingBubbleCard: View {
                 showArrow: false,
                 isPresented: showArrowsTip
             ) { dismissArrowsTip() }
+            .anchoredCallout(
+                targetID: "bubble.panel",
+                text: "One last thing. In some comics you will find hotspots. These are objects that have a flashing pulse. Clicking on these provides a list-type learning experience, such as colors or numbers. You can save these to your Notes section (the Notebook link at the bottom of the screen) by clicking the save link, for speedy reference if you ever require it. Click me to close.",
+                icon: nil,
+                showArrow: false,
+                isPresented: showHotspotTip
+            ) { dismissHotspotTip() }
             // Walkthrough closer: an up-arrow callout under the "?" icon, placed
             // exactly like the Library's "?" intro at the start of the flow.
             .overlay(alignment: .topTrailing) {
@@ -2018,11 +2028,11 @@ struct FloatingBubbleCard: View {
                 if active {
                     helpReplay = true
                     if showWordDetailTip { showWordDetailTip = false }
-                    withAnimation { showArrowsTip = false; showHelpReminderTip = false }
+                    withAnimation { showArrowsTip = false; showHotspotTip = false; showHelpReminderTip = false }
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showPanelTip = true }
                 } else {
                     helpReplay = false
-                    withAnimation { showPanelTip = false; showArrowsTip = false; showHelpReminderTip = false }
+                    withAnimation { showPanelTip = false; showArrowsTip = false; showHotspotTip = false; showHelpReminderTip = false }
                     if showWordDetailTip { showWordDetailTip = false }
                 }
             }
@@ -2068,6 +2078,23 @@ struct FloatingBubbleCard: View {
         seenArrowsTip = true
         if showArrowsTip {
             withAnimation(.easeInOut(duration: 0.2)) { showArrowsTip = false }
+            // Chain: explain hotspots next (then the "?" reminder closes the tour).
+            if HelpDebug.forceShowTooltips || helpReplay || !seenHotspotTip {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showHotspotTip = true }
+                }
+            } else if !seenHelpReminderTip {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showHelpReminderTip = true }
+                }
+            }
+        }
+    }
+
+    private func dismissHotspotTip() {
+        seenHotspotTip = true
+        if showHotspotTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showHotspotTip = false }
             // Chain: close the walkthrough by pointing out the "?" icon.
             if HelpDebug.forceShowTooltips || helpReplay || !seenHelpReminderTip {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
