@@ -2035,6 +2035,17 @@ struct FloatingBubbleCard: View {
                 // be stranded if the card's state identity was reset mid-replay.
                 CalloutOverWindow.shared.hide()
                 if active {
+                    // The closing tooltip points AT the "?" and says "click here" —
+                    // tapping the ? right then reads as "got it", not "replay the
+                    // whole tour immediately". Acknowledge and swallow that tap.
+                    if showHelpReminderTip {
+                        seenHelpReminderTip = true
+                        withAnimation { showHelpReminderTip = false }
+                        DispatchQueue.main.async {
+                            withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+                        }
+                        return
+                    }
                     helpReplay = true
                     if showWordDetailTip { showWordDetailTip = false }
                     withAnimation { showArrowsTip = false; showHotspotTip = false; showHelpReminderTip = false }
