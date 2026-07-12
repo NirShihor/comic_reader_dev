@@ -1949,7 +1949,7 @@ struct FloatingBubbleCard: View {
             .padding(.bottom, anchorTop ? 0 : 30)
             .anchoredCallout(
                 targetID: "bubble.panel",
-                text: "Here you can see the translation, listen to the audio and, if you wish, have the grammar explained. Now click on a word.",
+                text: "Here you can see the translation, listen to the audio and, if you wish, have the grammar explained. **Now click on a word in the sentence above.**",
                 icon: nil,
                 showArrow: false,
                 isPresented: showPanelTip
