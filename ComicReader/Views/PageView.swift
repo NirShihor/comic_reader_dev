@@ -1973,13 +1973,21 @@ struct FloatingBubbleCard: View {
                 showArrow: false,
                 isPresented: showArrowsTip
             ) { dismissArrowsTip() }
-            .anchoredCallout(
-                targetID: "bubble.panel",
-                text: "One last thing. In some comics you will find hotspots. These are objects that have a flashing pulse. Clicking on these provides a list-type learning experience, such as colors or numbers. You can save these to your Notes section (the Notebook link at the bottom of the screen) by clicking the save link, for speedy reference if you ever require it. Click me to close.",
-                icon: nil,
-                showArrow: false,
-                isPresented: showHotspotTip
-            ) { dismissHotspotTip() }
+            // Hotspot explainer: long text + unrelated to the card's content, so it
+            // floats dead-centre of the screen (covering the card if needed) instead
+            // of anchoring to the card — anchored, it climbed into the nav bar.
+            .overlay {
+                if showHotspotTip {
+                    HelpIntroCallout(
+                        text: "One last thing. In some comics you will find hotspots. These are objects that have a flashing pulse. Clicking on these provides a list-type learning experience, such as colors or numbers. You can save these to your Notes section (the Notebook link at the bottom of the screen) by clicking the save link, for speedy reference if you ever require it. Click me to close.",
+                        icon: nil,
+                        maxWidth: 300,
+                        showArrow: false
+                    ) { dismissHotspotTip() }
+                    .transition(.opacity)
+                    .zIndex(60)
+                }
+            }
             // Walkthrough closer: an up-arrow callout under the "?" icon, placed
             // exactly like the Library's "?" intro at the start of the flow.
             .overlay(alignment: .topTrailing) {
