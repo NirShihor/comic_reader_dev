@@ -487,10 +487,17 @@ struct PageView: View {
         seenSwipeTip = true
         if showSwipeTip {
             withAnimation(.easeInOut(duration: 0.2)) { showSwipeTip = false }
-            // Last page-level step — end the "?" replay.
             if helpReplay {
-                helpReplay = false
-                withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+                if !(currentPage.hotspots ?? []).isEmpty {
+                    // Replay on a page with a hotspot: explain it before ending.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showHotspotTip = true }
+                    }
+                } else {
+                    // Last page-level step — end the "?" replay.
+                    helpReplay = false
+                    withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+                }
             }
         }
     }
@@ -529,6 +536,11 @@ struct PageView: View {
         seenHotspotTip = true
         if showHotspotTip {
             withAnimation(.easeInOut(duration: 0.2)) { showHotspotTip = false }
+            // In a "?" replay it's the last page-level step — end the replay.
+            if helpReplay {
+                helpReplay = false
+                withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+            }
         }
     }
 
