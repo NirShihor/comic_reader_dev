@@ -407,7 +407,8 @@ private struct AnchoredCalloutBubble: View {
             if let icon {
                 Image(systemName: icon).font(.subheadline)
             }
-            Text(text)
+            // LocalizedStringKey init so **markdown bold** in callout text renders.
+            Text(.init(text))
                 .font(.subheadline).fontWeight(.medium)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
@@ -521,7 +522,8 @@ struct HelpIntroCallout: View {
                 if let icon {
                     Image(systemName: icon).font(.subheadline)
                 }
-                Text(text)
+                // LocalizedStringKey init so **markdown bold** in callout text renders.
+                Text(.init(text))
                     .font(.subheadline).fontWeight(.medium)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
