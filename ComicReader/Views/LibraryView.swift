@@ -14,8 +14,6 @@ struct LibraryView: View {
     @State private var searchText = ""
     @State private var selectedLevel: String? = nil
     @StateObject private var help = HelpModeController()
-    @AppStorage("help.seen.library-intro") private var seenLibraryIntro = false
-    @State private var showLibraryIntro = false
     @AppStorage("help.seen.library-title") private var seenLibraryTitleTip = false
     @State private var showLibraryTitleTip = false
     @AppStorage("help.seen.choose-collection") private var seenChooseCollection = false
@@ -51,25 +49,6 @@ struct LibraryView: View {
         }
         .helpTooltipLayer()
         .environmentObject(help)
-        .overlay(alignment: .topTrailing) {
-            if showLibraryIntro {
-                HelpIntroCallout(text: "Help is on hand at any point. Just click here. You can click me to close.") {
-                    withAnimation(.easeInOut(duration: 0.2)) { showLibraryIntro = false }
-                    seenLibraryIntro = true
-                    // Sequence: reveal the library-title tip once the "?" intro is done.
-                    if HelpDebug.forceShowTooltips || helpReplay || !seenLibraryTitleTip {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryTitleTip = true }
-                        }
-                    }
-                }
-                .padding(.trailing, 10)
-                .padding(.top, 0)
-                .offset(y: -24)   // pull up toward the "?" in the nav bar (~50% closer)
-                .transition(.opacity.combined(with: .move(edge: .top)))
-                .zIndex(50)
-            }
-        }
         .overlay(alignment: .topLeading) {
             if showLibraryTitleTip {
                 HelpIntroCallout(
@@ -115,14 +94,10 @@ struct LibraryView: View {
             }
         }
         .onAppear {
-            // Show the "?" intro first. The library-title tip only opens once the
-            // "?" intro has been seen — this session (via its dismiss) or a prior one;
+            // First visit: the library-title tip opens the sequence (the old "?"
+            // intro was retired — the reader's closing tooltip covers the ? button);
             // the "Choose a collection." prompt is last.
-            if HelpDebug.forceShowTooltips || !seenLibraryIntro {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryIntro = true }
-                }
-            } else if !seenLibraryTitleTip {
+            if HelpDebug.forceShowTooltips || !seenLibraryTitleTip {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryTitleTip = true }
                 }
@@ -138,12 +113,11 @@ struct LibraryView: View {
             // the start; turning help off dismisses whatever is showing.
             if active {
                 helpReplay = true
-                withAnimation { showLibraryTitleTip = false; showChooseCollection = false }
-                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryIntro = true }
+                withAnimation { showChooseCollection = false }
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryTitleTip = true }
             } else {
                 helpReplay = false
                 withAnimation {
-                    showLibraryIntro = false
                     showLibraryTitleTip = false
                     showChooseCollection = false
                 }

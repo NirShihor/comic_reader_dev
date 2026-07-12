@@ -1979,7 +1979,7 @@ struct FloatingBubbleCard: View {
             .overlay {
                 if showHotspotTip {
                     HelpIntroCallout(
-                        text: "One last thing. In some comics you will find hotspots. These are objects that have a flashing pulse. Clicking on these provides a list-type learning experience, such as colors or numbers. You can save these to your Notes section (the Notebook link at the bottom of the screen) by clicking the save link, for speedy reference if you ever require it. Click me to close.",
+                        text: "Nearly done! In some comics you will find hotspots. These are objects that have a flashing pulse. Clicking on these provides a list-type learning experience, such as colors or numbers. You can save these to your Notes section (the Notebook link at the bottom of the screen) by clicking the save link, for speedy reference if you ever require it. Click me to close.",
                         icon: nil,
                         maxWidth: 300,
                         showArrow: false
@@ -1988,12 +1988,13 @@ struct FloatingBubbleCard: View {
                     .zIndex(60)
                 }
             }
-            // Walkthrough closer: an up-arrow callout under the "?" icon, placed
-            // exactly like the Library's "?" intro at the start of the flow.
+            // Walkthrough closer: an up-arrow callout under the "?" icon. This is
+            // the walkthrough's ONLY mention of the ? button (the old Library
+            // intro was retired), so it introduces it rather than reminding.
             .overlay(alignment: .topTrailing) {
                 if showHelpReminderTip {
                     HelpIntroCallout(
-                        text: "Lastly, just a reminder that you can click here at any point if you need to revisit any of these help items.",
+                        text: "One last thing — help is always on hand. Click here at any point to revisit any of these help items.",
                         arrowInset: 100   // the reader's "?" sits ~129pt in from the trailing edge
                     ) { dismissHelpReminderTip() }
                     .padding(.trailing, 19)
