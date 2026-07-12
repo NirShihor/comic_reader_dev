@@ -144,6 +144,21 @@ struct LibraryView: View {
                 }
             }
         }
+        .onDisappear {
+            // "Now choose a collection."'s ACTION is navigating away — into a
+            // collection (or another tab). Leaving while it's up counts as done;
+            // without this it only got marked seen by tapping the bubble itself,
+            // so it re-appeared on every return to the Library.
+            if showChooseCollection {
+                seenChooseCollection = true
+                showChooseCollection = false
+            }
+            // A "?" replay can't continue off-screen — end it.
+            if helpReplay {
+                helpReplay = false
+                help.isActive = false
+            }
+        }
         .task {
             // Pull the catalog so available comics + author-set order load.
             await storeService.fetchCatalog()
