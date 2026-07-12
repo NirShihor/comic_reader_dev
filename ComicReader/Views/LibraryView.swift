@@ -84,6 +84,10 @@ struct LibraryView: View {
                     // Sequence: the "Choose a collection." prompt follows the title tip.
                     if HelpDebug.forceShowTooltips || helpReplay || !seenChooseCollection {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                            // Marked seen AT DISPLAY: it's a one-shot prompt, and any
+                            // dismiss-time flagging loses races (e.g. it fires after
+                            // the user has already navigated into a collection).
+                            seenChooseCollection = true
                             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showChooseCollection = true }
                         }
                     }
@@ -124,6 +128,7 @@ struct LibraryView: View {
                 }
             } else if !seenChooseCollection {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    seenChooseCollection = true   // one-shot: seen at display (see above)
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showChooseCollection = true }
                 }
             }
