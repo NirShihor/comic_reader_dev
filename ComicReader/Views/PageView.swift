@@ -1230,7 +1230,7 @@ struct PageView: View {
         .overlay(alignment: openCardAnchorTop ? .bottom : .top) {
             if showSwipeTip {
                 HelpIntroCallout(
-                    text: "To move to the next page swipe to the left.",
+                    text: "To move to the next page, swipe to the left.",
                     icon: "hand.draw.fill",
                     showArrow: false
                 ) { dismissSwipeTip() }
@@ -2101,7 +2101,7 @@ struct FloatingBubbleCard: View {
 
     private var wordDetailCallout: some View {
         HelpIntroCallout(
-            text: "You can listen and see the meaning of individual words and learn about their different forms (if they have any) by clicking More. If you want to find out more about the word - click on Explain further. You can also add words to your personal vocabulary collection. Now click me to close.",
+            text: "You can listen to and see the meaning of individual words and learn about their different forms (if they have any) by clicking More. If you want to find out more about the word — click on Explain further. You can also add words to your personal vocabulary collection. Now click me to close.",
             icon: "hand.tap.fill",
             maxWidth: 300,
             showArrow: false
