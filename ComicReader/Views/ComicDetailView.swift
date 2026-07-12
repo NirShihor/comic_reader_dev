@@ -148,7 +148,14 @@ struct ComicDetailView: View {
                 placeBelow: cockpitStep == 1,
                 arrowTrailing: cockpitStep == 2,  // point at the toggle switch on the right
                 isPresented: cockpitStep != 0
-            ) { advanceCockpitTips() }
+            ) {
+                // Tap-closing the Speaking-toggle tip (step 2, scrolled down to the
+                // practice section) brings "Start reading" back on screen — the tip
+                // itself suggests scrolling up to it. Flipping the toggle instead
+                // dismisses via onChange below without yanking the scroll position.
+                if cockpitStep == 2 { scrollTopToken += 1 }
+                advanceCockpitTips()
+            }
             .onChange(of: help.isActive) { _, active in
                 // "?" replays the cockpit sequence from step 1; off dismisses it.
                 if active {
