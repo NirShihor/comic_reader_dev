@@ -130,7 +130,8 @@ struct HotspotView: View {
                     .fontWeight(.semibold)
                 }
             }
-            .popover(item: $selectedWord) { word in
+            // arrowEdge: vertical-axis only — see WordButton's popover in PanelView.
+            .popover(item: $selectedWord, arrowEdge: .top) { word in
                 VStack(alignment: .leading, spacing: 8) {
                     Text(word.displayText)
                         .font(.headline)
