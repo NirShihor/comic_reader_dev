@@ -1476,6 +1476,9 @@ struct BubbleContentView: View {
     let bubble: Bubble
     @Binding var revealedBubbleId: String?   // shared with the page so revealed text also shows in the bubble
     var onWordTap: (() -> Void)? = nil       // notified when any word is tapped (clears the "Click on a word." tip)
+    /// Word popover direction — .bottom (opens upward) when the card hugs the
+    /// screen bottom, so the popup isn't squeezed against the tab bar.
+    var wordPopoverArrowEdge: Edge = .top
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var audioManager = AudioManager.shared
     @StateObject private var whisperService = WhisperService.shared
@@ -1607,7 +1610,8 @@ struct BubbleContentView: View {
                         weight: .medium,
                         sentenceText: sentence.text,
                         sentenceTranslation: sentence.translation,
-                        onTap: onWordTap
+                        onTap: onWordTap,
+                        popoverArrowEdge: wordPopoverArrowEdge
                     )
                     .explains("Tap a word",
                               "Tap any word to see its meaning and base form, hear it spoken, and save it to your vocabulary.",
@@ -2257,7 +2261,10 @@ struct FloatingBubbleCard: View {
             ScrollView {
                 if bubbles.indices.contains(index) {
                     BubbleContentView(comic: comic, bubble: bubbles[index], revealedBubbleId: $revealedBubbleId,
-                                      onWordTap: { handleWordTap() })
+                                      onWordTap: { handleWordTap() },
+                                      // Card hugging the screen bottom → word popovers
+                                      // open UPWARD so they aren't crushed at the tab bar.
+                                      wordPopoverArrowEdge: anchorTop ? .top : .bottom)
                         .id(bubbles[index].id)   // reset per-bubble state when stepping
                         // Extra horizontal inset so the side step-arrows (~48pt in from
                         // each edge, at mid-height) never sit on top of the text/controls,

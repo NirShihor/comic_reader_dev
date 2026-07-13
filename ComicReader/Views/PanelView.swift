@@ -1184,6 +1184,10 @@ struct WordButton: View {
     /// Optional: notified when the word is tapped (used to clear the first-run
     /// "tap a word" onboarding hint).
     var onTap: (() -> Void)? = nil
+    /// Which side the definition popover opens on. .top = popover below the word;
+    /// .bottom = popover above it (used when the word row sits near the screen
+    /// bottom, where a downward popover gets squeezed against the tab bar).
+    var popoverArrowEdge: Edge = .top
     @State private var showingDefinition = false
     @State private var showingForms = false
     @State private var showingExplain = false
@@ -1207,10 +1211,10 @@ struct WordButton: View {
                 .clipShape(RoundedRectangle(cornerRadius: 6))
         }
         .buttonStyle(.plain)
-        // arrowEdge locks the popover to the vertical axis: it presents above or
-        // below the word (flipping as space demands) but never sideways — a side
-        // attachment near the screen edge cropped the content off-screen.
-        .popover(isPresented: $showingDefinition, arrowEdge: .top) {
+        // arrowEdge locks the popover to the vertical axis (never sideways — a side
+        // attachment near the screen edge cropped the content off-screen). The edge
+        // is caller-chosen so bottom-anchored contexts can open upward instead.
+        .popover(isPresented: $showingDefinition, arrowEdge: popoverArrowEdge) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text(word.displayText)
