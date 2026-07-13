@@ -1642,7 +1642,7 @@ struct BubbleContentView: View {
                     withAnimation { translationRevealed.insert(sentence.id) }
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
-                    Label("Show translation", systemImage: "eye").font(.subheadline).foregroundStyle(.blue)
+                    Label("Show translation", systemImage: "eye").font(.subheadline).foregroundStyle(Color.translationLink)
                 }
             }
         }
@@ -1677,7 +1677,7 @@ struct BubbleContentView: View {
                     withAnimation { grammarRevealed.insert(sentence.id) }
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
-                    Label("Explain grammar", systemImage: "text.book.closed").font(.subheadline).foregroundStyle(.purple)
+                    Label("Explain grammar", systemImage: "text.book.closed").font(.subheadline).foregroundStyle(Color.grammarLink)
                 }
             }
         }
@@ -2220,14 +2220,17 @@ struct FloatingBubbleCard: View {
     }
 
     // Prominent circular step arrow, placed on the card's side at mid-height.
+    // Chevron/stroke use systemBackground so they invert WITH the circle: the
+    // app-wide tint is .primary, so in dark mode the circle is white — a fixed
+    // white chevron disappeared into it.
     private func sideArrow(next: Bool) -> some View {
         Button { next ? goNext() : goPrev() } label: {
             Image(systemName: next ? "chevron.right" : "chevron.left")
                 .font(.system(size: 20, weight: .heavy))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.systemBackground))
                 .frame(width: 44, height: 44)
-                .background(Color.accentColor, in: Circle())
-                .overlay(Circle().stroke(.white.opacity(0.85), lineWidth: 2))
+                .background(Color.primary, in: Circle())
+                .overlay(Circle().stroke(Color(.systemBackground).opacity(0.85), lineWidth: 2))
                 .shadow(color: .black.opacity(0.3), radius: 5, y: 2)
         }
         .buttonStyle(.plain)
@@ -2339,4 +2342,20 @@ private struct PopupContentHeightKey: PreferenceKey {
             .environmentObject(SettingsManager())
             .environmentObject(ReadingProgressManager())
     }
+}
+
+// MARK: - Dark-mode-aware link colours
+extension Color {
+    /// Stock .blue/.purple sink into the dark material cards — use brighter
+    /// variants in dark mode, the standard system colours in light.
+    static let translationLink = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.45, green: 0.69, blue: 1.00, alpha: 1)
+            : .systemBlue
+    })
+    static let grammarLink = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.82, green: 0.60, blue: 1.00, alpha: 1)
+            : .systemPurple
+    })
 }

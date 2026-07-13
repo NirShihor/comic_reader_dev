@@ -577,7 +577,7 @@ struct PanelView: View {
                             } label: {
                                 Label("Show translation", systemImage: "eye")
                                     .font(.subheadline)
-                                    .foregroundStyle(.blue)
+                                    .foregroundStyle(Color.translationLink)
                             }
                             .explains("Show translation",
                                       "Reveal the English translation of this sentence when you're stuck.")
@@ -619,7 +619,7 @@ struct PanelView: View {
                             } label: {
                                 Label("Explain grammar", systemImage: "text.book.closed")
                                     .font(.subheadline)
-                                    .foregroundStyle(.purple)
+                                    .foregroundStyle(Color.grammarLink)
                             }
                             .explains("Explain grammar",
                                       "Show a short, plain-language note on how this sentence works.")
