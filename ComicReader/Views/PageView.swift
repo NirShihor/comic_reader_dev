@@ -1840,15 +1840,19 @@ struct BubbleContentView: View {
                     .font(.subheadline).foregroundStyle(.secondary)
             }
 
-            HStack {
+            HStack(spacing: 12) {
+                // Icon-only: the card is narrow (the side arrows eat its width),
+                // so labelled buttons wrapped awkwardly ("Lis-ten").
                 Button { playAudio(practiceSentence?.audioUrl) } label: {
-                    Label("Listen", systemImage: "speaker.wave.2.fill").font(.subheadline)
+                    Image(systemName: "speaker.wave.2.fill").font(.subheadline)
                 }
                 .buttonStyle(.bordered)
+                .accessibilityLabel("Listen")
                 Button { practiceFeedback = nil } label: {
-                    Label("Try Again", systemImage: "arrow.counterclockwise").font(.subheadline)
+                    Image(systemName: "arrow.counterclockwise").font(.subheadline)
                 }
                 .buttonStyle(.bordered)
+                .accessibilityLabel("Try again")
             }
         }
         .padding()
