@@ -977,20 +977,23 @@ struct PanelView: View {
                         Text("Loading...")
                             .font(.subheadline)
                     } else {
-                        Label("Listen", systemImage: "speaker.wave.2.fill")
+                        // Icon-only, matching the floating card's feedback buttons.
+                        Image(systemName: "speaker.wave.2.fill")
                             .font(.subheadline)
                     }
                 }
                 .buttonStyle(.bordered)
                 .disabled(audioManager.isLoading)
+                .accessibilityLabel("Listen")
 
                 Button {
                     practiceFeedback = nil
                 } label: {
-                    Label("Try Again", systemImage: "arrow.counterclockwise")
+                    Image(systemName: "arrow.counterclockwise")
                         .font(.subheadline)
                 }
                 .buttonStyle(.bordered)
+                .accessibilityLabel("Try again")
             }
         }
         .padding()
