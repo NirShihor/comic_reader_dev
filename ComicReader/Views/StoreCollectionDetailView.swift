@@ -94,7 +94,7 @@ struct StoreCollectionDetailView: View {
             showingFullCover = true
         } label: {
             if let coverUrl = collectionCoverUrl {
-                AsyncImage(url: URL(string: "\(Secrets.serverBaseURL)\(coverUrl)")) { phase in
+                RetryingAsyncImage(url: URL(string: "\(Secrets.serverBaseURL)\(coverUrl)")) { phase in
                     switch phase {
                     case .success(let image):
                         image
@@ -206,7 +206,7 @@ struct StoreCollectionDetailView: View {
             Color.black.ignoresSafeArea()
 
             if let coverUrl = collectionCoverUrl {
-                AsyncImage(url: URL(string: "\(Secrets.serverBaseURL)\(coverUrl)")) { phase in
+                RetryingAsyncImage(url: URL(string: "\(Secrets.serverBaseURL)\(coverUrl)")) { phase in
                     switch phase {
                     case .success(let image):
                         image

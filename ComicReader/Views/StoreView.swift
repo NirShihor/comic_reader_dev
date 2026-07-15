@@ -193,7 +193,7 @@ struct StoreComicCard: View {
         VStack(alignment: .leading, spacing: compact ? 8 : 12) {
             HStack(spacing: compact ? 12 : 16) {
                 // Cover image from server
-                AsyncImage(url: URL(string: "\(Secrets.serverBaseURL)\(comic.coverThumbnailUrl)")) { phase in
+                RetryingAsyncImage(url: URL(string: "\(Secrets.serverBaseURL)\(comic.coverThumbnailUrl)")) { phase in
                     switch phase {
                     case .success(let image):
                         image
@@ -470,7 +470,7 @@ struct StoreCollectionGroup: View {
             HStack(spacing: 12) {
                 // Cover image
                 if let coverUrl = collectionCoverUrl {
-                    AsyncImage(url: URL(string: "\(Secrets.serverBaseURL)\(coverUrl)")) { phase in
+                    RetryingAsyncImage(url: URL(string: "\(Secrets.serverBaseURL)\(coverUrl)")) { phase in
                         switch phase {
                         case .success(let image):
                             image

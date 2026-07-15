@@ -105,6 +105,35 @@ extension Image {
     }
 }
 
+// MARK: - Retrying remote image
+/// AsyncImage that RETRIES failed loads. AsyncImage keeps its .failure phase
+/// forever — on the Library a burst of simultaneous thumbnail fetches can
+/// transiently fail (cold server, network blip) and those covers then stay
+/// blank placeholders until the app relaunches. This wrapper re-attempts with
+/// backoff (and again when the view reappears), up to `maxRetries`.
+struct RetryingAsyncImage<Content: View>: View {
+    let url: URL?
+    var maxRetries: Int = 4
+    @ViewBuilder var content: (AsyncImagePhase) -> Content
+
+    @State private var attempt = 0
+
+    var body: some View {
+        AsyncImage(url: url) { phase in
+            content(phase)
+                .onAppear {
+                    if case .failure = phase, attempt < maxRetries {
+                        let delay = 1.5 * Double(attempt + 1)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                            attempt += 1   // new identity → AsyncImage refetches
+                        }
+                    }
+                }
+        }
+        .id("\(url?.absoluteString ?? "")#\(attempt)")
+    }
+}
+
 // MARK: - SwiftUI View for async loading
 struct ComicImage: View {
     let imageName: String
@@ -124,7 +153,7 @@ struct ComicImage: View {
             } else if localMissing,
                       let path = remoteFallbackPath, !path.isEmpty,
                       let url = URL(string: "\(Secrets.serverBaseURL)\(path)") {
-                AsyncImage(url: url) { phase in
+                RetryingAsyncImage(url: url) { phase in
                     switch phase {
                     case .success(let image):
                         image.resizable()
