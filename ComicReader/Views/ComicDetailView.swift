@@ -56,6 +56,7 @@ struct ComicDetailView: View {
     @State private var guidedOnScreen = false   // next PageView push is a guided practice run
     @State private var pendingBubbleId: String? = nil   // bubble to resume the guided run at
     @State private var openPracticeAfterReading = false  // end-of-episode "Practice" tapped
+    @State private var practiceFromEnd = false  // popup came from the episode end → modes start from the beginning
     @State private var scrollTopToken = 0                 // bump to scroll the page to the top
     @StateObject private var help = HelpModeController()
 
@@ -99,12 +100,23 @@ struct ComicDetailView: View {
             .navigationDestination(item: $practiceDestination) { destinationView($0) }
             .onChange(of: practiceDestination) { _, newValue in
                 if let dest = newValue {
+                    // Coming from the episode-end "Practice" button: they just finished
+                    // reading, so the mode starts from the beginning, not the saved spot.
+                    if practiceFromEnd {
+                        progressManager.clearPracticePosition(for: comic.id)
+                        progressManager.clearWordPosition(for: comic.id)
+                        progressManager.clearPracticeBubble(for: comic.id)
+                    }
                     // Launching practice counts as interacting → Library "Continue";
                     // remember the mode (for Restart/Continue) and close the popup.
                     progressManager.touchProgress(comicId: comic.id)
                     progressManager.setPracticeMode(comic.id, mode: dest.modeKey)
                     showPracticeOptions = false
                 }
+            }
+            .onChange(of: showPracticeOptions) { _, open in
+                // Popup gone (mode chosen or dismissed) → back to normal resume behaviour.
+                if !open { practiceFromEnd = false }
             }
             .navigationDestination(item: $selectedPage) { page in
                 PageView(comic: comic, page: page, guidedOnScreenPractice: guidedOnScreen,
@@ -120,6 +132,7 @@ struct ComicDetailView: View {
                     // practice popup once the page view has finished popping.
                     if openPracticeAfterReading {
                         openPracticeAfterReading = false
+                        practiceFromEnd = true   // whatever mode they pick starts from the beginning
                         scrollTopToken += 1   // jump the home page back to the top
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                             withAnimation(.easeInOut(duration: 0.2)) { showPracticeOptions = true }
@@ -797,6 +810,14 @@ struct ComicDetailView: View {
     /// left off — same page AND same bubble (mirrors "Continue reading"). Restart
     /// routes through the `from:` variant with the cover and no bubble.
     private func startReadAndSpeak() {
+        if practiceFromEnd {
+            // Episode just finished → restart from the cover, no saved bubble.
+            progressManager.clearPracticePosition(for: comic.id)
+            progressManager.clearWordPosition(for: comic.id)
+            progressManager.clearPracticeBubble(for: comic.id)
+            startReadAndSpeak(from: firstPage)
+            return
+        }
         startReadAndSpeak(from: startingPage, bubbleId: progressManager.practiceBubbleId(for: comic.id))
     }
 

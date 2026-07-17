@@ -419,22 +419,20 @@ struct PageView: View {
     // then the bubble order within each panel). These are the tap targets for the
     // per-bubble reading sheet; sound effects and image bubbles are excluded.
     private var pageTextBubbles: [Bubble] {
-        // On story pages, skip borderless/transparent narration — decorative markers
-        // like "continuará…" — so they aren't tappable popup bubbles you have to step
-        // through before "End of Episode". EXCEPTION: the cover title is also
-        // transparent/borderless, but there we WANT it tappable so it opens the popup
-        // and plays its audio. It still gets no green fill — selectedBubbleDot skips
-        // bgTransparent bubbles — so the cover just pops up with audio, no highlight.
-        let onCover = currentPageIndex == 0
+        // Narration counts as real content — transparent/borderless included (cover
+        // titles, opening narration, mid-episode titles): it's tappable and plays its
+        // audio. Transparent ones just get no green fill in READING mode —
+        // selectedBubbleDot skips them there (no box to flood on the master art).
         var bubbles = currentPage.panels
             .sorted { $0.panelOrder < $1.panelOrder }
             .flatMap { $0.bubbles }
-            .filter { $0.isSoundEffect != true && $0.type != .image
-                      && (onCover || $0.bgTransparent != true) && !$0.sentences.isEmpty }
-        // On the final page, also drop any trailing narration (e.g. a "continuará…"
-        // marker that predates the bgTransparent flag) so the flow ends on the last
-        // line of dialogue — no clunky extra step that doesn't highlight and lags.
-        if currentPageIndex == sortedPages.count - 1 {
+            .filter { $0.isSoundEffect != true && $0.type != .image && !$0.sentences.isEmpty }
+        // READING mode, final page: drop trailing narration — the decorative
+        // "continuará…" marker — so the flow ends on the last line of dialogue, not
+        // a clunky extra step before "End of Episode". PRACTICE keeps it: the
+        // practice bake blanks every text bubble (continuará included), so a bubble
+        // left out here would show as an empty box that can never reveal or play.
+        if currentPageIndex == sortedPages.count - 1 && !isPracticeMode {
             while let last = bubbles.last, last.type == .narration {
                 bubbles.removeLast()
             }
@@ -442,13 +440,14 @@ struct PageView: View {
         return bubbles
     }
 
-    // Non-practised baked bubbles (sound effects / image bubbles). In practice mode
-    // the blank base hides these, so we overlay their master content to keep them
+    // Non-practised baked bubbles (sound effects / image bubbles, plus any text
+    // bubble with no sentences — nothing to reveal or play). In practice mode the
+    // blank base hides these, so we overlay their master content to keep them
     // looking like reading mode.
     private var pageSoundEffectBubbles: [Bubble] {
         currentPage.panels
             .flatMap { $0.bubbles }
-            .filter { $0.isSoundEffect == true || $0.type == .image }
+            .filter { $0.isSoundEffect == true || $0.type == .image || $0.sentences.isEmpty }
     }
 
     private var isPracticeMode: Bool {
@@ -830,8 +829,11 @@ struct PageView: View {
         let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|\(inkSource)|\(comic.bubbleDotColor ?? "def")"
         // Transparent/borderless narration (e.g. "continuará") has no balloon interior
         // to fill — flood-filling it would tint the text and a stray patch of art green.
-        // Skip the highlight entirely for these.
-        let fill = (b.bgTransparent == true) ? nil
+        // Skip the highlight for these in READING mode. In PRACTICE mode the empty
+        // bake paints these as a real bordered box (so they're visibly tappable), so
+        // the flood fill works and they highlight like any other bubble. If a comic
+        // predates that bake, the fill just fails its leak checks → nil → no highlight.
+        let fill = (b.bgTransparent == true && !isPracticeMode) ? nil
             : BubbleFill.overlay(maskSource: maskSource, inkSource: inkSource, comicId: comic.id,
                                  bubble: nb, color: UIColor(dotColor), cacheKey: key)
 
