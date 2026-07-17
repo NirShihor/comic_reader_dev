@@ -83,6 +83,11 @@ class TTSDelegate: NSObject, AVSpeechSynthesizerDelegate {
 // MARK: - RepeatPracticeView
 struct RepeatPracticeView: View {
     let comic: Comic
+    /// false (default): hear Spanish → repeat it → say the English meaning.
+    /// true: REVERSE mode — hear the ENGLISH line, answer with the Spanish.
+    /// Same state machine; the prompt audio, the skipped meaning step and the
+    /// no-audio reprompt are the only differences.
+    var reverse: Bool = false
     @EnvironmentObject private var progressManager: ReadingProgressManager
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var audioManager = AudioManager.shared
@@ -137,7 +142,7 @@ struct RepeatPracticeView: View {
                 practiceView
             }
         }
-        .navigationTitle("Repeat Practice")
+        .navigationTitle(reverse ? "Translate & Speak" : "Repeat Practice")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -190,7 +195,9 @@ struct RepeatPracticeView: View {
                 .font(.body)
                 .foregroundStyle(.secondary)
 
-            Text("Listen to each sentence, repeat it back, then say what it means in English.")
+            Text(reverse
+                 ? "Listen to each sentence in English, then say it in Spanish. You'll hear the Spanish answer after each try."
+                 : "Listen to each sentence, repeat it back, then say what it means in English.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -301,6 +308,19 @@ struct RepeatPracticeView: View {
     @ViewBuilder
     private var stateIndicator: some View {
         switch state {
+        case .playingSpanish where reverse:
+            // Reverse mode: the prompt is the ENGLISH line.
+            VStack(spacing: 8) {
+                Image(systemName: "speaker.wave.3.fill")
+                    .font(.system(size: 56))
+                    .foregroundStyle(.purple)
+                    .symbolEffect(.variableColor.iterative)
+                Text("EN")
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.purple)
+            }
+
         case .playingSpanish, .replayingCorrect, .replayingBeforeAdvance, .replayingBeforeRetry:
             Image(systemName: "speaker.wave.3.fill")
                 .font(.system(size: 56))
@@ -383,13 +403,19 @@ struct RepeatPracticeView: View {
                 .fontWeight(.bold)
 
             VStack(spacing: 16) {
-                scoreRow(label: "Pronunciation", correct: pronunciationCorrect, total: totalAttempted, icon: "mic.fill")
-                scoreRow(label: "Comprehension", correct: meaningCorrect, total: totalAttempted, icon: "brain.head.profile")
+                if reverse {
+                    scoreRow(label: "Translation", correct: pronunciationCorrect, total: totalAttempted, icon: "arrow.left.arrow.right")
+                } else {
+                    scoreRow(label: "Pronunciation", correct: pronunciationCorrect, total: totalAttempted, icon: "mic.fill")
+                    scoreRow(label: "Comprehension", correct: meaningCorrect, total: totalAttempted, icon: "brain.head.profile")
+                }
             }
             .padding(.horizontal, 32)
 
             if totalAttempted > 0 {
-                let overallPercent = Int(Double(pronunciationCorrect + meaningCorrect) / Double(totalAttempted * 2) * 100)
+                let overallPercent = reverse
+                    ? Int(Double(pronunciationCorrect) / Double(totalAttempted) * 100)
+                    : Int(Double(pronunciationCorrect + meaningCorrect) / Double(totalAttempted * 2) * 100)
                 Text("\(overallPercent)% overall")
                     .font(.title2)
                     .fontWeight(.semibold)
@@ -536,9 +562,27 @@ struct RepeatPracticeView: View {
         isFirstMeaningAttempt = true
         state = .playingSpanish
         updateNowPlaying()
+        playPrompt()
+    }
 
+    /// The line the learner responds to: the Spanish audio normally, the ENGLISH
+    /// audio in reverse mode (falling back to TTS when a sentence has no
+    /// pre-recorded English clip — same fallback the meaning step uses).
+    private func playPrompt() {
         let sentence = sentences[currentIndex]
-        audioManager.play(sentence.audioUrl)
+        if reverse {
+            if let en = sentence.translationAudioUrl, !en.isEmpty {
+                audioManager.play(en)
+            } else {
+                usingTTSFallback = true
+                speakTTS(sentence.translation) {
+                    self.usingTTSFallback = false
+                    self.handleAudioFinished()
+                }
+            }
+        } else {
+            audioManager.play(sentence.audioUrl)
+        }
     }
 
     // MARK: - Audio Completion Handler
@@ -555,11 +599,19 @@ struct RepeatPracticeView: View {
         case .feedbackRepeat(let correct):
             resetAudioSessionForPlayback()
             if correct {
-                // Correct pronunciation → ask meaning
-                state = .askingMeaning
-                audioManager.play(whatDoesItMeanClip)
+                if reverse {
+                    // Reverse: no meaning step (they just PRODUCED the Spanish) —
+                    // replay the Spanish once as reinforcement, then advance.
+                    state = .replayingBeforeAdvance
+                    audioManager.play(sentences[currentIndex].audioUrl)
+                } else {
+                    // Correct pronunciation → ask meaning
+                    state = .askingMeaning
+                    audioManager.play(whatDoesItMeanClip)
+                }
             } else {
-                // Incorrect → replay Spanish for retry
+                // Incorrect → replay Spanish for retry (in reverse mode that IS
+                // the answer: hear it, then say it back)
                 state = .replayingCorrect
                 audioManager.play(sentences[currentIndex].audioUrl)
             }
@@ -612,10 +664,17 @@ struct RepeatPracticeView: View {
 
         case .repromptNoAudioRepeat:
             // "I didn't hear anything" finished → replay the phrase, then re-record
-            // (same as the incorrect-pronunciation path, but unscored).
+            // (same as the incorrect-pronunciation path, but unscored). In reverse
+            // mode replay the ENGLISH prompt — replaying the Spanish would hand
+            // over the answer for a silent attempt.
             resetAudioSessionForPlayback()
-            state = .replayingCorrect
-            audioManager.play(sentences[currentIndex].audioUrl)
+            if reverse {
+                state = .playingSpanish
+                playPrompt()
+            } else {
+                state = .replayingCorrect
+                audioManager.play(sentences[currentIndex].audioUrl)
+            }
 
         case .repromptNoAudioMeaning:
             // "I didn't hear anything" finished → re-ask "what does it mean?"
@@ -642,10 +701,14 @@ struct RepeatPracticeView: View {
 
             await whisperService.startRecording()
 
-            // Fallback max timer (in case silence detection doesn't trigger)
+            // Fallback max timer (in case silence detection doesn't trigger).
+            // Reverse mode gets extra headroom: producing the Spanish from the
+            // English is recall, not repetition — thinking time comes first.
             let sentence = sentences[currentIndex]
             let wordCount = sentence.text.split(separator: " ").count
-            let timeout = max(4.0, Double(wordCount) * 1.0 + 2.0)
+            let timeout = reverse
+                ? max(8.0, Double(wordCount) * 1.5 + 4.0)
+                : max(4.0, Double(wordCount) * 1.0 + 2.0)
             autoStopTimer = Timer.scheduledTimer(withTimeInterval: timeout, repeats: false) { _ in
                 Task { @MainActor in
                     guard self.state == .recordingRepeat else { return }
@@ -848,9 +911,14 @@ struct RepeatPracticeView: View {
                 self.startRecordingRepeat()
             }
         case .processingRepeat, .feedbackRepeat, .replayingCorrect:
-            // Restart from Spanish replay
-            state = .replayingCorrect
-            audioManager.play(sentences[currentIndex].audioUrl)
+            // Restart from Spanish replay — except in reverse mode mid-attempt,
+            // where the Spanish is the ANSWER: re-play the English prompt instead.
+            if reverse {
+                playCurrentSentence()
+            } else {
+                state = .replayingCorrect
+                audioManager.play(sentences[currentIndex].audioUrl)
+            }
         case .askingMeaning, .waitingForMeaning:
             state = .askingMeaning
             audioManager.play(whatDoesItMeanClip)
@@ -1295,7 +1363,7 @@ struct RepeatPracticeView: View {
 
     private func updateNowPlaying() {
         var info = [String: Any]()
-        info[MPMediaItemPropertyTitle] = "Repeat Practice"
+        info[MPMediaItemPropertyTitle] = reverse ? "Translate & Speak" : "Repeat Practice"
         info[MPMediaItemPropertyArtist] = comic.title
         info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = Double(currentIndex)
         info[MPMediaItemPropertyPlaybackDuration] = Double(sentences.count)

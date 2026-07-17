@@ -5,6 +5,7 @@ enum PracticeDestination: Hashable {
     case speaking
     case listening
     case repeatPractice
+    case translateSpeak   // reverse Listen & speak: hear English, answer in Spanish
     case repeatListen
     case originListen
     case flowPractice
@@ -16,6 +17,7 @@ enum PracticeDestination: Hashable {
         case .speaking: return "speaking"
         case .listening: return "listening"
         case .repeatPractice: return "repeatPractice"
+        case .translateSpeak: return "translateSpeak"
         case .repeatListen: return "repeatListen"
         case .originListen: return "originListen"
         case .flowPractice: return "flowPractice"
@@ -28,6 +30,7 @@ enum PracticeDestination: Hashable {
         case "speaking": self = .speaking
         case "listening": self = .listening
         case "repeatPractice": self = .repeatPractice
+        case "translateSpeak": self = .translateSpeak
         case "repeatListen": self = .repeatListen
         case "originListen": self = .originListen
         case "flowPractice": self = .flowPractice
@@ -53,6 +56,7 @@ struct ComicDetailView: View {
     @State private var showingPracticeHelp = false
     @State private var showPracticeOptions = false
     @State private var showingDrillChooser = false
+    @State private var showingListenSpeakChooser = false   // Listen & speak: direction picker
     @State private var guidedOnScreen = false   // next PageView push is a guided practice run
     @State private var pendingBubbleId: String? = nil   // bubble to resume the guided run at
     @State private var openPracticeAfterReading = false  // end-of-episode "Practice" tapped
@@ -73,7 +77,9 @@ struct ComicDetailView: View {
         GridItem(.flexible(), spacing: 12)
     ]
 
-    var body: some View {
+    // body is split in two (navigation/practice plumbing here, dialogs + callouts
+    // in `body`) — as ONE modifier chain the type-checker gives up on it.
+    private var coreContent: some View {
         scrollContent
             .overlay { practiceOptionsOverlay }
             .navigationTitle("")   // shown in the header instead — avoid duplicate
@@ -143,13 +149,17 @@ struct ComicDetailView: View {
             .sheet(isPresented: $showingPracticeHelp) {
                 PracticeModesHelpView()
             }
+    }
+
+    var body: some View {
+        coreContent
             .confirmationDialog("Drill the key words", isPresented: $showingDrillChooser, titleVisibility: .visible) {
-                Button("Writing") { practiceDestination = .quiz }
-                if settingsManager.speakingEnabled {
-                    Button("Speaking") { practiceDestination = .speaking }
-                }
-                Button("Listening") { practiceDestination = .listening }
-                Button("Cancel", role: .cancel) { }
+                drillChooserButtons
+            }
+            .confirmationDialog("Listen & speak", isPresented: $showingListenSpeakChooser, titleVisibility: .visible) {
+                listenSpeakChooserButtons
+            } message: {
+                Text("Hear the Spanish, repeat it and give the meaning — or hear the English and answer in Spanish.")
             }
             .helpTooltipLayer()
             .environmentObject(help)
@@ -282,6 +292,25 @@ struct ComicDetailView: View {
         }
     }
 
+    // Dialog bodies extracted — inlining them in `body`'s modifier chain pushed
+    // the type-checker over its complexity limit.
+    @ViewBuilder
+    private var drillChooserButtons: some View {
+        Button("Writing") { practiceDestination = .quiz }
+        if settingsManager.speakingEnabled {
+            Button("Speaking") { practiceDestination = .speaking }
+        }
+        Button("Listening") { practiceDestination = .listening }
+        Button("Cancel", role: .cancel) { }
+    }
+
+    @ViewBuilder
+    private var listenSpeakChooserButtons: some View {
+        Button("Spanish → Spanish & English") { practiceDestination = .repeatPractice }
+        Button("English → Spanish") { practiceDestination = .translateSpeak }
+        Button("Cancel", role: .cancel) { }
+    }
+
     @ViewBuilder
     private func destinationView(_ destination: PracticeDestination) -> some View {
         switch destination {
@@ -289,6 +318,7 @@ struct ComicDetailView: View {
         case .speaking:      SpeakingTestView(comic: comic)
         case .listening:     ListeningTestView(comic: comic)
         case .repeatPractice: RepeatPracticeView(comic: comic)
+        case .translateSpeak: RepeatPracticeView(comic: comic, reverse: true)
         case .repeatListen:  RepeatListenView(comic: comic)
         case .originListen:  OriginListenView(comic: comic)
         case .flowPractice:  FlowPracticeView(comic: comic)
@@ -676,8 +706,8 @@ struct ComicDetailView: View {
                              action: { startReadAndSpeak() })
             practiceModeCard(icon: "headphones",
                              title: "Listen & speak", tag: "OFF SCREEN",
-                             description: "Screen off, eyes free. Hear each line, repeat it, say what it means.",
-                             action: { practiceDestination = .repeatPractice })
+                             description: "Screen off, eyes free. Hear each line and speak — Spanish → English, or English → Spanish.",
+                             action: { showingListenSpeakChooser = true })
         } else {
             practiceModeCard(icon: "headphones",
                              title: "Just listen", tag: "OFF SCREEN",
