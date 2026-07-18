@@ -205,6 +205,30 @@ struct HotspotView: View {
         }
         .helpTooltipLayer()
         .environmentObject(help)
+        // "?" callouts. The Test link is a toolbar button — toolbar items can't
+        // publish callout anchors — so the list tip is placed manually under the
+        // top-leading corner, arrow up at "Test" (same trick as the reader's
+        // "?" closer). The test-mode tip anchors to the direction picker proper.
+        .overlay(alignment: .topLeading) {
+            if help.isActive && !isTestMode {
+                HelpIntroCallout(
+                    text: "You can save the list in this hotspot in your notes and test yourself with the **Test** link.",
+                    arrowEdge: .leading,
+                    arrowInset: 14
+                ) { withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false } }
+                .padding(.leading, 12)
+                .offset(y: 48)   // just below the nav bar, arrow under "Test"
+                .transition(.opacity.combined(with: .move(edge: .top)))
+                .zIndex(60)
+            }
+        }
+        .anchoredCallout(
+            targetID: "hotspot.testDirection",
+            text: "Here you can switch your testing between English and Spanish.",
+            icon: nil,
+            placeBelow: true,
+            isPresented: help.isActive && isTestMode && !testComplete
+        ) { withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false } }
     }
 
     // MARK: - Normal Content
@@ -381,7 +405,10 @@ struct HotspotView: View {
             .padding(.top, 12)
             .onChange(of: testMode) { _, _ in
                 resetTest()
+                // Switching direction is the tip's action — it has done its job.
+                if help.isActive { withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false } }
             }
+            .calloutAnchor("hotspot.testDirection")
             .explains("Test direction", "Choose whether to translate from English into Spanish, or from Spanish into English.")
 
             // Progress
