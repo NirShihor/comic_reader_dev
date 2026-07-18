@@ -3,11 +3,17 @@ import SwiftUI
 
 @MainActor
 class VocabularyManager: ObservableObject {
+    // ONE shared instance app-wide. persistWords() writes this instance's whole
+    // list back to UserDefaults, so separate instances (each loading a snapshot
+    // at creation) silently clobbered each other's saves — saving two words from
+    // two word buttons kept only the second.
+    static let shared = VocabularyManager()
+
     @Published private(set) var savedWords: [SavedWord] = []
 
     private let storageKey = "savedVocabulary"
 
-    init() {
+    private init() {
         loadWords()
     }
 

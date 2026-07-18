@@ -2,7 +2,7 @@ import SwiftUI
 import AVFoundation
 
 struct VocabularyView: View {
-    @StateObject private var vocabularyManager = VocabularyManager()
+    @ObservedObject private var vocabularyManager = VocabularyManager.shared
     @StateObject private var comicStorage = LocalComicStorage.shared
     @State private var selectedFilter: SavedWord.ReviewState? = nil
     @State private var showingTest = false
