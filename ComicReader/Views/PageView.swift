@@ -364,6 +364,8 @@ struct PageView: View {
     /// Open this bubble's floating card on appear (e.g. opening a word's context
     /// from the Vocabulary list).
     var initialBubbleId: String? = nil
+    /// Open this hotspot's sheet on appear (deep link from a saved note).
+    var initialHotspotId: String? = nil
     /// Transient context views (e.g. Vocabulary) shouldn't move the saved reading
     /// position; set false to skip progress saving.
     var savesProgress: Bool = true
@@ -562,12 +564,14 @@ struct PageView: View {
     }
 
     init(comic: Comic, page: Page, guidedOnScreenPractice: Bool = false, onRequestPractice: (() -> Void)? = nil,
-         initialBubbleId: String? = nil, savesProgress: Bool = true, presentedModally: Bool = false) {
+         initialBubbleId: String? = nil, initialHotspotId: String? = nil,
+         savesProgress: Bool = true, presentedModally: Bool = false) {
         self.comic = comic
         self.page = page
         self.guidedOnScreenPractice = guidedOnScreenPractice
         self.onRequestPractice = onRequestPractice
         self.initialBubbleId = initialBubbleId
+        self.initialHotspotId = initialHotspotId
         self.savesProgress = savesProgress
         self.presentedModally = presentedModally
         // Initialize currentPageIndex to the correct page in sorted order
@@ -1140,7 +1144,7 @@ struct PageView: View {
             endOfEpisodeOverlay
         }
         .sheet(item: $selectedHotspot) { hotspot in
-            HotspotView(hotspot: hotspot, comicId: comic.id)
+            HotspotView(hotspot: hotspot, comicId: comic.id, pageNumber: currentPage.pageNumber)
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
@@ -1296,6 +1300,14 @@ struct PageView: View {
             // Open a specific bubble's card (e.g. from a Vocabulary word's context).
             if let initialBubbleId, let idx = pageTextBubbles.firstIndex(where: { $0.id == initialBubbleId }) {
                 selectedBubbleIndex = idx
+            }
+            // Open a specific hotspot's sheet (deep link from a saved note). A short
+            // delay lets the page settle so the sheet presents reliably.
+            if let initialHotspotId,
+               let h = (currentPage.hotspots ?? []).first(where: { $0.id == initialHotspotId }) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    selectedHotspot = h
+                }
             }
             // Save progress when view appears (skipped for transient context views).
             if savesProgress {

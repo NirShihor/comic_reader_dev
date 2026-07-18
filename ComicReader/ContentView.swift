@@ -357,10 +357,17 @@ struct CoachmarkPreviewHarness: View {
 // MARK: - Notebook
 
 /// A single notebook page: a title and free-form body text the user writes.
+/// Pages saved from a hotspot also carry a deep link back into the comic
+/// (optional fields, so previously stored pages decode unchanged).
 struct NotebookPage: Identifiable, Codable, Equatable {
     var id: String = UUID().uuidString
     var title: String = ""
     var body: String = ""
+    var linkComicId: String? = nil
+    var linkPageNumber: Int? = nil
+    var linkHotspotId: String? = nil
+
+    var hasComicLink: Bool { linkComicId != nil && linkHotspotId != nil }
 }
 
 private let notebookHighlightColor = Color.yellow.opacity(0.55)
@@ -631,14 +638,40 @@ final class NotebookManager: ObservableObject {
     }
 }
 
+/// A resolved "Open in comic" destination from a note's hotspot link.
+private struct NotebookLinkTarget: Identifiable {
+    let id = UUID()
+    let comic: Comic
+    let page: Page
+    let hotspotId: String
+}
+
 /// Handwritten-style notebook. Cream paper pages in the Comic Relief face.
 struct NotebookView: View {
     @EnvironmentObject private var notebook: NotebookManager
     @State private var editingPage: NotebookPage?
     @State private var readingPage: NotebookPage?
     @State private var showingHelp = false
+    @State private var linkTarget: NotebookLinkTarget?
+    @State private var linkError: String?
 
     private static let ink = Color(red: 0.14, green: 0.15, blue: 0.22)
+
+    /// Resolve a note's hotspot link against the comics on this device and open
+    /// it — or explain why we can't (comic deleted / not downloaded).
+    private func openComicLink(_ page: NotebookPage) {
+        guard let comicId = page.linkComicId, let hotspotId = page.linkHotspotId else { return }
+        guard let comic = LocalComicStorage.shared.downloadedComics.first(where: { $0.id == comicId }) else {
+            linkError = "This comic isn't on your device any more. Re-download it from your Library, then try the link again."
+            return
+        }
+        let sorted = comic.pages.sorted { $0.pageNumber < $1.pageNumber }
+        guard let target = sorted.first(where: { $0.pageNumber == page.linkPageNumber }) ?? sorted.first else {
+            linkError = "This comic has no pages on this device."
+            return
+        }
+        linkTarget = NotebookLinkTarget(comic: comic, page: target, hotspotId: hotspotId)
+    }
 
     var body: some View {
         ScrollView {
@@ -686,7 +719,8 @@ struct NotebookView: View {
                         .padding(.vertical, 4)
                 } else {
                     ForEach(notebook.userPages) { page in
-                        NotebookPaper(page: page, locked: false)
+                        NotebookPaper(page: page, locked: false,
+                                      onOpenLink: page.hasComicLink ? { openComicLink(page) } : nil)
                             .onTapGesture { editingPage = page }
                             .contextMenu {
                                 Button(role: .destructive) {
@@ -742,6 +776,29 @@ struct NotebookView: View {
                 notebook.setAdminHidden(page.id, true)
             })
         }
+        // "Open in comic": present the page full-screen and auto-open the hotspot
+        // (mirrors the Vocabulary "see in context" pattern).
+        .fullScreenCover(item: $linkTarget) { target in
+            NavigationStack {
+                PageView(
+                    comic: target.comic,
+                    page: target.page,
+                    initialHotspotId: target.hotspotId,
+                    savesProgress: false,
+                    presentedModally: true
+                )
+            }
+            .environmentObject(SettingsManager())
+            .environmentObject(ReadingProgressManager())
+        }
+        .alert("Can't open link", isPresented: Binding(
+            get: { linkError != nil },
+            set: { if !$0 { linkError = nil } }
+        )) {
+            Button("OK", role: .cancel) { linkError = nil }
+        } message: {
+            Text(linkError ?? "")
+        }
     }
 
     private func sectionHeader(_ text: String) -> some View {
@@ -756,6 +813,9 @@ struct NotebookView: View {
 private struct NotebookPaper: View {
     let page: NotebookPage
     var locked: Bool = false
+    /// Set on pages saved from a hotspot — renders an "Open in comic" action
+    /// that jumps straight back to the hotspot.
+    var onOpenLink: (() -> Void)? = nil
     private static let paper = Color(red: 0.99, green: 0.98, blue: 0.94)
     private static let ink = Color(red: 0.14, green: 0.15, blue: 0.22)
 
@@ -783,6 +843,16 @@ private struct NotebookPaper: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .lineSpacing(6)
                 .lineLimit(locked ? 6 : nil)
+
+            if page.hasComicLink, let onOpenLink {
+                Button(action: onOpenLink) {
+                    Label("Open in comic", systemImage: "book.fill")
+                        .font(.custom("ComicRelief-Bold", size: 15))
+                }
+                .buttonStyle(.borderless)
+                .tint(Color(red: 0x27/255, green: 0xAE/255, blue: 0x60/255))
+                .padding(.top, 2)
+            }
         }
         .padding(22)
         .frame(maxWidth: .infinity, alignment: .leading)
