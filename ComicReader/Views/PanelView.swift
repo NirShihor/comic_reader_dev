@@ -1192,7 +1192,7 @@ struct WordButton: View {
     @State private var showingForms = false
     @State private var showingExplain = false
     @State private var isSaved = false
-    @StateObject private var vocabularyManager = VocabularyManager()
+    @ObservedObject private var vocabularyManager = VocabularyManager.shared
     @StateObject private var audioManager = AudioManager.shared
 
     var body: some View {
