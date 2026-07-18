@@ -4,8 +4,12 @@ import AVFoundation
 struct HotspotView: View {
     let hotspot: Hotspot
     let comicId: String
+    /// Page the hotspot lives on — stored in a saved note so it can deep-link back.
+    var pageNumber: Int? = nil
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var settingsManager: SettingsManager
+    @EnvironmentObject private var notebook: NotebookManager
+    @State private var savedToNotes = false
 
     @State private var currentSlideIndex = 0
     @State private var audioPlayer: AVAudioPlayer?
@@ -66,6 +70,7 @@ struct HotspotView: View {
                 }
             }
             .contentShape(Rectangle())
+            .onAppear { savedToNotes = alreadySaved() }
             .gesture(
                 isTestMode ? nil :
                 DragGesture(minimumDistance: 50)
@@ -306,6 +311,25 @@ struct HotspotView: View {
             }
 
             Spacer()
+
+            // Save this hotspot to My Notes (with a link back to it), so it can be
+            // found again later — e.g. "I know there was a hotspot with the colors".
+            Button {
+                saveToNotes()
+            } label: {
+                Label(savedToNotes ? "Saved to notes" : "Save to notes",
+                      systemImage: savedToNotes ? "checkmark.circle.fill" : "note.text.badge.plus")
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(savedToNotes ? Color.green.opacity(0.15) : accent.opacity(0.12))
+                    .foregroundColor(savedToNotes ? .green : accent)
+                    .clipShape(Capsule())
+            }
+            .disabled(savedToNotes)
+            .padding(.bottom, 6)
+            .explains("Save to notes",
+                      "Add this hotspot to My Notes in your Notebook, with a link that jumps straight back here.")
 
             // Navigation controls
             HStack {
@@ -829,6 +853,41 @@ struct HotspotView: View {
         case 40..<60: return .orange
         default: return .red
         }
+    }
+
+    // MARK: - Save to notes
+
+    /// True when My Notes already holds a page linked to THIS hotspot.
+    private func alreadySaved() -> Bool {
+        notebook.userPages.contains { $0.linkHotspotId == hotspot.id && $0.linkComicId == comicId }
+    }
+
+    /// Create a My Notes page for this hotspot: its title, the comic + page it
+    /// came from, every slide's phrase, and a deep link back to the hotspot.
+    private func saveToNotes() {
+        guard !alreadySaved() else { savedToNotes = true; return }
+
+        let comicTitle = LocalComicStorage.shared.downloadedComics
+            .first { $0.id == comicId }?.title
+        var lines: [String] = []
+        if let comicTitle {
+            lines.append("From \(comicTitle)\(pageNumber.map { ", page \($0)" } ?? "").")
+            lines.append("")
+        }
+        for slide in hotspot.slides where !slide.text.isEmpty {
+            lines.append(slide.translation.isEmpty ? slide.text : "\(slide.text) — \(slide.translation)")
+        }
+
+        let page = NotebookPage(
+            title: hotspot.label ?? "Hotspot",
+            body: lines.joined(separator: "\n"),
+            linkComicId: comicId,
+            linkPageNumber: pageNumber,
+            linkHotspotId: hotspot.id
+        )
+        notebook.upsert(page)
+        savedToNotes = true
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
     }
 
     // MARK: - Audio

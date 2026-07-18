@@ -297,7 +297,7 @@ struct PanelView: View {
             Text(errorMessage)
         }
         .sheet(item: $selectedHotspot) { hotspot in
-            HotspotView(hotspot: hotspot, comicId: comic.id)
+            HotspotView(hotspot: hotspot, comicId: comic.id, pageNumber: page.pageNumber)
                 .environmentObject(settingsManager)
         }
         .alert("End of Episode", isPresented: $showEndOfEpisode) {
