@@ -209,16 +209,16 @@ struct HotspotView: View {
         // publish callout anchors — so the list tip is placed manually under the
         // top-leading corner, arrow up at "Test" (same trick as the reader's
         // "?" closer). The test-mode tip anchors to the direction picker proper.
-        .overlay(alignment: .topLeading) {
+        .overlay {
             if help.isActive && !isTestMode {
+                // Floats centred, no pointer — it references TWO controls, so
+                // inline direction arrows do the pointing: (↓) the Save-to-notes
+                // pill below, (↖) the Test link in the top-left of the nav bar.
                 HelpIntroCallout(
-                    text: "You can save the list in this hotspot in your notes and test yourself with the **Test** link.",
-                    arrowEdge: .leading,
-                    arrowInset: 14
+                    text: "You can save the list in this hotspot in your notes (↓) and test yourself with the **Test** link (↖).",
+                    showArrow: false
                 ) { withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false } }
-                .padding(.leading, 12)
-                .offset(y: 48)   // just below the nav bar, arrow under "Test"
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                .transition(.opacity)
                 .zIndex(60)
             }
         }
