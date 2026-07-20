@@ -547,7 +547,12 @@ struct OriginListenView: View {
 
         commandCenter.nextTrackCommand.isEnabled = true
         commandCenter.nextTrackCommand.addTarget { _ in
-            Task { @MainActor in self.skipToNext() }
+            Task { @MainActor in
+                // Stem double-press on the results screen restarts — a gesture
+                // the system never fires on its own (unlike play/toggle).
+                if self.state == .completed { self.restartFromRemote() }
+                else { self.skipToNext() }
+            }
             return .success
         }
 
@@ -586,8 +591,14 @@ struct OriginListenView: View {
         }
     }
 
-    /// AirPods restart from the completion screen.
+    /// AirPods restart from the completion screen. Guarded on headphones
+    /// actually being connected: casing/removing AirPods makes iOS fire a
+    /// synthesized play/toggle at us AFTER the route has fallen back to the
+    /// speaker — without the guard that phantom event restarted the session.
     private func restartFromRemote() {
+        let outputs = AVAudioSession.sharedInstance().currentRoute.outputs
+        let onHeadphones = outputs.contains { [.bluetoothA2DP, .bluetoothHFP, .bluetoothLE, .headphones].contains($0.portType) }
+        guard onHeadphones else { return }
         resetListening()
         startListening()
     }
