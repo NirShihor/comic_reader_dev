@@ -381,6 +381,7 @@ struct OriginListenView: View {
             state = .completed
             progressManager.clearPracticePosition(for: comic.id)   // finished → start fresh next time
             updateNowPlaying()
+            keepAliveAtCompletion()   // stay reachable for an AirPods restart
         } else {
             playCurrentSentence()
         }
@@ -393,6 +394,7 @@ struct OriginListenView: View {
             state = .completed
             progressManager.clearPracticePosition(for: comic.id)   // finished → start fresh next time
             updateNowPlaying()
+            keepAliveAtCompletion()   // stay reachable for an AirPods restart
         } else {
             playCurrentSentence()
         }
@@ -557,14 +559,19 @@ struct OriginListenView: View {
 
         commandCenter.togglePlayPauseCommand.isEnabled = true
         commandCenter.togglePlayPauseCommand.addTarget { _ in
-            Task { @MainActor in self.togglePause() }
+            Task { @MainActor in
+                // Stem press on the completion screen restarts the session.
+                if self.state == .completed { self.restartFromRemote() }
+                else { self.togglePause() }
+            }
             return .success
         }
 
         commandCenter.playCommand.isEnabled = true
         commandCenter.playCommand.addTarget { _ in
             Task { @MainActor in
-                if case .paused = self.state { self.togglePause() }
+                if self.state == .completed { self.restartFromRemote() }
+                else if case .paused = self.state { self.togglePause() }
             }
             return .success
         }
@@ -572,10 +579,26 @@ struct OriginListenView: View {
         commandCenter.pauseCommand.isEnabled = true
         commandCenter.pauseCommand.addTarget { _ in
             Task { @MainActor in
+                if self.state == .completed { return }
                 if case .paused = self.state { } else { self.pauseCurrent() }
             }
             return .success
         }
+    }
+
+    /// AirPods restart from the completion screen.
+    private func restartFromRemote() {
+        resetListening()
+        startListening()
+    }
+
+    /// After the last sentence there's no audio, so iOS would suspend the app
+    /// and stem presses would stop arriving. Loop the near-silent timer while
+    /// on the completion screen so a press can still restart hands-free; the
+    /// loop stops itself as soon as the state leaves .completed.
+    private func keepAliveAtCompletion() {
+        guard state == .completed else { return }
+        scheduleDelay(10) { self.keepAliveAtCompletion() }
     }
 
     private func setupNowPlaying() {
