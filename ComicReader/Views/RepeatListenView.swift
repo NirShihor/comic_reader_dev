@@ -111,6 +111,10 @@ struct RepeatListenView: View {
             synthesizer.delegate = ttsDelegate
             setupRemoteCommands()
             setupNowPlaying()
+            // Listen-only mode: make sure no leftover Whisper capture engine is
+            // running (e.g. from bubble speaking practice). A live mic engine
+            // restarts itself on route changes and can stall our playback.
+            WhisperService.shared.endCaptureSession()
             // Direct callback for background playback — bypasses SwiftUI .onChange which doesn't fire in background
             audioManager.onPlaybackFinished = { [self] in
                 if !usingTTSFallback {
