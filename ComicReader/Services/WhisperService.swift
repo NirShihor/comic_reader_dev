@@ -69,7 +69,7 @@ class WhisperService: ObservableObject {
         do {
             let audioSession = AVAudioSession.sharedInstance()
             if audioSession.category != .playAndRecord {
-                try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP])
+                try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothA2DP])
             }
             // Activation can still be refused for a moment if audio is winding down
             // or another app briefly holds the session — retry a few times so the
@@ -329,7 +329,7 @@ class WhisperService: ObservableObject {
         do {
             let session = AVAudioSession.sharedInstance()
             if session.category != .playAndRecord {
-                try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP])
+                try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothA2DP])
                 try session.setActive(true)
             }
             try startEngineIfNeeded()
