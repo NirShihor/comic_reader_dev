@@ -1326,6 +1326,11 @@ struct PageView: View {
                 settingsManager.speakingPracticeMode = false
                 settingsManager.listeningPracticeMode = false
             }
+            // Bubble speaking practice starts the shared Whisper capture engine
+            // (startRecording) and nothing here ever fully stopped it — the mic
+            // stayed live app-wide after reading, and its route-change restart
+            // machinery could interrupt playback in listen-only modes.
+            WhisperService.shared.endCaptureSession()
         }
         .onChange(of: currentPageIndex) { oldPage, newPage in
             // Close the bubble card and refresh the artwork aspect for the new page
