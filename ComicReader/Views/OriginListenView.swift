@@ -265,15 +265,10 @@ struct OriginListenView: View {
     private var stateIndicator: some View {
         switch state {
         case .playingSpanish:
-            VStack(spacing: 8) {
-                Image(systemName: "speaker.wave.3.fill")
-                    .font(.system(size: 48))
-                    .foregroundStyle(.blue)
-                    .symbolEffect(.variableColor.iterative)
-                Text("Listening...")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            Image(systemName: "speaker.wave.3.fill")
+                .font(.system(size: 48))
+                .foregroundStyle(.blue)
+                .symbolEffect(.variableColor.iterative)
 
         case .advancing:
             VStack(spacing: 8) {
