@@ -524,7 +524,9 @@ struct RepeatPracticeView: View {
     private func playCurrentSentence() {
         guard currentIndex < sentences.count else {
             state = .completed
-            stopKeepAlive()
+            // Keep the near-silent loop running on the results screen so the
+            // app stays the Now Playing target — an AirPods stem press can then
+            // restart the practice even with the phone locked. Stops onDisappear.
             updateNowPlaying()
             return
         }
@@ -810,7 +812,8 @@ struct RepeatPracticeView: View {
             if self.currentIndex >= self.sentences.count {
                 self.state = .completed
                 self.clearPracticeSpot()
-                self.stopKeepAlive()
+                // keepAlive stays running — see playCurrentSentence's completed
+                // branch: it lets an AirPods press restart from the lock screen.
                 self.updateNowPlaying()
             } else {
                 self.savePracticeSpot()
@@ -1274,14 +1277,20 @@ struct RepeatPracticeView: View {
 
         commandCenter.togglePlayPauseCommand.isEnabled = true
         commandCenter.togglePlayPauseCommand.addTarget { _ in
-            Task { @MainActor in self.togglePause() }
+            Task { @MainActor in
+                // Stem press on the results screen restarts the practice —
+                // hands-free from start to finish.
+                if self.state == .completed { self.restartFromRemote() }
+                else { self.togglePause() }
+            }
             return .success
         }
 
         commandCenter.playCommand.isEnabled = true
         commandCenter.playCommand.addTarget { _ in
             Task { @MainActor in
-                if case .paused = self.state { self.togglePause() }
+                if self.state == .completed { self.restartFromRemote() }
+                else if case .paused = self.state { self.togglePause() }
             }
             return .success
         }
@@ -1289,10 +1298,17 @@ struct RepeatPracticeView: View {
         commandCenter.pauseCommand.isEnabled = true
         commandCenter.pauseCommand.addTarget { _ in
             Task { @MainActor in
+                if self.state == .completed { return }
                 if case .paused = self.state { } else { self.pauseCurrent() }
             }
             return .success
         }
+    }
+
+    /// AirPods restart from the completion screen.
+    private func restartFromRemote() {
+        resetPractice()
+        startPractice()
     }
 
     private func setupNowPlaying() {
