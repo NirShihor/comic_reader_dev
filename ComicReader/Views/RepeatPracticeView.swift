@@ -1045,11 +1045,13 @@ struct RepeatPracticeView: View {
             // changed — redundant setCategory calls force the capture engine
             // to reconfigure, which can kill the mic while the phone is locked.
             if audioSession.category != .playAndRecord {
-                // .allowBluetoothA2DP keeps AirPods on the high-quality music
-                // profile (input falls back to the iPhone mic) instead of HFP
-                // call mode — in call mode the stem press is treated as call
-                // control and never reaches our remote-command handlers.
-                try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP])
+                // A2DP ONLY — do NOT add .allowBluetooth (HFP) here. With both
+                // options set, iOS prefers HFP whenever recording is active, so
+                // AirPods drop to call mode: stem presses become call controls
+                // that never reach our remote-command handlers, and audio runs
+                // through the low-quality call codec. A2DP-only keeps output on
+                // the music profile; input falls back to the iPhone mic.
+                try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothA2DP])
                 try audioSession.setActive(true)
             }
         } catch {
@@ -1255,7 +1257,7 @@ struct RepeatPracticeView: View {
         do {
             // .allowBluetoothA2DP: see resetAudioSessionForPlayback — without it
             // AirPods run in HFP call mode and stem presses never reach the app.
-            try AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP])
+            try AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothA2DP])
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             print("Failed to activate audio session for remote commands: \(error)")
