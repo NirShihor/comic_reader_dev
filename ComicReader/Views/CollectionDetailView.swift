@@ -45,17 +45,14 @@ struct CollectionDetailView: View {
         return downloadedEpisodes.count
     }
 
-    private var levelString: String {
-        catalogEpisodes.first?.level ?? downloadedEpisodes.first?.level.rawValue ?? "beginner"
+    // Every episode's level — the header badge shows the range ("Beginner –
+    // Intermediate") when the collection mixes levels.
+    private var episodeLevels: [String] {
+        if !catalogEpisodes.isEmpty { return catalogEpisodes.map(\.level) }
+        return downloadedEpisodes.map { $0.level.rawValue }
     }
 
-    private var levelColor: Color {
-        switch levelString {
-        case "intermediate": return .orange
-        case "advanced": return .red
-        default: return .green
-        }
-    }
+    private var levelColor: Color { levelRangeColor(episodeLevels) }
 
     private var collectionDescription: String? {
         catalogEpisodes.first?.collectionDescription
@@ -183,7 +180,7 @@ struct CollectionDetailView: View {
             }
 
             HStack(spacing: 12) {
-                Text(levelString.capitalized)
+                Text(levelRangeLabel(episodeLevels))
                     .font(.caption)
                     .fontWeight(.semibold)
                     .padding(.horizontal, 10)

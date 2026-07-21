@@ -1,5 +1,31 @@
 import SwiftUI
 
+// MARK: - Level ranges
+// Comics carry their OWN level, so a collection can mix them (two beginner
+// episodes + an intermediate one). These render a set of episode levels as one
+// badge: "Beginner" when uniform, "Beginner – Advanced" when mixed. Colour
+// follows the LOWEST level — the collection's entry point.
+private let comigoLevelOrder = ["beginner", "intermediate", "advanced"]
+
+func levelRangeLabel(_ levels: [String]) -> String {
+    let present = comigoLevelOrder.filter { levels.contains($0) }
+    guard let lo = present.first else { return "Beginner" }
+    guard let hi = present.last, hi != lo else { return lo.capitalized }
+    return "\(lo.capitalized) – \(hi.capitalized)"
+}
+
+func levelBadgeColor(_ level: String) -> Color {
+    switch level {
+    case "intermediate": return .orange
+    case "advanced": return .red
+    default: return .green
+    }
+}
+
+func levelRangeColor(_ levels: [String]) -> Color {
+    levelBadgeColor(comigoLevelOrder.first { levels.contains($0) } ?? "beginner")
+}
+
 struct StoreView: View {
     @StateObject private var storeService = ComicStoreService.shared
     @StateObject private var localStorage = LocalComicStorage.shared
@@ -271,6 +297,18 @@ struct StoreComicCard: View {
                                 .foregroundStyle(.white)
                                 .clipShape(Capsule())
                                 .fixedSize()
+                        } else {
+                            // Compact rows (collection episode lists): levels can
+                            // differ per episode, so each row shows its own.
+                            Text(comic.level.capitalized)
+                                .font(.caption2)
+                                .fontWeight(.semibold)
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 2)
+                                .background(levelColor.opacity(0.15))
+                                .foregroundStyle(levelColor)
+                                .clipShape(Capsule())
+                                .fixedSize()
                         }
 
                         // Pages count
@@ -454,14 +492,7 @@ struct StoreCollectionGroup: View {
         return nil
     }
 
-    private var levelColor: Color {
-        switch comics.first?.level ?? "beginner" {
-        case "beginner": return .green
-        case "intermediate": return .orange
-        case "advanced": return .red
-        default: return .blue
-        }
-    }
+    private var levelColor: Color { levelRangeColor(comics.map(\.level)) }
 
     var body: some View {
         NavigationLink {
@@ -516,7 +547,7 @@ struct StoreCollectionGroup: View {
                             .lineLimit(2)
                     }
 
-                    Text(comics.first?.level.capitalized ?? "Beginner")
+                    Text(levelRangeLabel(comics.map(\.level)))
                         .font(.caption2)
                         .fontWeight(.semibold)
                         .padding(.horizontal, 8)
