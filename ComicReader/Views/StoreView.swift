@@ -7,11 +7,27 @@ import SwiftUI
 // follows the LOWEST level — the collection's entry point.
 private let comigoLevelOrder = ["beginner", "intermediate", "advanced"]
 
-func levelRangeLabel(_ levels: [String]) -> String {
-    let present = comigoLevelOrder.filter { levels.contains($0) }
-    guard let lo = present.first else { return "Beginner" }
-    guard let hi = present.last, hi != lo else { return lo.capitalized }
-    return "\(lo.capitalized) – \(hi.capitalized)"
+/// One capsule per distinct level present, in order — a mixed collection shows
+/// [Beginner][Intermediate] rather than a single (misleading) badge.
+struct LevelBadges: View {
+    let levels: [String]
+    var compact: Bool = false
+    var body: some View {
+        let present = comigoLevelOrder.filter { levels.contains($0) }
+        HStack(spacing: 5) {
+            ForEach(present.isEmpty ? ["beginner"] : present, id: \.self) { lvl in
+                Text(lvl.capitalized)
+                    .font(compact ? .caption2 : .caption)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, compact ? 7 : 10)
+                    .padding(.vertical, compact ? 2 : 4)
+                    .background(levelBadgeColor(lvl))
+                    .foregroundStyle(.white)
+                    .clipShape(Capsule())
+                    .fixedSize()
+            }
+        }
+    }
 }
 
 func levelBadgeColor(_ level: String) -> Color {
@@ -547,15 +563,7 @@ struct StoreCollectionGroup: View {
                             .lineLimit(2)
                     }
 
-                    Text(levelRangeLabel(comics.map(\.level)))
-                        .font(.caption2)
-                        .fontWeight(.semibold)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(levelColor)
-                        .foregroundStyle(.white)
-                        .clipShape(Capsule())
-                        .fixedSize()
+                    LevelBadges(levels: comics.map(\.level), compact: true)
                 }
 
                 Spacer()

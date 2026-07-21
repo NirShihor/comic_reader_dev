@@ -21,14 +21,8 @@ struct StoreCollectionDetailView: View {
         return nil
     }
 
-    private var levelColor: Color {
-        switch comics.first?.level ?? "beginner" {
-        case "beginner": return .green
-        case "intermediate": return .orange
-        case "advanced": return .red
-        default: return .blue
-        }
-    }
+    private var levelColor: Color { levelRangeColor(comics.map(\.level)) }
+
 
     private var hasAnyDownloaded: Bool {
         comics.contains { storeService.downloadState(for: $0.id) == .downloaded }
@@ -136,14 +130,7 @@ struct StoreCollectionDetailView: View {
                 .fontWeight(.bold)
 
             HStack(spacing: 12) {
-                Text(comics.first?.level.capitalized ?? "Beginner")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(levelColor)
-                    .foregroundStyle(.white)
-                    .clipShape(Capsule())
+                LevelBadges(levels: comics.map(\.level))
 
                 Label("\(comics.count) episode\(comics.count == 1 ? "" : "s")", systemImage: "books.vertical")
                     .font(.caption)
