@@ -180,15 +180,7 @@ struct CollectionDetailView: View {
             }
 
             HStack(spacing: 12) {
-                Text(levelRangeLabel(episodeLevels))
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(levelColor)
-                    .foregroundStyle(.white)
-                    .clipShape(Capsule())
-                    .fixedSize()
+                LevelBadges(levels: episodeLevels)
 
                 let label = downloadedCount > 0 && downloadedCount < episodeCount
                     ? "\(episodeCount) episodes · \(downloadedCount) downloaded"
@@ -324,6 +316,9 @@ struct EpisodeCard: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 VStack(alignment: .leading, spacing: 6) {
+                    // Levels vary per episode within a collection — show this one's.
+                    LevelBadges(levels: [comic.level.rawValue], compact: true)
+
                     Text(comic.description)
                         .font(.caption)
                         .foregroundStyle(.secondary)
