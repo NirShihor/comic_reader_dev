@@ -2302,7 +2302,10 @@ struct FloatingBubbleCard: View {
             .frame(height: contentHeight > 0 ? min(contentHeight, maxContentHeight) : maxContentHeight)
             .onPreferenceChange(PopupContentHeightKey.self) { contentHeight = $0 }
         }
-        .background(.regularMaterial)
+        // thinMaterial (was regular): translucent enough that the page art
+        // ghosts through and the popup feels layered ON the page, while the
+        // blur keeps the text fully readable over any artwork.
+        .background(.thinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
