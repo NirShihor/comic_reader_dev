@@ -1653,7 +1653,7 @@ struct BubbleContentView: View {
                     withAnimation { translationRevealed.insert(sentence.id) }
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
-                    Label("Show translation", systemImage: "eye").font(.subheadline).foregroundStyle(Color.translationLink)
+                    Label("Show translation", systemImage: "eye").font(.subheadline.weight(.semibold)).foregroundStyle(Color.translationLink)
                 }
             }
         }
@@ -1688,7 +1688,7 @@ struct BubbleContentView: View {
                     withAnimation { grammarRevealed.insert(sentence.id) }
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
-                    Label("Explain grammar", systemImage: "text.book.closed").font(.subheadline).foregroundStyle(Color.grammarLink)
+                    Label("Explain grammar", systemImage: "text.book.closed").font(.subheadline.weight(.semibold)).foregroundStyle(Color.grammarLink)
                 }
             }
         }
