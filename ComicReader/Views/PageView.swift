@@ -2317,10 +2317,9 @@ struct FloatingBubbleCard: View {
             .frame(height: contentHeight > 0 ? min(contentHeight, maxContentHeight) : maxContentHeight)
             .onPreferenceChange(PopupContentHeightKey.self) { contentHeight = $0 }
         }
-        // ultraThinMaterial at half strength: past the last system material
-        // grade, so the frost itself is faded — the page art shows through
-        // nearly plainly, with only a whisper of blur/tint left.
-        .background(.ultraThinMaterial.opacity(0.5))
+        // ultraThinMaterial faded ~15%: a touch more transparent than the
+        // stock grade (0.5 was tried and looked terrible — barely any frost).
+        .background(.ultraThinMaterial.opacity(0.85))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
