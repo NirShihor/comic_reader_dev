@@ -576,7 +576,7 @@ struct PanelView: View {
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             } label: {
                                 Label("Show translation", systemImage: "eye")
-                                    .font(.subheadline)
+                                    .font(.subheadline.weight(.semibold))
                                     .foregroundStyle(Color.translationLink)
                             }
                             .explains("Show translation",
@@ -618,7 +618,7 @@ struct PanelView: View {
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             } label: {
                                 Label("Explain grammar", systemImage: "text.book.closed")
-                                    .font(.subheadline)
+                                    .font(.subheadline.weight(.semibold))
                                     .foregroundStyle(Color.grammarLink)
                             }
                             .explains("Explain grammar",
