@@ -1537,8 +1537,23 @@ struct BubbleContentView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             mainText(sentence)
                             if !isPracticeMode {
-                                translationRow(sentence)
-                                grammarRow(sentence)
+                                let hasTranslation = sentence.translation != nil && !(sentence.audioUrl ?? "").isEmpty
+                                let hasGrammar = !(sentence.grammarNote ?? "").isEmpty
+                                if hasTranslation || hasGrammar {
+                                    // One shared, faint backing behind both links: a
+                                    // touch of the theme background so they read
+                                    // clearly over the translucent card without
+                                    // hiding the page behind it.
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        translationRow(sentence)
+                                        grammarRow(sentence)
+                                    }
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 8)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(Color(.systemBackground).opacity(0.45))
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                }
                             }
                             audioRow(sentence)
                             revealedContent(sentence)
@@ -1653,7 +1668,7 @@ struct BubbleContentView: View {
                     withAnimation { translationRevealed.insert(sentence.id) }
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
-                    Label("Show translation", systemImage: "eye").font(.subheadline.weight(.semibold)).foregroundStyle(Color.translationLink)
+                    Label("Show translation", systemImage: "eye").font(.subheadline).foregroundStyle(Color.translationLink)
                 }
             }
         }
@@ -1688,7 +1703,7 @@ struct BubbleContentView: View {
                     withAnimation { grammarRevealed.insert(sentence.id) }
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
-                    Label("Explain grammar", systemImage: "text.book.closed").font(.subheadline.weight(.semibold)).foregroundStyle(Color.grammarLink)
+                    Label("Explain grammar", systemImage: "text.book.closed").font(.subheadline).foregroundStyle(Color.grammarLink)
                 }
             }
         }
