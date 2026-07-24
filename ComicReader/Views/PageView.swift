@@ -2302,10 +2302,10 @@ struct FloatingBubbleCard: View {
             .frame(height: contentHeight > 0 ? min(contentHeight, maxContentHeight) : maxContentHeight)
             .onPreferenceChange(PopupContentHeightKey.self) { contentHeight = $0 }
         }
-        // thinMaterial (was regular): translucent enough that the page art
-        // ghosts through and the popup feels layered ON the page, while the
-        // blur keeps the text fully readable over any artwork.
-        .background(.thinMaterial)
+        // ultraThinMaterial: the most translucent frosted grade — the page art
+        // clearly shows through and the popup feels layered ON the page, while
+        // the blur keeps the text readable over any artwork.
+        .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
