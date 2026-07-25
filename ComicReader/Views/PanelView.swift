@@ -1207,7 +1207,12 @@ struct WordButton: View {
                 .fontWeight(weight)
                 .padding(.horizontal, 4)
                 .padding(.vertical, 4)
-                .background(isHighlighted ? Color(red: 0x61/255, green: 0xF5/255, blue: 0x27/255).opacity(0.45) : Color(.systemGray6))
+                .background(isHighlighted
+                    // Solid #98F872 — the page bubble highlight's RENDERED colour
+                    // (65% #61F527 over white). A translucent chip composited over
+                    // the popup material always came out darker than the page.
+                    ? Color(red: 0x98/255, green: 0xF8/255, blue: 0x72/255)
+                    : Color(.systemGray6))
                 .clipShape(RoundedRectangle(cornerRadius: 6))
         }
         .buttonStyle(.plain)
