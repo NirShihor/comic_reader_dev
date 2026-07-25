@@ -140,23 +140,39 @@ enum BubbleFill {
             inkBuf = readPixels(inkCrop)
         }
 
-        func interior(_ x: Int, _ y: Int) -> Bool {
+        // The interior isn't always white — message-style narration bubbles use
+        // coloured fills (cyan chat bubbles etc.), which a fixed near-white test
+        // rejected outright (no highlight at all). Find a plausible interior
+        // pixel near the centre first (anything clearly lighter than ink), then
+        // flood everything close to THAT pixel's colour. White interiors behave
+        // exactly as before.
+        func plausibleInterior(_ x: Int, _ y: Int) -> Bool {
             let i = (y * cw + x) * 4
-            return maskBuf[i] > 190 && maskBuf[i + 1] > 190 && maskBuf[i + 2] > 190 && maskBuf[i + 3] > 40
+            let lum = (Int(maskBuf[i]) + Int(maskBuf[i + 1]) + Int(maskBuf[i + 2])) / 3
+            return lum > 120 && maskBuf[i + 3] > 40
         }
 
         // Seed at the bubble centre (crop-local); spiral out to the nearest
         // interior pixel if the centre lands on ink.
         var sx = min(max(Int(nb.midX * CGFloat(iw)) - px0, 0), cw - 1)
         var sy = min(max(Int(nb.midY * CGFloat(ih)) - py0, 0), ch - 1)
-        if !interior(sx, sy) {
+        if !plausibleInterior(sx, sy) {
             var found = false
             search: for d in 1...(max(cw, ch) / 2) {
                 let x0 = max(0, sx - d), x1 = min(cw - 1, sx + d)
                 let y0 = max(0, sy - d), y1 = min(ch - 1, sy + d)
-                for yy in y0...y1 { for xx in x0...x1 where interior(xx, yy) { sx = xx; sy = yy; found = true; break search } }
+                for yy in y0...y1 { for xx in x0...x1 where plausibleInterior(xx, yy) { sx = xx; sy = yy; found = true; break search } }
             }
             if !found { return nil }
+        }
+        // Flood pixels matching the SEED pixel's colour (tolerance covers
+        // gradients and JPEG noise) — not a hard-coded near-white.
+        let seedIdx = (sy * cw + sx) * 4
+        let seedR = Int(maskBuf[seedIdx]), seedG = Int(maskBuf[seedIdx + 1]), seedB = Int(maskBuf[seedIdx + 2])
+        func interior(_ x: Int, _ y: Int) -> Bool {
+            let i = (y * cw + x) * 4
+            return abs(Int(maskBuf[i]) - seedR) <= 46 && abs(Int(maskBuf[i + 1]) - seedG) <= 46
+                && abs(Int(maskBuf[i + 2]) - seedB) <= 46 && maskBuf[i + 3] > 40
         }
 
         // BFS flood fill the interior shape on the mask.
@@ -252,21 +268,37 @@ enum BubbleFill {
         }
         guard drewMask else { return nil }
 
-        func interior(_ x: Int, _ y: Int) -> Bool {
+        // The interior isn't always white — message-style narration bubbles use
+        // coloured fills (cyan chat bubbles etc.), which a fixed near-white test
+        // rejected outright (no highlight at all). Find a plausible interior
+        // pixel near the centre first (anything clearly lighter than ink), then
+        // flood everything close to THAT pixel's colour. White interiors behave
+        // exactly as before.
+        func plausibleInterior(_ x: Int, _ y: Int) -> Bool {
             let i = (y * cw + x) * 4
-            return maskBuf[i] > 190 && maskBuf[i + 1] > 190 && maskBuf[i + 2] > 190 && maskBuf[i + 3] > 40
+            let lum = (Int(maskBuf[i]) + Int(maskBuf[i + 1]) + Int(maskBuf[i + 2])) / 3
+            return lum > 120 && maskBuf[i + 3] > 40
         }
 
         var sx = min(max(Int(nb.midX * CGFloat(iw)) - px0, 0), cw - 1)
         var sy = min(max(Int(nb.midY * CGFloat(ih)) - py0, 0), ch - 1)
-        if !interior(sx, sy) {
+        if !plausibleInterior(sx, sy) {
             var found = false
             search: for d in 1...(max(cw, ch) / 2) {
                 let x0 = max(0, sx - d), x1 = min(cw - 1, sx + d)
                 let y0 = max(0, sy - d), y1 = min(ch - 1, sy + d)
-                for yy in y0...y1 { for xx in x0...x1 where interior(xx, yy) { sx = xx; sy = yy; found = true; break search } }
+                for yy in y0...y1 { for xx in x0...x1 where plausibleInterior(xx, yy) { sx = xx; sy = yy; found = true; break search } }
             }
             if !found { return nil }
+        }
+        // Flood pixels matching the SEED pixel's colour (tolerance covers
+        // gradients and JPEG noise) — not a hard-coded near-white.
+        let seedIdx = (sy * cw + sx) * 4
+        let seedR = Int(maskBuf[seedIdx]), seedG = Int(maskBuf[seedIdx + 1]), seedB = Int(maskBuf[seedIdx + 2])
+        func interior(_ x: Int, _ y: Int) -> Bool {
+            let i = (y * cw + x) * 4
+            return abs(Int(maskBuf[i]) - seedR) <= 46 && abs(Int(maskBuf[i + 1]) - seedG) <= 46
+                && abs(Int(maskBuf[i + 2]) - seedB) <= 46 && maskBuf[i + 3] > 40
         }
 
         var filled = [Bool](repeating: false, count: cw * ch)
@@ -2317,9 +2349,12 @@ struct FloatingBubbleCard: View {
             .frame(height: contentHeight > 0 ? min(contentHeight, maxContentHeight) : maxContentHeight)
             .onPreferenceChange(PopupContentHeightKey.self) { contentHeight = $0 }
         }
-        // ultraThinMaterial faded ~15%: a touch more transparent than the
-        // stock grade (0.5 was tried and looked terrible — barely any frost).
-        .background(.ultraThinMaterial.opacity(0.85))
+        // ultraThinMaterial: the most translucent frosted grade — the page art
+        // clearly shows through and the popup feels layered ON the page, while
+        // the blur keeps the text readable over any artwork. (Fading the
+        // material below full strength was tried and rejected — text fights
+        // the art almost immediately.)
+        .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
