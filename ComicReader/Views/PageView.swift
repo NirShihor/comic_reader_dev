@@ -169,10 +169,14 @@ enum BubbleFill {
         // gradients and JPEG noise) — not a hard-coded near-white.
         let seedIdx = (sy * cw + sx) * 4
         let seedR = Int(maskBuf[seedIdx]), seedG = Int(maskBuf[seedIdx + 1]), seedB = Int(maskBuf[seedIdx + 2])
+        // Tolerance 30 (was 46): a light-grey chat bubble (#d7d7d7, 215) on a
+        // white phone screen (255) differs by only 40 — at 46 the fill leaked
+        // into the screen and the leak checks killed the highlight. Flat baked
+        // fills vary by only a few points of JPEG noise, so 30 is still ample.
         func interior(_ x: Int, _ y: Int) -> Bool {
             let i = (y * cw + x) * 4
-            return abs(Int(maskBuf[i]) - seedR) <= 46 && abs(Int(maskBuf[i + 1]) - seedG) <= 46
-                && abs(Int(maskBuf[i + 2]) - seedB) <= 46 && maskBuf[i + 3] > 40
+            return abs(Int(maskBuf[i]) - seedR) <= 30 && abs(Int(maskBuf[i + 1]) - seedG) <= 30
+                && abs(Int(maskBuf[i + 2]) - seedB) <= 30 && maskBuf[i + 3] > 40
         }
 
         // BFS flood fill the interior shape on the mask.
@@ -295,10 +299,14 @@ enum BubbleFill {
         // gradients and JPEG noise) — not a hard-coded near-white.
         let seedIdx = (sy * cw + sx) * 4
         let seedR = Int(maskBuf[seedIdx]), seedG = Int(maskBuf[seedIdx + 1]), seedB = Int(maskBuf[seedIdx + 2])
+        // Tolerance 30 (was 46): a light-grey chat bubble (#d7d7d7, 215) on a
+        // white phone screen (255) differs by only 40 — at 46 the fill leaked
+        // into the screen and the leak checks killed the highlight. Flat baked
+        // fills vary by only a few points of JPEG noise, so 30 is still ample.
         func interior(_ x: Int, _ y: Int) -> Bool {
             let i = (y * cw + x) * 4
-            return abs(Int(maskBuf[i]) - seedR) <= 46 && abs(Int(maskBuf[i + 1]) - seedG) <= 46
-                && abs(Int(maskBuf[i + 2]) - seedB) <= 46 && maskBuf[i + 3] > 40
+            return abs(Int(maskBuf[i]) - seedR) <= 30 && abs(Int(maskBuf[i + 1]) - seedG) <= 30
+                && abs(Int(maskBuf[i + 2]) - seedB) <= 30 && maskBuf[i + 3] > 40
         }
 
         var filled = [Bool](repeating: false, count: cw * ch)
