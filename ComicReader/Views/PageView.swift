@@ -2351,6 +2351,11 @@ struct FloatingBubbleCard: View {
             .frame(height: contentHeight > 0 ? min(contentHeight, maxContentHeight) : maxContentHeight)
             .onPreferenceChange(PopupContentHeightKey.self) { contentHeight = $0 }
         }
+        // Kill the material's automatic VIBRANCY for the card's content: over
+        // a material, hierarchical colours (default text = .primary) get
+        // blended with the page art behind the frost — black text rendered
+        // grey once the card went ultra-thin. nil = normal solid colours.
+        .environment(\.backgroundMaterial, nil)
         // ultraThinMaterial: the most translucent frosted grade — the page art
         // clearly shows through and the popup feels layered ON the page, while
         // the blur keeps the text readable over any artwork. (Fading the
