@@ -871,7 +871,12 @@ struct PageView: View {
         // ONE standard highlight green everywhere — the per-comic
         // bubbleDotColor override is deliberately ignored (it only ever
         // produced comics whose highlight didn't match the rest of the app).
-        let dotColor = Color(red: 0x61/255, green: 0xF5/255, blue: 0x27/255)
+        // The arrival pulse uses the onboarding AMBER instead: green flashing
+        // then vanishing read like a selection error; amber is the app's
+        // established "guidance" colour (tooltips), so it reads as a hint.
+        let dotColor = flash
+            ? Color(red: 0xF0/255, green: 0xBB/255, blue: 0x29/255)
+            : Color(red: 0x61/255, green: 0xF5/255, blue: 0x27/255)
         // Shape from the blank bake (clean interior, reaches everywhere incl.
         // letter-counters); text/ink from whatever image is on screen so glyphs
         // stay readable. In blank practice mode both are the empty bake, so the
@@ -890,7 +895,7 @@ struct PageView: View {
         // resized bubble MUST invalidate the cached overlay (otherwise it returns the
         // stale fill from the old position — showing the wrong shape / a neighbour's text).
         let geo = "\(Int(b.positionX*1e4))_\(Int(b.positionY*1e4))_\(Int(b.width*1e4))_\(Int(b.height*1e4))"
-        let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|\(inkSource)|std"
+        let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|\(inkSource)|\(flash ? "amber" : "std")"
         // Transparent/borderless narration (e.g. "continuará") has no balloon interior
         // to fill — flood-filling it would tint the text and a stray patch of art green.
         // Skip the highlight for these in READING mode. In PRACTICE mode the empty
