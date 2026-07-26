@@ -188,7 +188,10 @@ struct CollectionDetailView: View {
                 Label(label, systemImage: "books.vertical")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .fixedSize()
+                    // Wrap, never push: the partial-download label ("3 episodes
+                    // · 2 downloaded") is long, and a hard fixedSize() forced
+                    // the whole header card wider than the screen.
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             if let desc = collectionDescription, !desc.isEmpty {
