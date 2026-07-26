@@ -429,6 +429,24 @@ struct PageView: View {
     @State private var showOnScreenComplete = false     // guided: all done
     @State private var selectedBubbleIndex: Int?   // open bubble in the floating card
     @State private var revealedBubbleId: String?   // practice: bubble whose text is revealed onto the page
+    // Arrival pulse: bubble 1 flashes green for ~1s when a story page loads, so
+    // the reader knows where the flow starts.
+    @State private var flashBubbleId: String?
+
+    private func flashFirstBubble() {
+        guard currentPageIndex > 0, selectedBubbleIndex == nil,
+              let first = pageTextBubbles.first else { return }
+        let page = currentPageIndex
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+            guard currentPageIndex == page, selectedBubbleIndex == nil else { return }
+            withAnimation(.easeIn(duration: 0.2)) { flashBubbleId = first.id }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                if flashBubbleId == first.id {
+                    withAnimation(.easeOut(duration: 0.35)) { flashBubbleId = nil }
+                }
+            }
+        }
+    }
     @State private var pageImageAspect: CGFloat?   // width/height of the page artwork
     @StateObject private var help = HelpModeController()
 
@@ -849,7 +867,7 @@ struct PageView: View {
     // real shape). Shows nothing when it can't fill cleanly (e.g. a borderless
     // narration such as a title or "continuará"). Static — no flashing.
     @ViewBuilder
-    private func selectedBubbleDot(_ b: Bubble, in rect: CGRect) -> some View {
+    private func selectedBubbleDot(_ b: Bubble, in rect: CGRect, flash: Bool = false) -> some View {
         // ONE standard highlight green everywhere — the per-comic
         // bubbleDotColor override is deliberately ignored (it only ever
         // produced comics whose highlight didn't match the rest of the app).
@@ -893,8 +911,9 @@ struct PageView: View {
                           y: rect.minY + fill.region.midY * rect.height)
                 .opacity(0.65)
                 .allowsHitTesting(false)
-                // Appear instantly on touch — don't inherit the card's fade-in.
-                .transition(.identity)
+                // Tap highlight appears instantly (identity); the arrival pulse
+                // fades in and out instead.
+                .transition(flash ? AnyTransition.opacity : .identity)
                 .animation(nil, value: selectedBubbleIndex)
         }
         // No fill possible (e.g. borderless narration like a title or
@@ -1077,6 +1096,13 @@ struct PageView: View {
                                 // the popup (bubbles are baked into the art).
                                 if let sel = selectedBubbleIndex, pageTextBubbles.indices.contains(sel) {
                                     selectedBubbleDot(pageTextBubbles[sel], in: rect)
+                                }
+
+                                // Arrival pulse on bubble 1 (fades in/out; same fill
+                                // as the tap highlight, so it also warms that cache).
+                                if selectedBubbleIndex == nil, let fid = flashBubbleId,
+                                   let fb = pageTextBubbles.first(where: { $0.id == fid }) {
+                                    selectedBubbleDot(fb, in: rect, flash: true)
                                 }
 
                                 // Traced hotspots: the artwork inside the shape
@@ -1335,6 +1361,7 @@ struct PageView: View {
             loadPageAspect()
             maybeShowCoverTip()
             maybeShowHotspotTip()
+            flashFirstBubble()
             // Guided run starts in speaking practice (safety net if not already set).
             if guidedOnScreenPractice && !settingsManager.speakingPracticeMode && !settingsManager.listeningPracticeMode {
                 settingsManager.speakingPracticeMode = true
@@ -1377,7 +1404,9 @@ struct PageView: View {
         .onChange(of: currentPageIndex) { oldPage, newPage in
             // Close the bubble card and refresh the artwork aspect for the new page
             selectedBubbleIndex = nil
+            flashBubbleId = nil          // never carry a stale pulse across pages
             loadPageAspect()
+            flashFirstBubble()
             // Leaving the cover hides the cover callout; returning to it re-offers it.
             if currentPageIndex == 0 { maybeShowCoverTip() }
             else if showCoverTip { withAnimation { showCoverTip = false } }
