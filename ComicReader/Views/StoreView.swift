@@ -14,7 +14,9 @@ struct LevelBadges: View {
     var compact: Bool = false
     var body: some View {
         let present = comigoLevelOrder.filter { levels.contains($0) }
-        HStack(spacing: 5) {
+        // Stacked vertically: side-by-side badges stretched narrow containers
+        // (the library collection card) when a collection spans levels.
+        VStack(alignment: .leading, spacing: 4) {
             ForEach(present.isEmpty ? ["beginner"] : present, id: \.self) { lvl in
                 Text(lvl.capitalized)
                     .font(compact ? .caption2 : .caption)
