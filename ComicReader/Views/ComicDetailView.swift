@@ -230,6 +230,7 @@ struct ComicDetailView: View {
         // Skip when auto-resuming straight into the reader — the screen is leaving.
         guard !autoResume, cockpitStep == 0 else { return }
         if !HelpDebug.forceShowTooltips { guard !seenCockpitTips else { return } }
+        if !HelpDebug.forceShowTooltips && !helpReplay, HelpTipCap.spent("comic-cockpit") { seenCockpitTips = true; return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             guard cockpitStep == 0 else { return }
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { cockpitStep = 1 }

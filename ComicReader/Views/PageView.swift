@@ -527,6 +527,7 @@ struct PageView: View {
     private func maybeShowCoverTip() {
         guard currentPageIndex == 0, !isPracticeMode, selectedBubbleIndex == nil else { return }
         if !HelpDebug.forceShowTooltips { guard !seenCoverTip else { return } }
+        if !HelpDebug.forceShowTooltips && !helpReplay, HelpTipCap.spent("cover-text") { seenCoverTip = true; return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             guard currentPageIndex == 0, selectedBubbleIndex == nil else { return }
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showCoverTip = true }
@@ -544,6 +545,7 @@ struct PageView: View {
     // MARK: - "Swipe to the next page" hint (chained after the word-popup guidance)
     private func maybeShowSwipeTip() {
         if !HelpDebug.forceShowTooltips && !helpReplay { guard !seenSwipeTip else { return } }
+        if !HelpDebug.forceShowTooltips && !helpReplay, HelpTipCap.spent("page-swipe") { seenSwipeTip = true; return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showSwipeTip = true }
         }
@@ -572,6 +574,7 @@ struct PageView: View {
     private func maybeShowBubbleTip() {
         guard currentPageIndex > 0, !isPracticeMode, selectedBubbleIndex == nil else { return }
         if !HelpDebug.forceShowTooltips { guard !seenBubbleTip else { return } }
+        if !HelpDebug.forceShowTooltips && !helpReplay, HelpTipCap.spent("story-bubble") { seenBubbleTip = true; return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             guard currentPageIndex > 0, selectedBubbleIndex == nil else { return }
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showBubbleTip = true }
@@ -2243,12 +2246,14 @@ struct FloatingBubbleCard: View {
     private func startCardTips() {
         guard !isPracticeMode else { return }   // the hints are for normal reading
         if HelpDebug.forceShowTooltips || !seenPanelTip {
+            if !HelpDebug.forceShowTooltips, HelpTipCap.spent("bubble-panel") { seenPanelTip = true; return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showPanelTip = true }
             }
         } else if seenBubbleTip, !seenArrowsTip {
             // They've done the first-panel walkthrough and tapped a bubble on a
             // story page — point out the step arrows on this panel.
+            if HelpTipCap.spent("story-arrows") { seenArrowsTip = true; return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showArrowsTip = true }
             }
@@ -2301,6 +2306,7 @@ struct FloatingBubbleCard: View {
         dismissPanelTip()
         guard !isPracticeMode else { return }
         if !HelpDebug.forceShowTooltips { guard !seenWordDetailTip else { return } }
+        if !HelpDebug.forceShowTooltips, HelpTipCap.spent("word-detail") { seenWordDetailTip = true; return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showWordDetailTip = true }
         }

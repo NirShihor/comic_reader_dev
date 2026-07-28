@@ -74,6 +74,7 @@ struct CollectionDetailView: View {
     private func maybeShowDownloadTip() {
         guard firstDownloadableID != nil, !showDownloadTip, !downloadTipDismissed else { return }
         if !HelpDebug.forceShowTooltips { guard !seenDownloadTip else { return } }
+        if !HelpDebug.forceShowTooltips, HelpTipCap.spent("collection-download") { seenDownloadTip = true; return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             guard firstDownloadableID != nil, !downloadTipDismissed else { return }
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showDownloadTip = true }
