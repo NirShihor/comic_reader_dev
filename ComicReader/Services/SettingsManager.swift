@@ -13,5 +13,7 @@ class SettingsManager: ObservableObject {
     @AppStorage("listeningPracticeMode") var listeningPracticeMode = false
     @AppStorage("autoPlayAudio") var autoPlayAudio = false
     @AppStorage("hapticFeedback") var hapticFeedback = true
+    // Soft chime when it's the learner's turn to speak (all speaking tests).
+    @AppStorage("recordCueSound") var recordCueSound = true
     @AppStorage("playbackSpeed") var playbackSpeed = 1.0
 }

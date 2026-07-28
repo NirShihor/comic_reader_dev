@@ -95,6 +95,9 @@ class WhisperService: ObservableObject {
             return
         }
 
+        // It's the learner's turn — soft chime (Settings > "Speaking cue sound").
+        playRecordCue()
+
         // Engine start can be refused while the phone is locked (StartIO
         // error). Don't abort the attempt — the watchdog below retries every
         // second and capture kicks in as soon as iOS allows it.
@@ -375,6 +378,12 @@ class WhisperService: ObservableObject {
     /// Speech/silence state machine, fed from the capture tap (~10x/sec)
     private func processLevel(_ power: Float) {
         guard isRecording else { return }
+        // Ignore levels while the record-cue chime (speaker -> mic) could still
+        // be audible — it must not read as speech onset for the auto-stop.
+        if let gate = levelGateUntil {
+            if Date() < gate { return }
+            levelGateUntil = nil
+        }
         if power > peakPower {
             peakPower = power
         }
@@ -389,6 +398,45 @@ class WhisperService: ObservableObject {
                 onSilenceDetected = nil  // fire only once
             }
         }
+    }
+
+    // MARK: - "Speak now" cue
+    // A soft synthesized ping played the moment capture starts, so the learner
+    // knows it's their turn. Default on; Settings > "Speaking cue sound".
+    private var cuePlayer: AVAudioPlayer?
+    private var levelGateUntil: Date?
+
+    private func playRecordCue() {
+        guard UserDefaults.standard.object(forKey: "recordCueSound") as? Bool ?? true else { return }
+        if cuePlayer == nil {
+            cuePlayer = try? AVAudioPlayer(data: Self.makeCueWav())
+            cuePlayer?.volume = 0.4
+            cuePlayer?.prepareToPlay()
+        }
+        cuePlayer?.currentTime = 0
+        cuePlayer?.play()
+        levelGateUntil = Date().addingTimeInterval(0.5)
+    }
+
+    /// 0.16s A5 sine ping with a fast decay — gentle, clearly not speech.
+    private static func makeCueWav() -> Data {
+        let sr = 44100.0
+        let n = Int(sr * 0.16)
+        var samples = [Int16](repeating: 0, count: n)
+        for i in 0..<n {
+            let t = Double(i) / sr
+            let v = sin(2 * .pi * 880 * t) * exp(-t * 22) * 0.35
+            samples[i] = Int16(max(-1.0, min(1.0, v)) * 32767)
+        }
+        var data = Data()
+        func append<T>(_ value: T) { var v = value; withUnsafeBytes(of: &v) { data.append(contentsOf: $0) } }
+        data.append(contentsOf: Array("RIFF".utf8)); append(UInt32(36 + n * 2))
+        data.append(contentsOf: Array("WAVE".utf8))
+        data.append(contentsOf: Array("fmt ".utf8)); append(UInt32(16)); append(UInt16(1)); append(UInt16(1))
+        append(UInt32(sr)); append(UInt32(sr * 2)); append(UInt16(2)); append(UInt16(16))
+        data.append(contentsOf: Array("data".utf8)); append(UInt32(n * 2))
+        samples.withUnsafeBufferPointer { data.append(Data(buffer: $0)) }
+        return data
     }
 
     /// Stop recording and transcribe with Whisper

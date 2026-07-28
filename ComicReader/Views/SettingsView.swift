@@ -29,6 +29,10 @@ struct SettingsView: View {
                     Label("Haptic feedback", systemImage: "hand.tap.fill")
                 }
 
+                Toggle(isOn: $settingsManager.recordCueSound) {
+                    Label("Speaking cue sound", systemImage: "waveform.and.mic")
+                }
+
                 Picker(selection: $settingsManager.playbackSpeed) {
                     Text("0.5x").tag(0.5)
                     Text("0.75x").tag(0.75)
