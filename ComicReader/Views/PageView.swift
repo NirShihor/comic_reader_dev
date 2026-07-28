@@ -434,18 +434,29 @@ struct PageView: View {
     // it's gone.
     @State private var flashBubbleId: String?   // bubble the hand points at
     @State private var flashArrowOn = false     // pulse visibility
+    // Each pulse run gets a generation; pending timers from a superseded run
+    // must expire SILENTLY. (They used to null the shared state as cleanup —
+    // which killed the pulse the NEXT page had just started, so swiping away
+    // mid-pulse broke the cue on every following page.)
+    @State private var flashGeneration = 0
 
     private func flashFirstBubble() {
+        flashGeneration += 1
+        let gen = flashGeneration
         guard currentPageIndex > 0, selectedBubbleIndex == nil,
-              let first = pageTextBubbles.first else { return }
-        let page = currentPageIndex
+              let first = pageTextBubbles.first else {
+            flashBubbleId = nil; flashArrowOn = false
+            return
+        }
         flashBubbleId = first.id
+        flashArrowOn = false
         // Two pulses: fade in 0.4s, hold ~0.7s, fade out 0.4s, short gap, repeat.
         let steps: [(Double, Bool)] = [(0.45, true), (1.55, false), (2.40, true), (3.50, false)]
         for (delay, on) in steps {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                guard currentPageIndex == page, selectedBubbleIndex == nil, flashBubbleId == first.id else {
-                    flashBubbleId = nil; flashArrowOn = false
+                guard gen == flashGeneration else { return }   // superseded — not ours to touch
+                guard selectedBubbleIndex == nil else {
+                    flashBubbleId = nil; flashArrowOn = false   // bubble opened — cancel
                     return
                 }
                 withAnimation(.easeInOut(duration: 0.4)) { flashArrowOn = on }
@@ -453,7 +464,7 @@ struct PageView: View {
         }
         // Retire the cue once the second fade-out has finished.
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.95) {
-            if flashBubbleId == first.id { flashBubbleId = nil }
+            if gen == flashGeneration { flashBubbleId = nil; flashArrowOn = false }
         }
     }
     @State private var pageImageAspect: CGFloat?   // width/height of the page artwork
