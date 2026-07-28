@@ -1107,8 +1107,8 @@ struct PageView: View {
                                 // bubble's bottom-right corner lands the tip inside.
                                 if selectedBubbleIndex == nil, flashBubbleId != nil, flashArrowOn,
                                    let fb = pageTextBubbles.first(where: { $0.id == flashBubbleId }) {
-                                    Image(systemName: "cursorarrow")
-                                        .font(.system(size: 38, weight: .bold))
+                                    Image(systemName: "hand.point.up.left.fill")
+                                        .font(.system(size: 40, weight: .bold))
                                         .foregroundStyle(.white)
                                         .shadow(color: .black.opacity(0.9), radius: 1.5)
                                         .shadow(color: .black.opacity(0.6), radius: 4)
