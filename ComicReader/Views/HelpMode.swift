@@ -500,6 +500,24 @@ extension View {
 /// the reader help is available. Colour-matched to the button's indigo accent so
 /// the two read as linked. Tapping it dismisses. Place with
 /// `.overlay(alignment: .topTrailing)`.
+// MARK: - Display cap for once-only tips
+/// Once-only tips mark themselves seen when their ACTION is taken — good
+/// teaching, but a user who ignores them (closes the card without tapping a
+/// word, dismisses popups by tapping elsewhere) re-arms them forever. Each
+/// display is counted; after `cap` appearances the tip gives up and counts
+/// as seen even without the action.
+enum HelpTipCap {
+    /// Increment the display counter for `key`; true = cap already spent,
+    /// caller should mark the tip seen and NOT show it.
+    static func spent(_ key: String, cap: Int = 3) -> Bool {
+        let k = "help.shown.\(key)"
+        let n = UserDefaults.standard.integer(forKey: k)
+        if n >= cap { return true }
+        UserDefaults.standard.set(n + 1, forKey: k)
+        return false
+    }
+}
+
 struct HelpIntroCallout: View {
     let text: String
     var icon: String? = "questionmark.circle.fill"
