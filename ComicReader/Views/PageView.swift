@@ -429,29 +429,25 @@ struct PageView: View {
     @State private var showOnScreenComplete = false     // guided: all done
     @State private var selectedBubbleIndex: Int?   // open bubble in the floating card
     @State private var revealedBubbleId: String?   // practice: bubble whose text is revealed onto the page
-    // Arrival cue: when a story page loads, bubble 1's text blinks — gone for
-    // 1s, back briefly, gone for 1s, back for good — marking where to start.
-    // While flashBubbleId is set, that bubble is overlaid from the empty bake.
-    @State private var flashBubbleId: String?
+    // Arrival cue: a cursor arrow flashes rapidly on bubble 1 when a story
+    // page loads (6 flashes, ~2s), then disappears — marking where to start.
+    @State private var flashBubbleId: String?   // bubble the arrow points at
+    @State private var flashArrowOn = false     // toggled rapidly for the flashing
 
     private func flashFirstBubble() {
-        // Reading mode only: the blink hides baked text via the empty bake,
-        // which IS the visible art in practice modes (nothing to hide there).
-        guard currentPageIndex > 0, !isPracticeMode, selectedBubbleIndex == nil,
-              currentPage.emptyBubblesImage != nil || currentPage.noTextImage != nil,
+        guard currentPageIndex > 0, selectedBubbleIndex == nil,
               let first = pageTextBubbles.first else { return }
         let page = currentPageIndex
-        // (delay from now, hidden?) — settle 0.45s, then hide 1s / show 0.45s / hide 1s.
-        let steps: [(Double, Bool)] = [(0.45, true), (1.45, false), (1.90, true), (2.90, false)]
-        for (delay, hidden) in steps {
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                guard currentPageIndex == page, selectedBubbleIndex == nil else {
-                    flashBubbleId = nil   // page turned / bubble opened — stop the blink
+        flashBubbleId = first.id
+        // 6 flashes: on/off every 0.17s after a 0.45s settle, then gone.
+        for i in 0..<12 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45 + 0.17 * Double(i)) {
+                guard currentPageIndex == page, selectedBubbleIndex == nil, flashBubbleId == first.id else {
+                    flashBubbleId = nil; flashArrowOn = false
                     return
                 }
-                withAnimation(.easeInOut(duration: 0.12)) {
-                    flashBubbleId = hidden ? first.id : nil
-                }
+                flashArrowOn = (i % 2 == 0)
+                if i == 11 { flashBubbleId = nil; flashArrowOn = false }
             }
         }
     }
@@ -1106,14 +1102,19 @@ struct PageView: View {
                                     selectedBubbleDot(pageTextBubbles[sel], in: rect)
                                 }
 
-                                // Arrival cue: bubble 1's TEXT blinks out and back
-                                // twice — its region is patched over from the
-                                // empty-bubbles bake while flashBubbleId is set.
-                                if selectedBubbleIndex == nil, let fid = flashBubbleId,
-                                   let emptyName = currentPage.emptyBubblesImage ?? currentPage.noTextImage,
-                                   let fb = pageTextBubbles.first(where: { $0.id == fid }) {
-                                    bubbleMasterClip(fb, in: rect, content: emptyName)
-                                        .transition(.opacity)
+                                // Arrival cue: cursor arrow flashing on bubble 1.
+                                // The glyph points up-left, so positioning it at the
+                                // bubble's bottom-right corner lands the tip inside.
+                                if selectedBubbleIndex == nil, flashBubbleId != nil, flashArrowOn,
+                                   let fb = pageTextBubbles.first(where: { $0.id == flashBubbleId }) {
+                                    Image(systemName: "cursorarrow")
+                                        .font(.system(size: 38, weight: .bold))
+                                        .foregroundStyle(.white)
+                                        .shadow(color: .black.opacity(0.9), radius: 1.5)
+                                        .shadow(color: .black.opacity(0.6), radius: 4)
+                                        .position(x: rect.minX + (fb.positionX + fb.width * 0.95) * rect.width,
+                                                  y: rect.minY + (fb.positionY + fb.height * 1.0) * rect.height)
+                                        .allowsHitTesting(false)
                                 }
 
                                 // Traced hotspots: the artwork inside the shape
