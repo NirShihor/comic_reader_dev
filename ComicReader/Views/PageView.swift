@@ -1109,7 +1109,8 @@ struct PageView: View {
                                    let fb = pageTextBubbles.first(where: { $0.id == flashBubbleId }) {
                                     Image(systemName: "hand.point.up.left.fill")
                                         .font(.system(size: 40, weight: .bold))
-                                        .foregroundStyle(.white)
+                                        // Same green as the bubble highlight.
+                                        .foregroundStyle(Color(red: 0x61/255, green: 0xF5/255, blue: 0x27/255))
                                         .shadow(color: .black.opacity(0.9), radius: 1.5)
                                         .shadow(color: .black.opacity(0.6), radius: 4)
                                         .position(x: rect.minX + (fb.positionX + fb.width * 0.95) * rect.width,
