@@ -429,20 +429,28 @@ struct PageView: View {
     @State private var showOnScreenComplete = false     // guided: all done
     @State private var selectedBubbleIndex: Int?   // open bubble in the floating card
     @State private var revealedBubbleId: String?   // practice: bubble whose text is revealed onto the page
-    // Arrival pulse: bubble 1 flashes green for ~1s when a story page loads, so
-    // the reader knows where the flow starts.
+    // Arrival cue: when a story page loads, bubble 1's text blinks — gone for
+    // 1s, back briefly, gone for 1s, back for good — marking where to start.
+    // While flashBubbleId is set, that bubble is overlaid from the empty bake.
     @State private var flashBubbleId: String?
 
     private func flashFirstBubble() {
-        guard currentPageIndex > 0, selectedBubbleIndex == nil,
+        // Reading mode only: the blink hides baked text via the empty bake,
+        // which IS the visible art in practice modes (nothing to hide there).
+        guard currentPageIndex > 0, !isPracticeMode, selectedBubbleIndex == nil,
+              currentPage.emptyBubblesImage != nil || currentPage.noTextImage != nil,
               let first = pageTextBubbles.first else { return }
         let page = currentPageIndex
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-            guard currentPageIndex == page, selectedBubbleIndex == nil else { return }
-            withAnimation(.easeIn(duration: 0.2)) { flashBubbleId = first.id }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                if flashBubbleId == first.id {
-                    withAnimation(.easeOut(duration: 0.35)) { flashBubbleId = nil }
+        // (delay from now, hidden?) — settle 0.45s, then hide 1s / show 0.45s / hide 1s.
+        let steps: [(Double, Bool)] = [(0.45, true), (1.45, false), (1.90, true), (2.90, false)]
+        for (delay, hidden) in steps {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                guard currentPageIndex == page, selectedBubbleIndex == nil else {
+                    flashBubbleId = nil   // page turned / bubble opened — stop the blink
+                    return
+                }
+                withAnimation(.easeInOut(duration: 0.12)) {
+                    flashBubbleId = hidden ? first.id : nil
                 }
             }
         }
@@ -804,14 +812,15 @@ struct PageView: View {
     // which can overlap neighbours). Falls back to the padded text box when there's
     // no balloon to flood (borderless narration / sound effect painted on the art).
     @ViewBuilder
-    private func bubbleMasterClip(_ b: Bubble, in rect: CGRect, coverBorder: Bool = false) -> some View {
+    private func bubbleMasterClip(_ b: Bubble, in rect: CGRect, coverBorder: Bool = false,
+                                  content: String? = nil) -> some View {
         let maskSource = currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage
         let nb = CGRect(x: b.positionX, y: b.positionY, width: b.width, height: b.height)
         // Include geometry so a moved/resized bubble invalidates the cached interior mask.
         let geo = "\(Int(b.positionX*1e4))_\(Int(b.positionY*1e4))_\(Int(b.width*1e4))_\(Int(b.height*1e4))"
         let mkey = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|imask"
         let mask = BubbleFill.interiorMask(maskSource: maskSource, comicId: comic.id, bubble: nb, cacheKey: mkey)
-        let master = ComicImage(imageName: currentPage.masterImage, comicId: comic.id)
+        let master = ComicImage(imageName: content ?? currentPage.masterImage, comicId: comic.id)
             .aspectRatio(contentMode: .fit)
             .frame(width: rect.width, height: rect.height)
         if let mask, coverBorder {
@@ -867,16 +876,11 @@ struct PageView: View {
     // real shape). Shows nothing when it can't fill cleanly (e.g. a borderless
     // narration such as a title or "continuará"). Static — no flashing.
     @ViewBuilder
-    private func selectedBubbleDot(_ b: Bubble, in rect: CGRect, flash: Bool = false) -> some View {
+    private func selectedBubbleDot(_ b: Bubble, in rect: CGRect) -> some View {
         // ONE standard highlight green everywhere — the per-comic
         // bubbleDotColor override is deliberately ignored (it only ever
         // produced comics whose highlight didn't match the rest of the app).
-        // The arrival pulse uses the onboarding AMBER instead: green flashing
-        // then vanishing read like a selection error; amber is the app's
-        // established "guidance" colour (tooltips), so it reads as a hint.
-        let dotColor = flash
-            ? Color(red: 0xF0/255, green: 0xBB/255, blue: 0x29/255)
-            : Color(red: 0x61/255, green: 0xF5/255, blue: 0x27/255)
+        let dotColor = Color(red: 0x61/255, green: 0xF5/255, blue: 0x27/255)
         // Shape from the blank bake (clean interior, reaches everywhere incl.
         // letter-counters); text/ink from whatever image is on screen so glyphs
         // stay readable. In blank practice mode both are the empty bake, so the
@@ -895,7 +899,7 @@ struct PageView: View {
         // resized bubble MUST invalidate the cached overlay (otherwise it returns the
         // stale fill from the old position — showing the wrong shape / a neighbour's text).
         let geo = "\(Int(b.positionX*1e4))_\(Int(b.positionY*1e4))_\(Int(b.width*1e4))_\(Int(b.height*1e4))"
-        let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|\(inkSource)|\(flash ? "amber" : "std")"
+        let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|\(inkSource)|std"
         // Transparent/borderless narration (e.g. "continuará") has no balloon interior
         // to fill — flood-filling it would tint the text and a stray patch of art green.
         // Skip the highlight for these in READING mode. In PRACTICE mode the empty
@@ -916,9 +920,8 @@ struct PageView: View {
                           y: rect.minY + fill.region.midY * rect.height)
                 .opacity(0.65)
                 .allowsHitTesting(false)
-                // Tap highlight appears instantly (identity); the arrival pulse
-                // fades in and out instead.
-                .transition(flash ? AnyTransition.opacity : .identity)
+                // Appear instantly on touch — don't inherit the card's fade-in.
+                .transition(.identity)
                 .animation(nil, value: selectedBubbleIndex)
         }
         // No fill possible (e.g. borderless narration like a title or
@@ -1103,11 +1106,14 @@ struct PageView: View {
                                     selectedBubbleDot(pageTextBubbles[sel], in: rect)
                                 }
 
-                                // Arrival pulse on bubble 1 (fades in/out; same fill
-                                // as the tap highlight, so it also warms that cache).
+                                // Arrival cue: bubble 1's TEXT blinks out and back
+                                // twice — its region is patched over from the
+                                // empty-bubbles bake while flashBubbleId is set.
                                 if selectedBubbleIndex == nil, let fid = flashBubbleId,
+                                   let emptyName = currentPage.emptyBubblesImage ?? currentPage.noTextImage,
                                    let fb = pageTextBubbles.first(where: { $0.id == fid }) {
-                                    selectedBubbleDot(fb, in: rect, flash: true)
+                                    bubbleMasterClip(fb, in: rect, content: emptyName)
+                                        .transition(.opacity)
                                 }
 
                                 // Traced hotspots: the artwork inside the shape
