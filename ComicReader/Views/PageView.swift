@@ -429,26 +429,31 @@ struct PageView: View {
     @State private var showOnScreenComplete = false     // guided: all done
     @State private var selectedBubbleIndex: Int?   // open bubble in the floating card
     @State private var revealedBubbleId: String?   // practice: bubble whose text is revealed onto the page
-    // Arrival cue: a cursor arrow flashes rapidly on bubble 1 when a story
-    // page loads (6 flashes, ~2s), then disappears — marking where to start.
-    @State private var flashBubbleId: String?   // bubble the arrow points at
-    @State private var flashArrowOn = false     // toggled rapidly for the flashing
+    // Arrival cue: the pointing hand gives two SOFT pulses on bubble 1 when a
+    // story page loads — slow fade in, a beat on screen, slow fade out — then
+    // it's gone.
+    @State private var flashBubbleId: String?   // bubble the hand points at
+    @State private var flashArrowOn = false     // pulse visibility
 
     private func flashFirstBubble() {
         guard currentPageIndex > 0, selectedBubbleIndex == nil,
               let first = pageTextBubbles.first else { return }
         let page = currentPageIndex
         flashBubbleId = first.id
-        // 6 flashes: on/off every 0.17s after a 0.45s settle, then gone.
-        for i in 0..<12 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45 + 0.17 * Double(i)) {
+        // Two pulses: fade in 0.4s, hold ~0.7s, fade out 0.4s, short gap, repeat.
+        let steps: [(Double, Bool)] = [(0.45, true), (1.55, false), (2.40, true), (3.50, false)]
+        for (delay, on) in steps {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 guard currentPageIndex == page, selectedBubbleIndex == nil, flashBubbleId == first.id else {
                     flashBubbleId = nil; flashArrowOn = false
                     return
                 }
-                flashArrowOn = (i % 2 == 0)
-                if i == 11 { flashBubbleId = nil; flashArrowOn = false }
+                withAnimation(.easeInOut(duration: 0.4)) { flashArrowOn = on }
             }
+        }
+        // Retire the cue once the second fade-out has finished.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.95) {
+            if flashBubbleId == first.id { flashBubbleId = nil }
         }
     }
     @State private var pageImageAspect: CGFloat?   // width/height of the page artwork
@@ -1115,6 +1120,7 @@ struct PageView: View {
                                         .shadow(color: .black.opacity(0.6), radius: 4)
                                         .position(x: rect.minX + (fb.positionX + fb.width * 0.95) * rect.width,
                                                   y: rect.minY + (fb.positionY + fb.height * 1.0) * rect.height)
+                                        .transition(.opacity)   // soft pulses, not hard flashes
                                         .allowsHitTesting(false)
                                 }
 
