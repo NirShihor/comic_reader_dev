@@ -695,7 +695,35 @@ struct PageView: View {
             ? Color.clear
             : Color.fromHex(hotspot.borderColor, fallback: Color(red: 0, green: 188/255, blue: 212/255))
 
-        if (hotspot.points?.count ?? 0) >= 3 {
+        if hotspot.displayStyle == "button" {
+            // A REAL button drawn on the page: tapping it triggers the hotspot
+            // popup (e.g. a message appearing on an in-story phone screen).
+            Button {
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                selectedHotspot = hotspot
+            } label: {
+                Text(hotspot.buttonLabel ?? hotspot.label ?? "•••")
+                    .font(.system(size: min(h * 0.42, 17), weight: .semibold, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 8)
+                    .frame(width: w, height: h)
+                    .background(
+                        RoundedRectangle(cornerRadius: h * 0.3, style: .continuous)
+                            .fill(frameColor == Color.clear
+                                  ? Color(red: 0, green: 188/255, blue: 212/255)
+                                  : frameColor)
+                            .shadow(color: .black.opacity(0.35), radius: 3, y: 2)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: h * 0.3, style: .continuous)
+                            .strokeBorder(Color.white.opacity(0.65), lineWidth: 1)
+                    )
+            }
+            .buttonStyle(.plain)
+            .position(x: centerX, y: centerY)
+        } else if (hotspot.points?.count ?? 0) >= 3 {
             // Traced hotspots: the visible cue is the floating cut-out
             // (hotspotFloatingCutout). Here we just need the tap target.
             Color.clear
@@ -1140,7 +1168,7 @@ struct PageView: View {
 
                                 // Traced hotspots: the artwork inside the shape
                                 // lifts/floats toward the reader as it pulses.
-                                ForEach(currentPage.hotspots ?? [], id: \.id) { h in
+                                ForEach((currentPage.hotspots ?? []).filter { $0.displayStyle != "button" }, id: \.id) { h in
                                     hotspotFloatingCutout(h, in: rect)
                                 }
 

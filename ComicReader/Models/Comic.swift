@@ -118,6 +118,10 @@ struct Hotspot: Identifiable, Codable, Hashable {
     var pulseBrightness: Double?
     // Optional glow tint (hex) washed over the cut-out at the pulse peak; nil/empty = none.
     var pulseTint: String?
+    // "button": rendered as a real tappable button (rounded, labelled) instead
+    // of a pulsing area — e.g. a message notification on an in-story screen.
+    var displayStyle: String?
+    var buttonLabel: String?
     let slides: [HotspotSlide]
 }
 
