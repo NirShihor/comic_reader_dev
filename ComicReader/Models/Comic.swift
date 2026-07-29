@@ -122,6 +122,9 @@ struct Hotspot: Identifiable, Codable, Hashable {
     // of a pulsing area — e.g. a message notification on an in-story screen.
     var displayStyle: String?
     var buttonLabel: String?
+    // When set, the button opens THIS bubble's popup card (full bubble
+    // behaviour) instead of the hotspot slides.
+    var triggerBubbleId: String?
     let slides: [HotspotSlide]
 }
 

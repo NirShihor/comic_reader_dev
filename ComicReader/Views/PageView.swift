@@ -700,7 +700,15 @@ struct PageView: View {
             // popup (e.g. a message appearing on an in-story phone screen).
             Button {
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                selectedHotspot = hotspot
+                // Linked to a bubble → open that bubble's full popup card
+                // (words, translation, grammar, audio, practice) instead of
+                // the hotspot slides.
+                if let tid = hotspot.triggerBubbleId,
+                   let idx = pageTextBubbles.firstIndex(where: { $0.id == tid }) {
+                    selectedBubbleIndex = idx
+                } else {
+                    selectedHotspot = hotspot
+                }
             } label: {
                 Text(hotspot.buttonLabel ?? hotspot.label ?? "•••")
                     .font(.system(size: min(h * 0.42, 17), weight: .semibold, design: .rounded))
