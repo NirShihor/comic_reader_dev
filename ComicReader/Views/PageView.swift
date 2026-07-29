@@ -503,10 +503,13 @@ struct PageView: View {
         // titles, opening narration, mid-episode titles): it's tappable and plays its
         // audio. Transparent ones just get no green fill in READING mode —
         // selectedBubbleDot skips them there (no box to flood on the master art).
+        // Image bubbles WITH sentences count as text bubbles: the sentences are
+        // deliberately invisible on the page (only the image bakes) but power
+        // the popup card / audio / practice — an in-story screen message.
         var bubbles = currentPage.panels
             .sorted { $0.panelOrder < $1.panelOrder }
             .flatMap { $0.bubbles }
-            .filter { $0.isSoundEffect != true && $0.type != .image && !$0.sentences.isEmpty }
+            .filter { $0.isSoundEffect != true && !$0.sentences.isEmpty }
         // READING mode, final page: drop trailing narration — the decorative
         // "continuará…" marker — so the flow ends on the last line of dialogue, not
         // a clunky extra step before "End of Episode". PRACTICE keeps it: the
