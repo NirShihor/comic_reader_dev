@@ -750,11 +750,23 @@ struct PageView: View {
                 let seconds = timeline.date.timeIntervalSinceReferenceDate
                 let pulse = (sin(seconds * 2.5) + 1.0) / 2.0
                 ZStack {
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(frameColor, lineWidth: 1.5 + pulse * 1.5)
-                        .shadow(color: frameColor.opacity(pulse * 0.8), radius: 4 + pulse * 6)
-                        .opacity(0.3 + pulse * 0.7)
-                        .scaleEffect(1.0 + pulse * 0.15)
+                    if hotspot.borderColor == "transparent" {
+                        // "Transparent" = no hard frame, but still discoverable:
+                        // a thick blurred stroke reads as a soft breathing halo
+                        // (default cyan) rather than a border line.
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color(red: 0, green: 188/255, blue: 212/255)
+                                        .opacity(0.25 + pulse * 0.55),
+                                    lineWidth: 7 + pulse * 3)
+                            .blur(radius: 7)
+                            .scaleEffect(1.0 + pulse * 0.12)
+                    } else {
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(frameColor, lineWidth: 1.5 + pulse * 1.5)
+                            .shadow(color: frameColor.opacity(pulse * 0.8), radius: 4 + pulse * 6)
+                            .opacity(0.3 + pulse * 0.7)
+                            .scaleEffect(1.0 + pulse * 0.15)
+                    }
                     Color.clear.contentShape(Rectangle())
                 }
             }
