@@ -376,6 +376,8 @@ struct HotspotJSON: Codable {
     let pulseScale: Double?
     let pulseBrightness: Double?
     let pulseTint: String?
+    let displayStyle: String?
+    let buttonLabel: String?
     let slides: [HotspotSlideJSON]
 
     func toHotspot() -> Hotspot {
@@ -391,6 +393,8 @@ struct HotspotJSON: Codable {
             pulseScale: pulseScale,
             pulseBrightness: pulseBrightness,
             pulseTint: pulseTint,
+            displayStyle: displayStyle,
+            buttonLabel: buttonLabel,
             slides: slides.map { $0.toHotspotSlide() }
         )
     }
