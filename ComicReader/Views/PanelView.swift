@@ -1260,7 +1260,9 @@ struct WordButton: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
-                if let baseForm = word.baseForm, baseForm.lowercased() != word.displayText.lowercased() {
+                // Always show the base form — even when the word IS the base
+                // form (hiding it read as "no base form recorded").
+                if let baseForm = word.baseForm, !baseForm.isEmpty {
                     HStack {
                         Text("Base form: \(baseForm)")
                             .font(.caption)
