@@ -1452,6 +1452,17 @@ struct WordFormsView: View {
     @StateObject private var audioManager = AudioManager.shared
     @State private var showingExplanations = false
 
+    /// The grammatical form the sentence uses: the matching row's label from
+    /// the forms table, or "Base form" when the word IS the base form.
+    private var usedFormLabel: String? {
+        let same: (String) -> Bool = {
+            $0.compare(word.displayText, options: [.caseInsensitive, .diacriticInsensitive]) == .orderedSame
+        }
+        if let f = word.forms?.first(where: { same($0.text) }) { return f.label }
+        if let base = word.baseForm, same(base) { return "Base form" }
+        return nil
+    }
+
     var body: some View {
         NavigationStack {
             List {
@@ -1466,15 +1477,24 @@ struct WordFormsView: View {
                             .foregroundStyle(.secondary)
                     }
                     .listRowBackground(Color(.systemGray6))
+                }
 
-                    // The word exactly as it appears in the sentence — always
-                    // shown, base form or not, so the link between the comic
-                    // text and the forms table is explicit.
+                // The word exactly as it appears in the sentence — always shown,
+                // base form or not, with its grammatical form named. Its own
+                // section so the green row is rounded on all four corners.
+                Section {
                     HStack {
-                        Text("In this sentence")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 120, alignment: .leading)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("In this sentence")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            if let formLabel = usedFormLabel {
+                                Text(formLabel)
+                                    .font(.caption)
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+                        .frame(width: 120, alignment: .leading)
                         Text(word.displayText)
                             .font(.body)
                             .bold()
