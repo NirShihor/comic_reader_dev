@@ -1464,11 +1464,38 @@ struct WordFormsView: View {
                             .foregroundStyle(.secondary)
                     }
                     .listRowBackground(Color(.systemGray6))
+
+                    // The word exactly as it appears in the sentence — always
+                    // shown, base form or not, so the link between the comic
+                    // text and the forms table is explicit.
+                    HStack {
+                        Text("In this sentence")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 120, alignment: .leading)
+                        Text(word.displayText)
+                            .font(.body)
+                            .bold()
+                        Spacer()
+                        Button {
+                            let audioFile = word.displayText.lowercased()
+                                .folding(options: .diacriticInsensitive, locale: .current)
+                            audioManager.play(audioFile, volume: 1.0)
+                        } label: {
+                            Image(systemName: "speaker.wave.2.fill")
+                                .font(.caption)
+                                .foregroundStyle(.blue)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .listRowBackground(Color(red: 0x98/255, green: 0xF8/255, blue: 0x72/255).opacity(0.3))
                 }
 
                 if let forms = word.forms, !forms.isEmpty {
                     Section("Forms") {
                         ForEach(Array(forms.enumerated()), id: \.offset) { _, form in
+                            let isUsed = form.text.compare(word.displayText,
+                                                          options: [.caseInsensitive, .diacriticInsensitive]) == .orderedSame
                             HStack {
                                 Text(form.label)
                                     .font(.subheadline)
@@ -1476,6 +1503,7 @@ struct WordFormsView: View {
                                     .frame(width: 120, alignment: .leading)
                                 Text(form.text)
                                     .font(.body)
+                                    .fontWeight(isUsed ? .bold : .regular)
                                 Spacer()
                                 if let audioUrl = form.audioUrl {
                                     Button {
@@ -1488,6 +1516,9 @@ struct WordFormsView: View {
                                     .buttonStyle(.plain)
                                 }
                             }
+                            .listRowBackground(isUsed
+                                ? Color(red: 0x98/255, green: 0xF8/255, blue: 0x72/255).opacity(0.3)
+                                : nil)
                         }
 
                         Button {
