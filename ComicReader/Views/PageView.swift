@@ -439,6 +439,8 @@ struct PageView: View {
     // which killed the pulse the NEXT page had just started, so swiping away
     // mid-pulse broke the cue on every following page.)
     @State private var flashGeneration = 0
+    // Armed when a hotspot with advanceOnClose is opened by a tap; consumed on dismiss.
+    @State private var hotspotAdvanceOnClose = false
 
     private func flashFirstBubble() {
         flashGeneration += 1
@@ -710,6 +712,7 @@ struct PageView: View {
                    let idx = pageTextBubbles.firstIndex(where: { $0.id == tid }) {
                     selectedBubbleIndex = idx
                 } else {
+                    hotspotAdvanceOnClose = hotspot.advanceOnClose == true
                     selectedHotspot = hotspot
                 }
             } label: {
@@ -748,6 +751,7 @@ struct PageView: View {
                        let idx = pageTextBubbles.firstIndex(where: { $0.id == tid }) {
                         selectedBubbleIndex = idx
                     } else {
+                        hotspotAdvanceOnClose = hotspot.advanceOnClose == true
                         selectedHotspot = hotspot
                     }
                 }
@@ -784,6 +788,7 @@ struct PageView: View {
                    let idx = pageTextBubbles.firstIndex(where: { $0.id == tid }) {
                     selectedBubbleIndex = idx
                 } else {
+                    hotspotAdvanceOnClose = hotspot.advanceOnClose == true
                     selectedHotspot = hotspot
                 }
             }
@@ -1306,7 +1311,16 @@ struct PageView: View {
 
             endOfEpisodeOverlay
         }
-        .sheet(item: $selectedHotspot) { hotspot in
+        .sheet(item: $selectedHotspot, onDismiss: {
+            // Opt-in per hotspot: closing its popup turns the page (never on
+            // the notes deep-link open, which doesn't arm the flag).
+            if hotspotAdvanceOnClose {
+                hotspotAdvanceOnClose = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    goToNextPage()
+                }
+            }
+        }) { hotspot in
             HotspotView(hotspot: hotspot, comicId: comic.id, pageNumber: currentPage.pageNumber)
         }
         .navigationBarTitleDisplayMode(.inline)
