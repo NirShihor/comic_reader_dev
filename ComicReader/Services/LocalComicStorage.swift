@@ -379,6 +379,7 @@ struct HotspotJSON: Codable {
     let displayStyle: String?
     let buttonLabel: String?
     let triggerBubbleId: String?
+    let advanceOnClose: Bool?
     let slides: [HotspotSlideJSON]
 
     func toHotspot() -> Hotspot {
@@ -397,6 +398,7 @@ struct HotspotJSON: Codable {
             displayStyle: displayStyle,
             buttonLabel: buttonLabel,
             triggerBubbleId: triggerBubbleId,
+            advanceOnClose: advanceOnClose,
             slides: slides.map { $0.toHotspotSlide() }
         )
     }

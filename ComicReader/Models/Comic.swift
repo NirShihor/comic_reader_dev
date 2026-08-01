@@ -125,6 +125,8 @@ struct Hotspot: Identifiable, Codable, Hashable {
     // When set, the button opens THIS bubble's popup card (full bubble
     // behaviour) instead of the hotspot slides.
     var triggerBubbleId: String?
+    // Opt-in: closing this hotspot's popup turns to the next page.
+    var advanceOnClose: Bool?
     let slides: [HotspotSlide]
 }
 
