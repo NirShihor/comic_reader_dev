@@ -736,14 +736,20 @@ struct PageView: View {
             .position(x: centerX, y: centerY)
         } else if (hotspot.points?.count ?? 0) >= 3 {
             // Traced hotspots: the visible cue is the floating cut-out
-            // (hotspotFloatingCutout). Here we just need the tap target.
+            // (hotspotFloatingCutout). Here we just need the tap target —
+            // inset(-16) grows the hit area so tiny traces stay tappable.
             Color.clear
-                .contentShape(Rectangle())
+                .contentShape(Rectangle().inset(by: -16))
                 .frame(width: w, height: h)
                 .position(x: centerX, y: centerY)
                 .onTapGesture {
                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                    selectedHotspot = hotspot
+                    if let tid = hotspot.triggerBubbleId,
+                       let idx = pageTextBubbles.firstIndex(where: { $0.id == tid }) {
+                        selectedBubbleIndex = idx
+                    } else {
+                        selectedHotspot = hotspot
+                    }
                 }
         } else {
             TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
@@ -767,14 +773,19 @@ struct PageView: View {
                             .opacity(0.3 + pulse * 0.7)
                             .scaleEffect(1.0 + pulse * 0.15)
                     }
-                    Color.clear.contentShape(Rectangle())
+                    Color.clear.contentShape(Rectangle().inset(by: -16))
                 }
             }
             .frame(width: w, height: h)
             .position(x: centerX, y: centerY)
             .onTapGesture {
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                selectedHotspot = hotspot
+                if let tid = hotspot.triggerBubbleId,
+                   let idx = pageTextBubbles.firstIndex(where: { $0.id == tid }) {
+                    selectedBubbleIndex = idx
+                } else {
+                    selectedHotspot = hotspot
+                }
             }
         }
     }
