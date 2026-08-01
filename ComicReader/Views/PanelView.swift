@@ -13,6 +13,9 @@ struct PanelView: View {
     /// end-of-episode alert.
     var guidedOnScreenPractice: Bool = false
     var onGuidedEnd: (() -> Void)?
+    /// Called when a hotspot flagged advanceOnClose closes its popup — the host
+    /// page view leaves the panel and turns to the next page.
+    var onHotspotAdvance: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var audioManager = AudioManager.shared
@@ -31,9 +34,10 @@ struct PanelView: View {
     @State private var errorMessage = ""
     @State private var showEndOfEpisode = false
     @State private var selectedHotspot: Hotspot?
+    @State private var hotspotAdvanceArmed = false   // advanceOnClose hotspot open
     @StateObject private var help = HelpModeController()
 
-    init(comic: Comic, page: Page, panel: Panel, hotspots: [Hotspot] = [], navigateToPage: Binding<Int?>, dismissPanel: (() -> Void)? = nil, dismissToHome: (() -> Void)? = nil, guidedOnScreenPractice: Bool = false, onGuidedEnd: (() -> Void)? = nil) {
+    init(comic: Comic, page: Page, panel: Panel, hotspots: [Hotspot] = [], navigateToPage: Binding<Int?>, dismissPanel: (() -> Void)? = nil, dismissToHome: (() -> Void)? = nil, guidedOnScreenPractice: Bool = false, onGuidedEnd: (() -> Void)? = nil, onHotspotAdvance: (() -> Void)? = nil) {
         self.comic = comic
         self.page = page
         self.panel = panel
@@ -43,6 +47,7 @@ struct PanelView: View {
         self.dismissToHome = dismissToHome
         self.guidedOnScreenPractice = guidedOnScreenPractice
         self.onGuidedEnd = onGuidedEnd
+        self.onHotspotAdvance = onHotspotAdvance
         _currentPanelId = State(initialValue: panel.id)
     }
 
@@ -296,7 +301,12 @@ struct PanelView: View {
         } message: {
             Text(errorMessage)
         }
-        .sheet(item: $selectedHotspot) { hotspot in
+        .sheet(item: $selectedHotspot, onDismiss: {
+            if hotspotAdvanceArmed {
+                hotspotAdvanceArmed = false
+                onHotspotAdvance?()
+            }
+        }) { hotspot in
             HotspotView(hotspot: hotspot, comicId: comic.id, pageNumber: page.pageNumber)
                 .environmentObject(settingsManager)
         }
@@ -509,6 +519,7 @@ struct PanelView: View {
         .position(x: centerX, y: centerY)
         .onTapGesture {
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            hotspotAdvanceArmed = item.hotspot.advanceOnClose == true
             selectedHotspot = item.hotspot
         }
         .explains("Tappable spot", "These pulsing markers open extra vocabulary and phrase practice.", id: "panel.hotspot")

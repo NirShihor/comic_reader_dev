@@ -1022,6 +1022,49 @@ struct PageView: View {
         }
     }
 
+    // advanceOnClose hotspot closed inside the panel overlay: leave the panel,
+    // then turn the page. Named func — inlining the closure in PanelView's init
+    // pushed the body past the type-checker's limit.
+    // Extracted from body: the PanelView construction inline pushed the body
+    // expression past the type-checker's limit once onHotspotAdvance was added.
+    @ViewBuilder
+    private func panelOverlay(_ panel: Panel) -> some View {
+        PanelView(
+            comic: comic,
+            page: currentPage,
+            panel: panel,
+            hotspots: currentPage.hotspots ?? [],
+            navigateToPage: $navigateToPage,
+            dismissPanel: {
+                // Remove the overlay without animation — an interrupted
+                // removal transition can leave the page layout stuck
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) {
+                    selectedPanel = nil
+                }
+            },
+            dismissToHome: {
+                dismiss()
+            },
+            guidedOnScreenPractice: guidedOnScreenPractice,
+            onGuidedEnd: { handleGuidedEnd() },
+            onHotspotAdvance: handleHotspotAdvanceFromPanel
+        )
+        .environmentObject(settingsManager)
+        .transition(.move(edge: .bottom))
+        .zIndex(1)
+    }
+
+    private func handleHotspotAdvanceFromPanel() {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) { selectedPanel = nil }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            goToNextPage()
+        }
+    }
+
     private func goToNextPage() {
         guard currentPageIndex < sortedPages.count - 1 else {
             if guidedOnScreenPractice {
@@ -1254,30 +1297,7 @@ struct PageView: View {
             // Panel view overlay — presented on top of the page instead of as a sheet
             // to avoid iOS sheet presentation scaling the underlying page view
             if let panel = selectedPanel {
-                PanelView(
-                    comic: comic,
-                    page: currentPage,
-                    panel: panel,
-                    hotspots: currentPage.hotspots ?? [],
-                    navigateToPage: $navigateToPage,
-                    dismissPanel: {
-                        // Remove the overlay without animation — an interrupted
-                        // removal transition can leave the page layout stuck
-                        var transaction = Transaction()
-                        transaction.disablesAnimations = true
-                        withTransaction(transaction) {
-                            selectedPanel = nil
-                        }
-                    },
-                    dismissToHome: {
-                        dismiss()
-                    },
-                    guidedOnScreenPractice: guidedOnScreenPractice,
-                    onGuidedEnd: { handleGuidedEnd() }
-                )
-                .environmentObject(settingsManager)
-                .transition(.move(edge: .bottom))
-                .zIndex(1)
+                panelOverlay(panel)
             }
 
             // Floating, draggable card showing one bubble's content (normal reading).
