@@ -244,11 +244,12 @@ struct HotspotView: View {
 
             // Slide image
             if let slide = currentSlide, let imageUrl = slide.imageUrl {
+                // No backing colour: a non-16:9 image used to get black bars
+                // either side — let the sheet background show instead.
                 ComicImage(imageName: imageUrl, comicId: comicId)
                     .aspectRatio(contentMode: .fit)
                     .frame(maxWidth: .infinity, maxHeight: UIScreen.main.bounds.height * 0.4)
                     .clipped()
-                    .background(Color.black)
             }
 
             // Content area
