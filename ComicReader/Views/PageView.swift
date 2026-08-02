@@ -1000,8 +1000,22 @@ struct PageView: View {
                 .transition(.identity)
                 .animation(nil, value: selectedBubbleIndex)
         }
-        // No fill possible (e.g. borderless narration like a title or
-        // "continuará") → show nothing at all.
+        else {
+            // No balloon to flood (hidden bubble, transparent narration, or a
+            // fill that failed its leak checks): mark the selection with a soft
+            // rounded green wash over the bubble's rect instead of nothing —
+            // essential for invisible bubbles, where the reader otherwise gets
+            // no confirmation of WHAT opened.
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(dotColor)
+                .frame(width: b.width * rect.width + 12, height: b.height * rect.height + 8)
+                .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
+                          y: rect.minY + (b.positionY + b.height / 2) * rect.height)
+                .opacity(0.35)
+                .allowsHitTesting(false)
+                .transition(.identity)
+                .animation(nil, value: selectedBubbleIndex)
+        }
     }
 
     private func loadPageAspect() {
