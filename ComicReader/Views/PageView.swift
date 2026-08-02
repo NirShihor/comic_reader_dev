@@ -512,13 +512,16 @@ struct PageView: View {
             .sorted { $0.panelOrder < $1.panelOrder }
             .flatMap { $0.bubbles }
             .filter { $0.isSoundEffect != true && !$0.sentences.isEmpty }
-        // READING mode, final page: drop trailing narration — the decorative
-        // "continuará…" marker — so the flow ends on the last line of dialogue, not
-        // a clunky extra step before "End of Episode". PRACTICE keeps it: the
-        // practice bake blanks every text bubble (continuará included), so a bubble
-        // left out here would show as an empty box that can never reveal or play.
+        // READING mode, final page: drop the decorative "continuará…" end marker
+        // so the flow ends on the last line of dialogue. Matched by TEXT — the
+        // old blanket strip-all-trailing-narration rule silently deleted real
+        // content (LA REVELACIÓN's last page is entirely narration bubbles, and
+        // every one became untappable). PRACTICE keeps even the marker: the
+        // practice bake blanks every text bubble, so a bubble left out here
+        // would show as an empty box that can never reveal or play.
         if currentPageIndex == sortedPages.count - 1 && !isPracticeMode {
-            while let last = bubbles.last, last.type == .narration {
+            while let last = bubbles.last, last.type == .narration,
+                  last.sentences.first?.text.lowercased().contains("continuar") == true {
                 bubbles.removeLast()
             }
         }
