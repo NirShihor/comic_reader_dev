@@ -470,6 +470,8 @@ struct BubbleJSON: Codable {
     let type: String
     let isSoundEffect: Bool?
     let bgTransparent: Bool?
+    let hidden: Bool?
+    let highlightWash: Bool?
     let imageUrl: String?
     let position: PositionJSON
     let sentences: [SentenceJSON]
@@ -480,6 +482,8 @@ struct BubbleJSON: Codable {
             type: Bubble.BubbleType(rawValue: type) ?? .speech,
             isSoundEffect: isSoundEffect,
             bgTransparent: bgTransparent,
+            hidden: hidden,
+            highlightWash: highlightWash,
             imageUrl: imageUrl,
             positionX: position.x,
             positionY: position.y,

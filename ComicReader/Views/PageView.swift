@@ -1000,12 +1000,13 @@ struct PageView: View {
                 .transition(.identity)
                 .animation(nil, value: selectedBubbleIndex)
         }
-        else {
-            // No balloon to flood (hidden bubble, transparent narration, or a
-            // fill that failed its leak checks): mark the selection with a soft
-            // rounded green wash over the bubble's rect instead of nothing —
-            // essential for invisible bubbles, where the reader otherwise gets
-            // no confirmation of WHAT opened.
+        else if b.highlightWash ?? (b.hidden == true) {
+            // Soft green wash over the bubble's rect for bubbles with no
+            // balloon to flood. Author-controlled per bubble ("Green highlight
+            // in reader"); default: hidden (data-only) bubbles get it — they
+            // need SOME confirmation of what opened — while visible transparent
+            // narration (cover titles, continuará) doesn't, since a green slab
+            // over baked art looks broken.
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(dotColor)
                 .frame(width: b.width * rect.width + 12, height: b.height * rect.height + 8)
