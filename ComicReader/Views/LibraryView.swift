@@ -472,7 +472,8 @@ struct LibraryView: View {
                 case .standalone(let c):
                     if c.level.rawValue != level { return false }
                 case .collection(let col):
-                    if col.level.rawValue != level { return false }
+                    // Mixed-level collections match when ANY episode fits.
+                    if !col.comics.contains(where: { $0.level.rawValue == level }) { return false }
                 }
             }
             // Search text (title / English title / description / collection name)
@@ -729,6 +730,16 @@ struct CollectionCard: View {
         return max(catalogTotal, collection.episodeCount)
     }
 
+    // Distinct levels across the WHOLE collection — from the catalog (which
+    // knows every episode), falling back to downloaded episodes offline.
+    private var collectionLevels: [String] {
+        let catalogLevels = storeService.catalog
+            .filter { $0.collectionTitle == collection.title }
+            .map { $0.level }
+        if !catalogLevels.isEmpty { return catalogLevels }
+        return collection.comics.map { $0.level.rawValue }
+    }
+
     private var episodesLabel: String {
         let downloaded = collection.episodeCount
         if totalEpisodes > downloaded {
@@ -782,15 +793,9 @@ struct CollectionCard: View {
                     .foregroundStyle(.secondary)
 
                 HStack(spacing: 8) {
-                    Text(collection.level.displayName)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(levelColor.opacity(0.2))
-                        .foregroundStyle(levelColor)
-                        .clipShape(Capsule())
-                        .fixedSize()
+                    // One badge per distinct level — a mixed collection shows
+                    // [Beginner][Intermediate], not just the first episode's.
+                    LevelBadges(levels: collectionLevels, compact: true)
 
                     Spacer()
                 }
