@@ -110,27 +110,21 @@ struct LibraryView: View {
         .sheet(isPresented: $showCreatorMessage, onDismiss: {
             creatorMessageSeen = true
             withAnimation(.easeInOut(duration: 0.25)) { showCreatorBanner = false }
+            // The creator message opens the first-launch experience; the intro
+            // tooltips follow only once it has been read and closed.
+            startIntroTooltipsIfNeeded(after: 0.8)
         }) {
             CreatorMessageView()
         }
         .onAppear {
             if !creatorMessageSeen {
+                // First launch: only the creator banner — the intro tooltips
+                // hold back until the message has been opened and closed.
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                     withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { showCreatorBanner = true }
                 }
-            }
-            // First visit: the library-title tip opens the sequence (the old "?"
-            // intro was retired — the reader's closing tooltip covers the ? button);
-            // the "Choose a collection." prompt is last.
-            if HelpDebug.forceShowTooltips || !seenLibraryTitleTip {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryTitleTip = true }
-                }
-            } else if !seenChooseCollection {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                    seenChooseCollection = true   // one-shot: seen at display (see above)
-                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showChooseCollection = true }
-                }
+            } else {
+                startIntroTooltipsIfNeeded(after: 0.6)
             }
         }
         .onChange(of: help.isActive) { _, active in
@@ -207,6 +201,22 @@ struct LibraryView: View {
 
     // Indigo brand accent (reserved for primary actions / selected chips).
     private var accentColor: Color { Color(red: 91/255, green: 91/255, blue: 214/255) }
+
+    // First visit: the library-title tip opens the sequence (the old "?"
+    // intro was retired — the reader's closing tooltip covers the ? button);
+    // the "Choose a collection." prompt is last.
+    private func startIntroTooltipsIfNeeded(after delay: TimeInterval) {
+        if HelpDebug.forceShowTooltips || !seenLibraryTitleTip {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showLibraryTitleTip = true }
+            }
+        } else if !seenChooseCollection {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                seenChooseCollection = true   // one-shot: seen at display (see body overlay note)
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showChooseCollection = true }
+            }
+        }
+    }
 
     // Bottom banner inviting first-time users to read the creator's welcome.
     private var creatorBanner: some View {
@@ -883,8 +893,8 @@ struct CreatorMessageView: View {
         "Language comes alive when we care about what’s being said — when we want to understand the story, respond to a character, or discover what happens next. That curiosity encourages us to reach beyond the words and phrases that we already know.",
         "I believe comics are uniquely suited to this kind of learning. They bring together language, images, characters and context, allowing you to explore at your own pace while enjoying the story along the way.",
         "Every comic in Comigo is created with the help of AI and a dedicated platform I built for the process. Producing stories designed specifically for language learners still takes considerable care and time. There is already plenty to explore, and I’ll be adding new comics every week.",
-        "While I continue expanding the collection, Comigo will be available at a lower introductory price, including an option for lifetime access. Existing subscribers will never pay more than the price at which they joined and will always have access to all current and future content. If the cost is beyond your means but you believe Comigo could help you, please get in touch.",
-        "I’ve poured a great deal of time and care into making Comigo a language-learning experience worth returning to. I’d love to hear your feedback—and your ideas for future subjects, stories, characters or collections.",
+        "While I continue expanding the collection, Comigo will be available at a lower introductory price, including an option for lifetime access. Existing subscribers will never pay more than the price at which they joined and will always have access to all current and future content. If the cost is beyond your means but you believe Comigo could help you, please [get in touch](mailto:nirshihor@gmail.com).",
+        "I’ve poured a great deal of time and care into making Comigo a language-learning experience worth returning to. I’d love to [hear your feedback](mailto:nirshihor@gmail.com)—and your ideas for future subjects, stories, characters or collections.",
         "Thank you for being here. I hope you enjoy the journey."
     ]
 
@@ -897,7 +907,9 @@ struct CreatorMessageView: View {
                         .padding(.top, 6)
 
                     ForEach(paragraphs, id: \.self) { para in
-                        Text(para)
+                        // .init → LocalizedStringKey, so the [text](mailto:…)
+                        // links render as tappable.
+                        Text(.init(para))
                             .font(.body)
                             .lineSpacing(3)
                     }
@@ -910,6 +922,7 @@ struct CreatorMessageView: View {
                 .padding(.bottom, 32)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .tint(Color(red: 91/255, green: 91/255, blue: 214/255))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
