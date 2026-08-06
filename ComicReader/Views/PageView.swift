@@ -946,6 +946,45 @@ struct PageView: View {
         }
     }
 
+    // Arrival cue: amber (tooltip-color) fill of bubble 1's interior — the same
+    // flood-fill as the green open-bubble highlight, just a different color.
+    // Falls back to a soft rounded wash when there's no balloon to flood
+    // (borderless narration) — acceptable because the flash is momentary.
+    @ViewBuilder
+    private func flashBubbleOverlay(_ b: Bubble, in rect: CGRect) -> some View {
+        let amber = Color(red: 240/255, green: 187/255, blue: 41/255)   // #F0BB29, as tooltips
+        let maskSource = currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage
+        let inkSource = (isPracticeMode && revealedBubbleId != b.id)
+            ? (currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage)
+            : currentPage.masterImage
+        let nb = CGRect(x: b.positionX, y: b.positionY, width: b.width, height: b.height)
+        let geo = "\(Int(b.positionX*1e4))_\(Int(b.positionY*1e4))_\(Int(b.width*1e4))_\(Int(b.height*1e4))"
+        let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|\(inkSource)|amber"
+        let fill = (b.bgTransparent == true && !isPracticeMode) ? nil
+            : BubbleFill.overlay(maskSource: maskSource, inkSource: inkSource, comicId: comic.id,
+                                 bubble: nb, color: UIColor(amber), cacheKey: key)
+
+        if let fill {
+            Image(uiImage: fill.image)
+                .resizable()
+                .frame(width: fill.region.width * rect.width, height: fill.region.height * rect.height)
+                .position(x: rect.minX + fill.region.midX * rect.width,
+                          y: rect.minY + fill.region.midY * rect.height)
+                .opacity(0.6)
+                .allowsHitTesting(false)
+                .transition(.opacity)
+        } else {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(amber)
+                .frame(width: b.width * rect.width + 12, height: b.height * rect.height + 8)
+                .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
+                          y: rect.minY + (b.positionY + b.height / 2) * rect.height)
+                .opacity(0.3)
+                .allowsHitTesting(false)
+                .transition(.opacity)
+        }
+    }
+
     // Highlights the open bubble, linking it to the popup. Fills the bubble's
     // interior with a solid, slightly-brighter green (flood-filled to match its
     // real shape). Shows nothing when it can't fill cleanly (e.g. a borderless
@@ -1240,17 +1279,10 @@ struct PageView: View {
                                 }
 
                                 // Arrival cue: two quick amber flashes (tooltip
-                                // color) washing over bubble 1.
+                                // color) filling bubble 1's interior.
                                 if selectedBubbleIndex == nil, flashBubbleId != nil, flashArrowOn,
                                    let fb = pageTextBubbles.first(where: { $0.id == flashBubbleId }) {
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(Color(red: 240/255, green: 187/255, blue: 41/255).opacity(0.55))
-                                        .frame(width: fb.width * rect.width,
-                                               height: fb.height * rect.height)
-                                        .position(x: rect.minX + (fb.positionX + fb.width / 2) * rect.width,
-                                                  y: rect.minY + (fb.positionY + fb.height / 2) * rect.height)
-                                        .transition(.opacity)
-                                        .allowsHitTesting(false)
+                                    flashBubbleOverlay(fb, in: rect)
                                 }
 
                                 // Traced hotspots: the artwork inside the shape
