@@ -22,6 +22,11 @@ class WhisperService: ObservableObject {
     // out of the running stream.
     private let engine = AVAudioEngine()
     private var engineRunning = false
+    // True between interruption .began and .ended (phone call, Siri, another
+    // app taking audio). While set, every self-healing mechanism (watchdog,
+    // route/config restarts) stands down — reclaiming the session here would
+    // steal audio back from the call/app that legitimately took it.
+    private(set) var interrupted = false
     private var configObserver: NSObjectProtocol?
     private var interruptionObserver: NSObjectProtocol?
     private var routeChangeObserver: NSObjectProtocol?
@@ -144,7 +149,7 @@ class WhisperService: ObservableObject {
         watchdogTimer?.invalidate()
         watchdogTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
-                guard let self, self.isRecording else { return }
+                guard let self, self.isRecording, !self.interrupted else { return }
                 let stats = self.capture.stats()
                 let stale = stats.last.map { Date().timeIntervalSince($0) > 1.2 } ?? true
                 if stale || !self.engine.isRunning {
@@ -218,8 +223,9 @@ class WhisperService: ObservableObject {
                 queue: .main
             ) { [weak self] _ in
                 Task { @MainActor in
+                    guard let self, !self.interrupted else { return }
                     print("[Whisper] Audio configuration changed")
-                    self?.scheduleEngineRestart()
+                    self.scheduleEngineRestart()
                 }
             }
         }
@@ -230,7 +236,7 @@ class WhisperService: ObservableObject {
                 queue: .main
             ) { [weak self] _ in
                 Task { @MainActor in
-                    guard let self, self.engineRunning else { return }
+                    guard let self, self.engineRunning, !self.interrupted else { return }
                     // A route change (AirPods in/out) changes the input format.
                     // Tear the tap down now and rebuild on the new route — this
                     // fires before the engine's own configuration-change in some
@@ -247,14 +253,28 @@ class WhisperService: ObservableObject {
                 queue: .main
             ) { [weak self] notification in
                 let typeValue = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt
+                let optionsValue = notification.userInfo?[AVAudioSessionInterruptionOptionKey] as? UInt
                 Task { @MainActor in
                     guard let self else { return }
                     if typeValue == AVAudioSession.InterruptionType.ended.rawValue {
-                        print("[Whisper] Audio interruption ended, restoring capture")
-                        try? AVAudioSession.sharedInstance().setActive(true)
-                        self.restartEngine()
+                        self.interrupted = false
+                        // Only reclaim the session when iOS says the interrupter
+                        // is done with it (.shouldResume). Without that hint the
+                        // other app (music, a call app) still owns audio and
+                        // grabbing it back would cut them off.
+                        let shouldResume = optionsValue.map {
+                            AVAudioSession.InterruptionOptions(rawValue: $0).contains(.shouldResume)
+                        } ?? false
+                        if shouldResume {
+                            print("[Whisper] Audio interruption ended, restoring capture")
+                            try? AVAudioSession.sharedInstance().setActive(true)
+                            self.restartEngine()
+                        } else {
+                            print("[Whisper] Audio interruption ended (no shouldResume) — staying quiet")
+                        }
                     } else {
                         print("[Whisper] Audio interruption began")
+                        self.interrupted = true
                     }
                 }
             }

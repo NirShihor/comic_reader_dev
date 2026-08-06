@@ -23,6 +23,9 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
     private var player: AVAudioPlayer?
     private var timer: Timer?
+    // Whether playback was live when an audio interruption (call, Siri,
+    // another app) began — .ended only resumes if this was true.
+    private var wasPlayingWhenInterrupted = false
 
     // AVAudioEngine for boosted playback
     private var audioEngine: AVAudioEngine?
@@ -93,27 +96,33 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         switch type {
         case .began:
             print("🔇 Audio interruption began")
-            // iOS automatically pauses our player; we just note it
+            // iOS pauses our player automatically. Remember whether we were
+            // mid-playback so .ended knows if resuming even makes sense.
+            wasPlayingWhenInterrupted = isPlaying
+            isPlaying = false
+            stopTimer()
 
         case .ended:
             print("🔊 Audio interruption ended")
-            // Re-activate the audio session
-            setupAudioSession()
-
-            // Check if we should resume
+            // Resume ONLY when iOS explicitly says the interrupter released
+            // the session (.shouldResume). No hint means another app (music,
+            // podcasts, a call) still owns audio — grabbing the session back
+            // would silence them, which is exactly the bug this guards.
             let shouldResume: Bool
             if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
                 shouldResume = AVAudioSession.InterruptionOptions(rawValue: optionsValue).contains(.shouldResume)
             } else {
-                shouldResume = true
+                shouldResume = false
             }
 
-            if shouldResume, let player = self.player, !player.isPlaying {
+            if shouldResume, wasPlayingWhenInterrupted, let player = self.player, !player.isPlaying {
                 print("🔊 Resuming playback after interruption")
+                setupAudioSession()
                 player.play()
                 isPlaying = true
                 startTimer()
             }
+            wasPlayingWhenInterrupted = false
 
         @unknown default:
             break

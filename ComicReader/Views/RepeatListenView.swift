@@ -82,6 +82,9 @@ struct RepeatListenView: View {
     @State private var showSpanishText = false
     @State private var showTranslation = false
     @State private var pulseAnimation = false
+    // True when an audio interruption auto-paused the session (vs. a pause
+    // the user chose) — only interruption pauses auto-resume on .ended.
+    @State private var pausedByInterruption = false
 
     var body: some View {
         Group {
@@ -129,6 +132,34 @@ struct RepeatListenView: View {
             cleanup()
             teardownRemoteCommands()
             audioManager.onPlaybackFinished = nil
+        }
+        .onReceive(NotificationCenter.default.publisher(for: AVAudioSession.interruptionNotification)) { note in
+            handleSessionInterruption(note)
+        }
+    }
+
+    /// A phone call / Siri / another audio app took the session: pause the
+    /// flow instead of fighting for audio. If iOS hands the session back
+    /// (.shouldResume, e.g. after a call ends), pick up where we paused —
+    /// but never auto-resume over a pause the user chose themselves.
+    private func handleSessionInterruption(_ note: Notification) {
+        guard let typeValue = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else { return }
+        switch type {
+        case .began:
+            guard !isPausedState, state != .idle, state != .completed else { return }
+            pauseCurrent()
+            pausedByInterruption = true
+        case .ended:
+            guard pausedByInterruption else { return }
+            pausedByInterruption = false
+            let opts = (note.userInfo?[AVAudioSessionInterruptionOptionKey] as? UInt)
+                .map { AVAudioSession.InterruptionOptions(rawValue: $0) } ?? []
+            if opts.contains(.shouldResume) {
+                resumeFromPause()
+            }
+        @unknown default:
+            break
         }
     }
 
