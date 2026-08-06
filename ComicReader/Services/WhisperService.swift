@@ -41,7 +41,9 @@ class WhisperService: ObservableObject {
     private let silenceThreshold: Float = -44
     private let silenceDuration: TimeInterval = 1.5  // seconds of silence after speech to auto-stop
 
-    private let apiURL = URL(string: "https://api.openai.com/v1/audio/transcriptions")!
+    // Transcription goes through OUR server (which holds the OpenAI key) — the
+    // key no longer ships inside the app binary.
+    private let apiURL = URL(string: "\(Secrets.serverBaseURL)/api/reader/transcribe")!
 
     /// Start recording audio
     func startRecording() async {
@@ -621,29 +623,16 @@ class WhisperService: ObservableObject {
 
     /// Send audio to Whisper API for transcription
     private func transcribeWithWhisper(audioURL: URL, prompt: String? = nil, language: String = "es") async throws -> String {
-        let apiKey = Secrets.openAIAPIKey
-
-        guard apiKey != "YOUR_OPENAI_API_KEY_HERE" else {
-            throw WhisperError.missingAPIKey
-        }
-
         // Read audio file
         let audioData = try Data(contentsOf: audioURL)
 
-        // Create multipart form data
+        // Create multipart form data (model is chosen server-side)
         let boundary = UUID().uuidString
         var request = URLRequest(url: apiURL)
         request.httpMethod = "POST"
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
         var body = Data()
-
-        // Add model field. gpt-4o-transcribe is more accurate and noise-robust
-        // than whisper-1; same endpoint, same default JSON response ({ "text" }).
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"model\"\r\n\r\n".data(using: .utf8)!)
-        body.append("gpt-4o-transcribe\r\n".data(using: .utf8)!)
 
         // Add language field. An empty language means auto-detect (used by Flow
         // Practice, where the learner may speak the target language OR English
