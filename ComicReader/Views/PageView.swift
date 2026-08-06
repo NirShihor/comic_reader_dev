@@ -451,8 +451,8 @@ struct PageView: View {
         }
         flashBubbleId = first.id
         flashArrowOn = false
-        // Two quick flashes: on/off, on/off.
-        let steps: [(Double, Bool)] = [(0.35, true), (0.75, false), (1.05, true), (1.45, false)]
+        // Three quick flashes: on/off, on/off, on/off.
+        let steps: [(Double, Bool)] = [(0.35, true), (0.75, false), (1.05, true), (1.45, false), (1.75, true), (2.15, false)]
         for (delay, on) in steps {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 guard gen == flashGeneration else { return }   // superseded — not ours to touch
@@ -463,8 +463,8 @@ struct PageView: View {
                 withAnimation(.easeInOut(duration: 0.18)) { flashArrowOn = on }
             }
         }
-        // Retire the cue once the second flash has faded.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.75) {
+        // Retire the cue once the third flash has faded.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.45) {
             if gen == flashGeneration { flashBubbleId = nil; flashArrowOn = false }
         }
     }
@@ -952,14 +952,16 @@ struct PageView: View {
     // (borderless narration) — acceptable because the flash is momentary.
     @ViewBuilder
     private func flashBubbleOverlay(_ b: Bubble, in rect: CGRect) -> some View {
-        let amber = Color(red: 240/255, green: 187/255, blue: 41/255)   // #F0BB29, as tooltips
+        // Darker than the tooltip amber (#F0BB29) — over the white bubble
+        // interior the lighter shade washed out.
+        let amber = Color(red: 209/255, green: 152/255, blue: 12/255)   // #D1980C
         let maskSource = currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage
         let inkSource = (isPracticeMode && revealedBubbleId != b.id)
             ? (currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage)
             : currentPage.masterImage
         let nb = CGRect(x: b.positionX, y: b.positionY, width: b.width, height: b.height)
         let geo = "\(Int(b.positionX*1e4))_\(Int(b.positionY*1e4))_\(Int(b.width*1e4))_\(Int(b.height*1e4))"
-        let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|\(inkSource)|amber"
+        let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|\(inkSource)|amber2"
         let fill = (b.bgTransparent == true && !isPracticeMode) ? nil
             : BubbleFill.overlay(maskSource: maskSource, inkSource: inkSource, comicId: comic.id,
                                  bubble: nb, color: UIColor(amber), cacheKey: key)
