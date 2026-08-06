@@ -890,7 +890,7 @@ struct CreatorMessageView: View {
 
     private let paragraphs: [String] = [
         "Thank you for downloading my app. I’m an independent developer, and I created Comigo while searching for a more natural and engaging way to learn Spanish.",
-        "Language comes alive when we care about what’s being said — when we want to understand the story, respond to a character, or discover what happens next. That curiosity encourages us to reach beyond the words and phrases that we already know.",
+        "Language comes alive when we care about what’s being said — when we want to understand the story, respond to a character, or discover what happens next. That curiosity encourages us to reach beyond the words and phrases that we are already familiar with to further absorb and improve.",
         "I believe comics are uniquely suited to this kind of learning. They bring together language, images, characters and context, allowing you to explore at your own pace while enjoying the story along the way.",
         "Every comic in Comigo is created with the help of AI and a dedicated platform I built for the process. Producing stories designed specifically for language learners takes considerable care and time. There is already plenty to explore, and I’ll be adding new comics every week.",
         "While I continue expanding the collection, Comigo will be available at a lower introductory price, including an option for lifetime access. Existing subscribers will never pay more than the price at which they joined and will always have access to all current and future content. If the cost is beyond your means but you believe Comigo could help you, please [get in touch](mailto:nirshihor@gmail.com).",
