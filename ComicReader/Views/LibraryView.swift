@@ -888,13 +888,19 @@ struct CollectionCard: View {
 struct CreatorMessageView: View {
     @Environment(\.dismiss) private var dismiss
 
-    private let paragraphs: [String] = [
-        "Thank you for downloading my app. I’m an independent developer, and I created Comigo while searching for a more natural and engaging way to learn Spanish.",
-        "Language comes alive when we care about what’s being said — when we want to understand the story, respond to a character, or discover what happens next. That curiosity encourages us to reach beyond the words and phrases that we are already familiar with to further absorb and improve.",
-        "I believe comics are uniquely suited to this kind of learning. They bring together language, images, characters and context, allowing you to explore at your own pace while enjoying the story along the way.",
-        "Every comic in Comigo is created with the help of AI and a dedicated platform I built for the process. Producing stories designed specifically for language learners takes considerable care and time. There is already plenty to explore, and I’ll be adding new comics every week.",
-        "While I continue expanding the collection, Comigo will be available at a lower introductory price, including an option for lifetime access. Existing subscribers will never pay more than the price at which they joined and will always have access to all current and future content. If the cost is beyond your means but you believe Comigo could help you, please [get in touch](mailto:nirshihor@gmail.com).",
-        "I’ve poured a great deal of time and care into making Comigo a language-learning experience worth returning to. I’d love to [hear your feedback](mailto:nirshihor@gmail.com)—and your ideas for future subjects, stories, characters or collections.",
+    private let sections: [(heading: String, body: String)] = [
+        ("Why I created Comigo",
+         "Thank you for downloading Comigo. I’m an independent developer, and I created it while searching for a more natural and engaging way to learn Spanish."),
+        ("Why comics?",
+         "Language learning comes alive when curiosity pushes us forward. Comics combine language, images and context, letting you learn at your own pace while enjoying the story."),
+        ("Growing the collection",
+         "The comics are created using a platform I built specifically for this purpose. Stories for language learners take time and care to produce, but there is already plenty to explore—and I’ll be adding new comics every week."),
+        ("Introductory pricing",
+         "At this early stage, Comigo is available at a lower introductory price, including an option for lifetime access. Subscribers will always keep their original price and access to all content. If cost is a barrier, please [get in touch](mailto:nirshihor@gmail.com).")
+    ]
+
+    private let closing: [String] = [
+        "I’d love to [hear your feedback](mailto:nirshihor@gmail.com), as well as your ideas for future stories and collections.",
         "Thank you for being here. I hope you enjoy the journey."
     ]
 
@@ -902,13 +908,19 @@ struct CreatorMessageView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    Text("Welcome to Comigo")
-                        .font(.title.bold())
-                        .padding(.top, 6)
+                    ForEach(sections, id: \.heading) { section in
+                        VStack(alignment: .leading, spacing: 7) {
+                            Text(section.heading)
+                                .font(.title3.weight(.semibold))
+                            // .init → LocalizedStringKey, so the [text](mailto:…)
+                            // links render as tappable.
+                            Text(.init(section.body))
+                                .font(.body)
+                                .lineSpacing(3)
+                        }
+                    }
 
-                    ForEach(paragraphs, id: \.self) { para in
-                        // .init → LocalizedStringKey, so the [text](mailto:…)
-                        // links render as tappable.
+                    ForEach(closing, id: \.self) { para in
                         Text(.init(para))
                             .font(.body)
                             .lineSpacing(3)
