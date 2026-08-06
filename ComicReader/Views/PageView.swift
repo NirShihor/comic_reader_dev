@@ -429,10 +429,9 @@ struct PageView: View {
     @State private var showOnScreenComplete = false     // guided: all done
     @State private var selectedBubbleIndex: Int?   // open bubble in the floating card
     @State private var revealedBubbleId: String?   // practice: bubble whose text is revealed onto the page
-    // Arrival cue: the pointing hand gives two SOFT pulses on bubble 1 when a
-    // story page loads — slow fade in, a beat on screen, slow fade out — then
-    // it's gone.
-    @State private var flashBubbleId: String?   // bubble the hand points at
+    // Arrival cue: bubble 1 gives two QUICK amber flashes (tooltip color)
+    // when a story page loads, then it's gone.
+    @State private var flashBubbleId: String?   // bubble being flashed
     @State private var flashArrowOn = false     // pulse visibility
     // Each pulse run gets a generation; pending timers from a superseded run
     // must expire SILENTLY. (They used to null the shared state as cleanup —
@@ -452,8 +451,8 @@ struct PageView: View {
         }
         flashBubbleId = first.id
         flashArrowOn = false
-        // Two pulses: fade in 0.4s, hold ~0.7s, fade out 0.4s, short gap, repeat.
-        let steps: [(Double, Bool)] = [(0.45, true), (1.55, false), (2.40, true), (3.50, false)]
+        // Two quick flashes: on/off, on/off.
+        let steps: [(Double, Bool)] = [(0.35, true), (0.75, false), (1.05, true), (1.45, false)]
         for (delay, on) in steps {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 guard gen == flashGeneration else { return }   // superseded — not ours to touch
@@ -461,11 +460,11 @@ struct PageView: View {
                     flashBubbleId = nil; flashArrowOn = false   // bubble opened — cancel
                     return
                 }
-                withAnimation(.easeInOut(duration: 0.4)) { flashArrowOn = on }
+                withAnimation(.easeInOut(duration: 0.18)) { flashArrowOn = on }
             }
         }
-        // Retire the cue once the second fade-out has finished.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.95) {
+        // Retire the cue once the second flash has faded.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.75) {
             if gen == flashGeneration { flashBubbleId = nil; flashArrowOn = false }
         }
     }
@@ -1240,20 +1239,17 @@ struct PageView: View {
                                     selectedBubbleDot(pageTextBubbles[sel], in: rect)
                                 }
 
-                                // Arrival cue: cursor arrow flashing on bubble 1.
-                                // The glyph points up-left, so positioning it at the
-                                // bubble's bottom-right corner lands the tip inside.
+                                // Arrival cue: two quick amber flashes (tooltip
+                                // color) washing over bubble 1.
                                 if selectedBubbleIndex == nil, flashBubbleId != nil, flashArrowOn,
                                    let fb = pageTextBubbles.first(where: { $0.id == flashBubbleId }) {
-                                    Image(systemName: "hand.point.up.left.fill")
-                                        .font(.system(size: 40, weight: .bold))
-                                        // Same green as the bubble highlight.
-                                        .foregroundStyle(Color(red: 0x61/255, green: 0xF5/255, blue: 0x27/255))
-                                        .shadow(color: .black.opacity(0.9), radius: 1.5)
-                                        .shadow(color: .black.opacity(0.6), radius: 4)
-                                        .position(x: rect.minX + (fb.positionX + fb.width * 0.95) * rect.width,
-                                                  y: rect.minY + (fb.positionY + fb.height * 1.0) * rect.height)
-                                        .transition(.opacity)   // soft pulses, not hard flashes
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(Color(red: 240/255, green: 187/255, blue: 41/255).opacity(0.55))
+                                        .frame(width: fb.width * rect.width,
+                                               height: fb.height * rect.height)
+                                        .position(x: rect.minX + (fb.positionX + fb.width / 2) * rect.width,
+                                                  y: rect.minY + (fb.positionY + fb.height / 2) * rect.height)
+                                        .transition(.opacity)
                                         .allowsHitTesting(false)
                                 }
 
