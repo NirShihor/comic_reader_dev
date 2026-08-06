@@ -20,6 +20,11 @@ struct LibraryView: View {
     @State private var showChooseCollection = false
     // True while "?" is replaying the sequence — bypasses the "seen" flags.
     @State private var helpReplay = false
+    // First-launch "A message from the creator" banner: slides up from the
+    // bottom until the message has been opened once.
+    @AppStorage("creatorMessage.seen") private var creatorMessageSeen = false
+    @State private var showCreatorBanner = false
+    @State private var showCreatorMessage = false
 
     private var showInitialLoader: Bool {
         localStorage.isLoading && localStorage.downloadedComics.isEmpty
@@ -93,7 +98,27 @@ struct LibraryView: View {
                 .zIndex(50)
             }
         }
+        .overlay(alignment: .bottom) {
+            if showCreatorBanner && !creatorMessageSeen {
+                creatorBanner
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 10)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(40)
+            }
+        }
+        .sheet(isPresented: $showCreatorMessage, onDismiss: {
+            creatorMessageSeen = true
+            withAnimation(.easeInOut(duration: 0.25)) { showCreatorBanner = false }
+        }) {
+            CreatorMessageView()
+        }
         .onAppear {
+            if !creatorMessageSeen {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { showCreatorBanner = true }
+                }
+            }
             // First visit: the library-title tip opens the sequence (the old "?"
             // intro was retired — the reader's closing tooltip covers the ? button);
             // the "Choose a collection." prompt is last.
@@ -182,6 +207,31 @@ struct LibraryView: View {
 
     // Indigo brand accent (reserved for primary actions / selected chips).
     private var accentColor: Color { Color(red: 91/255, green: 91/255, blue: 214/255) }
+
+    // Bottom banner inviting first-time users to read the creator's welcome.
+    private var creatorBanner: some View {
+        Button {
+            showCreatorMessage = true
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "envelope.fill")
+                Text("A message from the creator")
+                    .fontWeight(.semibold)
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.up")
+                    .font(.footnote.weight(.bold))
+                    .opacity(0.8)
+            }
+            .font(.subheadline)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 13)
+            .background(accentColor, in: RoundedRectangle(cornerRadius: 15))
+            .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.comigoInk, lineWidth: 2))
+            .shadow(color: .black.opacity(0.25), radius: 8, y: 3)
+        }
+        .buttonStyle(.plain)
+    }
 
     // Navy outline matching the logo bubble — used for card/chip/field borders.
     private var borderInk: Color { .comigoInk }
@@ -818,6 +868,54 @@ struct CollectionCard: View {
         case .beginner: return .green
         case .intermediate: return .orange
         case .advanced: return .red
+        }
+    }
+}
+
+// MARK: - Creator welcome message
+
+/// Full welcome letter from the creator, opened from the first-launch banner.
+struct CreatorMessageView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    private let paragraphs: [String] = [
+        "Thank you for downloading my app. I’m an independent developer, and I created Comigo while searching for a more natural and engaging way to learn Spanish.",
+        "Language comes alive when we care about what’s being said — when we want to understand the story, respond to a character, or discover what happens next. That curiosity encourages us to reach beyond the words and phrases that we already know.",
+        "I believe comics are uniquely suited to this kind of learning. They bring together language, images, characters and context, allowing you to explore at your own pace while enjoying the story along the way.",
+        "Every comic in Comigo is created with the help of AI and a dedicated platform I built for the process. Producing stories designed specifically for language learners still takes considerable care and time. There is already plenty to explore, and I’ll be adding new comics every week.",
+        "While I continue expanding the collection, Comigo will be available at a lower introductory price, including an option for lifetime access. Existing subscribers will never pay more than the price at which they joined and will always have access to all current and future content. If the cost is beyond your means but you believe Comigo could help you, please get in touch.",
+        "I’ve poured a great deal of time and care into making Comigo a language-learning experience worth returning to. I’d love to hear your feedback—and your ideas for future subjects, stories, characters or collections.",
+        "Thank you for being here. I hope you enjoy the journey."
+    ]
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    Text("Welcome to Comigo")
+                        .font(.title.bold())
+                        .padding(.top, 6)
+
+                    ForEach(paragraphs, id: \.self) { para in
+                        Text(para)
+                            .font(.body)
+                            .lineSpacing(3)
+                    }
+
+                    Text("Nir, creator of Comigo")
+                        .font(.body.italic())
+                        .padding(.top, 6)
+                }
+                .padding(.horizontal, 22)
+                .padding(.bottom, 32)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .fontWeight(.semibold)
+                }
+            }
         }
     }
 }
