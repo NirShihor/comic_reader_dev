@@ -81,6 +81,30 @@ struct CollectionDetailView: View {
         }
     }
 
+    // FIRST-USE follow-up to the download advice: once the advised episode
+    // finishes downloading, its card gets a "Now click me." nudge. One-shot,
+    // never part of the "?" replay.
+    @AppStorage("help.seen.collection-open-after-download") private var seenOpenAfterDownloadTip = false
+    @State private var showOpenTip = false
+    @State private var openTipComicId: String?
+
+    private func maybeShowOpenTip(justDownloadedId: String?) {
+        guard let id = justDownloadedId, downloadedComic(id) != nil,
+              !seenOpenAfterDownloadTip, !helpReplay, seenDownloadTip else { return }
+        openTipComicId = id
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            guard !seenOpenAfterDownloadTip else { return }
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showOpenTip = true }
+        }
+    }
+
+    private func dismissOpenTip() {
+        seenOpenAfterDownloadTip = true
+        if showOpenTip {
+            withAnimation(.easeInOut(duration: 0.2)) { showOpenTip = false }
+        }
+    }
+
     // Tapping any Download dismisses the advice and stops it reappearing for the
     // next episode in this collection.
     private func dismissDownloadTip() {
@@ -121,8 +145,25 @@ struct CollectionDetailView: View {
         ) {
             dismissDownloadTip()
         }
+        .anchoredCallout(
+            targetID: "collection.openComic",
+            text: "Now click me.",
+            icon: "hand.tap.fill",
+            isPresented: showOpenTip && openTipComicId != nil
+        ) {
+            dismissOpenTip()
+        }
         .onAppear { maybeShowDownloadTip() }
-        .onChange(of: firstDownloadableID) { _, _ in maybeShowDownloadTip() }
+        .onChange(of: firstDownloadableID) { old, _ in
+            maybeShowDownloadTip()
+            // The previously-advised episode just flipped to downloaded —
+            // nudge the reader to open it.
+            maybeShowOpenTip(justDownloadedId: old)
+        }
+        .onDisappear {
+            // Navigating away (usually INTO the comic) completes the nudge.
+            if showOpenTip { dismissOpenTip() }
+        }
         .onChange(of: help.isActive) { _, active in
             // "?" replays the download advice (when something is downloadable);
             // turning help off hides it.
@@ -223,6 +264,9 @@ struct CollectionDetailView: View {
                             EpisodeCard(comic: local, progress: progressManager.getProgress(for: local.id))
                         }
                         .buttonStyle(.plain)
+                        // Post-download nudge target ("Now click me.") — only the
+                        // episode the download advice pointed at gets the anchor.
+                        .calloutAnchor(local.id == openTipComicId ? "collection.openComic" : "collection.row.\(local.id)")
                         .explainsIf(index == 0, "Open a comic",
                                     "Tap a comic here to open it and start reading.",
                                     id: "collection.firstComic")
