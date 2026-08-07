@@ -147,7 +147,7 @@ struct CollectionDetailView: View {
         }
         .anchoredCallout(
             targetID: "collection.openComic",
-            text: "Now click me.",
+            text: "Now click the comic.",
             icon: "hand.tap.fill",
             isPresented: showOpenTip && openTipComicId != nil
         ) {
