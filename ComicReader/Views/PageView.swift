@@ -976,15 +976,35 @@ struct PageView: View {
                 .allowsHitTesting(false)
                 .transition(.opacity)
         } else {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            // Borderless narration: no balloon to fill, and a solid amber slab
+            // over the art looks broken — flash the LETTERING instead. A
+            // blend-mode rect only moves pixels on the glyphs' side of the
+            // amber threshold: dark text → .lighten (only pixels darker than
+            // amber shift toward it), light text → .darken (only lighter
+            // pixels shift) — the surrounding art mostly sits on the other
+            // side of the threshold and is left alone.
+            Rectangle()
                 .fill(amber)
-                .frame(width: b.width * rect.width + 12, height: b.height * rect.height + 8)
+                .frame(width: b.width * rect.width + 8, height: b.height * rect.height + 6)
                 .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
                           y: rect.minY + (b.positionY + b.height / 2) * rect.height)
-                .opacity(0.5)
+                .blendMode(isLightHex(b.textColor) ? .darken : .lighten)
                 .allowsHitTesting(false)
                 .transition(.opacity)
         }
+    }
+
+    // Rough luminance test for an authored "#rgb"/"#rrggbb" lettering color.
+    // Unset or unparseable → false (treat as dark ink, the common case).
+    private func isLightHex(_ hex: String?) -> Bool {
+        guard var h = hex?.trimmingCharacters(in: .whitespaces).lowercased() else { return false }
+        if h.hasPrefix("#") { h.removeFirst() }
+        if h.count == 3 { h = h.map { "\($0)\($0)" }.joined() }
+        guard h.count >= 6, let v = UInt64(h.prefix(6), radix: 16) else {
+            return h == "white"
+        }
+        let r = Double((v >> 16) & 0xFF), g = Double((v >> 8) & 0xFF), bl = Double(v & 0xFF)
+        return (0.299 * r + 0.587 * g + 0.114 * bl) / 255 > 0.6
     }
 
     // Highlights the open bubble, linking it to the popup. Fills the bubble's

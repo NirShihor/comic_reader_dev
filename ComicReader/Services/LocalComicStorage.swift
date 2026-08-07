@@ -472,6 +472,7 @@ struct BubbleJSON: Codable {
     let bgTransparent: Bool?
     let hidden: Bool?
     let highlightWash: Bool?
+    let textColor: String?
     let imageUrl: String?
     let position: PositionJSON
     let sentences: [SentenceJSON]
@@ -484,6 +485,7 @@ struct BubbleJSON: Codable {
             bgTransparent: bgTransparent,
             hidden: hidden,
             highlightWash: highlightWash,
+            textColor: textColor,
             imageUrl: imageUrl,
             positionX: position.x,
             positionY: position.y,
