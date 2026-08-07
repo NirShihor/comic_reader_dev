@@ -57,7 +57,7 @@ struct LibraryView: View {
         .overlay(alignment: .topLeading) {
             if showLibraryTitleTip {
                 HelpIntroCallout(
-                    text: "This is your library. It contains collections of comics. A collection is a series of comics that share the same theme, characters and storyline.",
+                    text: "This is your library. It contains collections of comics. A collection is a series of comics that share the same theme, characters and storyline. Click me to close.",
                     icon: "books.vertical.fill",
                     arrowEdge: .leading,
                     arrowInset: 22,
