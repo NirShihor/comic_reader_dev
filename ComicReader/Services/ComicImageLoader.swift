@@ -68,6 +68,15 @@ class ComicImageLoader {
             image = UIImage(named: imageName)
         }
 
+        // Force the JPEG/PNG decode NOW, on whatever thread we're on (the
+        // ComicImage path calls this on a background queue). Without this,
+        // UIImage(contentsOfFile:) defers decoding to first RENDER — on the
+        // main thread — so a screenful of fresh covers froze the UI and
+        // dropped taps right after the Library appeared.
+        if let raw = image, let prepared = raw.preparingForDisplay() {
+            image = prepared
+        }
+
         // Cache the result
         if let image = image {
             imageCache.setObject(image, forKey: cacheKey)
