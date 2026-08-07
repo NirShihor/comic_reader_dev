@@ -62,29 +62,32 @@ class LocalComicStorage: ObservableObject {
 
     // MARK: - Public Methods
 
-    /// Reload all downloaded comics from disk
+    /// Reload all downloaded comics from disk.
+    /// The file reads + JSON decodes run OFF the main actor — decoding a whole
+    /// library of multi-MB comic.json files on the main thread froze the app
+    /// for seconds right after launch (taps silently dropped).
     func loadDownloadedComics() async {
         isLoading = true
         defer { isLoading = false }
 
-        var comics: [Comic] = []
-
-        // Load from Documents/Comics
-        if let comicFolders = try? fileManager.contentsOfDirectory(at: comicsDirectory, includingPropertiesForKeys: nil) {
-            for folder in comicFolders where folder.hasDirectoryPath {
-                if let comic = loadComic(from: folder) {
-                    comics.append(comic)
+        let dir = comicsDirectory
+        var comics: [Comic] = await Task.detached(priority: .userInitiated) {
+            var loaded: [Comic] = []
+            if let comicFolders = try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) {
+                for folder in comicFolders where folder.hasDirectoryPath {
+                    if let comic = Self.loadComic(from: folder) {
+                        loaded.append(comic)
+                    }
                 }
             }
-        }
-
-        // Also load bundled comics from app bundle
-        let bundledComics = loadBundledComics()
-        for bundledComic in bundledComics {
-            if !comics.contains(where: { $0.id == bundledComic.id }) {
-                comics.append(bundledComic)
+            // Also load bundled comics from app bundle
+            for bundledComic in Self.loadBundledComics() {
+                if !loaded.contains(where: { $0.id == bundledComic.id }) {
+                    loaded.append(bundledComic)
+                }
             }
-        }
+            return loaded
+        }.value
 
         // Filter out comics the user has deleted
         let hidden = hiddenComicIds
@@ -226,7 +229,7 @@ class LocalComicStorage: ObservableObject {
         }
     }
 
-    private func loadComic(from folder: URL) -> Comic? {
+    private nonisolated static func loadComic(from folder: URL) -> Comic? {
         let jsonFile = folder.appendingPathComponent("comic.json")
 
         guard let data = try? Data(contentsOf: jsonFile),
@@ -238,9 +241,9 @@ class LocalComicStorage: ObservableObject {
     }
 
     /// Load comics from the BundledComics folder in the app bundle
-    private func loadBundledComics() -> [Comic] {
+    private nonisolated static func loadBundledComics() -> [Comic] {
         guard let bundledComicsURL = Bundle.main.url(forResource: "BundledComics", withExtension: nil),
-              let comicFolders = try? fileManager.contentsOfDirectory(at: bundledComicsURL, includingPropertiesForKeys: nil) else {
+              let comicFolders = try? FileManager.default.contentsOfDirectory(at: bundledComicsURL, includingPropertiesForKeys: nil) else {
             return []
         }
 
