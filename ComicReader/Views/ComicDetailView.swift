@@ -168,7 +168,7 @@ struct ComicDetailView: View {
                 text: cockpitText,
                 icon: nil,
                 showArrow: cockpitStep >= 2,     // step 1 floats under the cover, no arrow
-                placeBelow: cockpitStep == 1,
+                placeBelow: cockpitStep == 1 || cockpitStep == 3,  // step 3 sits under "Start reading", arrow up
                 arrowTrailing: cockpitStep == 2,  // point at the toggle switch on the right
                 isPresented: cockpitStep != 0
             ) {
@@ -190,8 +190,12 @@ struct ComicDetailView: View {
                 }
             }
             .onChange(of: settingsManager.speakingEnabled) { _, _ in
-                // Its callout's action was taken — retire it.
-                if cockpitStep == 2 { advanceCockpitTips() }
+                // Its callout's action was taken — advance. The next step points
+                // at "Start reading", so bring it back on screen first.
+                if cockpitStep == 2 {
+                    scrollTopToken += 1
+                    advanceCockpitTips()
+                }
             }
             .onAppear {
                 startCockpitTips()
@@ -214,6 +218,7 @@ struct ComicDetailView: View {
         switch cockpitStep {
         case 1: return "comic.cockpit"
         case 2: return "comic.speaking"
+        case 3: return "comic.start"
         default: return ""
         }
     }
@@ -222,6 +227,7 @@ struct ComicDetailView: View {
         switch cockpitStep {
         case 1: return "This is the language-learning cockpit. Decide if you want to simply read and listen, or practice with any of the different practice modes. It is recommended to read and listen to the comic at least once before starting to practice."
         case 2: return "Prefer not to speak at this time? Change to silent exercises. You can close me to see the different exercise modes or scroll up and click the Start reading button."
+        case 3: return "Let's start."
         default: return ""
         }
     }
@@ -241,7 +247,7 @@ struct ComicDetailView: View {
         // Step through the sequence; end (and mark seen) after the last callout.
         // Additional steps get chained here as they're added.
         withAnimation(.easeInOut(duration: 0.2)) {
-            if cockpitStep < 2 {
+            if cockpitStep < 3 {
                 cockpitStep += 1
             } else {
                 cockpitStep = 0
@@ -385,6 +391,7 @@ struct ComicDetailView: View {
                             startNormalReading(startingPage)
                         }
                     }
+                    .calloutAnchor("comic.start")
                     .explains("Start reading",
                               "Open the comic and start reading — it picks up from where you left off.")
 
