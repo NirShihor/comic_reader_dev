@@ -2294,12 +2294,10 @@ struct FloatingBubbleCard: View {
             // intro was retired), so it introduces it rather than reminding.
             .overlay(alignment: .topTrailing) {
                 if showHelpReminderTip {
-                    // First use adds the closing instruction; dismissing then
-                    // returns the reader to the cover. A "?" replay shows the
-                    // plain version and stays put.
+                    // First use only ("?" replays end at the arrows tip) —
+                    // dismissing returns the reader to the cover.
                     HelpIntroCallout(
-                        text: "One last thing — help is always on hand. Click here at any point to revisit any of these help items."
-                            + (helpReplay ? "" : " Now close me and start from the beginning."),
+                        text: "One last thing — help is always on hand. Click here at any point to revisit any of these help items. Now close me and start from the beginning.",
                         arrowInset: 100   // the reader's "?" sits ~129pt in from the trailing edge
                     ) { dismissHelpReminderTip() }
                     .padding(.trailing, 19)
@@ -2408,7 +2406,13 @@ struct FloatingBubbleCard: View {
             // Chain: close the walkthrough by pointing out the "?" icon. (The
             // hotspot explainer now shows contextually, on the first page that
             // actually has a hotspot — see the page-level hotspot tip.)
-            if HelpDebug.forceShowTooltips || helpReplay || !seenHelpReminderTip {
+            // FIRST USE ONLY — a "?" replay ends here instead: the closer's
+            // job (introduce the ? and send the reader back to the cover)
+            // only makes sense once.
+            if helpReplay {
+                helpReplay = false
+                withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+            } else if HelpDebug.forceShowTooltips || !seenHelpReminderTip {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { showHelpReminderTip = true }
                 }
@@ -2420,15 +2424,9 @@ struct FloatingBubbleCard: View {
         seenHelpReminderTip = true
         if showHelpReminderTip {
             withAnimation(.easeInOut(duration: 0.2)) { showHelpReminderTip = false }
-            // Very last step — end the "?" replay.
-            if helpReplay {
-                helpReplay = false
-                withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
-            } else {
-                // First-use walkthrough complete — close the card and return
-                // to the cover, as the tip's closing line promised.
-                onFirstUseTourEnd()
-            }
+            // First-use walkthrough complete (this tip only shows on first
+            // use) — close the card and return to the cover, as promised.
+            onFirstUseTourEnd()
         }
     }
 
