@@ -626,14 +626,6 @@ struct PageView: View {
             if helpReplay {
                 helpReplay = false
                 withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
-            } else {
-                // First-use tour is over — take the reader back to the cover
-                // to start from the beginning (as the tip's text promised).
-                navForward = false
-                withAnimation {
-                    currentPageIndex = 0
-                    textRevealed = false
-                }
             }
         }
     }
@@ -1343,7 +1335,18 @@ struct PageView: View {
                     // the selection) until the reader taps a bubble on the new page.
                     onRequestNextPage: { goToNextPage() },
                     onRequestPrevPage: { goToPreviousPage() },
-                    onWordTipDismissed: { maybeShowSwipeTip() }
+                    onWordTipDismissed: { maybeShowSwipeTip() },
+                    onFirstUseTourEnd: {
+                        // Walkthrough over: close the card and go back to the
+                        // cover so the reader starts from the beginning.
+                        selectedBubbleIndex = nil
+                        revealedBubbleId = nil
+                        navForward = false
+                        withAnimation {
+                            currentPageIndex = 0
+                            textRevealed = false
+                        }
+                    }
                 )
                 .environmentObject(settingsManager)
                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
@@ -1470,12 +1473,8 @@ struct PageView: View {
         // pulse is on screen, so the tip talks about "this page". Floats centred.
         .overlay {
             if showHotspotTip && selectedBubbleIndex == nil && selectedPanel == nil {
-                // Last tip of the FIRST-USE tour: its closing line sends the
-                // reader back to the cover to start reading for real. A "?"
-                // replay keeps the plain closing line and stays on the page.
                 HelpIntroCallout(
-                    text: "This page has a hotspot — the object with the flashing pulse. Clicking on it provides a list-type learning experience, such as colors or numbers. You can save it to your Notes section (the Notebook link at the bottom of the screen) by clicking the save link, for speedy reference if you ever require it."
-                        + (helpReplay ? " Click me to close." : " Now close me and start from the beginning."),
+                    text: "This page has a hotspot — the object with the flashing pulse. Clicking on it provides a list-type learning experience, such as colors or numbers. You can save it to your Notes section (the Notebook link at the bottom of the screen) by clicking the save link, for speedy reference if you ever require it. Click me to close.",
                     icon: nil,
                     maxWidth: 300,
                     showArrow: false
@@ -2235,6 +2234,9 @@ struct FloatingBubbleCard: View {
     /// Notified when the word-popup guidance is dismissed — the page uses it to
     /// chain the next onboarding hint (swipe to turn the page).
     var onWordTipDismissed: () -> Void = {}
+    /// Notified when the FIRST-USE walkthrough's closing tip ("One last thing…")
+    /// is dismissed — the page closes the card and returns to the cover.
+    var onFirstUseTourEnd: () -> Void = {}
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var help: HelpModeController
 
@@ -2292,8 +2294,12 @@ struct FloatingBubbleCard: View {
             // intro was retired), so it introduces it rather than reminding.
             .overlay(alignment: .topTrailing) {
                 if showHelpReminderTip {
+                    // First use adds the closing instruction; dismissing then
+                    // returns the reader to the cover. A "?" replay shows the
+                    // plain version and stays put.
                     HelpIntroCallout(
-                        text: "One last thing — help is always on hand. Click here at any point to revisit any of these help items.",
+                        text: "One last thing — help is always on hand. Click here at any point to revisit any of these help items."
+                            + (helpReplay ? "" : " Now close me and start from the beginning."),
                         arrowInset: 100   // the reader's "?" sits ~129pt in from the trailing edge
                     ) { dismissHelpReminderTip() }
                     .padding(.trailing, 19)
@@ -2418,6 +2424,10 @@ struct FloatingBubbleCard: View {
             if helpReplay {
                 helpReplay = false
                 withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+            } else {
+                // First-use walkthrough complete — close the card and return
+                // to the cover, as the tip's closing line promised.
+                onFirstUseTourEnd()
             }
         }
     }
