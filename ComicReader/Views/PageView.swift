@@ -626,6 +626,14 @@ struct PageView: View {
             if helpReplay {
                 helpReplay = false
                 withAnimation(.easeInOut(duration: 0.2)) { help.isActive = false }
+            } else {
+                // First-use tour is over — take the reader back to the cover
+                // to start from the beginning (as the tip's text promised).
+                navForward = false
+                withAnimation {
+                    currentPageIndex = 0
+                    textRevealed = false
+                }
             }
         }
     }
@@ -1462,8 +1470,12 @@ struct PageView: View {
         // pulse is on screen, so the tip talks about "this page". Floats centred.
         .overlay {
             if showHotspotTip && selectedBubbleIndex == nil && selectedPanel == nil {
+                // Last tip of the FIRST-USE tour: its closing line sends the
+                // reader back to the cover to start reading for real. A "?"
+                // replay keeps the plain closing line and stays on the page.
                 HelpIntroCallout(
-                    text: "This page has a hotspot — the object with the flashing pulse. Clicking on it provides a list-type learning experience, such as colors or numbers. You can save it to your Notes section (the Notebook link at the bottom of the screen) by clicking the save link, for speedy reference if you ever require it. Click me to close.",
+                    text: "This page has a hotspot — the object with the flashing pulse. Clicking on it provides a list-type learning experience, such as colors or numbers. You can save it to your Notes section (the Notebook link at the bottom of the screen) by clicking the save link, for speedy reference if you ever require it."
+                        + (helpReplay ? " Click me to close." : " Now close me and start from the beginning."),
                     icon: nil,
                     maxWidth: 300,
                     showArrow: false
