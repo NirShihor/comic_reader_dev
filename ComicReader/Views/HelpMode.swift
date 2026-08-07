@@ -509,7 +509,10 @@ extension View {
 enum HelpTipCap {
     /// Increment the display counter for `key`; true = cap already spent,
     /// caller should mark the tip seen and NOT show it.
-    static func spent(_ key: String, cap: Int = 3) -> Bool {
+    /// Cap is 1: every tip is one-shot at first display — repeat showings on
+    /// each new comic read as a bug, not as teaching (the "?" replay exists
+    /// for anyone who wants a tip again).
+    static func spent(_ key: String, cap: Int = 1) -> Bool {
         let k = "help.shown.\(key)"
         let n = UserDefaults.standard.integer(forKey: k)
         if n >= cap { return true }
