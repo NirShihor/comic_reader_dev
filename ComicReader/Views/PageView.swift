@@ -1212,6 +1212,21 @@ struct PageView: View {
                         GeometryReader { imageGeometry in
                             let rect = fittedImageRect(in: imageGeometry.size)
                             ZStack {
+                                // While "Click on the text." is up, ANY tap counts as
+                                // clicking the text. The real target can sit mislaid for
+                                // a beat while the page aspect loads (fittedImageRect's
+                                // full-screen fallback), which made first taps miss —
+                                // the callout keeps pointing at the title regardless.
+                                if currentPageIndex == 0, showCoverTip, selectedBubbleIndex == nil,
+                                   !pageTextBubbles.isEmpty {
+                                    Color.clear
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                            selectedBubbleIndex = 0
+                                        }
+                                }
+
                                 // Practice: keep sound-effect / image bubbles baked
                                 // (they aren't practised), then reveal only the open
                                 // bubble's text on top.
