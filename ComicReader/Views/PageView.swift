@@ -442,10 +442,17 @@ struct PageView: View {
     // Armed when a hotspot with advanceOnClose is opened by a tap; consumed on dismiss.
     @State private var hotspotAdvanceOnClose = false
 
+    // A visible tooltip owns the reader's attention — the pointing hand
+    // stays off while any is up (checked at start AND at each pulse step,
+    // so a tooltip appearing mid-pulse also hides it).
+    private var tooltipShowing: Bool {
+        showCoverTip || showSwipeTip || showBubbleTip || showHotspotTip
+    }
+
     private func flashFirstBubble() {
         flashGeneration += 1
         let gen = flashGeneration
-        guard currentPageIndex > 0, selectedBubbleIndex == nil,
+        guard currentPageIndex > 0, selectedBubbleIndex == nil, !tooltipShowing,
               let first = pageTextBubbles.first else {
             flashBubbleId = nil; flashArrowOn = false
             return
@@ -457,8 +464,8 @@ struct PageView: View {
         for (delay, on) in steps {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 guard gen == flashGeneration else { return }   // superseded — not ours to touch
-                guard selectedBubbleIndex == nil else {
-                    flashBubbleId = nil; flashArrowOn = false   // bubble opened — cancel
+                guard selectedBubbleIndex == nil, !tooltipShowing else {
+                    flashBubbleId = nil; flashArrowOn = false   // bubble opened / tooltip up — cancel
                     return
                 }
                 withAnimation(.easeInOut(duration: 0.4)) { flashArrowOn = on }
@@ -1243,7 +1250,7 @@ struct PageView: View {
                                 // Arrival cue: pointing hand pulsing on bubble 1.
                                 // The glyph points up-left, so positioning it at the
                                 // bubble's bottom-right corner lands the tip inside.
-                                if selectedBubbleIndex == nil, flashBubbleId != nil, flashArrowOn,
+                                if selectedBubbleIndex == nil, flashBubbleId != nil, flashArrowOn, !tooltipShowing,
                                    let fb = pageTextBubbles.first(where: { $0.id == flashBubbleId }) {
                                     Image(systemName: "hand.point.up.left.fill")
                                         .font(.system(size: 40, weight: .bold))
