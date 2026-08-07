@@ -83,7 +83,10 @@ struct ContentView: View {
         }
 
         // Pre-warm the keyboard so the first tap-to-type doesn't stall.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        // WELL after launch: keyboard-subsystem init runs on the main thread
+        // and can take seconds — at +0.3s it landed exactly on the user's
+        // first taps and made the whole app feel dead on arrival.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8.0) {
             guard let window = UIApplication.shared.connectedScenes
                 .compactMap({ $0 as? UIWindowScene })
                 .flatMap({ $0.windows })
