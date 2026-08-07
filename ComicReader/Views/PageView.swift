@@ -952,16 +952,16 @@ struct PageView: View {
     // (borderless narration) — acceptable because the flash is momentary.
     @ViewBuilder
     private func flashBubbleOverlay(_ b: Bubble, in rect: CGRect) -> some View {
-        // Darker than the tooltip amber (#F0BB29) — over the white bubble
-        // interior the lighter shade washed out.
-        let amber = Color(red: 209/255, green: 152/255, blue: 12/255)   // #D1980C
+        // Tooltip amber, shown near-opaque so what reaches the eye matches the
+        // tooltips (at lower opacity the white interior washed it into pastel).
+        let amber = Color(red: 240/255, green: 187/255, blue: 41/255)   // #F0BB29
         let maskSource = currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage
         let inkSource = (isPracticeMode && revealedBubbleId != b.id)
             ? (currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage)
             : currentPage.masterImage
         let nb = CGRect(x: b.positionX, y: b.positionY, width: b.width, height: b.height)
         let geo = "\(Int(b.positionX*1e4))_\(Int(b.positionY*1e4))_\(Int(b.width*1e4))_\(Int(b.height*1e4))"
-        let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|\(inkSource)|amber2"
+        let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|\(inkSource)|amber3"
         let fill = (b.bgTransparent == true && !isPracticeMode) ? nil
             : BubbleFill.overlay(maskSource: maskSource, inkSource: inkSource, comicId: comic.id,
                                  bubble: nb, color: UIColor(amber), cacheKey: key)
@@ -972,7 +972,7 @@ struct PageView: View {
                 .frame(width: fill.region.width * rect.width, height: fill.region.height * rect.height)
                 .position(x: rect.minX + fill.region.midX * rect.width,
                           y: rect.minY + fill.region.midY * rect.height)
-                .opacity(0.6)
+                .opacity(0.9)
                 .allowsHitTesting(false)
                 .transition(.opacity)
         } else {
@@ -981,7 +981,7 @@ struct PageView: View {
                 .frame(width: b.width * rect.width + 12, height: b.height * rect.height + 8)
                 .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
                           y: rect.minY + (b.positionY + b.height / 2) * rect.height)
-                .opacity(0.3)
+                .opacity(0.5)
                 .allowsHitTesting(false)
                 .transition(.opacity)
         }
