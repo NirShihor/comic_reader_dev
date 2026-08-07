@@ -429,9 +429,10 @@ struct PageView: View {
     @State private var showOnScreenComplete = false     // guided: all done
     @State private var selectedBubbleIndex: Int?   // open bubble in the floating card
     @State private var revealedBubbleId: String?   // practice: bubble whose text is revealed onto the page
-    // Arrival cue: bubble 1 gives two QUICK amber flashes (tooltip color)
-    // when a story page loads, then it's gone.
-    @State private var flashBubbleId: String?   // bubble being flashed
+    // Arrival cue: the pointing hand gives two SOFT pulses on bubble 1 when a
+    // story page loads — slow fade in, a beat on screen, slow fade out — then
+    // it's gone.
+    @State private var flashBubbleId: String?   // bubble the hand points at
     @State private var flashArrowOn = false     // pulse visibility
     // Each pulse run gets a generation; pending timers from a superseded run
     // must expire SILENTLY. (They used to null the shared state as cleanup —
@@ -451,8 +452,8 @@ struct PageView: View {
         }
         flashBubbleId = first.id
         flashArrowOn = false
-        // Three quick flashes: on/off, on/off, on/off.
-        let steps: [(Double, Bool)] = [(0.35, true), (0.75, false), (1.05, true), (1.45, false), (1.75, true), (2.15, false)]
+        // Two pulses: fade in 0.4s, hold ~0.7s, fade out 0.4s, short gap, repeat.
+        let steps: [(Double, Bool)] = [(0.45, true), (1.55, false), (2.40, true), (3.50, false)]
         for (delay, on) in steps {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 guard gen == flashGeneration else { return }   // superseded — not ours to touch
@@ -460,11 +461,11 @@ struct PageView: View {
                     flashBubbleId = nil; flashArrowOn = false   // bubble opened — cancel
                     return
                 }
-                withAnimation(.easeInOut(duration: 0.18)) { flashArrowOn = on }
+                withAnimation(.easeInOut(duration: 0.4)) { flashArrowOn = on }
             }
         }
-        // Retire the cue once the third flash has faded.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.45) {
+        // Retire the cue once the second fade-out has finished.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.95) {
             if gen == flashGeneration { flashBubbleId = nil; flashArrowOn = false }
         }
     }
@@ -946,67 +947,6 @@ struct PageView: View {
         }
     }
 
-    // Arrival cue: amber (tooltip-color) fill of bubble 1's interior — the same
-    // flood-fill as the green open-bubble highlight, just a different color.
-    // Falls back to a soft rounded wash when there's no balloon to flood
-    // (borderless narration) — acceptable because the flash is momentary.
-    @ViewBuilder
-    private func flashBubbleOverlay(_ b: Bubble, in rect: CGRect) -> some View {
-        // Tooltip amber, shown near-opaque so what reaches the eye matches the
-        // tooltips (at lower opacity the white interior washed it into pastel).
-        let amber = Color(red: 240/255, green: 187/255, blue: 41/255)   // #F0BB29
-        let maskSource = currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage
-        let inkSource = (isPracticeMode && revealedBubbleId != b.id)
-            ? (currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage)
-            : currentPage.masterImage
-        let nb = CGRect(x: b.positionX, y: b.positionY, width: b.width, height: b.height)
-        let geo = "\(Int(b.positionX*1e4))_\(Int(b.positionY*1e4))_\(Int(b.width*1e4))_\(Int(b.height*1e4))"
-        let key = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|\(inkSource)|amber3"
-        let fill = (b.bgTransparent == true && !isPracticeMode) ? nil
-            : BubbleFill.overlay(maskSource: maskSource, inkSource: inkSource, comicId: comic.id,
-                                 bubble: nb, color: UIColor(amber), cacheKey: key)
-
-        if let fill {
-            Image(uiImage: fill.image)
-                .resizable()
-                .frame(width: fill.region.width * rect.width, height: fill.region.height * rect.height)
-                .position(x: rect.minX + fill.region.midX * rect.width,
-                          y: rect.minY + fill.region.midY * rect.height)
-                .opacity(0.9)
-                .allowsHitTesting(false)
-                .transition(.opacity)
-        } else {
-            // Borderless narration: no balloon to fill, and a solid amber slab
-            // over the art looks broken — flash the LETTERING instead. A
-            // blend-mode rect only moves pixels on the glyphs' side of the
-            // amber threshold: dark text → .lighten (only pixels darker than
-            // amber shift toward it), light text → .darken (only lighter
-            // pixels shift) — the surrounding art mostly sits on the other
-            // side of the threshold and is left alone.
-            Rectangle()
-                .fill(amber)
-                .frame(width: b.width * rect.width + 8, height: b.height * rect.height + 6)
-                .position(x: rect.minX + (b.positionX + b.width / 2) * rect.width,
-                          y: rect.minY + (b.positionY + b.height / 2) * rect.height)
-                .blendMode(isLightHex(b.textColor) ? .darken : .lighten)
-                .allowsHitTesting(false)
-                .transition(.opacity)
-        }
-    }
-
-    // Rough luminance test for an authored "#rgb"/"#rrggbb" lettering color.
-    // Unset or unparseable → false (treat as dark ink, the common case).
-    private func isLightHex(_ hex: String?) -> Bool {
-        guard var h = hex?.trimmingCharacters(in: .whitespaces).lowercased() else { return false }
-        if h.hasPrefix("#") { h.removeFirst() }
-        if h.count == 3 { h = h.map { "\($0)\($0)" }.joined() }
-        guard h.count >= 6, let v = UInt64(h.prefix(6), radix: 16) else {
-            return h == "white"
-        }
-        let r = Double((v >> 16) & 0xFF), g = Double((v >> 8) & 0xFF), bl = Double(v & 0xFF)
-        return (0.299 * r + 0.587 * g + 0.114 * bl) / 255 > 0.6
-    }
-
     // Highlights the open bubble, linking it to the popup. Fills the bubble's
     // interior with a solid, slightly-brighter green (flood-filled to match its
     // real shape). Shows nothing when it can't fill cleanly (e.g. a borderless
@@ -1300,11 +1240,21 @@ struct PageView: View {
                                     selectedBubbleDot(pageTextBubbles[sel], in: rect)
                                 }
 
-                                // Arrival cue: two quick amber flashes (tooltip
-                                // color) filling bubble 1's interior.
+                                // Arrival cue: pointing hand pulsing on bubble 1.
+                                // The glyph points up-left, so positioning it at the
+                                // bubble's bottom-right corner lands the tip inside.
                                 if selectedBubbleIndex == nil, flashBubbleId != nil, flashArrowOn,
                                    let fb = pageTextBubbles.first(where: { $0.id == flashBubbleId }) {
-                                    flashBubbleOverlay(fb, in: rect)
+                                    Image(systemName: "hand.point.up.left.fill")
+                                        .font(.system(size: 40, weight: .bold))
+                                        // Same green as the bubble highlight.
+                                        .foregroundStyle(Color(red: 0x61/255, green: 0xF5/255, blue: 0x27/255))
+                                        .shadow(color: .black.opacity(0.9), radius: 1.5)
+                                        .shadow(color: .black.opacity(0.6), radius: 4)
+                                        .position(x: rect.minX + (fb.positionX + fb.width * 0.95) * rect.width,
+                                                  y: rect.minY + (fb.positionY + fb.height * 1.0) * rect.height)
+                                        .transition(.opacity)   // soft pulses, not hard flashes
+                                        .allowsHitTesting(false)
                                 }
 
                                 // Traced hotspots: the artwork inside the shape
