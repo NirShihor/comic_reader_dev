@@ -225,7 +225,7 @@ struct ComicDetailView: View {
 
     private var cockpitText: String {
         switch cockpitStep {
-        case 1: return "This is the language-learning cockpit. Decide if you want to simply read and listen, or practice with any of the different practice modes. It is recommended to read and listen to the comic at least once before starting to practice."
+        case 1: return "This is the language-learning cockpit. Decide if you want to simply read and listen, or practice with any of the different practice modes. It is recommended to read and listen to the comic at least once before starting to practice. Now click me."
         case 2: return "Prefer not to speak at this time? Change to silent exercises. You can close me to see the different exercise modes or scroll up and click the Start reading button."
         case 3: return "Let's start."
         default: return ""
