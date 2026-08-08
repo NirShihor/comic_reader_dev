@@ -896,11 +896,11 @@ struct CreatorMessageView: View {
         ("Growing the collection",
          "The comics are created using a platform I built specifically for this purpose. Stories for language learners take time and care to produce, but there is already plenty to explore—and I’ll be adding new comics every week."),
         ("Introductory pricing",
-         "At this early stage, Comigo is available at a lower introductory price, including an option for lifetime access. Subscribers will always keep their original price and access to all content. If cost is a barrier, please [get in touch](mailto:nirshihor@gmail.com).")
+         "At this early stage, Comigo is available at a lower introductory price, including an option for lifetime access. Subscribers will always keep their original price and access to all content. If cost is a barrier, please [get in touch](mailto:nir@comigo.net).")
     ]
 
     private let closing: [String] = [
-        "I’d love to [hear your feedback](mailto:nirshihor@gmail.com), as well as your ideas for future stories and collections.",
+        "I’d love to [hear your feedback](mailto:nir@comigo.net), as well as your ideas for future stories and collections.",
         "Thank you for being here. I hope you enjoy the journey."
     ]
 
