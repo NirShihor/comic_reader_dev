@@ -519,6 +519,17 @@ struct PageView: View {
             .sorted { $0.panelOrder < $1.panelOrder }
             .flatMap { $0.bubbles }
             .filter { $0.isSoundEffect != true && !$0.sentences.isEmpty }
+        // Newer exports stamp a PAGE-WIDE readingOrder on every bubble (it
+        // carries the author's manual reorderings, including across panels).
+        // Sort by it when present; older bundles keep the panel-order flatten.
+        if bubbles.contains(where: { $0.readingOrder != nil }) {
+            bubbles = bubbles.enumerated()
+                .sorted { a, b in
+                    (a.element.readingOrder ?? (10_000 + a.offset)) <
+                    (b.element.readingOrder ?? (10_000 + b.offset))
+                }
+                .map { $0.element }
+        }
         // No last-page narration special case any more: "continuará…" behaves
         // like any bubble (tap plays its audio). Its old problems are solved
         // elsewhere — the green fill already skips transparent narration in
@@ -1026,6 +1037,25 @@ struct PageView: View {
         }
     }
 
+    // Where the pointing hand sits for the arrival cue. The bubble's DATA box
+    // can be much larger than the drawn balloon (generous boxes, tails), which
+    // stranded the hand mid-art — so anchor to the flood-filled balloon's tight
+    // bounds when they exist, and only fall back to the box.
+    private func flashHandAnchor(_ b: Bubble, in rect: CGRect) -> CGPoint {
+        let maskSource = currentPage.emptyBubblesImage ?? currentPage.noTextImage ?? currentPage.masterImage
+        let nb = CGRect(x: b.positionX, y: b.positionY, width: b.width, height: b.height)
+        let geo = "\(Int(b.positionX*1e4))_\(Int(b.positionY*1e4))_\(Int(b.width*1e4))_\(Int(b.height*1e4))"
+        let mkey = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|imask"
+        if b.bgTransparent != true,
+           let mask = BubbleFill.interiorMask(maskSource: maskSource, comicId: comic.id, bubble: nb, cacheKey: mkey) {
+            let bx = mask.bounds
+            return CGPoint(x: rect.minX + (bx.minX + bx.width * 0.95) * rect.width,
+                           y: rect.minY + bx.maxY * rect.height)
+        }
+        return CGPoint(x: rect.minX + (b.positionX + b.width * 0.95) * rect.width,
+                       y: rect.minY + (b.positionY + b.height) * rect.height)
+    }
+
     private func loadPageAspect() {
         let name = currentPage.masterImage
         let comicId = comic.id
@@ -1267,14 +1297,14 @@ struct PageView: View {
                                 // bubble's bottom-right corner lands the tip inside.
                                 if selectedBubbleIndex == nil, flashBubbleId != nil, flashArrowOn, !tooltipShowing,
                                    let fb = pageTextBubbles.first(where: { $0.id == flashBubbleId }) {
+                                    let anchor = flashHandAnchor(fb, in: rect)
                                     Image(systemName: "hand.point.up.left.fill")
                                         .font(.system(size: 40, weight: .bold))
                                         // Same green as the bubble highlight.
                                         .foregroundStyle(Color(red: 0x61/255, green: 0xF5/255, blue: 0x27/255))
                                         .shadow(color: .black.opacity(0.9), radius: 1.5)
                                         .shadow(color: .black.opacity(0.6), radius: 4)
-                                        .position(x: rect.minX + (fb.positionX + fb.width * 0.95) * rect.width,
-                                                  y: rect.minY + (fb.positionY + fb.height * 1.0) * rect.height)
+                                        .position(x: anchor.x, y: anchor.y)
                                         .transition(.opacity)   // soft pulses, not hard flashes
                                         .allowsHitTesting(false)
                                 }

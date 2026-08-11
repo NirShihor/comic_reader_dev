@@ -50,6 +50,7 @@ struct Bubble: Identifiable, Codable, Hashable {
     var hidden: Bool?          // data-only: not baked into the art at all (invisible tap region)
     var highlightWash: Bool?   // author override for the green selection wash
     var textColor: String?     // authored lettering color (hex) — drives the arrival-flash blend
+    var readingOrder: Int?     // page-wide reading position (export-stamped; includes manual overrides)
     var imageUrl: String?
     var fontSize: Double?
     let positionX: Double  // percentage 0-1

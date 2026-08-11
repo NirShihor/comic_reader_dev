@@ -1511,9 +1511,19 @@ struct WordFormsView: View {
                             .bold()
                         Spacer()
                         Button {
-                            let audioFile = word.displayText.lowercased()
-                                .folding(options: .diacriticInsensitive, locale: .current)
-                            audioManager.play(audioFile, volume: 1.0)
+                            // The export's wordAudioUrl names the exact file
+                            // (accents KEPT, punctuation stripped). Deriving it
+                            // from displayText broke every accented word — the
+                            // fold stripped accents the filenames contain.
+                            if let wordAudio = word.wordAudioUrl {
+                                audioManager.play(wordAudio, volume: 1.0)
+                            } else {
+                                let cleaned = word.text.lowercased()
+                                    .components(separatedBy: CharacterSet(charactersIn: ".,!?;:\"“”‘’¿¡…[](){}/\\"))
+                                    .joined()
+                                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                                audioManager.play(cleaned, volume: 1.0)
+                            }
                         } label: {
                             Image(systemName: "speaker.wave.2.fill")
                                 .font(.caption)
