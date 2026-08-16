@@ -1048,9 +1048,14 @@ struct PageView: View {
         let mkey = "\(comic.id)|p\(currentPage.pageNumber)|\(b.id)|\(geo)|\(maskSource)|imask"
         if b.bgTransparent != true,
            let mask = BubbleFill.interiorMask(maskSource: maskSource, comicId: comic.id, bubble: nb, cacheKey: mkey) {
-            let bx = mask.bounds
-            return CGPoint(x: rect.minX + (bx.minX + bx.width * 0.95) * rect.width,
-                           y: rect.minY + bx.maxY * rect.height)
+            // The flood includes the balloon's TAIL (connected white), which
+            // stretches the bounds well past the balloon body — clip to the
+            // data box, which contains the body but not the tail.
+            let bx = mask.bounds.intersection(nb)
+            if !bx.isNull, bx.width > 0.01, bx.height > 0.01 {
+                return CGPoint(x: rect.minX + (bx.minX + bx.width * 0.95) * rect.width,
+                               y: rect.minY + bx.maxY * rect.height)
+            }
         }
         return CGPoint(x: rect.minX + (b.positionX + b.width * 0.95) * rect.width,
                        y: rect.minY + (b.positionY + b.height) * rect.height)

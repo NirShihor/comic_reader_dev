@@ -56,6 +56,10 @@ struct HotspotView: View {
         return testSlides[testSlideIndex]
     }
 
+    // Transient tab-bar-style strip after an auto-save, so the user sees the
+    // Notebook badge count even though the real tab bar is behind this sheet.
+    @State private var showNotebookBar = false
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -70,6 +74,35 @@ struct HotspotView: View {
                 }
             }
             .contentShape(Rectangle())
+            .overlay(alignment: .bottom) {
+                if showNotebookBar {
+                    HStack(spacing: 6) {
+                        Spacer()
+                        VStack(spacing: 3) {
+                            Image(systemName: "book.closed")
+                                .font(.system(size: 20))
+                                .overlay(alignment: .topTrailing) {
+                                    Text("\(notebook.unreadCount)")
+                                        .font(.caption2.bold())
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 5)
+                                        .padding(.vertical, 1)
+                                        .background(Color.red, in: Capsule())
+                                        .offset(x: 12, y: -8)
+                                }
+                            Text("Notebook")
+                                .font(.caption2)
+                        }
+                        .foregroundColor(.primary)
+                        Spacer()
+                    }
+                    .padding(.top, 8)
+                    .padding(.bottom, 20)
+                    .background(.ultraThinMaterial)
+                    .overlay(alignment: .top) { Divider() }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
             .onAppear { savedToNotes = alreadySaved() }
             .gesture(
                 isTestMode ? nil :
@@ -913,9 +946,14 @@ struct HotspotView: View {
             linkPageNumber: pageNumber,
             linkHotspotId: hotspot.id
         )
-        notebook.upsert(page)
+        notebook.upsert(page, markUnread: true)
         savedToNotes = true
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        // Show the Notebook badge for a beat so the save visibly "lands".
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { showNotebookBar = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            withAnimation(.easeInOut(duration: 0.3)) { showNotebookBar = false }
+        }
     }
 
     // MARK: - Audio

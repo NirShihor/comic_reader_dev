@@ -427,19 +427,33 @@ struct LibraryView: View {
         ("All", nil), ("Beginner", "beginner"), ("Intermediate", "intermediate"), ("Advanced", "advanced")
     ]
 
+    // Chip colors match the level badges on the comic cards: beginner green,
+    // intermediate orange. Advanced is greyed until it exists; All keeps the
+    // brand accent.
+    private func levelChipColor(_ value: String?) -> Color {
+        switch value {
+        case "beginner": return .green
+        case "intermediate": return .orange
+        case "advanced": return .gray
+        default: return accentColor
+        }
+    }
+
     private var levelChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(levelOptions, id: \.label) { option in
                     let selected = selectedLevel == option.value
+                    let color = levelChipColor(option.value)
+                    let greyed = option.value == "advanced"
                     Text(option.label)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundStyle(selected ? .white : .secondary)
+                        .foregroundStyle(selected ? .white : (greyed ? Color.secondary.opacity(0.6) : color))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 9)
-                        .background(selected ? accentColor : Color(.secondarySystemGroupedBackground),
+                        .background(selected ? color : Color(.secondarySystemGroupedBackground),
                                     in: Capsule())
-                        .overlay(Capsule().stroke(borderInk, lineWidth: 2))
+                        .overlay(Capsule().stroke(greyed && !selected ? borderInk.opacity(0.4) : borderInk, lineWidth: 2))
                         .contentShape(Capsule())
                         .onTapGesture {
                             withAnimation(.easeInOut(duration: 0.15)) { selectedLevel = option.value }

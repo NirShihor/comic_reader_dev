@@ -20,6 +20,7 @@ struct ContentView: View {
     // already has reading progress. They see "Continue learning".
     @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore = false
     @EnvironmentObject private var progressManager: ReadingProgressManager
+    @EnvironmentObject private var notebookManager: NotebookManager
     private var returningUser: Bool {
         hasLaunchedBefore || !progressManager.progressMap.isEmpty
     }
@@ -86,17 +87,24 @@ struct ContentView: View {
         // WELL after launch: keyboard-subsystem init runs on the main thread
         // and can take seconds — at +0.3s it landed exactly on the user's
         // first taps and made the whole app feel dead on arrival.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 8.0) {
-            guard let window = UIApplication.shared.connectedScenes
-                .compactMap({ $0 as? UIWindowScene })
-                .flatMap({ $0.windows })
-                .first(where: { $0.isKeyWindow }) else { return }
-            let field = UITextField(frame: .zero)
-            window.addSubview(field)
-            field.becomeFirstResponder()
-            field.resignFirstResponder()
-            field.removeFromSuperview()
-        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8.0) { warmUpKeyboard() }
+    }
+
+    /// One-time keyboard-subsystem init. Also fired when the Notebook tab
+    /// opens, so a note created within seconds of launch doesn't stall.
+    private static var didWarmKeyboard = false
+    static func warmUpKeyboard() {
+        guard !didWarmKeyboard else { return }
+        didWarmKeyboard = true
+        guard let window = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap({ $0.windows })
+            .first(where: { $0.isKeyWindow }) else { didWarmKeyboard = false; return }
+        let field = UITextField(frame: .zero)
+        window.addSubview(field)
+        field.becomeFirstResponder()
+        field.resignFirstResponder()
+        field.removeFromSuperview()
     }
 
     private var tabs: some View {
@@ -140,7 +148,17 @@ struct ContentView: View {
             .tabItem {
                 Label("Notebook", systemImage: "book.closed")
             }
+            .badge(notebookManager.unreadCount)
             .tag(Tab.notebook)
+            .onChange(of: selectedTab) { _, tab in
+                // Opening the Notebook clears the unread badge — and warms the
+                // keyboard while the user browses, so the first note editor
+                // opens without the one-time keyboard-init stall.
+                if tab == .notebook {
+                    notebookManager.markAllAdminRead()
+                    ContentView.warmUpKeyboard()
+                }
+            }
 
             NavigationStack {
                 SettingsView()
@@ -243,6 +261,9 @@ struct LandingView: View {
                 }
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
+                // Lift the text toward the (offset-raised) logo so the gap up
+                // to the logo matches the gap down to the button (~100pt each).
+                .offset(y: -70)
 
                 Text("Read and listen to comics in Spanish, tap sentences and words to understand them and practice out loud.")
                     .font(Brand.body(15.5))
@@ -250,6 +271,7 @@ struct LandingView: View {
                     .multilineTextAlignment(.center)
                     .lineSpacing(3)
                     .frame(maxWidth: 280)
+                    .offset(y: -70)
                     .padding(.top, 24)
 
                 Button(action: onGetStarted) {
@@ -541,13 +563,37 @@ final class NotebookManager: ObservableObject {
     @Published var hiddenAdminIds: Set<String> {
         didSet { UserDefaults.standard.set(Array(hiddenAdminIds), forKey: hiddenKey) }
     }
+    /// Admin note ids the user has OPENED — drives the unread badge on the tab.
+    @Published var readAdminIds: Set<String> {
+        didSet { UserDefaults.standard.set(Array(readAdminIds), forKey: readKey) }
+    }
+    /// AUTO-ADDED user notes (hotspot saves) the user hasn't visited yet —
+    /// they count toward the tab badge like unread admin notes.
+    @Published var unreadUserIds: Set<String> {
+        didSet { UserDefaults.standard.set(Array(unreadUserIds), forKey: unreadUserKey) }
+    }
 
     private let storageKey = "notebookPages.v1"
     private let adminCacheKey = "notebookAdminCache.v1"
     private let hiddenKey = "notebookHiddenAdmin.v1"
+    private let readKey = "notebookReadAdmin.v1"
+    private let unreadUserKey = "notebookUnreadUser.v1"
 
     /// Admin pages the user hasn't hidden.
     var visibleAdminPages: [NotebookPage] { adminPages.filter { !hiddenAdminIds.contains($0.id) } }
+    /// Visible admin notes the user hasn't opened yet.
+    var unreadAdminCount: Int { visibleAdminPages.filter { !readAdminIds.contains($0.id) }.count }
+    /// Tab badge: unread admin notes + auto-added user notes not yet visited.
+    var unreadCount: Int {
+        let userUnread = userPages.filter { unreadUserIds.contains($0.id) }.count
+        return unreadAdminCount + userUnread
+    }
+    func markAdminRead(_ id: String) { readAdminIds.insert(id) }
+    /// Opening the Notebook clears the badge — everything visible counts as seen.
+    func markAllAdminRead() {
+        readAdminIds.formUnion(visibleAdminPages.map { $0.id })
+        unreadUserIds.removeAll()
+    }
     /// Admin pages the user has hidden.
     var hiddenAdminPages: [NotebookPage] { adminPages.filter { hiddenAdminIds.contains($0.id) } }
 
@@ -557,6 +603,8 @@ final class NotebookManager: ObservableObject {
 
     init() {
         hiddenAdminIds = Set(UserDefaults.standard.array(forKey: "notebookHiddenAdmin.v1") as? [String] ?? [])
+        readAdminIds = Set(UserDefaults.standard.array(forKey: "notebookReadAdmin.v1") as? [String] ?? [])
+        unreadUserIds = Set(UserDefaults.standard.array(forKey: "notebookUnreadUser.v1") as? [String] ?? [])
         // Admin: prefer the cached server copy; otherwise the compiled fallback.
         if let cached = UserDefaults.standard.data(forKey: adminCacheKey),
            let decoded = try? JSONDecoder().decode([NotebookPage].self, from: cached) {
@@ -599,11 +647,14 @@ final class NotebookManager: ObservableObject {
     }
 
     /// Insert a new user page or update an existing one (matched by id).
-    func upsert(_ page: NotebookPage) {
+    func upsert(_ page: NotebookPage, markUnread: Bool = false) {
         if let idx = userPages.firstIndex(where: { $0.id == page.id }) {
             userPages[idx] = page
         } else {
-            userPages.append(page)
+            // Newest note on top (manual pages and auto-saved hotspot notes
+            // alike). Existing notes keep their position when edited.
+            userPages.insert(page, at: 0)
+            if markUnread { unreadUserIds.insert(page.id) }
         }
     }
 
@@ -679,11 +730,34 @@ struct NotebookView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
+                // "My notes" first (newest on top); admin notes below, in
+                // their original (earliest-first) order.
+                sectionHeader("My notes")
+                if notebook.userPages.isEmpty {
+                    Text("Tap + to add a note.")
+                        .font(.custom("ComicRelief-Regular", size: 16))
+                        .foregroundColor(Self.ink.opacity(0.55))
+                        .padding(.vertical, 4)
+                } else {
+                    ForEach(notebook.userPages) { page in
+                        NotebookPaper(page: page, locked: false,
+                                      onOpenLink: page.hasComicLink ? { openComicLink(page) } : nil)
+                            .onTapGesture { editingPage = page }
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    notebook.delete(page)
+                                } label: {
+                                    Label("Delete note", systemImage: "trash")
+                                }
+                            }
+                    }
+                }
+
                 if !notebook.visibleAdminPages.isEmpty {
                     sectionHeader("Admin Notes")
                     ForEach(notebook.visibleAdminPages) { page in
                         NotebookPaper(page: page, locked: true)
-                            .onTapGesture { readingPage = page }
+                            .onTapGesture { readingPage = page; notebook.markAdminRead(page.id) }
                             .contextMenu {
                                 Button {
                                     notebook.setAdminHidden(page.id, true)
@@ -714,26 +788,6 @@ struct NotebookView: View {
                     .tint(Self.ink.opacity(0.6))
                 }
 
-                sectionHeader("My notes")
-                if notebook.userPages.isEmpty {
-                    Text("Tap + to add your own page — notes, reminders, anything.")
-                        .font(.custom("ComicRelief-Regular", size: 16))
-                        .foregroundColor(Self.ink.opacity(0.55))
-                        .padding(.vertical, 4)
-                } else {
-                    ForEach(notebook.userPages) { page in
-                        NotebookPaper(page: page, locked: false,
-                                      onOpenLink: page.hasComicLink ? { openComicLink(page) } : nil)
-                            .onTapGesture { editingPage = page }
-                            .contextMenu {
-                                Button(role: .destructive) {
-                                    notebook.delete(page)
-                                } label: {
-                                    Label("Delete page", systemImage: "trash")
-                                }
-                            }
-                    }
-                }
             }
             .padding()
         }
@@ -969,7 +1023,7 @@ private struct NotebookHelpView: View {
                     """)
 
                     block("Delete one of My Notes", Self.ink, """
-                    Open your note and tap “Delete page” at the BOTTOM (or press and hold the card). Admin notes can’t be deleted — only hidden.
+                    Open your note and tap “Delete note” at the BOTTOM (or press and hold the card). Admin notes can’t be deleted — only hidden.
                     """)
                 }
                 .padding(24)
@@ -1029,7 +1083,7 @@ private struct NotebookPageEditor: View {
                         onDelete()
                         dismiss()
                     } label: {
-                        Label("Delete page", systemImage: "trash")
+                        Label("Delete note", systemImage: "trash")
                             .frame(maxWidth: .infinity)
                     }
                     .padding(.vertical, 10)

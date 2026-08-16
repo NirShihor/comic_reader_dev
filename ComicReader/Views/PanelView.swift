@@ -1478,14 +1478,37 @@ struct WordFormsView: View {
         NavigationStack {
             List {
                 Section {
+                    VStack(alignment: .leading, spacing: 2) {
+                    Text("Base form")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                     HStack {
                         Text(word.baseForm ?? word.displayText)
                             .font(.title2)
                             .bold()
+                        Button {
+                            // Same file the base-form rows use elsewhere —
+                            // accents kept, punctuation stripped.
+                            if let baseAudio = word.baseFormAudioUrl {
+                                audioManager.play(baseAudio, volume: 1.0)
+                            } else {
+                                let cleaned = (word.baseForm ?? word.text).lowercased()
+                                    .components(separatedBy: CharacterSet(charactersIn: ".,!?;:\"“”‘’¿¡…[](){}/\\"))
+                                    .joined()
+                                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                                audioManager.play(cleaned, volume: 1.0)
+                            }
+                        } label: {
+                            Image(systemName: "speaker.wave.2.fill")
+                                .font(.caption)
+                                .foregroundStyle(.blue)
+                        }
+                        .buttonStyle(.plain)
                         Spacer()
                         Text(word.meaning)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
+                    }
                     }
                     .listRowBackground(Color(.systemGray6))
                 }
