@@ -45,9 +45,12 @@ struct ComicDetailView: View {
     /// resume reading/practice exactly like tapping the primary button here.
     var autoResume: Bool = false
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var hSize
     @EnvironmentObject var progressManager: ReadingProgressManager
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var localStorage = LocalComicStorage.shared
+    @StateObject private var store = StoreService.shared
+    @State private var showPaywall = false
 
     @State private var didAutoResume = false
     @State private var practiceDestination: PracticeDestination?
@@ -106,6 +109,12 @@ struct ComicDetailView: View {
             .navigationDestination(item: $practiceDestination) { destinationView($0) }
             .onChange(of: practiceDestination) { _, newValue in
                 if let dest = newValue {
+                    // Locked (e.g. subscription lapsed after download) — every
+                    // practice mode funnels through here, so one gate covers all.
+                    guard requireUnlocked() else {
+                        practiceDestination = nil
+                        return
+                    }
                     // Coming from the episode-end "Practice" button: they just finished
                     // reading, so the mode starts from the beginning, not the saved spot.
                     if practiceFromEnd {
@@ -149,6 +158,28 @@ struct ComicDetailView: View {
             .sheet(isPresented: $showingPracticeHelp) {
                 PracticeModesHelpView()
             }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
+            }
+    }
+
+    // MARK: - Subscription gate
+    // First episode of every collection (and standalone comics) is free; other
+    // episodes need Comigo Unlimited. Matters when the subscription lapses after
+    // an episode was downloaded — the file stays, reading it re-locks.
+    private var isLocked: Bool {
+        !store.isUnlocked(episodeNumber: comic.episodeNumber,
+                          collectionId: comic.collectionId ?? comic.collectionTitle)
+    }
+
+    /// Gate for every "start reading/practicing" entry point. Returns true when
+    /// the user may proceed; otherwise pops the paywall.
+    private func requireUnlocked() -> Bool {
+        if isLocked {
+            showPaywall = true
+            return false
+        }
+        return true
     }
 
     var body: some View {
@@ -288,6 +319,7 @@ struct ComicDetailView: View {
                     pagesGrid
                 }
                 .padding(.vertical, 16)
+                .readableColumn()
             }
             .onChange(of: scrollTopToken) { _, _ in
                 withAnimation { proxy.scrollTo("top", anchor: .top) }
@@ -449,6 +481,7 @@ struct ComicDetailView: View {
     // Launch the last-used practice mode. `restart` clears the saved spot so it
     // begins from the first sentence; otherwise it resumes where it left off.
     private func launchPractice(restart: Bool) {
+        guard requireUnlocked() else { return }
         if restart {
             progressManager.clearPracticePosition(for: comic.id)
             progressManager.clearWordPosition(for: comic.id)
@@ -629,7 +662,9 @@ struct ComicDetailView: View {
                 .aspectRatio(contentMode: .fill)
                 .frame(width: geo.size.width, height: geo.size.height, alignment: .top)
         }
-        .frame(height: 208)
+        // Taller on iPad: the readable column is ~700pt wide, and the iPhone's
+        // 208pt height would crop the cover art to a thin sliver.
+        .frame(height: hSize == .regular ? 340 : 208)
         .clipped()
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .shadow(color: .black.opacity(0.08), radius: 16, y: 4)
@@ -862,6 +897,7 @@ struct ComicDetailView: View {
     /// On-screen "Read & speak": text stays visible, learner speaks each line.
     /// Mirrors the legacy On-Screen guided run. Opens at `page`, at `bubbleId` when set.
     private func startReadAndSpeak(from page: Page, bubbleId: String? = nil) {
+        guard requireUnlocked() else { return }
         settingsManager.speakingPracticeMode = true
         settingsManager.listeningPracticeMode = false
         guidedOnScreen = true
@@ -884,6 +920,7 @@ struct ComicDetailView: View {
     /// Open a page for plain reading. Clears any leftover practice-mode flags so
     /// the reader shows the real (text) artwork, not the empty-bubble practice art.
     private func startNormalReading(_ page: Page) {
+        guard requireUnlocked() else { return }
         settingsManager.speakingPracticeMode = false
         settingsManager.listeningPracticeMode = false
         guidedOnScreen = false

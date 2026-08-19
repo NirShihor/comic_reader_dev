@@ -198,6 +198,7 @@ struct StoreView: View {
                 }
             }
             .padding(20)
+            .readableColumn()
         }
         .background(Color(.systemGroupedBackground))
     }
@@ -215,9 +216,22 @@ struct StoreComicCard: View {
     var onDownloadStart: (() -> Void)? = nil
     @StateObject private var storeService = ComicStoreService.shared
     @StateObject private var localStorage = LocalComicStorage.shared
+    @StateObject private var store = StoreService.shared
+    @State private var showPaywall = false
 
     var downloadState: DownloadState {
         storeService.downloadState(for: comic.id)
+    }
+
+    /// Free = first episode of its collection (or standalone); otherwise needs
+    /// the subscription. Already-downloaded comics are never re-locked.
+    private var isLocked: Bool {
+        !store.isUnlocked(episodeNumber: comic.episodeNumber, collectionId: comic.collectionTitle)
+    }
+
+    private var showLockBadge: Bool {
+        if case .notDownloaded = downloadState { return isLocked }
+        return false
     }
 
     private var openLabel: some View {
@@ -261,6 +275,16 @@ struct StoreComicCard: View {
                     }
                 }
                 .frame(width: coverSize.width, height: coverSize.height)
+                .overlay(alignment: .topTrailing) {
+                    if showLockBadge {
+                        Image(systemName: "lock.fill")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(5)
+                            .background(.black.opacity(0.55), in: Circle())
+                            .padding(4)
+                    }
+                }
 
                 // Info
                 VStack(alignment: .leading, spacing: compact ? 4 : 8) {
@@ -374,19 +398,33 @@ struct StoreComicCard: View {
     private var downloadButton: some View {
         switch downloadState {
         case .notDownloaded:
-            Button {
-                onDownloadStart?()
-                Task {
-                    await storeService.downloadComic(comic)
+            if isLocked {
+                Button {
+                    showPaywall = true
+                } label: {
+                    Label("Unlock with Comigo Unlimited", systemImage: "lock.fill")
+                        .font(.subheadline)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
                 }
-            } label: {
-                Label("Download", systemImage: "arrow.down.circle.fill")
-                    .font(.subheadline)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 8)
+                .buttonStyle(.borderedProminent)
+                .tint(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255))
+                .sheet(isPresented: $showPaywall) { PaywallView() }
+            } else {
+                Button {
+                    onDownloadStart?()
+                    Task {
+                        await storeService.downloadComic(comic)
+                    }
+                } label: {
+                    Label("Download", systemImage: "arrow.down.circle.fill")
+                        .font(.subheadline)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.green)
 
         case .downloading(let progress):
             VStack(spacing: 8) {

@@ -1,0 +1,73 @@
+{
+  "identifier" : "C0A1B057-0000-4000-8000-000000000001",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "49.99",
+      "familyShareable" : false,
+      "internalID" : "C0A1B057-0000-4000-8000-000000000002",
+      "localizations" : [
+        {
+          "description" : "All content, forever. One-time purchase.",
+          "displayName" : "Comigo Unlimited Lifetime",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.comigo.unlimited.lifetime",
+      "referenceName" : "Comigo Unlimited - Lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_askToBuyEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_GB",
+    "_storefront" : "GBR",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "C0A1B057-0000-4000-8000-000000000003",
+      "localizations" : [
+
+      ],
+      "name" : "Comigo Unlimited",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "7.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "C0A1B057-0000-4000-8000-000000000004",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "All episodes, audio and practice modes.",
+              "displayName" : "Comigo Unlimited",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.comigo.unlimited.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Comigo Unlimited Monthly",
+          "subscriptionGroupID" : "C0A1B057-0000-4000-8000-000000000003",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

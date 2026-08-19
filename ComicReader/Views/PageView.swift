@@ -1134,8 +1134,7 @@ struct PageView: View {
     // MARK: - Guided "On Screen" practice (speaking → listening)
 
     /// Reached the end of the comic during a guided run. After speaking practice,
-    /// offer to start listening practice; after listening, thyarn
-    /// KeSo LoI'We need Wi@e run is complete.
+    /// offer to start listening practice; after listening, the run is complete.
     private func handleGuidedEnd() {
         if settingsManager.speakingPracticeMode {
             showSpeakingDonePrompt = true

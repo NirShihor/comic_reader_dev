@@ -49,15 +49,7 @@ struct SettingsView: View {
             // Account Section
             Section {
                 NavigationLink {
-                    Text("Profile")
-                        .navigationTitle("Profile")
-                } label: {
-                    Label("Profile", systemImage: "person.fill")
-                }
-
-                NavigationLink {
-                    Text("Subscription")
-                        .navigationTitle("Subscription")
+                    SubscriptionSettingsView()
                 } label: {
                     Label("Subscription", systemImage: "creditcard.fill")
                 }
@@ -72,28 +64,26 @@ struct SettingsView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
-                NavigationLink {
-                    Text("Help content")
-                        .navigationTitle("Help")
-                } label: {
-                    Label("Help", systemImage: "questionmark.circle.fill")
+                Link(destination: URL(string: "mailto:nir@comigo.net")!) {
+                    Label("Contact & feedback", systemImage: "envelope.fill")
                 }
 
-                NavigationLink {
-                    Text("Terms of Service content")
-                        .navigationTitle("Terms of Service")
-                } label: {
-                    Label("Terms of Service", systemImage: "doc.text.fill")
+                Link(destination: URL(string: "https://comigo.net/privacy.html")!) {
+                    Label("Privacy Policy", systemImage: "hand.raised.fill")
+                }
+
+                Link(destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!) {
+                    Label("Terms of Use", systemImage: "doc.text.fill")
                 }
             } header: {
                 Text("About")
             }
 
-            // Version
+            // Version (real values from the bundle, not a hard-coded string)
             Section {
                 HStack {
                     Spacer()
-                    Text("Version 1.0.0")
+                    Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0") (\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "–"))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Spacer()
@@ -101,6 +91,64 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Settings")
+    }
+}
+
+// MARK: - Subscription settings
+/// Real subscription status + actions, backed by StoreService. Replaces the
+/// old placeholder screen.
+struct SubscriptionSettingsView: View {
+    @StateObject private var store = StoreService.shared
+    @State private var showPaywall = false
+    @State private var restoring = false
+
+    var body: some View {
+        List {
+            Section {
+                HStack {
+                    Label("Comigo Unlimited", systemImage: store.hasUnlimited ? "checkmark.seal.fill" : "lock.fill")
+                    Spacer()
+                    Text(store.hasUnlimited ? "Active" : "Not subscribed")
+                        .foregroundStyle(store.hasUnlimited ? .green : .secondary)
+                }
+            } footer: {
+                Text("The first episode of every series is free. Comigo Unlimited unlocks every episode — as a monthly subscription or a one-time lifetime purchase.")
+            }
+
+            Section {
+                if !store.hasUnlimited {
+                    Button {
+                        showPaywall = true
+                    } label: {
+                        Label("View plans", systemImage: "sparkles")
+                    }
+                }
+
+                Button {
+                    restoring = true
+                    Task {
+                        await store.restore()
+                        restoring = false
+                    }
+                } label: {
+                    HStack {
+                        Label("Restore purchases", systemImage: "arrow.clockwise")
+                        if restoring {
+                            Spacer()
+                            ProgressView()
+                        }
+                    }
+                }
+                .disabled(restoring)
+
+                Link(destination: URL(string: "https://apps.apple.com/account/subscriptions")!) {
+                    Label("Manage subscription", systemImage: "gearshape.fill")
+                }
+            }
+        }
+        .navigationTitle("Subscription")
+        .sheet(isPresented: $showPaywall) { PaywallView() }
+        .task { await store.refreshEntitlement() }
     }
 }
 

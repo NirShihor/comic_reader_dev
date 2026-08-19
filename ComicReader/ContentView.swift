@@ -1,10 +1,14 @@
 import SwiftUI
 import UIKit
+import StoreKit
 
 struct ContentView: View {
     @State private var selectedTab: Tab = .library
     @State private var libraryNavigationPath = NavigationPath()
     @State private var showSplash = true
+    // Debug-only: "--paywall-preview" launch arg opens the paywall sheet over the
+    // library, for scripted App Store review screenshots.
+    @State private var showDebugPaywall = false
     // App appearance override, set from Settings → Appearance: "system"/"light"/"dark".
     @AppStorage("appearanceMode") private var appearanceMode = "system"
 
@@ -64,7 +68,16 @@ struct ContentView: View {
             }
         }
         .preferredColorScheme(preferredColorScheme)
-        .onAppear { ContentView.warmUpNotebook() }
+        .onAppear {
+            ContentView.warmUpNotebook()
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("--paywall-preview") {
+                showSplash = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { showDebugPaywall = true }
+            }
+            #endif
+        }
+        .sheet(isPresented: $showDebugPaywall) { PaywallView() }
     }
 
     /// Pay the one-time costs (custom-font glyph load + keyboard subsystem init)
@@ -179,6 +192,17 @@ struct ContentView: View {
     }
 }
 
+// MARK: - iPad readable width
+
+extension View {
+    /// Constrain page content to a readable centred column on iPad. No-op on
+    /// iPhone, where the screen is narrower than the cap anyway.
+    func readableColumn(_ maxWidth: CGFloat = 700) -> some View {
+        frame(maxWidth: maxWidth)
+            .frame(maxWidth: .infinity)
+    }
+}
+
 // MARK: - Landing / Splash
 
 // Design tokens for the landing screen (match the rest of the refresh).
@@ -226,12 +250,16 @@ private struct Squiggle: Shape {
 struct LandingView: View {
     var ctaTitle: String = "Get started"
     var onGetStarted: () -> Void = {}
+    // iPad (regular width): the iPhone layout's hand-tuned offsets pin content
+    // low and stretch the CTA — centre a fixed-width column instead.
+    @Environment(\.horizontalSizeClass) private var hSize
+    private var isPad: Bool { hSize == .regular }
 
     var body: some View {
         ZStack {
             Brand.violet.ignoresSafeArea()
 
-            // Content, pinned to the bottom
+            // Content, pinned to the bottom (iPhone) / centred (iPad)
             VStack(spacing: 0) {
                 Spacer()
 
@@ -241,7 +269,7 @@ struct LandingView: View {
                     .frame(width: 271)
                     .shadow(color: Brand.textPrimary.opacity(0.12), radius: 12, x: 0, y: 6)
                     .padding(.bottom, 46)
-                    .offset(y: -125)
+                    .offset(y: isPad ? 0 : -125)
 
                 // Tagline — "Spanish." in Luckiest Guy (yellow period), the line
                 // below in Inter with a yellow squiggle underline.
@@ -263,7 +291,7 @@ struct LandingView: View {
                 .multilineTextAlignment(.center)
                 // Lift the text toward the (offset-raised) logo so the gap up
                 // to the logo matches the gap down to the button (~100pt each).
-                .offset(y: -70)
+                .offset(y: isPad ? 0 : -70)
 
                 Text("Read and listen to comics in Spanish, tap sentences and words to understand them and practice out loud.")
                     .font(Brand.body(15.5))
@@ -271,7 +299,7 @@ struct LandingView: View {
                     .multilineTextAlignment(.center)
                     .lineSpacing(3)
                     .frame(maxWidth: 280)
-                    .offset(y: -70)
+                    .offset(y: isPad ? 0 : -70)
                     .padding(.top, 24)
 
                 Button(action: onGetStarted) {
@@ -285,9 +313,12 @@ struct LandingView: View {
                         .shadow(color: Brand.ink.opacity(0.25), radius: 10, x: 0, y: 8)
                 }
                 .padding(.top, 30)
+
+                if isPad { Spacer() }
             }
+            .frame(maxWidth: isPad ? 480 : .infinity)
             .padding(.horizontal, 30)
-            .padding(.bottom, 46)
+            .padding(.bottom, isPad ? 0 : 46)
         }
     }
 }
@@ -1102,6 +1133,272 @@ private struct NotebookPageEditor: View {
                         .fontWeight(.semibold)
                 }
             }
+        }
+    }
+}
+
+
+// MARK: - Store (Comigo Unlimited subscription)
+
+/// StoreKit 2 wrapper for Comigo Unlimited: a monthly subscription or a
+/// one-time lifetime unlock (non-consumable). Entitlement rule: the FIRST
+/// episode of every collection (and any standalone comic) is free; everything
+/// else needs either purchase.
+@MainActor
+final class StoreService: ObservableObject {
+    static let shared = StoreService()
+    static let monthlyProductID = "com.comigo.unlimited.monthly"
+    static let lifetimeProductID = "com.comigo.unlimited.lifetime"
+
+    @Published private(set) var hasUnlimited = false
+    @Published private(set) var monthlyProduct: Product?
+    @Published private(set) var lifetimeProduct: Product?
+    private var updatesTask: Task<Void, Never>?
+
+    private init() {
+        // Keep entitlement current across renewals/refunds/family sharing.
+        updatesTask = Task { [weak self] in
+            for await update in Transaction.updates {
+                if case .verified(let t) = update { await t.finish() }
+                await self?.refreshEntitlement()
+            }
+        }
+        Task {
+            await loadProducts()
+            await refreshEntitlement()
+        }
+    }
+
+    func loadProducts() async {
+        let products = (try? await Product.products(for: [Self.monthlyProductID, Self.lifetimeProductID])) ?? []
+        monthlyProduct = products.first { $0.id == Self.monthlyProductID }
+        lifetimeProduct = products.first { $0.id == Self.lifetimeProductID }
+    }
+
+    func refreshEntitlement() async {
+        // Active subscription OR the lifetime unlock — a non-consumable stays
+        // in currentEntitlements forever unless refunded (revocationDate).
+        var active = false
+        for await entitlement in Transaction.currentEntitlements {
+            if case .verified(let t) = entitlement,
+               t.productID == Self.monthlyProductID || t.productID == Self.lifetimeProductID,
+               t.revocationDate == nil {
+                active = true
+            }
+        }
+        hasUnlimited = active
+    }
+
+    /// Returns true when the purchase completed and the entitlement is live.
+    func purchase(_ product: Product) async throws -> Bool {
+        let result = try await product.purchase()
+        switch result {
+        case .success(let verification):
+            if case .verified(let t) = verification { await t.finish() }
+            await refreshEntitlement()
+            return hasUnlimited
+        case .userCancelled, .pending:
+            return false
+        @unknown default:
+            return false
+        }
+    }
+
+    func restore() async {
+        try? await AppStore.sync()
+        await refreshEntitlement()
+    }
+
+    /// First episode of every collection is free; standalone comics are free.
+    static func isFreeEpisode(episodeNumber: Int?, collectionId: String?) -> Bool {
+        guard collectionId != nil else { return true }
+        return (episodeNumber ?? 1) == 1
+    }
+
+    func isUnlocked(episodeNumber: Int?, collectionId: String?) -> Bool {
+        hasUnlimited || Self.isFreeEpisode(episodeNumber: episodeNumber, collectionId: collectionId)
+    }
+
+    enum StoreError: LocalizedError {
+        case productUnavailable
+        var errorDescription: String? { "The subscription isn't available right now. Please try again in a moment." }
+    }
+}
+
+// MARK: - Paywall
+
+struct PaywallView: View {
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var store = StoreService.shared
+    @State private var purchasing = false
+    @State private var errorMessage: String?
+
+    // Debug screenshot mode (--paywall-preview): products can't load via
+    // simctl (no StoreKit config outside Xcode), so show the real store
+    // prices as static text. Never active in release builds.
+    private var previewMode: Bool {
+        #if DEBUG
+        return ProcessInfo.processInfo.arguments.contains("--paywall-preview")
+        #else
+        return false
+        #endif
+    }
+    private var monthlyPriceLine: String? {
+        if let price = store.monthlyProduct?.displayPrice { return "\(price) / month · cancel anytime" }
+        return previewMode ? "£7.99 / month · cancel anytime" : nil
+    }
+    private var lifetimePriceLine: String? {
+        if let price = store.lifetimeProduct?.displayPrice { return "\(price) once · yours forever" }
+        return previewMode ? "$49.99 once · yours forever" : nil
+    }
+
+    private let violet = Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255)
+    private let ink = Color(red: 0x15/255, green: 0x17/255, blue: 0x2A/255)
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Spacer()
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.white.opacity(0.85))
+                }
+            }
+            .padding([.top, .horizontal], 18)
+
+            Spacer(minLength: 8)
+
+            Image("comicgo_logo_yoni_1_alpha_layer_2")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 190)
+
+            Text("Keep the story going")
+                .font(.system(size: 28, weight: .heavy, design: .rounded))
+                .foregroundColor(.white)
+                .padding(.top, 18)
+
+            VStack(alignment: .leading, spacing: 12) {
+                paywallRow("book.fill", "Every episode of every series — current and future")
+                paywallRow("waveform", "All audio, translations and practice modes")
+                paywallRow("sparkles", "New comics added regularly")
+                paywallRow("gift.fill", "The first episode of every series stays free")
+            }
+            .padding(.horizontal, 34)
+            .padding(.top, 18)
+
+            Spacer(minLength: 12)
+
+            VStack(spacing: 10) {
+                // Monthly — the primary option.
+                Button {
+                    purchase(store.monthlyProduct)
+                } label: {
+                    VStack(spacing: 3) {
+                        Text(purchasing ? "One moment…" : "Subscribe")
+                            .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        if let line = monthlyPriceLine {
+                            Text(line)
+                                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                .opacity(0.85)
+                        }
+                    }
+                    .foregroundColor(ink)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.white, in: RoundedRectangle(cornerRadius: 16))
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(ink, lineWidth: 3))
+                }
+                .disabled(purchasing)
+
+                // Lifetime — one-time unlock, shown once its product loads.
+                if let line = lifetimePriceLine {
+                    Button {
+                        purchase(store.lifetimeProduct)
+                    } label: {
+                        VStack(spacing: 3) {
+                            Text("Lifetime access")
+                                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                            Text(line)
+                                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                .opacity(0.85)
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 16))
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(.white, lineWidth: 2))
+                    }
+                    .disabled(purchasing)
+                }
+            }
+            .padding(.horizontal, 28)
+
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.footnote)
+                    .foregroundColor(.yellow)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 28)
+                    .padding(.top, 8)
+            }
+
+            Button("Restore purchases") {
+                Task {
+                    await store.restore()
+                    if store.hasUnlimited { dismiss() }
+                }
+            }
+            .font(.system(size: 14, weight: .semibold, design: .rounded))
+            .foregroundColor(.white.opacity(0.9))
+            .padding(.top, 12)
+
+            HStack(spacing: 18) {
+                Link("Privacy Policy", destination: URL(string: "https://comigo.net/privacy.html")!)
+                Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+            }
+            .font(.footnote)
+            .foregroundColor(.white.opacity(0.7))
+            .padding(.top, 10)
+            .padding(.bottom, 26)
+        }
+        .background(violet.ignoresSafeArea())
+        .onAppear {
+            if store.monthlyProduct == nil {
+                Task { await store.loadProducts() }
+            }
+        }
+    }
+
+    private func paywallRow(_ icon: String, _ text: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .foregroundColor(.yellow)
+                .frame(width: 22)
+            Text(text)
+                .font(.system(size: 15.5, weight: .medium, design: .rounded))
+                .foregroundColor(.white)
+        }
+    }
+
+    private func purchase(_ product: Product?) {
+        errorMessage = nil
+        guard let product else {
+            // Products not loaded yet (offline / App Store hiccup) — retry the fetch.
+            errorMessage = StoreService.StoreError.productUnavailable.errorDescription
+            Task { await store.loadProducts() }
+            return
+        }
+        purchasing = true
+        Task {
+            do {
+                let ok = try await StoreService.shared.purchase(product)
+                if ok { dismiss() }
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            purchasing = false
         }
     }
 }

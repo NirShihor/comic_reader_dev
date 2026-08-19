@@ -101,6 +101,7 @@ struct LibraryView: View {
         .overlay(alignment: .bottom) {
             if showCreatorBanner && !creatorMessageSeen {
                 creatorBanner
+                    .frame(maxWidth: 652)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 10)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -512,6 +513,7 @@ struct LibraryView: View {
                 }
             }
             .padding()
+            .readableColumn()
         }
     }
 

@@ -127,6 +127,7 @@ struct CollectionDetailView: View {
                 episodeSection
             }
             .padding(.vertical)
+            .readableColumn()
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
