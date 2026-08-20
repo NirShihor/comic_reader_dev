@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
@@ -79,6 +80,19 @@ struct SettingsView: View {
                 Text("About")
             }
 
+            // Diagnostics
+            Section {
+                NavigationLink {
+                    SpeechLogView()
+                } label: {
+                    Label("Speech log", systemImage: "waveform")
+                }
+            } header: {
+                Text("Diagnostics")
+            } footer: {
+                Text("A short on-device record of speaking-practice attempts, for troubleshooting microphone issues. Nothing is uploaded.")
+            }
+
             // Version (real values from the bundle, not a hard-coded string)
             Section {
                 HStack {
@@ -91,6 +105,64 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Settings")
+    }
+}
+
+// MARK: - Speech diagnostics log
+/// Read-only viewer for the WhisperDiag rolling attempt log, with Copy for
+/// pasting into a bug report.
+struct SpeechLogView: View {
+    @State private var entries: [WhisperDiag] = []
+    @State private var copied = false
+
+    var body: some View {
+        List {
+            if entries.isEmpty {
+                Text("No attempts recorded yet. Do some speaking practice, then check back here.")
+                    .foregroundStyle(.secondary)
+            }
+            ForEach(Array(entries.reversed())) { e in
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack {
+                        Text(e.outcome)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(e.outcome == "ok" ? Color.green : Color.orange)
+                        Spacer()
+                        Text(e.date, format: .dateTime.day().month().hour().minute())
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Text("\(e.route) · peak \(String(format: "%.1f", e.peakDb)) dB · \(e.buffers) buffers")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    if !e.heard.isEmpty {
+                        Text("Heard: “\(e.heard)”").font(.caption)
+                    }
+                    if !e.expected.isEmpty {
+                        Text("Expected: “\(e.expected)”").font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+        }
+        .navigationTitle("Speech log")
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Clear") {
+                    WhisperDiag.clear()
+                    entries = []
+                }
+                .disabled(entries.isEmpty)
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(copied ? "Copied ✓" : "Copy") {
+                    UIPasteboard.general.string = WhisperDiag.exportText()
+                    copied = true
+                }
+                .disabled(entries.isEmpty)
+            }
+        }
+        .onAppear { entries = WhisperDiag.load() }
     }
 }
 

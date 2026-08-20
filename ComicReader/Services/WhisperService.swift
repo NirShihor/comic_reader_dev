@@ -461,6 +461,15 @@ class WhisperService: ObservableObject {
         return data
     }
 
+    /// Current audio route ("AirPods Pro → AirPods Pro", "iPhone Microphone →
+    /// Speaker", car Bluetooth names…) — recorded with each diagnostics entry.
+    private func currentRouteDescription() -> String {
+        let r = AVAudioSession.sharedInstance().currentRoute
+        let inp = r.inputs.map(\.portName).joined(separator: "+")
+        let out = r.outputs.map(\.portName).joined(separator: "+")
+        return "\(inp.isEmpty ? "?" : inp) → \(out.isEmpty ? "?" : out)"
+    }
+
     /// Stop recording and transcribe with Whisper
     func stopRecording(expectedText: String? = nil, language: String = "es") async -> String {
         guard isRecording else {
@@ -478,6 +487,8 @@ class WhisperService: ObservableObject {
         if buffersThisAttempt == 0 {
             captureDiagnostic = "mic stalled — no audio captured"
             print("[Whisper] ZERO buffers captured this attempt — engine was dead")
+            WhisperDiag.record(route: currentRouteDescription(), peakDb: peakPower, buffers: 0,
+                               outcome: "zero-buffers", heard: "", expected: expectedText)
             isProcessing = false
             return ""
         }
@@ -488,6 +499,8 @@ class WhisperService: ObservableObject {
         // than unlocked ones; a too-high gate silently fails every attempt.
         if peakPower < -55 {
             print("[Whisper] No speech detected (peak power: \(peakPower) dB), skipping transcription")
+            WhisperDiag.record(route: currentRouteDescription(), peakDb: peakPower, buffers: buffersThisAttempt,
+                               outcome: "gated-silent", heard: "", expected: expectedText)
             isProcessing = false
             return ""
         }
@@ -536,15 +549,22 @@ class WhisperService: ObservableObject {
             // their "I didn't hear anything" path instead of scoring it wrong.
             if isAnchorEcho(transcription, language: language) {
                 print("[Whisper] Anchor prompt echoed — treating as no speech")
+                WhisperDiag.record(route: currentRouteDescription(), peakDb: peakPower, buffers: buffersThisAttempt,
+                                   outcome: "anchor-echo", heard: transcription, expected: expectedText)
                 transcribedText = ""
                 isProcessing = false
                 return ""
             }
+            WhisperDiag.record(route: currentRouteDescription(), peakDb: peakPower, buffers: buffersThisAttempt,
+                               outcome: transcription.isEmpty ? "empty" : "ok",
+                               heard: transcription, expected: expectedText)
             transcribedText = transcription
             isProcessing = false
             return transcription
         } catch {
             self.error = "Transcription failed: \(error.localizedDescription)"
+            WhisperDiag.record(route: currentRouteDescription(), peakDb: peakPower, buffers: buffersThisAttempt,
+                               outcome: "error: \(error.localizedDescription)", heard: "", expected: expectedText)
             isProcessing = false
             return ""
         }
@@ -950,5 +970,54 @@ enum WhisperError: LocalizedError {
         case .apiError(let code, let message):
             return "API error (\(code)): \(message)"
         }
+    }
+}
+
+
+// MARK: - Whisper attempt diagnostics
+/// Rolling on-device log of speech-capture attempts, viewable in Settings →
+/// Speech log. Exists to diagnose "I didn't hear anything" reports from the
+/// field (car Bluetooth, AirPods, locked phone) without an attached debugger.
+/// Kept small (last 50 attempts), never uploaded anywhere.
+struct WhisperDiag: Codable, Identifiable {
+    var id = UUID()
+    let date: Date
+    let route: String
+    let peakDb: Float
+    let buffers: Int
+    let outcome: String   // ok | empty | gated-silent | zero-buffers | anchor-echo | error: …
+    let heard: String
+    let expected: String
+
+    static let storageKey = "whisperDiag.v1"
+
+    static func record(route: String, peakDb: Float, buffers: Int,
+                       outcome: String, heard: String, expected: String?) {
+        var all = load()
+        all.append(WhisperDiag(date: Date(), route: route, peakDb: peakDb, buffers: buffers,
+                               outcome: outcome, heard: String(heard.prefix(80)),
+                               expected: String((expected ?? "").prefix(80))))
+        if all.count > 50 { all.removeFirst(all.count - 50) }
+        if let data = try? JSONEncoder().encode(all) {
+            UserDefaults.standard.set(data, forKey: storageKey)
+        }
+    }
+
+    static func load() -> [WhisperDiag] {
+        guard let data = UserDefaults.standard.data(forKey: storageKey),
+              let all = try? JSONDecoder().decode([WhisperDiag].self, from: data) else { return [] }
+        return all
+    }
+
+    static func clear() { UserDefaults.standard.removeObject(forKey: storageKey) }
+
+    static func exportText() -> String {
+        let df = DateFormatter(); df.dateFormat = "dd MMM HH:mm:ss"
+        return load().reversed().map {
+            var line = "\(df.string(from: $0.date)) | \($0.route) | peak \(String(format: "%.1f", $0.peakDb)) dB | \($0.buffers) buf | \($0.outcome)"
+            if !$0.heard.isEmpty { line += " | heard: \"\($0.heard)\"" }
+            if !$0.expected.isEmpty { line += " | expected: \"\($0.expected)\"" }
+            return line
+        }.joined(separator: "\n")
     }
 }
