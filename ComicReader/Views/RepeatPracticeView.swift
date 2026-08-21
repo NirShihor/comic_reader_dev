@@ -772,8 +772,15 @@ struct RepeatPracticeView: View {
                 return
             }
 
-            // Reject if user spoke the English translation instead of Spanish
-            if !sentence.translation.isEmpty && detectSpokenEnglish(spoken: transcription, expected: sentence.translation) {
+            // Reject if user spoke the English translation instead of Spanish —
+            // but ONLY when the Spanish line and its translation are actually
+            // distinguishable. Some lines are identical in both languages
+            // ("No...", "¡Hospital!"): there, a perfect Spanish answer also
+            // "matches the English" and this guard would fail a correct attempt.
+            let translationIndistinguishable = whisperService.compareText(
+                spoken: sentence.translation, expected: sentence.text, passThreshold: 0.85).isCorrect
+            if !sentence.translation.isEmpty && !translationIndistinguishable
+                && detectSpokenEnglish(spoken: transcription, expected: sentence.translation) {
                 // Spoke the meaning, not the Spanish — mark incorrect
                 if isFirstRepeatAttempt {
                     isFirstRepeatAttempt = false
@@ -803,6 +810,14 @@ struct RepeatPracticeView: View {
             if isFirstRepeatAttempt {
                 if isCorrect { pronunciationCorrect += 1 }
                 isFirstRepeatAttempt = false
+            }
+
+            // Failed AND the recording was notably quiet: mis-transcription of
+            // faint speech is far likelier than a truly wrong answer. Ask for a
+            // louder take (unscored) instead of a demoralising "not quite".
+            if !isCorrect && whisperService.lastAttemptPeakDb < -24 {
+                handleQuietAudio(repeatStep: true)
+                return
             }
 
             showSpanishText = true
@@ -859,6 +874,12 @@ struct RepeatPracticeView: View {
             }
 
             let isCorrect = compareEnglish(spoken: transcription, expected: sentence.translation)
+
+            // Quiet failed take → ask for a louder one, unscored (see repeat step).
+            if !isCorrect && whisperService.lastAttemptPeakDb < -24 {
+                handleQuietAudio(repeatStep: false)
+                return
+            }
 
             // Score only first attempt
             if isFirstMeaningAttempt {
@@ -1178,6 +1199,16 @@ struct RepeatPracticeView: View {
             speakTTS("I didn't hear anything. Please try again.") {
                 self.handleAudioFinished()
             }
+        }
+    }
+
+    /// Quiet-but-present speech that failed the comparison: the transcription is
+    /// unreliable at low levels, so don't score it — ask for a louder take and
+    /// re-run the same step (reuses the no-audio reprompt flow).
+    private func handleQuietAudio(repeatStep: Bool) {
+        state = repeatStep ? .repromptNoAudioRepeat : .repromptNoAudioMeaning
+        speakTTS("I couldn't hear you well. Please speak a little louder.") {
+            self.handleAudioFinished()
         }
     }
 

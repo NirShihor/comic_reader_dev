@@ -37,6 +37,9 @@ class WhisperService: ObservableObject {
     private var recordingFormatSampleRate: Double = 0
     private var restartTask: Task<Void, Never>?
     private var peakPower: Float = -160
+    /// Peak level of the most recent attempt, for callers that want to
+    /// distinguish "wrong answer" from "too quiet to judge fairly".
+    var lastAttemptPeakDb: Float { peakPower }
     private var speechDetected = false
     private var silenceStart: Date?
     var onSilenceDetected: (() -> Void)?
