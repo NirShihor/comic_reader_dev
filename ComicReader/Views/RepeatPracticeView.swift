@@ -134,7 +134,7 @@ struct RepeatPracticeView: View {
     private let correctClip = "correct"
     private let notQuiteClip = "not_quite_listen_again"
     private let whatDoesItMeanClip = "what_does_it_mean"
-    private let noAudioClip = "no_audio"   // "I didn't hear anything. Please try again."
+    private let noAudioClip = "no_audio"   // "I couldn't quite hear you."
 
     var body: some View {
         Group {
@@ -765,10 +765,21 @@ struct RepeatPracticeView: View {
 
             resetAudioSessionForPlayback()
 
-            // No speech captured → say so and re-record, rather than scoring a
-            // silent attempt as wrong.
+            // Empty transcription → re-record, never score it. Pick the honest
+            // message: at normal volume the user DID speak (the model failed —
+            // e.g. echoed our anchor prompt), so "I didn't hear anything" is
+            // wrong and confusing; only true near-silence gets that line.
             if transcription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                handleNoAudio(repeatStep: true)
+                if whisperService.lastAttemptHeardSpeech {
+                    // They spoke, but nothing usable came back (e.g. the model
+                    // echoed the anchor prompt) — that's a miss, not silence.
+                    if isFirstRepeatAttempt { isFirstRepeatAttempt = false }
+                    showSpanishText = true
+                    state = .feedbackRepeat(correct: false)
+                    audioManager.play(notQuiteClip)
+                } else {
+                    handleNoAudio(repeatStep: true)
+                }
                 return
             }
 
@@ -810,14 +821,6 @@ struct RepeatPracticeView: View {
             if isFirstRepeatAttempt {
                 if isCorrect { pronunciationCorrect += 1 }
                 isFirstRepeatAttempt = false
-            }
-
-            // Failed AND the recording was notably quiet: mis-transcription of
-            // faint speech is far likelier than a truly wrong answer. Ask for a
-            // louder take (unscored) instead of a demoralising "not quite".
-            if !isCorrect && whisperService.lastAttemptPeakDb < -24 {
-                handleQuietAudio(repeatStep: true)
-                return
             }
 
             showSpanishText = true
@@ -867,19 +870,20 @@ struct RepeatPracticeView: View {
 
             resetAudioSessionForPlayback()
 
-            // No speech captured → say so and re-record, rather than scoring it wrong.
+            // Empty transcription → re-record; message by level (see repeat step).
             if transcription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                handleNoAudio(repeatStep: false)
+                if whisperService.lastAttemptHeardSpeech {
+                    // Spoke but unusable — grade as a miss (see repeat step).
+                    if isFirstMeaningAttempt { isFirstMeaningAttempt = false }
+                    state = .feedbackMeaning(correct: false)
+                    audioManager.play(notQuiteClip)
+                } else {
+                    handleNoAudio(repeatStep: false)
+                }
                 return
             }
 
             let isCorrect = compareEnglish(spoken: transcription, expected: sentence.translation)
-
-            // Quiet failed take → ask for a louder one, unscored (see repeat step).
-            if !isCorrect && whisperService.lastAttemptPeakDb < -24 {
-                handleQuietAudio(repeatStep: false)
-                return
-            }
 
             // Score only first attempt
             if isFirstMeaningAttempt {
@@ -1196,19 +1200,9 @@ struct RepeatPracticeView: View {
         if Bundle.main.url(forResource: noAudioClip, withExtension: "mp3") != nil {
             audioManager.play(noAudioClip)
         } else {
-            speakTTS("I didn't hear anything. Please try again.") {
+            speakTTS("I couldn't quite hear you.") {
                 self.handleAudioFinished()
             }
-        }
-    }
-
-    /// Quiet-but-present speech that failed the comparison: the transcription is
-    /// unreliable at low levels, so don't score it — ask for a louder take and
-    /// re-run the same step (reuses the no-audio reprompt flow).
-    private func handleQuietAudio(repeatStep: Bool) {
-        state = repeatStep ? .repromptNoAudioRepeat : .repromptNoAudioMeaning
-        speakTTS("I couldn't hear you well. Please speak a little louder.") {
-            self.handleAudioFinished()
         }
     }
 

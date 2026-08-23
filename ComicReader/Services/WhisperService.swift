@@ -37,10 +37,13 @@ class WhisperService: ObservableObject {
     private var recordingFormatSampleRate: Double = 0
     private var restartTask: Task<Void, Never>?
     private var peakPower: Float = -160
-    /// Peak level of the most recent attempt, for callers that want to
-    /// distinguish "wrong answer" from "too quiet to judge fairly".
-    var lastAttemptPeakDb: Float { peakPower }
     private var speechDetected = false
+    /// Whether the last attempt plausibly contained real speech — computed at
+    /// stop time by comparing the attempt's levels against ITS OWN background
+    /// (see classifySpeech), so it adapts to quiet rooms, cars and cafés alike.
+    private(set) var lastAttemptHeardSpeech = false
+    /// Per-buffer RMS levels (~10/sec) for the current attempt.
+    private var levelHistory: [Float] = []
     private var silenceStart: Date?
     var onSilenceDetected: (() -> Void)?
     // dB below which input counts as "silence". Locked iPhones apply lower
@@ -135,6 +138,8 @@ class WhisperService: ObservableObject {
             peakPower = -160
             speechDetected = false
             silenceStart = nil
+            levelHistory = []
+            lastAttemptHeardSpeech = false
             captureDiagnostic = nil
             attemptStartBufferCount = capture.stats().count
             capture.setFile(file)
@@ -386,6 +391,21 @@ class WhisperService: ObservableObject {
         onSilenceDetected = nil
     }
 
+    /// Did this attempt contain real speech? Judged RELATIVE to the attempt's
+    /// own background: the floor is the 20th-percentile level, and speech must
+    /// stand 12 dB above it for at least ~0.2s (2+ buffers 10 dB above floor).
+    /// Absolute thresholds can't do this job — a quiet room's ambience and a
+    /// car's are 20 dB apart — and single-buffer spikes (clicks, thumps) fail
+    /// the sustained requirement.
+    static func classifySpeech(levels: [Float]) -> Bool {
+        guard levels.count >= 5 else { return false }
+        let sorted = levels.sorted()
+        let floor = sorted[max(0, Int(Double(sorted.count) * 0.2))]
+        let peak = sorted[sorted.count - 1]
+        let sustained = levels.filter { $0 > floor + 10 }.count
+        return peak > floor + 12 && sustained >= 2
+    }
+
     /// RMS level of a buffer in dBFS
     private nonisolated static func levelDb(of buffer: AVAudioPCMBuffer) -> Float {
         guard let data = buffer.floatChannelData?[0] else { return -160 }
@@ -412,6 +432,7 @@ class WhisperService: ObservableObject {
         if power > peakPower {
             peakPower = power
         }
+        levelHistory.append(power)
         if power > silenceThreshold {
             speechDetected = true
             silenceStart = nil
@@ -495,7 +516,8 @@ class WhisperService: ObservableObject {
             isProcessing = false
             return ""
         }
-        print("[Whisper] Attempt captured \(buffersThisAttempt) buffers, peak \(peakPower) dB")
+        lastAttemptHeardSpeech = Self.classifySpeech(levels: levelHistory)
+        print("[Whisper] Attempt captured \(buffersThisAttempt) buffers, peak \(peakPower) dB, heardSpeech \(lastAttemptHeardSpeech)")
 
         // Skip transcription if no speech detected (peak power below threshold).
         // Generous on purpose: locked iPhones meter speech several dB lower
@@ -651,7 +673,12 @@ class WhisperService: ObservableObject {
         // "the", "is", "a" — all in the English anchor) isn't discarded as an echo.
         // Real answers in the meaning/word drills are only 1–3 words.
         if a.contains(t) {
-            return t.split(separator: " ").count >= 4
+            let words = t.split(separator: " ").count
+            // A PREFIX of the anchor is far more echo-shaped than anchor words from
+            // anywhere — "lo que sigue" (3 words) was graded as a real (wrong)
+            // answer. Prefixes count as echoes from 3 words; elsewhere from 4.
+            if a.hasPrefix(t) { return words >= 3 }
+            return words >= 4
         }
         return false
     }
@@ -811,8 +838,12 @@ class WhisperService: ObservableObject {
                         // Short words (1-3 chars): allow 1 edit of any kind
                         matches = distance <= 1
                     } else {
-                        // Regular words: allow 1 edit of any kind, or 2 edits for longer words (8+)
-                        matches = distance <= 1 || (maxLen >= 8 && distance <= 2)
+                        // Regular words: 1 edit; longer words scale — Whisper's
+                        // phonetic spellings of long Spanish words drift further
+                        // ("descubrimiento" → "descobdemiento" is 3 edits), so
+                        // 8+ letter words allow 25% of their length (8–11 → 2,
+                        // 12–15 → 3, 16+ → 4).
+                        matches = distance <= 1 || (maxLen >= 8 && Double(distance) <= Double(maxLen) * 0.25)
                     }
                     if matches {
                         matched = true
