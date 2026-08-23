@@ -4,6 +4,11 @@ import UIKit
 struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @AppStorage("appearanceMode") private var appearanceMode = "system"
+    @AppStorage("demo.hideCues") private var hideCues = false
+
+    private var hideCuesBinding: Binding<Bool> {
+        Binding(get: { hideCues }, set: { hideCues = $0 })
+    }
 
     var body: some View {
         List {
@@ -87,10 +92,14 @@ struct SettingsView: View {
                 } label: {
                     Label("Speech log", systemImage: "waveform")
                 }
+
+                Toggle(isOn: hideCuesBinding) {
+                    Label("Hide reading cues", systemImage: "hand.point.up.left")
+                }
             } header: {
                 Text("Diagnostics")
             } footer: {
-                Text("A short on-device record of speaking-practice attempts, for troubleshooting microphone issues. Nothing is uploaded.")
+                Text("Speech log: a short on-device record of speaking-practice attempts, for troubleshooting microphone issues — nothing is uploaded. Hide reading cues: turns off the pointing-hand hint on page arrival (useful for screen recordings).")
             }
 
             // Version (real values from the bundle, not a hard-coded string)

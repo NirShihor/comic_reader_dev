@@ -452,6 +452,12 @@ struct PageView: View {
     private func flashFirstBubble() {
         flashGeneration += 1
         let gen = flashGeneration
+        // Settings → Diagnostics → "Hide reading cues": suppress the arrival
+        // hand for clean marketing/screen recordings.
+        guard !UserDefaults.standard.bool(forKey: "demo.hideCues") else {
+            flashBubbleId = nil; flashArrowOn = false
+            return
+        }
         guard currentPageIndex > 0, selectedBubbleIndex == nil, !tooltipShowing,
               let first = pageTextBubbles.first else {
             flashBubbleId = nil; flashArrowOn = false
