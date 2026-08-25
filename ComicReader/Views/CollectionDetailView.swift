@@ -259,7 +259,8 @@ struct CollectionDetailView: View {
         if !catalogEpisodes.isEmpty {
             LazyVStack(spacing: 12) {
                 ForEach(Array(catalogEpisodes.enumerated()), id: \.element.id) { index, ep in
-                    if let local = downloadedComic(ep.id) {
+                    // Downloaded but stale → store card, which shows Open + Update.
+                    if let local = downloadedComic(ep.id), !storeService.updateAvailable(for: ep.id) {
                         // Downloaded → open in place.
                         NavigationLink(destination: ComicDetailView(comic: local)) {
                             EpisodeCard(comic: local, progress: progressManager.getProgress(for: local.id))

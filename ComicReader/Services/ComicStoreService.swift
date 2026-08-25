@@ -14,6 +14,9 @@ struct StoreComic: Identifiable, Codable {
     let language: String
     let fileSizeMB: Double
     let version: String
+    /// Content hash of the server's current bundle — compared against the
+    /// hash recorded at download time to detect available updates.
+    let bundleVersion: String?
     let downloadUrl: String
     let collectionTitle: String?
     let collectionTitleEn: String?
@@ -24,7 +27,7 @@ struct StoreComic: Identifiable, Codable {
 
     enum CodingKeys: String, CodingKey {
         case id, title, titleEn, description, coverThumbnailUrl, level
-        case totalPages, estimatedMinutes, language, fileSizeMB, version, downloadUrl
+        case totalPages, estimatedMinutes, language, fileSizeMB, version, bundleVersion, downloadUrl
         case collectionTitle, collectionTitleEn, episodeNumber
         case collectionDescription, collectionCoverThumbnailUrl
         case order
@@ -43,6 +46,7 @@ struct StoreComic: Identifiable, Codable {
         language = try container.decodeIfPresent(String.self, forKey: .language) ?? "es"
         fileSizeMB = try container.decodeIfPresent(Double.self, forKey: .fileSizeMB) ?? 0
         version = try container.decodeIfPresent(String.self, forKey: .version) ?? "1.0"
+        bundleVersion = try container.decodeIfPresent(String.self, forKey: .bundleVersion)
         downloadUrl = try container.decodeIfPresent(String.self, forKey: .downloadUrl) ?? ""
         collectionTitle = try container.decodeIfPresent(String.self, forKey: .collectionTitle)
         collectionTitleEn = try container.decodeIfPresent(String.self, forKey: .collectionTitleEn)
@@ -54,7 +58,7 @@ struct StoreComic: Identifiable, Codable {
 
     init(id: String, title: String, titleEn: String? = nil, description: String, coverThumbnailUrl: String,
          level: String, totalPages: Int, estimatedMinutes: Int, language: String,
-         fileSizeMB: Double, version: String, downloadUrl: String,
+         fileSizeMB: Double, version: String, bundleVersion: String? = nil, downloadUrl: String,
          collectionTitle: String? = nil, collectionTitleEn: String? = nil, episodeNumber: Int? = nil,
          collectionDescription: String? = nil, collectionCoverThumbnailUrl: String? = nil,
          order: Int? = nil) {
@@ -69,6 +73,7 @@ struct StoreComic: Identifiable, Codable {
         self.language = language
         self.fileSizeMB = fileSizeMB
         self.version = version
+        self.bundleVersion = bundleVersion
         self.downloadUrl = downloadUrl
         self.collectionTitle = collectionTitle
         self.collectionTitleEn = collectionTitleEn
@@ -188,6 +193,26 @@ class ComicStoreService: ObservableObject {
         return .notDownloaded
     }
 
+    // MARK: - Bundle versions (update detection)
+
+    /// comicId → bundleVersion recorded when that bundle was downloaded.
+    private let bundleVersionsKey = "downloadedBundleVersions.v1"
+    private var downloadedBundleVersions: [String: String] {
+        get { UserDefaults.standard.dictionary(forKey: bundleVersionsKey) as? [String: String] ?? [:] }
+        set { UserDefaults.standard.set(newValue, forKey: bundleVersionsKey) }
+    }
+
+    /// True when the server's bundle differs from what this device downloaded.
+    /// Devices that downloaded before version tracking existed have no record,
+    /// which deliberately reads as "update available" — their bundles predate
+    /// the current exporter anyway.
+    func updateAvailable(for comicId: String) -> Bool {
+        guard localStorage.isDownloaded(comicId),
+              let latest = catalog.first(where: { $0.id == comicId })?.bundleVersion,
+              !latest.isEmpty else { return false }
+        return downloadedBundleVersions[comicId] != latest
+    }
+
     // MARK: - Downloads
 
     /// Download a comic from the store as a single ZIP bundle
@@ -252,6 +277,9 @@ class ComicStoreService: ObservableObject {
                 ComicImageLoader.shared.clearCache(forComic: folderName)
                 URLCache.shared.removeAllCachedResponses()
                 localStorage.unhideComic(folderName)
+                if let bv = comic.bundleVersion, !bv.isEmpty {
+                    downloadedBundleVersions[folderName] = bv
+                }
                 downloadStates[comic.id] = .downloaded
                 await localStorage.loadDownloadedComics()
 

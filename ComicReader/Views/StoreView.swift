@@ -448,6 +448,24 @@ struct StoreComicCard: View {
 
         case .downloaded:
             HStack {
+                if storeService.updateAvailable(for: comic.id) {
+                    // Newer bundle on the server — one tap re-downloads in place
+                    // (progress, vocabulary and notes all survive: they live
+                    // outside the bundle, keyed by comic id).
+                    Button {
+                        Task { await storeService.downloadComic(comic) }
+                    } label: {
+                        Label("Update", systemImage: "arrow.triangle.2.circlepath")
+                            .font(.subheadline)
+                            .lineLimit(1)
+                            .fixedSize()
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.orange)
+                }
+
                 if let downloadedComic = localStorage.downloadedComics.first(where: { $0.id == comic.id }) {
                     Group {
                         if let onOpenComic {
