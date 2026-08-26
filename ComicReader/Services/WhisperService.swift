@@ -42,6 +42,10 @@ class WhisperService: ObservableObject {
     /// stop time by comparing the attempt's levels against ITS OWN background
     /// (see classifySpeech), so it adapts to quiet rooms, cars and cafés alike.
     private(set) var lastAttemptHeardSpeech = false
+    /// What an UNSTEERED transcription pass heard on the last attempt (no
+    /// language/prompt bias) — nil when the server didn't run one. Used to
+    /// catch "answered in English" even when the steered pass translated it.
+    private(set) var lastFreeTranscription: String?
     /// Per-buffer RMS levels (~10/sec) for the current attempt.
     private var levelHistory: [Float] = []
     private var silenceStart: Date?
@@ -140,6 +144,7 @@ class WhisperService: ObservableObject {
             silenceStart = nil
             levelHistory = []
             lastAttemptHeardSpeech = false
+            lastFreeTranscription = nil
             captureDiagnostic = nil
             attemptStartBufferCount = capture.stats().count
             capture.setFile(file)
@@ -567,7 +572,8 @@ class WhisperService: ObservableObject {
             // (e.g. Spanish decoded as Esperanto), so we pass a GENERIC prompt in
             // the target language to anchor it — it contains no answer words, so it
             // can't cause an echo/false-pass.
-            let transcription = try await transcribeWithWhisper(audioURL: url, prompt: languageAnchorPrompt(language), language: language)
+            let transcription = try await transcribeWithWhisper(audioURL: url, prompt: languageAnchorPrompt(language), language: language,
+                                                                detectLanguage: language == "es")
             print("[Whisper] Transcribed: \"\(transcription)\" (expected: \"\(expectedText ?? "-")\", speechDetected: \(speechDetected))")
             // On silence/non-speech the model often just echoes our generic anchor
             // prompt back. That isn't real speech — treat it as empty so callers run
@@ -683,6 +689,53 @@ class WhisperService: ObservableObject {
         return false
     }
 
+    /// Did the learner answer in ENGLISH when Spanish was expected? Checks both
+    /// the steered transcription and the unsteered pass (`lastFreeTranscription`)
+    /// against the sentence's English translation — the steered pass sometimes
+    /// TRANSLATES English speech into fluent Spanish, so it can't be trusted
+    /// alone. Strict (exact-word) matching: high confidence only.
+    func spokeEnglish(transcription: String, expectedSpanish: String, expectedTranslation: String) -> Bool {
+        guard !expectedTranslation.isEmpty else { return false }
+        // Lines identical in both languages ("No...", "¡Hospital!") can't be
+        // told apart — a correct Spanish answer would also "match the English".
+        if compareText(spoken: expectedTranslation, expected: expectedSpanish, passThreshold: 0.85).isCorrect {
+            return false
+        }
+        if Self.matchesEnglish(spoken: transcription, expected: expectedTranslation) { return true }
+        if let free = lastFreeTranscription, !free.isEmpty,
+           Self.matchesEnglish(spoken: free, expected: expectedTranslation) { return true }
+        return false
+    }
+
+    static func matchesEnglish(spoken: String, expected: String) -> Bool {
+        let spokenClean = normalizeEnglishLoose(spoken)
+        let expectedClean = normalizeEnglishLoose(expected)
+        guard !spokenClean.isEmpty, !expectedClean.isEmpty else { return false }
+        if spokenClean == expectedClean { return true }
+        if spokenClean.contains(expectedClean) || expectedClean.contains(spokenClean) { return true }
+        let spokenWords = spokenClean.split(separator: " ").map(String.init)
+        let expectedWords = expectedClean.split(separator: " ").map(String.init)
+        // Single-word translations false-match Spanish too easily — exact only.
+        guard expectedWords.count >= 2 else { return spokenClean == expectedClean }
+        var matchCount = 0
+        var used = Set<Int>()
+        for e in expectedWords {
+            for (i, w) in spokenWords.enumerated() where !used.contains(i) && w == e {
+                matchCount += 1; used.insert(i); break
+            }
+        }
+        return Double(matchCount) / Double(expectedWords.count) >= 0.71
+    }
+
+    private static func normalizeEnglishLoose(_ text: String) -> String {
+        text.lowercased()
+            .replacingOccurrences(of: "\u{2019}", with: "'")
+            .replacingOccurrences(of: "\u{2018}", with: "'")
+            .components(separatedBy: CharacterSet.letters.union(CharacterSet(charactersIn: "'")).inverted)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+    }
+
     /// Lowercased, letters-only, single-spaced — for loose text comparison.
     private func wordsOnly(_ s: String) -> String {
         s.lowercased()
@@ -692,7 +745,8 @@ class WhisperService: ObservableObject {
     }
 
     /// Send audio to Whisper API for transcription
-    private func transcribeWithWhisper(audioURL: URL, prompt: String? = nil, language: String = "es") async throws -> String {
+    private func transcribeWithWhisper(audioURL: URL, prompt: String? = nil, language: String = "es",
+                                       detectLanguage: Bool = false) async throws -> String {
         // Read audio file
         let audioData = try Data(contentsOf: audioURL)
 
@@ -711,6 +765,13 @@ class WhisperService: ObservableObject {
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
             body.append("Content-Disposition: form-data; name=\"language\"\r\n\r\n".data(using: .utf8)!)
             body.append("\(language)\r\n".data(using: .utf8)!)
+        }
+
+        // Ask for a parallel unsteered pass (see lastFreeTranscription)
+        if detectLanguage {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"detect\"\r\n\r\n".data(using: .utf8)!)
+            body.append("1\r\n".data(using: .utf8)!)
         }
 
         // Add prompt hint to reduce hallucination on short audio
@@ -746,6 +807,7 @@ class WhisperService: ObservableObject {
 
         // Parse response
         let json = try JSONDecoder().decode(WhisperResponse.self, from: data)
+        lastFreeTranscription = json.freeText
         return json.text
     }
 
@@ -988,6 +1050,8 @@ final class CaptureBox: @unchecked Sendable {
 // MARK: - Models
 struct WhisperResponse: Codable {
     let text: String
+    /// Present when the server also ran an unsteered pass (detect=1).
+    let freeText: String?
 }
 
 enum WhisperError: LocalizedError {

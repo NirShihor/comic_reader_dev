@@ -791,7 +791,7 @@ struct RepeatPracticeView: View {
             let translationIndistinguishable = whisperService.compareText(
                 spoken: sentence.translation, expected: sentence.text, passThreshold: 0.85).isCorrect
             if !sentence.translation.isEmpty && !translationIndistinguishable
-                && detectSpokenEnglish(spoken: transcription, expected: sentence.translation) {
+                && whisperService.spokeEnglish(transcription: transcription, expectedSpanish: sentence.text, expectedTranslation: sentence.translation) {
                 // Spoke the meaning, not the Spanish — mark incorrect
                 if isFirstRepeatAttempt {
                     isFirstRepeatAttempt = false

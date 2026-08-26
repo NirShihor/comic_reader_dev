@@ -1765,6 +1765,7 @@ private struct BubblePracticeFeedback {
     let expectedText: String
     let words: [Word]
     var noSpeech: Bool = false   // nothing was heard — not a wrong answer
+    var spokeEnglish: Bool = false   // answered with the English translation
 }
 
 /// A single bubble's content for the floating card. Handles normal reading
@@ -2141,7 +2142,9 @@ struct BubbleContentView: View {
                 Text("Tap Speak and say the line again.")
                     .font(.subheadline).foregroundStyle(.secondary)
             } else {
-                if !feedback.isCorrect {
+                if feedback.spokeEnglish {
+                    Text("That was the English — try saying it in Spanish.").font(.subheadline)
+                } else if !feedback.isCorrect {
                     Text("You said: \"\(feedback.spokenText)\"").font(.subheadline)
                 }
                 Text(settingsManager.listeningPracticeMode ? "Meaning: \(feedback.expectedText)" : "Expected: \(feedback.expectedText)")
@@ -2206,13 +2209,18 @@ struct BubbleContentView: View {
                     expectedText: expectedText, words: sentence.words, noSpeech: true)
                 return
             }
-            let (isCorrect, _) = whisperService.compareText(spoken: spokenText, expected: expectedText)
+            // Answered in English (possibly translated into Spanish by the
+            // steered transcription) → never a pass, and say why.
+            let spokeEnglish = whisperService.spokeEnglish(
+                transcription: spokenText, expectedSpanish: expectedText, expectedTranslation: sentence.translation ?? "")
+            let isCorrect = spokeEnglish ? false
+                : whisperService.compareText(spoken: spokenText, expected: expectedText).isCorrect
             try? await Task.sleep(nanoseconds: 300_000_000)
             processingSentenceId = nil
             practiceFeedback = BubblePracticeFeedback(
                 sentenceId: sentence.id, isCorrect: isCorrect,
                 spokenText: spokenText,
-                expectedText: expectedText, words: sentence.words)
+                expectedText: expectedText, words: sentence.words, spokeEnglish: spokeEnglish)
             playingSentenceId = sentence.id
             playAudio(sentence.audioUrl)
         }

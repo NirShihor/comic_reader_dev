@@ -57,6 +57,7 @@ struct PanelView: View {
         let spokenText: String
         let expectedText: String
         let words: [Word]
+        var spokeEnglish: Bool = false   // answered with the English translation
     }
 
     // Pages sorted by pageNumber for navigation
@@ -934,8 +935,13 @@ struct PanelView: View {
                 }
             } else if !feedback.isCorrect {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("You said: \"\(feedback.spokenText)\"")
-                        .font(.subheadline)
+                    if feedback.spokeEnglish {
+                        Text("That was the English — try saying it in Spanish.")
+                            .font(.subheadline)
+                    } else {
+                        Text("You said: \"\(feedback.spokenText)\"")
+                            .font(.subheadline)
+                    }
 
                     Text("Expected:")
                         .font(.subheadline)
@@ -1053,6 +1059,20 @@ struct PanelView: View {
             var isCorrect = false
             var matchedText = expectedText
             var matchedAudio = sentence.audioUrl
+
+            // Answered in English (the steered transcription may even have
+            // translated it into Spanish) → never a pass, and say why.
+            if !spokenText.isEmpty,
+               whisperService.spokeEnglish(transcription: spokenText, expectedSpanish: expectedText, expectedTranslation: sentence.translation ?? "") {
+                try? await Task.sleep(nanoseconds: 300_000_000)
+                processingSentenceId = nil
+                practiceFeedback = PracticeFeedback(
+                    sentenceId: sentence.id, isCorrect: false, spokenText: spokenText,
+                    expectedText: expectedText, words: sentence.words, spokeEnglish: true)
+                playingSentenceId = sentence.id
+                playAudio(sentence.audioUrl)
+                return
+            }
 
             let (mainCorrect, _) = whisperService.compareText(spoken: spokenText, expected: expectedText)
             if mainCorrect {
