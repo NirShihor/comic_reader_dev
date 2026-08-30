@@ -1295,7 +1295,7 @@ struct WordButton: View {
                 // form (hiding it read as "no base form recorded").
                 if let baseForm = word.baseForm, !baseForm.isEmpty {
                     HStack {
-                        Text("Base form: \(baseForm)")
+                        Text(word.baseMeaning.map { "Base form: \(baseForm) — \($0)" } ?? "Base form: \(baseForm)")
                             .font(.caption)
                             .foregroundStyle(.tertiary)
 
@@ -1525,9 +1525,15 @@ struct WordFormsView: View {
                         }
                         .buttonStyle(.plain)
                         Spacer()
-                        Text(word.meaning)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                        // The base form's OWN meaning ("to go"), never the
+                        // in-sentence one ("I will go") — that belongs below.
+                        // Older bundles lack baseMeaning: fall back to the
+                        // sentence meaning only when the word IS its base form.
+                        if let gloss = word.baseMeaning ?? (usedFormLabel == "Base form" ? word.meaning : nil) {
+                            Text(gloss)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     }
                     .listRowBackground(Color(.systemGray6))
@@ -1549,9 +1555,14 @@ struct WordFormsView: View {
                             }
                         }
                         .frame(width: 120, alignment: .leading)
-                        Text(word.displayText)
-                            .font(.body)
-                            .bold()
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(word.displayText)
+                                .font(.body)
+                                .bold()
+                            Text(word.meaning)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                         Spacer()
                         Button {
                             // The export's wordAudioUrl names the exact file

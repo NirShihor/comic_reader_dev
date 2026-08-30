@@ -11,8 +11,9 @@ struct WordForm: Codable, Hashable {
 struct Word: Identifiable, Codable, Hashable {
     let id: String
     let text: String
-    let meaning: String
-    var baseForm: String?
+    let meaning: String          // meaning in THIS sentence ("I will go")
+    var baseForm: String?        // dictionary form ("ir")
+    var baseMeaning: String?     // dictionary meaning of the base form ("to go")
     var audioUrl: String?  // Legacy field
     var wordAudioUrl: String?  // Audio for the exact word as spoken
     var baseFormAudioUrl: String?  // Audio for the dictionary/base form
