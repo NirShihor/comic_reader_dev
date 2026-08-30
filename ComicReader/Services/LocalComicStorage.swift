@@ -549,6 +549,7 @@ struct WordJSON: Codable {
     let text: String
     let meaning: String
     let baseForm: String?
+    let baseMeaning: String?
     let audioUrl: String?
     let wordAudioUrl: String?
     let baseFormAudioUrl: String?
@@ -563,6 +564,7 @@ struct WordJSON: Codable {
             text: text,
             meaning: meaning,
             baseForm: baseForm,
+            baseMeaning: baseMeaning,
             audioUrl: audioUrl,
             wordAudioUrl: wordAudioUrl,
             baseFormAudioUrl: baseFormAudioUrl,
