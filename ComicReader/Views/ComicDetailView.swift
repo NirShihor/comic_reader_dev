@@ -9,6 +9,7 @@ enum PracticeDestination: Hashable {
     case repeatListen
     case originListen
     case flowPractice
+    case keyPhrases       // see the English, say the key phrase in Spanish
 
     // Stable string used to persist/restore the last-used practice mode.
     var modeKey: String {
@@ -21,6 +22,7 @@ enum PracticeDestination: Hashable {
         case .repeatListen: return "repeatListen"
         case .originListen: return "originListen"
         case .flowPractice: return "flowPractice"
+        case .keyPhrases: return "keyPhrases"
         }
     }
 
@@ -34,6 +36,7 @@ enum PracticeDestination: Hashable {
         case "repeatListen": self = .repeatListen
         case "originListen": self = .originListen
         case "flowPractice": self = .flowPractice
+        case "keyPhrases": self = .keyPhrases
         default: return nil
         }
     }
@@ -361,6 +364,7 @@ struct ComicDetailView: View {
         case .repeatListen:  RepeatListenView(comic: comic)
         case .originListen:  OriginListenView(comic: comic)
         case .flowPractice:  FlowPracticeView(comic: comic)
+        case .keyPhrases:    KeyPhrasePracticeView(comic: comic)
         }
     }
 
@@ -751,6 +755,12 @@ struct ComicDetailView: View {
                              title: "Listen & speak", tag: "OFF SCREEN",
                              description: "Screen off, eyes free. Hear each line and speak — Spanish → English, or English → Spanish.",
                              action: { showingListenSpeakChooser = true })
+            if !(comic.keyPhrases ?? []).isEmpty {
+                practiceModeCard(icon: "quote.bubble.fill",
+                                 title: "Key phrases", tag: "ON SCREEN",
+                                 description: "Everyday phrases from this story. See the English, say it in Spanish, then hear it in its scene.",
+                                 action: { practiceDestination = .keyPhrases })
+            }
         } else {
             practiceModeCard(icon: "headphones",
                              title: "Just listen", tag: "OFF SCREEN",

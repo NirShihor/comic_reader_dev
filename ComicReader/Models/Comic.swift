@@ -144,6 +144,19 @@ struct Page: Identifiable, Codable, Hashable {
     var emptyBubblesImage: String? = nil   // bubbles drawn, text blank — for practice modes
     let panels: [Panel]
     var hotspots: [Hotspot]?
+    var keyPhraseId: String? = nil   // set on practice pages (comic.practicePages)
+}
+
+// MARK: - KeyPhrase
+/// An everyday phrase mined from the comic's own words, optionally with a
+/// full practice page (one bubble holding the phrase) in comic.practicePages.
+struct KeyPhrase: Identifiable, Codable, Hashable {
+    let id: String
+    let es: String
+    let en: String
+    var kind: String? = nil            // "verbatim" | "recombined"
+    var sourcePages: [Int]? = nil
+    var practicePageId: String? = nil  // reader-side page id in practicePages
 }
 
 // MARK: - ReviewWord
@@ -178,6 +191,10 @@ struct Comic: Identifiable, Codable, Hashable {
     /// Manual sort position set in the generator (lower = higher up).
     /// Falls back to title ordering when absent/equal.
     var order: Int?
+
+    /// Key everyday phrases + their practice pages (Key phrases speaking mode).
+    var keyPhrases: [KeyPhrase]? = nil
+    var practicePages: [Page]? = nil
 
     enum DifficultyLevel: String, Codable, Hashable {
         case beginner

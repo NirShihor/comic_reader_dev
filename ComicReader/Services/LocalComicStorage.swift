@@ -284,8 +284,12 @@ struct ComicJSON: Codable {
     let collectionCoverImage: String?
     let episodeNumber: Int?
 
+    // Key phrases + practice pages (optional — older bundles lack them)
+    let keyPhrases: [KeyPhraseJSON]?
+    let practicePages: [PageJSON]?
+
     func toComic(basePath: URL) -> Comic {
-        Comic(
+        var comic = Comic(
             id: id,
             title: title,
             titleEn: titleEn,
@@ -304,6 +308,22 @@ struct ComicJSON: Codable {
             collectionCoverImage: collectionCoverImage,
             episodeNumber: episodeNumber
         )
+        comic.keyPhrases = keyPhrases?.map { $0.toKeyPhrase() }
+        comic.practicePages = practicePages?.map { $0.toPage() }
+        return comic
+    }
+}
+
+struct KeyPhraseJSON: Codable {
+    let id: String
+    let es: String
+    let en: String
+    let kind: String?
+    let sourcePages: [Int]?
+    let practicePageId: String?
+
+    func toKeyPhrase() -> KeyPhrase {
+        KeyPhrase(id: id, es: es, en: en, kind: kind, sourcePages: sourcePages, practicePageId: practicePageId)
     }
 }
 
@@ -415,6 +435,7 @@ struct PageJSON: Codable {
     let emptyBubblesImage: String?
     let panels: [PanelJSON]
     let hotspots: [HotspotJSON]?
+    let keyPhraseId: String?
 
     func toPage() -> Page {
         Page(
@@ -424,7 +445,8 @@ struct PageJSON: Codable {
             noTextImage: noTextImage,
             emptyBubblesImage: emptyBubblesImage,
             panels: panels.map { $0.toPanel() },
-            hotspots: hotspots?.map { $0.toHotspot() }
+            hotspots: hotspots?.map { $0.toHotspot() },
+            keyPhraseId: keyPhraseId
         )
     }
 }
