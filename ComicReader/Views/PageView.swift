@@ -1609,8 +1609,9 @@ struct PageView: View {
                 AnalyticsService.shared.track(.comicStarted(
                     comicId: comic.id, comicName: comic.title, collectionId: comic.collectionId,
                     level: comic.level.rawValue,
-                    isFree: StoreService.isFreeEpisode(episodeNumber: comic.episodeNumber,
-                                                       collectionId: comic.collectionId ?? comic.collectionTitle)))
+                    isFree: StoreService.isFree(episodeNumber: comic.episodeNumber,
+                                                collectionId: comic.collectionId ?? comic.collectionTitle,
+                                                classification: AccessModelService.shared.classification)))
                 trackPageViewed()
             }
             loadPageAspect()

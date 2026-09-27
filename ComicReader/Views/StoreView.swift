@@ -223,10 +223,10 @@ struct StoreComicCard: View {
         storeService.downloadState(for: comic.id)
     }
 
-    /// Free = first episode of its collection (or standalone); otherwise needs
-    /// the subscription. Already-downloaded comics are never re-locked.
+    /// Locked unless the customer's access (trial, subscription, lifetime, or
+    /// the legacy first-episode rule) covers it — see StoreService.isUnlocked.
     private var isLocked: Bool {
-        !store.isUnlocked(episodeNumber: comic.episodeNumber, collectionId: comic.collectionTitle)
+        !store.isUnlocked(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle)
     }
 
     private var showLockBadge: Bool {
@@ -403,7 +403,8 @@ struct StoreComicCard: View {
                     AnalyticsService.shared.track(.lockedContentTapped(comicId: comic.id, collectionId: comic.collectionId))
                     showPaywall = true
                 } label: {
-                    Label("Unlock with Comigo Unlimited", systemImage: "lock.fill")
+                    Label(store.showsTrialBanner ? "Start your \(StoreService.trialDays(store.monthlyProduct) ?? 7)-day free trial" : "Unlock with Comigo Unlimited",
+                          systemImage: store.showsTrialBanner ? "sparkles" : "lock.fill")
                         .font(.subheadline)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)

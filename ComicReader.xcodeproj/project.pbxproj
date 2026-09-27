@@ -63,6 +63,8 @@
 		C3000001000000000000A17 /* PurchaseAttribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A07 /* PurchaseAttribution.swift */; };
 		C3000001000000000000A18 /* AnalyticsConsentCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A08 /* AnalyticsConsentCard.swift */; };
 		C3000001000000000000A19 /* ComigoStore.storekit in Resources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A09 /* ComigoStore.storekit */; };
+		D4000001000000000000A11 /* AccessModelService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4000001000000000000A01 /* AccessModelService.swift */; };
+		D4000001000000000000A12 /* AccessModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4000001000000000000A02 /* AccessModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -125,6 +127,8 @@
 		C3000001000000000000A07 /* PurchaseAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseAttribution.swift; sourceTree = "<group>"; };
 		C3000001000000000000A08 /* AnalyticsConsentCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsConsentCard.swift; sourceTree = "<group>"; };
 		C3000001000000000000A09 /* ComigoStore.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = ComigoStore.storekit; sourceTree = "<group>"; };
+		D4000001000000000000A01 /* AccessModelService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessModelService.swift; sourceTree = "<group>"; };
+		D4000001000000000000A02 /* AccessModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessModelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -184,6 +188,7 @@
 			isa = PBXGroup;
 			children = (
 				C3000001000000000000A06 /* AnalyticsTests.swift */,
+				D4000001000000000000A02 /* AccessModelTests.swift */,
 				C3000001000000000000A09 /* ComigoStore.storekit */,
 			);
 			path = ComicReaderTests;
@@ -285,6 +290,7 @@
 				A1000001111111110000023 /* ComicImageLoader.swift */,
 				A1000001111111110000025 /* SpeechRecognizer.swift */,
 				A1000001111111110000027 /* ZIPExtractor.swift */,
+				D4000001000000000000A01 /* AccessModelService.swift */,
 				C3000001000000000000C02 /* Analytics */,
 			);
 			path = Services;
@@ -508,6 +514,7 @@
 				C3000001000000000000A13 /* PostHogAnalyticsBackend.swift in Sources */,
 				C3000001000000000000A17 /* PurchaseAttribution.swift in Sources */,
 				C3000001000000000000A18 /* AnalyticsConsentCard.swift in Sources */,
+				D4000001000000000000A11 /* AccessModelService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -516,6 +523,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3000001000000000000A16 /* AnalyticsTests.swift in Sources */,
+				D4000001000000000000A12 /* AccessModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -687,7 +695,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 124;
+				CURRENT_PROJECT_VERSION = 200;
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -720,7 +728,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 124;
+				CURRENT_PROJECT_VERSION = 200;
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

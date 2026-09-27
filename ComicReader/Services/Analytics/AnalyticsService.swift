@@ -79,7 +79,7 @@ enum AnalyticsConsent: String {
 /// network requests at all.
 @MainActor
 final class AnalyticsService: ObservableObject {
-    static let shared = AnalyticsService()
+    static let shared = AnalyticsService(waitsForAccessModel: true)
 
     static let consentKey = "analytics.consent"
     private static let logger = Logger(subsystem: "net.comigo.reader", category: "Analytics")
@@ -95,9 +95,17 @@ final class AnalyticsService: ObservableObject {
         didSet { entitlementKnown = true; flushIfReady() }
     }
 
-    /// Set by the subscription model once it has classified this install from
-    /// its original App Store acquisition. Left out of events until then.
+    /// Set once AccessModelService has classified this Apple ID from its
+    /// original App Store acquisition. Left out of events until then (and when
+    /// the classification can't be established).
     var accessModel: AccessModel?
+
+    /// AccessModelService's answer; nil = couldn't be established.
+    func accessModelResolved(_ model: AccessModel?) {
+        accessModel = model
+        accessModelKnown = true
+        flushIfReady()
+    }
 
     private let defaults: UserDefaults
     private let configuration: AnalyticsConfiguration
@@ -106,6 +114,8 @@ final class AnalyticsService: ObservableObject {
     private let log: (String) -> Void
     private let onConsentChange: (Bool) -> Void
     private let workQueue = DispatchQueue(label: "net.comigo.analytics", qos: .utility)
+    private let waitsForAccessModel: Bool
+    private var accessModelKnown = false
 
     private var backend: AnalyticsBackend?
     private var backendOptedOut = false
@@ -132,8 +142,10 @@ final class AnalyticsService: ObservableObject {
          makeBackend: @escaping () -> AnalyticsBackend = { PostHogAnalyticsBackend() },
          now: @escaping () -> Date = Date.init,
          log: ((String) -> Void)? = nil,
-         onConsentChange: ((Bool) -> Void)? = nil) {
+         onConsentChange: ((Bool) -> Void)? = nil,
+         waitsForAccessModel: Bool = false) {
         self.defaults = defaults
+        self.waitsForAccessModel = waitsForAccessModel
         self.configuration = configuration
         self.makeBackend = makeBackend
         self.now = now
@@ -274,7 +286,11 @@ final class AnalyticsService: ObservableObject {
         workQueue.async { body(backend.distinctId()) }
     }
 
-    private var isReady: Bool { started && (entitlementKnown || readinessTimedOut) }
+    /// Events (never the UI) wait for the first entitlement read — and, in the
+    /// app, the access-model classification — up to `readinessTimeout`.
+    private var isReady: Bool {
+        started && (readinessTimedOut || (entitlementKnown && (accessModelKnown || !waitsForAccessModel)))
+    }
 
     private func flushIfReady() {
         guard isReady, !pending.isEmpty else { return }

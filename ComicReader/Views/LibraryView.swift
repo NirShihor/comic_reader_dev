@@ -29,6 +29,10 @@ struct LibraryView: View {
     // so the two first-run cards don't arrive together — except that if the
     // message is still unread on a later launch, the card no longer waits.
     @ObservedObject private var analytics = AnalyticsService.shared
+    // Trial banner: eligible new-model customers only. Deliberately NOT tied
+    // to analytics consent — it's product functionality.
+    @ObservedObject private var store = StoreService.shared
+    @State private var showTrialPaywall = false
     @AppStorage("analytics.consentCardDeferred") private var consentCardDeferred = false
     @State private var consentCardReady = false
 
@@ -113,6 +117,10 @@ struct LibraryView: View {
                     }
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
+                if store.showsTrialBanner {
+                    trialBanner
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
                 if showCreatorBanner && !creatorMessageSeen {
                     creatorBanner
                         .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -123,6 +131,7 @@ struct LibraryView: View {
             .padding(.bottom, 10)
             .zIndex(40)
         }
+        .sheet(isPresented: $showTrialPaywall) { PaywallView(source: .libraryBanner) }
         .sheet(isPresented: $showCreatorMessage, onDismiss: {
             creatorMessageSeen = true
             withAnimation(.easeInOut(duration: 0.25)) { showCreatorBanner = false }
@@ -248,6 +257,31 @@ struct LibraryView: View {
     }
 
     // Bottom banner inviting first-time users to read the creator's welcome.
+    private var trialBanner: some View {
+        Button {
+            showTrialPaywall = true
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "sparkles")
+                Text("Start your \(StoreService.trialDays(store.monthlyProduct) ?? 7)-day free trial")
+                    .fontWeight(.semibold)
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.up")
+                    .font(.footnote.weight(.bold))
+                    .opacity(0.8)
+            }
+            .font(.subheadline)
+            .foregroundStyle(Color.comigoInk)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 13)
+            .background(Color(red: 0xFF/255, green: 0xD2/255, blue: 0x3F/255), in: RoundedRectangle(cornerRadius: 15))
+            .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.comigoInk, lineWidth: 2))
+            .shadow(color: .black.opacity(0.25), radius: 8, y: 3)
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Shows the free trial offer and its terms")
+    }
+
     private var creatorBanner: some View {
         Button {
             showCreatorMessage = true

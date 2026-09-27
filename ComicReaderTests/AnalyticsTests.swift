@@ -98,7 +98,7 @@ final class AnalyticsTests: XCTestCase {
     }
 
     func testControlledValuesAreSnakeCase() {
-        XCTAssertEqual(PaywallSource.allCases.map(\.rawValue), ["comic_locked", "settings", "trial_expired"])
+        XCTAssertEqual(PaywallSource.allCases.map(\.rawValue), ["comic_locked", "settings", "trial_expired", "library_banner"])
         XCTAssertEqual(AudioType.allCases.map(\.rawValue), ["sentence", "word"])
         XCTAssertEqual(PurchaseType.allCases.map(\.rawValue), ["subscription", "lifetime"])
         XCTAssertEqual(Entitlement.allCases.map(\.rawValue), ["free", "trial", "subscribed", "lifetime"])

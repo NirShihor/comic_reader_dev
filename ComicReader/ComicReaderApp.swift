@@ -6,7 +6,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         AnalyticsService.shared.start()
-        // Read the StoreKit entitlement at launch so the first events carry it.
+        // Classify the access model (AppTransaction) and read the StoreKit
+        // entitlement in the background. Nothing waits on either: until they
+        // answer, the app uses legacy (never-reduced) access rules.
+        AccessModelService.shared.startObserving()
         _ = StoreService.shared
         return true
     }
