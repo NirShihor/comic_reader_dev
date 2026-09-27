@@ -51,7 +51,8 @@ final class DemoRecording: XCTestCase {
         continueAfterFailure = false
         app = XCUIApplication()
         // Silence every first-run tooltip / cue so the recording is clean.
-        var args = ["-hasLaunchedBefore", "YES", "-demo.hideCues", "YES", "-creatorMessage.seen", "YES"]
+        var args = ["-hasLaunchedBefore", "YES", "-demo.hideCues", "YES", "-creatorMessage.seen", "YES",
+                    "-spanishLevel", "beginner"]
         for k in ["library-title", "choose-collection", "comic-cockpit", "cover-text", "page-swipe", "story-bubble",
                   "hotspot-info", "bubble-panel", "word-detail", "story-arrows", "help-reminder",
                   "collection-download", "collection-open-after-download"] {
@@ -238,4 +239,5 @@ final class DemoRecording: XCTestCase {
         try data.write(to: URL(fileURLWithPath: "\(syncDir)/events.json"))
         FileManager.default.createFile(atPath: "\(syncDir)/done", contents: nil)
     }
+
 }

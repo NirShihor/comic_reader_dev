@@ -10,6 +10,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // entitlement in the background. Nothing waits on either: until they
         // answer, the app uses legacy (never-reduced) access rules.
         AccessModelService.shared.startObserving()
+        // Reads the current notification permission only; never requests it.
+        ReminderService.shared.startObserving()
         _ = StoreService.shared
         return true
     }

@@ -1256,6 +1256,7 @@ struct PageView: View {
     private func trackComicCompleted() {
         guard tracksReading, !completionTracked else { return }
         completionTracked = true
+        ReminderService.shared.markComicCompleted()
         AnalyticsService.shared.track(.comicCompleted(
             comicId: comic.id, comicName: comic.title, collectionId: comic.collectionId,
             level: comic.level.rawValue))
@@ -1642,6 +1643,9 @@ struct PageView: View {
                     panelNumber: 0,
                     asPractice: guidedOnScreenPractice
                 )
+                // Reading (or a guided practice run) is meaningful use: roll the
+                // inactivity reminders forward. Throttled inside the service.
+                Task { await ReminderService.shared.recordEngagement() }
             }
         }
         .onDisappear {
@@ -1684,6 +1688,9 @@ struct PageView: View {
                     panelNumber: 0,
                     asPractice: guidedOnScreenPractice
                 )
+                // Reading (or a guided practice run) is meaningful use: roll the
+                // inactivity reminders forward. Throttled inside the service.
+                Task { await ReminderService.shared.recordEngagement() }
             }
         }
         .onChange(of: selectedBubbleIndex) { _, newValue in

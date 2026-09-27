@@ -80,6 +80,7 @@ enum AnalyticsEvent {
     case trialStarted(productId: String)
     case subscriptionStarted(productId: String)
     case purchaseCompleted(productId: String, purchaseType: PurchaseType)
+    case spanishLevelSelected(level: SpanishLevel)
 
     var name: String {
         switch self {
@@ -98,6 +99,7 @@ enum AnalyticsEvent {
         case .trialStarted: return "trial_started"
         case .subscriptionStarted: return "subscription_started"
         case .purchaseCompleted: return "purchase_completed"
+        case .spanishLevelSelected: return "spanish_level_selected"
         }
     }
 
@@ -151,6 +153,8 @@ enum AnalyticsEvent {
         case let .purchaseCompleted(productId, purchaseType):
             set("product_id", productId)
             set("purchase_type", purchaseType.rawValue)
+        case let .spanishLevelSelected(level):
+            set("spanish_level", level.rawValue)
         }
         return p
     }

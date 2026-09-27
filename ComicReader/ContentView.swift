@@ -24,6 +24,9 @@ struct ContentView: View {
     // Returning user = has launched before (flag set on first Get started) or
     // already has reading progress. They see "Continue learning".
     @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore = false
+    // Asked once, right after the landing screen, until a level is chosen —
+    // a Comigo screen, not a system prompt, and unrelated to analytics consent.
+    @AppStorage(SpanishLevel.storageKey) private var spanishLevelRaw = ""
     @EnvironmentObject private var progressManager: ReadingProgressManager
     @EnvironmentObject private var notebookManager: NotebookManager
     private var returningUser: Bool {
@@ -64,6 +67,11 @@ struct ContentView: View {
                         withAnimation(.easeInOut(duration: 0.4)) { showSplash = false }
                     }
                 )
+            } else if SpanishLevel(rawValue: spanishLevelRaw) == nil {
+                SpanishLevelView { level in
+                    withAnimation(.easeInOut(duration: 0.35)) { SpanishLevel.select(level) }
+                }
+                .transition(.opacity)
             } else {
                 tabs
             }
@@ -207,7 +215,7 @@ extension View {
 // MARK: - Landing / Splash
 
 // Design tokens for the landing screen (match the rest of the refresh).
-private enum Brand {
+enum Brand {
     static let accent        = Color(red: 0x5B/255, green: 0x5B/255, blue: 0xD6/255) // #5B5BD6
     static let yellow        = Color(red: 0xFF/255, green: 0xD2/255, blue: 0x3F/255) // #FFD23F
     static let violet        = Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255) // #6E40F0

@@ -6,6 +6,10 @@ struct SettingsView: View {
     @AppStorage("appearanceMode") private var appearanceMode = "system"
     @AppStorage("demo.hideCues") private var hideCues = false
     @ObservedObject private var analytics = AnalyticsService.shared
+    @ObservedObject private var reminders = ReminderService.shared
+    @AppStorage(SpanishLevel.storageKey) private var spanishLevelRaw = ""
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
 
     private var hideCuesBinding: Binding<Bool> {
         Binding(get: { hideCues }, set: { hideCues = $0 })
@@ -51,6 +55,52 @@ struct SettingsView: View {
                 }
             } header: {
                 Text("Reading")
+            }
+
+            // Learning Section
+            Section {
+                NavigationLink {
+                    SpanishLevelSettingsView()
+                } label: {
+                    HStack {
+                        Label("Spanish level", systemImage: "graduationcap.fill")
+                        Spacer()
+                        Text(SpanishLevel(rawValue: spanishLevelRaw)?.title ?? "Not set")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } header: {
+                Text("Learning")
+            }
+
+            // Reminders Section — reflects iOS's actual notification permission.
+            Section {
+                if reminders.settingsState == .blockedInSystem {
+                    HStack {
+                        Label("Inactivity reminders", systemImage: "bell.slash.fill")
+                        Spacer()
+                        Text("Off in iOS Settings").foregroundStyle(.secondary)
+                    }
+                    Button {
+                        if let url = ReminderService.systemSettingsURL { openURL(url) }
+                    } label: {
+                        Label("Open iOS Settings", systemImage: "gear")
+                    }
+                } else {
+                    Toggle(isOn: Binding(
+                        get: { reminders.settingsState == .on },
+                        set: { on in
+                            if on { Task { await reminders.allowReminders() } } else { reminders.disableReminders() }
+                        })) {
+                        Label("Inactivity reminders", systemImage: "bell.fill")
+                    }
+                }
+            } header: {
+                Text("Reminders")
+            } footer: {
+                Text(reminders.settingsState == .blockedInSystem
+                     ? "Notifications for Comigo are turned off in iOS Settings. Turn them on there to get reminders."
+                     : "A gentle nudge if you haven't read any Spanish for 3 days, and again after 7. Set up on this device only — nothing is sent to us.")
             }
 
             // Account Section
@@ -130,6 +180,41 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Settings")
+        .task { await reminders.refreshAuthorization() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await reminders.refreshAuthorization() } }
+        }
+    }
+}
+
+/// Settings → Spanish level: change the level chosen on first run.
+struct SpanishLevelSettingsView: View {
+    @AppStorage(SpanishLevel.storageKey) private var spanishLevelRaw = ""
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(SpanishLevel.allCases) { level in
+                    Button {
+                        SpanishLevel.select(level)
+                    } label: {
+                        HStack(alignment: .center, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(level.title).foregroundStyle(.primary)
+                                Text(level.detail).font(.footnote).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if spanishLevelRaw == level.rawValue {
+                                Image(systemName: "checkmark").foregroundStyle(.tint).fontWeight(.semibold)
+                            }
+                        }
+                    }
+                }
+            } footer: {
+                Text("Stored on this device.")
+            }
+        }
+        .navigationTitle("Spanish level")
     }
 }
 

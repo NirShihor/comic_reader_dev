@@ -33,6 +33,10 @@ struct LibraryView: View {
     // to analytics consent — it's product functionality.
     @ObservedObject private var store = StoreService.shared
     @State private var showTrialPaywall = false
+    // Reminder offer fallback (e.g. they went straight into practice after
+    // finishing their first comic, so the comic screen didn't show it).
+    @ObservedObject private var reminders = ReminderService.shared
+    @State private var showReminderPrompt = false
     @AppStorage("analytics.consentCardDeferred") private var consentCardDeferred = false
     @State private var consentCardReady = false
 
@@ -132,6 +136,7 @@ struct LibraryView: View {
             .zIndex(40)
         }
         .sheet(isPresented: $showTrialPaywall) { PaywallView(source: .libraryBanner) }
+        .sheet(isPresented: $showReminderPrompt) { ReminderPromptView(reminders: reminders) }
         .sheet(isPresented: $showCreatorMessage, onDismiss: {
             creatorMessageSeen = true
             withAnimation(.easeInOut(duration: 0.25)) { showCreatorBanner = false }
@@ -143,6 +148,11 @@ struct LibraryView: View {
             CreatorMessageView()
         }
         .onAppear {
+            if reminders.shouldOfferPrompt {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    if reminders.shouldOfferPrompt { showReminderPrompt = true }
+                }
+            }
             if creatorMessageSeen || consentCardDeferred {
                 showConsentCardIfNeeded(after: 1.2)
             } else {

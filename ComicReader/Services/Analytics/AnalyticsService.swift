@@ -115,6 +115,7 @@ final class AnalyticsService: ObservableObject {
     private let onConsentChange: (Bool) -> Void
     private let workQueue = DispatchQueue(label: "net.comigo.analytics", qos: .utility)
     private let waitsForAccessModel: Bool
+    private let currentSpanishLevel: () -> SpanishLevel?
     private var accessModelKnown = false
 
     private var backend: AnalyticsBackend?
@@ -143,9 +144,11 @@ final class AnalyticsService: ObservableObject {
          now: @escaping () -> Date = Date.init,
          log: ((String) -> Void)? = nil,
          onConsentChange: ((Bool) -> Void)? = nil,
-         waitsForAccessModel: Bool = false) {
+         waitsForAccessModel: Bool = false,
+         spanishLevel: (() -> SpanishLevel?)? = nil) {
         self.defaults = defaults
         self.waitsForAccessModel = waitsForAccessModel
+        self.currentSpanishLevel = spanishLevel ?? { SpanishLevel.stored() }
         self.configuration = configuration
         self.makeBackend = makeBackend
         self.now = now
@@ -276,6 +279,8 @@ final class AnalyticsService: ObservableObject {
         ]
         if let entitlement { p["entitlement"] = entitlement.rawValue }
         if let accessModel { p["access_model"] = accessModel.rawValue }
+        // Read at send time, which only happens with consent.
+        if let level = currentSpanishLevel() { p["spanish_level"] = level.rawValue }
         return p
     }
 

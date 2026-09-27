@@ -65,6 +65,11 @@
 		C3000001000000000000A19 /* ComigoStore.storekit in Resources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A09 /* ComigoStore.storekit */; };
 		D4000001000000000000A11 /* AccessModelService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4000001000000000000A01 /* AccessModelService.swift */; };
 		D4000001000000000000A12 /* AccessModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4000001000000000000A02 /* AccessModelTests.swift */; };
+		F6000001000000000000A11 /* SpanishLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6000001000000000000A01 /* SpanishLevel.swift */; };
+		F6000001000000000000A12 /* ReminderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6000001000000000000A02 /* ReminderService.swift */; };
+		F6000001000000000000A13 /* SpanishLevelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6000001000000000000A03 /* SpanishLevelView.swift */; };
+		F6000001000000000000A14 /* ReminderPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6000001000000000000A04 /* ReminderPromptView.swift */; };
+		F6000001000000000000A15 /* LevelAndReminderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6000001000000000000A05 /* LevelAndReminderTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -129,6 +134,11 @@
 		C3000001000000000000A09 /* ComigoStore.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = ComigoStore.storekit; sourceTree = "<group>"; };
 		D4000001000000000000A01 /* AccessModelService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessModelService.swift; sourceTree = "<group>"; };
 		D4000001000000000000A02 /* AccessModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessModelTests.swift; sourceTree = "<group>"; };
+		F6000001000000000000A01 /* SpanishLevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpanishLevel.swift; sourceTree = "<group>"; };
+		F6000001000000000000A02 /* ReminderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderService.swift; sourceTree = "<group>"; };
+		F6000001000000000000A03 /* SpanishLevelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpanishLevelView.swift; sourceTree = "<group>"; };
+		F6000001000000000000A04 /* ReminderPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderPromptView.swift; sourceTree = "<group>"; };
+		F6000001000000000000A05 /* LevelAndReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelAndReminderTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -189,6 +199,7 @@
 			children = (
 				C3000001000000000000A06 /* AnalyticsTests.swift */,
 				D4000001000000000000A02 /* AccessModelTests.swift */,
+				F6000001000000000000A05 /* LevelAndReminderTests.swift */,
 				C3000001000000000000A09 /* ComigoStore.storekit */,
 			);
 			path = ComicReaderTests;
@@ -273,6 +284,8 @@
 				A1000001111111110000033 /* FlowPracticeView.swift */,
 				A1000001111111110000034 /* KeyPhrasePracticeView.swift */,
 				C3000001000000000000A08 /* AnalyticsConsentCard.swift */,
+				F6000001000000000000A04 /* ReminderPromptView.swift */,
+				F6000001000000000000A03 /* SpanishLevelView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -291,6 +304,8 @@
 				A1000001111111110000025 /* SpeechRecognizer.swift */,
 				A1000001111111110000027 /* ZIPExtractor.swift */,
 				D4000001000000000000A01 /* AccessModelService.swift */,
+				F6000001000000000000A02 /* ReminderService.swift */,
+				F6000001000000000000A01 /* SpanishLevel.swift */,
 				C3000001000000000000C02 /* Analytics */,
 			);
 			path = Services;
@@ -515,6 +530,10 @@
 				C3000001000000000000A17 /* PurchaseAttribution.swift in Sources */,
 				C3000001000000000000A18 /* AnalyticsConsentCard.swift in Sources */,
 				D4000001000000000000A11 /* AccessModelService.swift in Sources */,
+				F6000001000000000000A14 /* ReminderPromptView.swift in Sources */,
+				F6000001000000000000A13 /* SpanishLevelView.swift in Sources */,
+				F6000001000000000000A12 /* ReminderService.swift in Sources */,
+				F6000001000000000000A11 /* SpanishLevel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -524,6 +543,7 @@
 			files = (
 				C3000001000000000000A16 /* AnalyticsTests.swift in Sources */,
 				D4000001000000000000A12 /* AccessModelTests.swift in Sources */,
+				F6000001000000000000A15 /* LevelAndReminderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -538,7 +558,7 @@
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.comicreader.app.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -558,7 +578,7 @@
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.comicreader.app.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -711,7 +731,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.comicreader.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -744,7 +764,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.comicreader.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -764,7 +784,7 @@
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.comicreader.app.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -785,7 +805,7 @@
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.comicreader.app.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;

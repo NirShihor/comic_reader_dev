@@ -54,6 +54,8 @@ struct ComicDetailView: View {
     @StateObject private var localStorage = LocalComicStorage.shared
     @StateObject private var store = StoreService.shared
     @State private var showPaywall = false
+    @ObservedObject private var reminders = ReminderService.shared
+    @State private var showReminderPrompt = false
 
     @State private var didAutoResume = false
     @State private var practiceDestination: PracticeDestination?
@@ -136,6 +138,7 @@ struct ComicDetailView: View {
                     if let type = PracticeType(modeKey: dest.modeKey) {
                         AnalyticsService.shared.track(.practiceStarted(comicId: comic.id, practiceType: type))
                     }
+                    Task { await reminders.recordEngagement() }
                 }
             }
             .onChange(of: showPracticeOptions) { _, open in
@@ -154,6 +157,10 @@ struct ComicDetailView: View {
                     guidedOnScreen = false
                     // If they tapped "Practice" at the end of the episode, open the
                     // practice popup once the page view has finished popping.
+                    if !openPracticeAfterReading && reminders.shouldOfferPrompt {
+                        // First comic just finished: offer reminders once the reader has closed.
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { showReminderPrompt = true }
+                    }
                     if openPracticeAfterReading {
                         openPracticeAfterReading = false
                         practiceFromEnd = true   // whatever mode they pick starts from the beginning
@@ -169,6 +176,9 @@ struct ComicDetailView: View {
             }
             .sheet(isPresented: $showPaywall) {
                 PaywallView(source: .comicLocked)
+            }
+            .sheet(isPresented: $showReminderPrompt) {
+                ReminderPromptView(reminders: reminders)
             }
     }
 
