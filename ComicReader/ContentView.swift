@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import StoreKit
+import Combine
 
 struct ContentView: View {
     @State private var selectedTab: Tab = .library
@@ -23,6 +24,9 @@ struct ContentView: View {
     // Returning user = has launched before (flag set on first Get started) or
     // already has reading progress. They see "Continue learning".
     @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore = false
+    // Asked once, right after the landing screen, until a level is chosen —
+    // a Comigo screen, not a system prompt, and unrelated to analytics consent.
+    @AppStorage(SpanishLevel.storageKey) private var spanishLevelRaw = ""
     @EnvironmentObject private var progressManager: ReadingProgressManager
     @EnvironmentObject private var notebookManager: NotebookManager
     private var returningUser: Bool {
@@ -63,6 +67,11 @@ struct ContentView: View {
                         withAnimation(.easeInOut(duration: 0.4)) { showSplash = false }
                     }
                 )
+            } else if SpanishLevel(rawValue: spanishLevelRaw) == nil {
+                SpanishLevelView { level in
+                    withAnimation(.easeInOut(duration: 0.35)) { SpanishLevel.select(level) }
+                }
+                .transition(.opacity)
             } else {
                 tabs
             }
@@ -77,7 +86,7 @@ struct ContentView: View {
             }
             #endif
         }
-        .sheet(isPresented: $showDebugPaywall) { PaywallView() }
+        .sheet(isPresented: $showDebugPaywall) { PaywallView(source: nil) }
     }
 
     /// Pay the one-time costs (custom-font glyph load + keyboard subsystem init)
@@ -206,7 +215,7 @@ extension View {
 // MARK: - Landing / Splash
 
 // Design tokens for the landing screen (match the rest of the refresh).
-private enum Brand {
+enum Brand {
     static let accent        = Color(red: 0x5B/255, green: 0x5B/255, blue: 0xD6/255) // #5B5BD6
     static let yellow        = Color(red: 0xFF/255, green: 0xD2/255, blue: 0x3F/255) // #FFD23F
     static let violet        = Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255) // #6E40F0
@@ -1140,10 +1149,15 @@ private struct NotebookPageEditor: View {
 
 // MARK: - Store (Comigo Unlimited subscription)
 
-/// StoreKit 2 wrapper for Comigo Unlimited: a monthly subscription or a
-/// one-time lifetime unlock (non-consumable). Entitlement rule: the FIRST
-/// episode of every collection (and any standalone comic) is free; everything
-/// else needs either purchase.
+/// StoreKit 2 wrapper for Comigo Unlimited: a monthly subscription (with a
+/// free-trial introductory offer for eligible customers) or a one-time
+/// lifetime unlock (non-consumable). StoreKit is the only source of truth for
+/// entitlement, trial eligibility, trial state and expiry — no local timers.
+///
+/// Access rule (see `isUnlocked`): an active trial, paid subscription or
+/// lifetime unlock opens everything, for every access model. Without one,
+/// legacy users (and anyone not yet classified) keep the first episode of
+/// every collection free; new-model users can browse but not read.
 @MainActor
 final class StoreService: ObservableObject {
     static let shared = StoreService()
@@ -1153,13 +1167,35 @@ final class StoreService: ObservableObject {
     @Published private(set) var hasUnlimited = false
     @Published private(set) var monthlyProduct: Product?
     @Published private(set) var lifetimeProduct: Product?
+    /// free / trial / subscribed / lifetime, from verified current entitlements.
+    @Published private(set) var entitlement: Entitlement = .free
+    /// End of the active free trial (StoreKit's expiration date for that period).
+    @Published private(set) var trialEndsAt: Date?
+    /// Next renewal of an active paid subscription.
+    @Published private(set) var renewsAt: Date?
+    /// The customer's last monthly period was the free trial, it has ended, and
+    /// no paid period followed (StoreKit's latest transaction for the product).
+    @Published private(set) var trialExpired = false
+    /// StoreKit says this customer is eligible for the free-trial offer.
+    @Published private(set) var freeTrialAvailable = false
+    /// Apple's renewal info for the monthly subscription: false once the
+    /// customer has turned auto-renew off (access continues to the period end).
+    @Published private(set) var autoRenews: Bool?
     private var updatesTask: Task<Void, Never>?
+    private var accessModelObservation: AnyCancellable?
 
     private init() {
+        // Access depends on the access model as well; re-render gated views when it resolves.
+        accessModelObservation = AccessModelService.shared.$classification.sink { [weak self] _ in
+            self?.objectWillChange.send()
+        }
         // Keep entitlement current across renewals/refunds/family sharing.
         updatesTask = Task { [weak self] in
             for await update in Transaction.updates {
-                if case .verified(let t) = update { await t.finish() }
+                if case .verified(let t) = update {
+                    await t.finish()
+                    self?.reportPurchase(t, purchasedHere: false)
+                }
                 await self?.refreshEntitlement()
             }
         }
@@ -1176,16 +1212,42 @@ final class StoreService: ObservableObject {
     }
 
     func refreshEntitlement() async {
-        // Active subscription OR the lifetime unlock — a non-consumable stays
-        // in currentEntitlements forever unless refunded (revocationDate).
+        // Active subscription (trial or paid, incl. Apple's billing grace
+        // period) OR the lifetime unlock — a non-consumable stays in
+        // currentEntitlements forever unless refunded (revocationDate).
         var active = false
+        var kind = Entitlement.free
+        var trialEnd: Date?, renewal: Date?
         for await entitlement in Transaction.currentEntitlements {
             if case .verified(let t) = entitlement,
                t.productID == Self.monthlyProductID || t.productID == Self.lifetimeProductID,
                t.revocationDate == nil {
                 active = true
+                if t.productID == Self.lifetimeProductID {
+                    kind = .lifetime
+                } else if kind != .lifetime {
+                    if Self.isFreeTrialPeriod(t) {
+                        kind = .trial; trialEnd = t.expirationDate
+                    } else {
+                        kind = .subscribed; renewal = t.expirationDate
+                    }
+                }
             }
         }
+        entitlement = kind
+        trialEndsAt = kind == .trial ? trialEnd : nil
+        renewsAt = kind == .subscribed ? renewal : nil
+        trialExpired = !active ? await Self.lastPeriodWasUnconvertedTrial() : false
+        if let monthly = monthlyProduct {
+            freeTrialAvailable = await isEligibleForFreeTrial(monthly)
+            autoRenews = nil
+            if kind == .trial || kind == .subscribed,
+               let status = try? await monthly.subscription?.status.first,
+               case .verified(let info) = status.renewalInfo {
+                autoRenews = info.willAutoRenew
+            }
+        }
+        AnalyticsService.shared.entitlement = kind
         #if DEBUG
         // Marketing recordings on the Simulator: `-demo.unlimited YES` opens every episode
         // without a purchase (debug builds only — never in the App Store build).
@@ -1196,10 +1258,15 @@ final class StoreService: ObservableObject {
 
     /// Returns true when the purchase completed and the entitlement is live.
     func purchase(_ product: Product) async throws -> Bool {
-        let result = try await product.purchase()
+        // Attribution token only when the user has opted into analytics.
+        let token = PurchaseAttribution.shared.tokenForPurchase()
+        let result = try await product.purchase(options: token.map { [.appAccountToken($0)] } ?? [])
         switch result {
         case .success(let verification):
-            if case .verified(let t) = verification { await t.finish() }
+            if case .verified(let t) = verification {
+                await t.finish()
+                reportPurchase(t, purchasedHere: true)
+            }
             await refreshEntitlement()
             return hasUnlimited
         case .userCancelled, .pending:
@@ -1212,16 +1279,180 @@ final class StoreService: ObservableObject {
     func restore() async {
         try? await AppStore.sync()
         await refreshEntitlement()
+        // A restore is also the moment to fix a classification StoreKit
+        // couldn't provide earlier (may ask the user to sign in).
+        if AccessModelService.shared.classification == .unknown {
+            await AccessModelService.shared.refreshAfterRestore()
+        }
     }
 
-    /// First episode of every collection is free; standalone comics are free.
+    /// True when StoreKit's latest monthly transaction is a free-trial period
+    /// that has ended (no paid renewal followed it, or it would be the latest).
+    static func lastPeriodWasUnconvertedTrial(now: Date = Date()) async -> Bool {
+        guard let latest = await Transaction.latest(for: monthlyProductID),
+              case .verified(let t) = latest else { return false }
+        return isFreeTrialPeriod(t) && t.revocationDate == nil && (t.expirationDate ?? .distantFuture) <= now
+    }
+
+    // MARK: - Purchase analytics
+    // The app reports the moments only it sees reliably: a free trial starting
+    // and a lifetime purchase. Paid subscription periods (direct starts, trial
+    // conversions, renewals) are reported by the server from App Store Server
+    // Notifications, so no event has two sources.
+
+    private static let reportedKey = "analytics.reportedTransactions"
+
+    /// `purchasedHere`: the transaction came back from this device's own
+    /// purchase call. Otherwise (Transaction.updates — Ask to Buy approvals,
+    /// purchases on the user's other devices, restores) it's only reported when
+    /// it carries this install's attribution token, i.e. it was started here.
+    func reportPurchase(_ t: StoreKit.Transaction, purchasedHere: Bool,
+                        analytics: AnalyticsService = .shared,
+                        defaults: UserDefaults = .standard,
+                        installToken: UUID?? = .none) {
+        let installToken = installToken ?? PurchaseAttribution.shared.existingToken
+        guard analytics.isEnabled,
+              t.revocationDate == nil,
+              t.ownershipType == .purchased,
+              purchasedHere || (t.appAccountToken != nil && t.appAccountToken == installToken)
+        else { return }
+        // Once per transaction: the purchase result and Transaction.updates can
+        // both deliver the same transaction, and updates replay at launch.
+        var reported = defaults.stringArray(forKey: Self.reportedKey) ?? []
+        let id = String(t.id)
+        guard !reported.contains(id), let event = Self.purchaseEvent(for: t) else { return }
+        analytics.track(event)
+        reported.append(id)
+        defaults.set(Array(reported.suffix(100)), forKey: Self.reportedKey)
+    }
+
+    /// The app-side purchase event for a verified transaction, if any: a paid
+    /// lifetime purchase, or the first transaction of a subscription whose
+    /// period is its free trial. Paid subscription periods → nil (server's job).
+    static func purchaseEvent(for t: StoreKit.Transaction) -> AnalyticsEvent? {
+        if t.productID == lifetimeProductID {
+            // Free lifetime unlocks (offer codes) aren't purchases.
+            guard t.price.map({ $0 > 0 }) ?? true else { return nil }
+            return .purchaseCompleted(productId: t.productID, purchaseType: .lifetime)
+        }
+        if t.productID == monthlyProductID, t.id == t.originalID, isFreeTrialPeriod(t) {
+            return .trialStarted(productId: t.productID)
+        }
+        return nil
+    }
+
+    /// Whether `product` offers a free-trial introductory offer this user is
+    /// eligible for, according to StoreKit.
+    func isEligibleForFreeTrial(_ product: Product) async -> Bool {
+        guard let sub = product.subscription, sub.introductoryOffer?.paymentMode == .freeTrial else { return false }
+        return await sub.isEligibleForIntroOffer
+    }
+
+    /// Call when a paywall has put the free-trial offer for `product` on
+    /// screen. Sends `trial_offer_viewed` only if StoreKit confirms this user is
+    /// eligible for that free trial — so a paywall shown to someone who has
+    /// already used their trial doesn't count. Once per paywall presentation is
+    /// the caller's job (as with paywall_viewed).
+    func trialOfferShown(_ product: Product, source: PaywallSource, analytics: AnalyticsService = .shared) async {
+        guard await isEligibleForFreeTrial(product) else { return }
+        analytics.track(.trialOfferViewed(source: source, productId: product.id))
+    }
+
+    /// The current period of this subscription transaction is its free-trial
+    /// introductory offer. (iOS 17.0–17.1 can't read the payment mode; the only
+    /// introductory offer Comigo configures is the free trial.)
+    static func isFreeTrialPeriod(_ t: StoreKit.Transaction) -> Bool {
+        if #available(iOS 17.2, *) {
+            return t.offer?.type == .introductory && t.offer?.paymentMode == .freeTrial
+        }
+        return t.offerType == .introductory
+    }
+
+    /// The legacy free rule: first episode of every collection, and standalone comics.
     static func isFreeEpisode(episodeNumber: Int?, collectionId: String?) -> Bool {
         guard collectionId != nil else { return true }
         return (episodeNumber ?? 1) == 1
     }
 
+    /// Free without any entitlement under this access model. Unknown is
+    /// treated as legacy: access is never withdrawn on uncertainty.
+    static func isFree(episodeNumber: Int?, collectionId: String?,
+                       classification: AccessModelService.Classification) -> Bool {
+        classification != .newModel && isFreeEpisode(episodeNumber: episodeNumber, collectionId: collectionId)
+    }
+
+    /// An active trial, paid subscription or lifetime unlock opens everything,
+    /// whatever the access model; otherwise only the model's free episodes.
+    static func isUnlocked(entitled: Bool, classification: AccessModelService.Classification,
+                           episodeNumber: Int?, collectionId: String?) -> Bool {
+        entitled || isFree(episodeNumber: episodeNumber, collectionId: collectionId, classification: classification)
+    }
+
     func isUnlocked(episodeNumber: Int?, collectionId: String?) -> Bool {
-        hasUnlimited || Self.isFreeEpisode(episodeNumber: episodeNumber, collectionId: collectionId)
+        Self.isUnlocked(entitled: hasUnlimited, classification: AccessModelService.shared.classification,
+                        episodeNumber: episodeNumber, collectionId: collectionId)
+    }
+
+    // MARK: - Paywall state
+
+    enum PaywallMode: Equatable {
+        /// StoreKit says the customer is eligible for the free trial.
+        case freeTrial
+        /// Not eligible (e.g. already had a trial): plain subscribe/lifetime.
+        case subscribe
+        /// New-model customer whose trial ended without a paid period.
+        case trialExpired
+    }
+
+    static func paywallMode(isNewModel: Bool, trialExpired: Bool, entitled: Bool, eligibleForTrial: Bool) -> PaywallMode {
+        if isNewModel && trialExpired && !entitled { return .trialExpired }
+        return eligibleForTrial ? .freeTrial : .subscribe
+    }
+
+    /// The paywall's analytics source: a new-model customer whose trial has
+    /// ended is reported as `trial_expired`, however they reached it.
+    static func analyticsSource(requested: PaywallSource?, mode: PaywallMode) -> PaywallSource? {
+        guard let requested else { return nil }
+        return mode == .trialExpired ? .trialExpired : requested
+    }
+
+    func currentPaywallMode() async -> PaywallMode {
+        if monthlyProduct == nil { await loadProducts() }
+        let eligible: Bool
+        if let monthly = monthlyProduct { eligible = await isEligibleForFreeTrial(monthly) } else { eligible = false }
+        return Self.paywallMode(isNewModel: AccessModelService.shared.isNewModel, trialExpired: trialExpired,
+                                entitled: hasUnlimited, eligibleForTrial: eligible)
+    }
+
+    /// Eligible new-model customers without an entitlement see the Library's
+    /// "Start your 7-day free trial" banner. Independent of analytics consent.
+    var showsTrialBanner: Bool {
+        AccessModelService.shared.isNewModel && !hasUnlimited && freeTrialAvailable
+    }
+
+    /// Length of the free trial in days, from the product's introductory offer.
+    static func trialDays(_ product: Product?) -> Int? {
+        guard let offer = product?.subscription?.introductoryOffer, offer.paymentMode == .freeTrial else { return nil }
+        let period = offer.period
+        switch period.unit {
+        case .day: return period.value * offer.periodCount
+        case .week: return period.value * 7 * offer.periodCount
+        default: return nil
+        }
+    }
+
+    /// "month", "year", "3 months"… for the product's billing period.
+    static func billingPeriodText(_ product: Product?) -> String {
+        guard let period = product?.subscription?.subscriptionPeriod else { return "month" }
+        let unit: String
+        switch period.unit {
+        case .day: unit = "day"
+        case .week: unit = "week"
+        case .month: unit = "month"
+        case .year: unit = "year"
+        @unknown default: unit = "period"
+        }
+        return period.value == 1 ? unit : "\(period.value) \(unit)s"
     }
 
     enum StoreError: LocalizedError {
@@ -1233,32 +1464,31 @@ final class StoreService: ObservableObject {
 // MARK: - Paywall
 
 struct PaywallView: View {
+    /// What opened the paywall, for analytics; nil for the debug screenshot preview.
+    let source: PaywallSource?
     @Environment(\.dismiss) private var dismiss
     @StateObject private var store = StoreService.shared
+    @ObservedObject private var access = AccessModelService.shared
+    @State private var mode: StoreService.PaywallMode?
     @State private var purchasing = false
+    @State private var restoring = false
     @State private var errorMessage: String?
-
-    // Debug screenshot mode (--paywall-preview): products can't load via
-    // simctl (no StoreKit config outside Xcode), so show the real store
-    // prices as static text. Never active in release builds.
-    private var previewMode: Bool {
-        #if DEBUG
-        return ProcessInfo.processInfo.arguments.contains("--paywall-preview")
-        #else
-        return false
-        #endif
-    }
-    private var monthlyPriceLine: String? {
-        if let price = store.monthlyProduct?.displayPrice { return "\(price) / month · cancel anytime" }
-        return previewMode ? "£7.99 / month · cancel anytime" : nil
-    }
-    private var lifetimePriceLine: String? {
-        if let price = store.lifetimeProduct?.displayPrice { return "\(price) once · yours forever" }
-        return previewMode ? "$49.99 once · yours forever" : nil
-    }
+    @State private var viewTracked = false
 
     private let violet = Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255)
     private let ink = Color(red: 0x15/255, green: 0x17/255, blue: 0x2A/255)
+
+    private var monthly: Product? { store.monthlyProduct }
+    private var period: String { StoreService.billingPeriodText(monthly) }
+    private var trialDays: Int { StoreService.trialDays(monthly) ?? 7 }
+
+    private var headline: String {
+        switch mode {
+        case .freeTrial: return "Try Comigo free for \(trialDays) days"
+        case .trialExpired: return "Your free trial has ended"
+        default: return "Keep the story going"
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -1269,63 +1499,57 @@ struct PaywallView: View {
                         .font(.title2)
                         .foregroundStyle(.white.opacity(0.85))
                 }
+                .accessibilityLabel("Close")
             }
             .padding([.top, .horizontal], 18)
 
-            Spacer(minLength: 8)
+            ScrollView {
+                VStack(spacing: 0) {
+                    Image("comicgo_logo_yoni_1_alpha_layer_2")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 170)
 
-            Image("comicgo_logo_yoni_1_alpha_layer_2")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 190)
+                    Text(headline)
+                        .font(.system(size: 27, weight: .heavy, design: .rounded))
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 16)
+                        .padding(.horizontal, 24)
+                    if mode == .trialExpired {
+                        Text("Subscribe to keep reading every comic.")
+                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                            .foregroundColor(.white.opacity(0.85))
+                            .padding(.top, 6)
+                    }
 
-            Text("Keep the story going")
-                .font(.system(size: 28, weight: .heavy, design: .rounded))
-                .foregroundColor(.white)
-                .padding(.top, 18)
-
-            VStack(alignment: .leading, spacing: 12) {
-                paywallRow("book.fill", "Every episode of every series — current and future")
-                paywallRow("waveform", "All audio, translations and practice modes")
-                paywallRow("sparkles", "New comics added regularly")
-                paywallRow("gift.fill", "The first episode of every series stays free")
-            }
-            .padding(.horizontal, 34)
-            .padding(.top, 18)
-
-            Spacer(minLength: 12)
-
-            VStack(spacing: 10) {
-                // Monthly — the primary option.
-                Button {
-                    purchase(store.monthlyProduct)
-                } label: {
-                    VStack(spacing: 3) {
-                        Text(purchasing ? "One moment…" : "Subscribe")
-                            .font(.system(size: 18, weight: .heavy, design: .rounded))
-                        if let line = monthlyPriceLine {
-                            Text(line)
-                                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                                .opacity(0.85)
+                    VStack(alignment: .leading, spacing: 12) {
+                        if mode == .freeTrial {
+                            paywallRow("sparkles", "Full access free for \(trialDays) days")
+                        }
+                        paywallRow("book.fill", "Every episode of every series — current and future")
+                        paywallRow("waveform", "All audio, translations and practice modes")
+                        paywallRow("plus.circle.fill", "New comics added regularly")
+                        if !access.isNewModel {
+                            paywallRow("gift.fill", "The first episode of every series stays free")
                         }
                     }
-                    .foregroundColor(ink)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Color.white, in: RoundedRectangle(cornerRadius: 16))
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(ink, lineWidth: 3))
+                    .padding(.horizontal, 34)
+                    .padding(.top, 18)
                 }
-                .disabled(purchasing)
+                .padding(.bottom, 12)
+            }
 
-                // Lifetime — one-time unlock, shown once its product loads.
-                if let line = lifetimePriceLine {
+            VStack(spacing: 10) {
+                subscribeButton
+                if let lifetime = store.lifetimeProduct {
                     Button {
-                        purchase(store.lifetimeProduct)
+                        purchase(lifetime)
                     } label: {
                         VStack(spacing: 3) {
                             Text("Lifetime access")
                                 .font(.system(size: 16, weight: .heavy, design: .rounded))
-                            Text(line)
+                            Text("\(lifetime.displayPrice) once · yours forever")
                                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                                 .opacity(0.85)
                         }
@@ -1336,6 +1560,14 @@ struct PaywallView: View {
                         .overlay(RoundedRectangle(cornerRadius: 16).stroke(.white, lineWidth: 2))
                     }
                     .disabled(purchasing)
+                }
+                if let terms = subscriptionTerms {
+                    Text(terms)
+                        .font(.system(size: 11.5, weight: .medium, design: .rounded))
+                        .foregroundColor(.white.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 2)
                 }
             }
             .padding(.horizontal, 28)
@@ -1349,31 +1581,60 @@ struct PaywallView: View {
                     .padding(.top, 8)
             }
 
-            Button("Restore purchases") {
-                Task {
-                    await store.restore()
-                    if store.hasUnlimited { dismiss() }
-                }
-            }
-            .font(.system(size: 14, weight: .semibold, design: .rounded))
-            .foregroundColor(.white.opacity(0.9))
-            .padding(.top, 12)
+            Button(restoring ? "Restoring…" : "Restore purchases") { restore() }
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundColor(.white.opacity(0.9))
+                .disabled(restoring)
+                .padding(.top, 10)
 
             HStack(spacing: 18) {
-                Link("Privacy Policy", destination: URL(string: "https://comigo.net/privacy.html")!)
+                Link("Privacy Policy", destination: URL(string: "https://comigo.net/privacy")!)
                 Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
             }
             .font(.footnote)
             .foregroundColor(.white.opacity(0.7))
-            .padding(.top, 10)
-            .padding(.bottom, 26)
+            .padding(.top, 8)
+            .padding(.bottom, 22)
         }
         .background(violet.ignoresSafeArea())
-        .onAppear {
-            if store.monthlyProduct == nil {
-                Task { await store.loadProducts() }
-            }
+        .task { await resolveMode() }
+        .onChange(of: store.hasUnlimited) { _, unlocked in
+            if unlocked { dismiss() }
         }
+    }
+
+    @ViewBuilder
+    private var subscribeButton: some View {
+        Button {
+            purchase(monthly)
+        } label: {
+            VStack(spacing: 3) {
+                Text(purchasing ? "One moment…" : (mode == .freeTrial ? "Start free trial" : "Subscribe"))
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+                if let monthly {
+                    Text(mode == .freeTrial
+                         ? "\(trialDays) days free, then \(monthly.displayPrice) / \(period)"
+                         : "\(monthly.displayPrice) / \(period) · cancel anytime")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .opacity(0.85)
+                }
+            }
+            .foregroundColor(ink)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(Color.white, in: RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(ink, lineWidth: 3))
+        }
+        .disabled(purchasing || mode == nil)
+    }
+
+    /// Apple's required auto-renewal disclosure, with StoreKit's localised price.
+    private var subscriptionTerms: String? {
+        guard let monthly else { return nil }
+        if mode == .freeTrial {
+            return "Your \(trialDays)-day free trial automatically becomes a \(monthly.displayPrice)/\(period) subscription unless you cancel at least 24 hours before it ends. Payment is charged to your Apple Account when the trial ends; the subscription renews automatically each \(period) until cancelled. Cancel anytime in Settings → Apple Account → Subscriptions."
+        }
+        return "Comigo Unlimited is \(monthly.displayPrice)/\(period), charged to your Apple Account, and renews automatically unless cancelled at least 24 hours before the end of the current period. Cancel anytime in Settings → Apple Account → Subscriptions."
     }
 
     private func paywallRow(_ icon: String, _ text: String) -> some View {
@@ -1387,12 +1648,26 @@ struct PaywallView: View {
         }
     }
 
+    /// Works out which offer this customer gets (StoreKit eligibility), then
+    /// records the view once — with trial_expired as the source for a
+    /// new-model customer whose trial has ended.
+    private func resolveMode() async {
+        let resolved = await store.currentPaywallMode()
+        mode = resolved
+        guard !viewTracked, let source = StoreService.analyticsSource(requested: source, mode: resolved) else { return }
+        viewTracked = true
+        AnalyticsService.shared.track(.paywallViewed(source: source))
+        if resolved == .freeTrial, let monthly {
+            await store.trialOfferShown(monthly, source: source)
+        }
+    }
+
     private func purchase(_ product: Product?) {
         errorMessage = nil
         guard let product else {
             // Products not loaded yet (offline / App Store hiccup) — retry the fetch.
             errorMessage = StoreService.StoreError.productUnavailable.errorDescription
-            Task { await store.loadProducts() }
+            Task { await store.loadProducts(); await resolveMode() }
             return
         }
         purchasing = true
@@ -1404,6 +1679,21 @@ struct PaywallView: View {
                 errorMessage = error.localizedDescription
             }
             purchasing = false
+        }
+    }
+
+    private func restore() {
+        restoring = true
+        errorMessage = nil
+        Task {
+            await store.restore()
+            restoring = false
+            if store.hasUnlimited {
+                dismiss()
+            } else {
+                errorMessage = "No active Comigo Unlimited purchase was found for this Apple Account."
+                await resolveMode()
+            }
         }
     }
 }

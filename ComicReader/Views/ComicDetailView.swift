@@ -54,6 +54,8 @@ struct ComicDetailView: View {
     @StateObject private var localStorage = LocalComicStorage.shared
     @StateObject private var store = StoreService.shared
     @State private var showPaywall = false
+    @ObservedObject private var reminders = ReminderService.shared
+    @State private var showReminderPrompt = false
 
     @State private var didAutoResume = false
     @State private var practiceDestination: PracticeDestination?
@@ -109,7 +111,10 @@ struct ComicDetailView: View {
             } message: {
                 Text("Delete \"\(comic.title)\"? This will remove it from your device. You can re-download it later.")
             }
-            .navigationDestination(item: $practiceDestination) { destinationView($0) }
+            .navigationDestination(item: $practiceDestination) {
+                destinationView($0)
+                    .environment(\.analyticsComicContext, AnalyticsComicContext(comicId: comic.id, pageNumber: nil))
+            }
             .onChange(of: practiceDestination) { _, newValue in
                 if let dest = newValue {
                     // Locked (e.g. subscription lapsed after download) — every
@@ -130,6 +135,10 @@ struct ComicDetailView: View {
                     progressManager.touchProgress(comicId: comic.id)
                     progressManager.setPracticeMode(comic.id, mode: dest.modeKey)
                     showPracticeOptions = false
+                    if let type = PracticeType(modeKey: dest.modeKey) {
+                        AnalyticsService.shared.track(.practiceStarted(comicId: comic.id, practiceType: type))
+                    }
+                    Task { await reminders.recordEngagement() }
                 }
             }
             .onChange(of: showPracticeOptions) { _, open in
@@ -148,6 +157,10 @@ struct ComicDetailView: View {
                     guidedOnScreen = false
                     // If they tapped "Practice" at the end of the episode, open the
                     // practice popup once the page view has finished popping.
+                    if !openPracticeAfterReading && reminders.shouldOfferPrompt {
+                        // First comic just finished: offer reminders once the reader has closed.
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { showReminderPrompt = true }
+                    }
                     if openPracticeAfterReading {
                         openPracticeAfterReading = false
                         practiceFromEnd = true   // whatever mode they pick starts from the beginning
@@ -162,7 +175,10 @@ struct ComicDetailView: View {
                 PracticeModesHelpView()
             }
             .sheet(isPresented: $showPaywall) {
-                PaywallView()
+                PaywallView(source: .comicLocked)
+            }
+            .sheet(isPresented: $showReminderPrompt) {
+                ReminderPromptView(reminders: reminders)
             }
     }
 
@@ -179,6 +195,7 @@ struct ComicDetailView: View {
     /// the user may proceed; otherwise pops the paywall.
     private func requireUnlocked() -> Bool {
         if isLocked {
+            AnalyticsService.shared.track(.lockedContentTapped(comicId: comic.id, collectionId: comic.collectionId))
             showPaywall = true
             return false
         }
@@ -914,6 +931,7 @@ struct ComicDetailView: View {
         pendingBubbleId = bubbleId
         showPracticeOptions = false
         progressManager.setPracticeMode(comic.id, mode: "readSpeak")
+        AnalyticsService.shared.track(.practiceStarted(comicId: comic.id, practiceType: .readSpeak))
         selectedPage = page
     }
 

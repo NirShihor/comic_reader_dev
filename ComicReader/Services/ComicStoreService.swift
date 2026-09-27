@@ -18,6 +18,7 @@ struct StoreComic: Identifiable, Codable {
     /// hash recorded at download time to detect available updates.
     let bundleVersion: String?
     let downloadUrl: String
+    let collectionId: String?
     let collectionTitle: String?
     let collectionTitleEn: String?
     let episodeNumber: Int?
@@ -28,7 +29,7 @@ struct StoreComic: Identifiable, Codable {
     enum CodingKeys: String, CodingKey {
         case id, title, titleEn, description, coverThumbnailUrl, level
         case totalPages, estimatedMinutes, language, fileSizeMB, version, bundleVersion, downloadUrl
-        case collectionTitle, collectionTitleEn, episodeNumber
+        case collectionId, collectionTitle, collectionTitleEn, episodeNumber
         case collectionDescription, collectionCoverThumbnailUrl
         case order
     }
@@ -48,6 +49,7 @@ struct StoreComic: Identifiable, Codable {
         version = try container.decodeIfPresent(String.self, forKey: .version) ?? "1.0"
         bundleVersion = try container.decodeIfPresent(String.self, forKey: .bundleVersion)
         downloadUrl = try container.decodeIfPresent(String.self, forKey: .downloadUrl) ?? ""
+        collectionId = try container.decodeIfPresent(String.self, forKey: .collectionId)
         collectionTitle = try container.decodeIfPresent(String.self, forKey: .collectionTitle)
         collectionTitleEn = try container.decodeIfPresent(String.self, forKey: .collectionTitleEn)
         episodeNumber = try container.decodeIfPresent(Int.self, forKey: .episodeNumber)
@@ -59,7 +61,7 @@ struct StoreComic: Identifiable, Codable {
     init(id: String, title: String, titleEn: String? = nil, description: String, coverThumbnailUrl: String,
          level: String, totalPages: Int, estimatedMinutes: Int, language: String,
          fileSizeMB: Double, version: String, bundleVersion: String? = nil, downloadUrl: String,
-         collectionTitle: String? = nil, collectionTitleEn: String? = nil, episodeNumber: Int? = nil,
+         collectionId: String? = nil, collectionTitle: String? = nil, collectionTitleEn: String? = nil, episodeNumber: Int? = nil,
          collectionDescription: String? = nil, collectionCoverThumbnailUrl: String? = nil,
          order: Int? = nil) {
         self.id = id
@@ -75,6 +77,7 @@ struct StoreComic: Identifiable, Codable {
         self.version = version
         self.bundleVersion = bundleVersion
         self.downloadUrl = downloadUrl
+        self.collectionId = collectionId
         self.collectionTitle = collectionTitle
         self.collectionTitleEn = collectionTitleEn
         self.episodeNumber = episodeNumber

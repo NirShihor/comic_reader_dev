@@ -171,6 +171,11 @@ struct RepeatPracticeView: View {
                 }
             }
         }
+        .onChange(of: state) { old, new in
+            if new == .completed && old != .completed {
+                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: reverse ? .translateSpeak : .repeatPractice))
+            }
+        }
         .onDisappear {
             // Remember the spot if they left mid-session (not finished / not on start).
             if state != .completed && state != .idle && !sentences.isEmpty {

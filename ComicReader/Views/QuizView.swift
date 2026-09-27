@@ -99,7 +99,10 @@ struct QuizView: View {
             if !quizComplete { progressManager.saveWordPosition(comicId: comic.id, index: currentIndex) }
         }
         .onChange(of: quizComplete) { _, done in
-            if done { progressManager.clearWordPosition(for: comic.id) }
+            if done {
+                progressManager.clearWordPosition(for: comic.id)
+                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .quiz))
+            }
         }
         .sheet(isPresented: $showingContext) {
             if let page = contextPage, let panel = contextPanel {

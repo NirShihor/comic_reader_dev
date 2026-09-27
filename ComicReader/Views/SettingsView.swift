@@ -5,6 +5,11 @@ struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @AppStorage("appearanceMode") private var appearanceMode = "system"
     @AppStorage("demo.hideCues") private var hideCues = false
+    @ObservedObject private var analytics = AnalyticsService.shared
+    @ObservedObject private var reminders = ReminderService.shared
+    @AppStorage(SpanishLevel.storageKey) private var spanishLevelRaw = ""
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
 
     private var hideCuesBinding: Binding<Bool> {
         Binding(get: { hideCues }, set: { hideCues = $0 })
@@ -52,6 +57,52 @@ struct SettingsView: View {
                 Text("Reading")
             }
 
+            // Learning Section
+            Section {
+                NavigationLink {
+                    SpanishLevelSettingsView()
+                } label: {
+                    HStack {
+                        Label("Spanish level", systemImage: "graduationcap.fill")
+                        Spacer()
+                        Text(SpanishLevel(rawValue: spanishLevelRaw)?.title ?? "Not set")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } header: {
+                Text("Learning")
+            }
+
+            // Reminders Section — reflects iOS's actual notification permission.
+            Section {
+                if reminders.settingsState == .blockedInSystem {
+                    HStack {
+                        Label("Inactivity reminders", systemImage: "bell.slash.fill")
+                        Spacer()
+                        Text("Off in iOS Settings").foregroundStyle(.secondary)
+                    }
+                    Button {
+                        if let url = ReminderService.systemSettingsURL { openURL(url) }
+                    } label: {
+                        Label("Open iOS Settings", systemImage: "gear")
+                    }
+                } else {
+                    Toggle(isOn: Binding(
+                        get: { reminders.settingsState == .on },
+                        set: { on in
+                            if on { Task { await reminders.allowReminders() } } else { reminders.disableReminders() }
+                        })) {
+                        Label("Inactivity reminders", systemImage: "bell.fill")
+                    }
+                }
+            } header: {
+                Text("Reminders")
+            } footer: {
+                Text(reminders.settingsState == .blockedInSystem
+                     ? "Notifications for Comigo are turned off in iOS Settings. Turn them on there to get reminders."
+                     : "A gentle nudge if you haven't read any Spanish for 3 days, and again after 7. Set up on this device only — nothing is sent to us.")
+            }
+
             // Account Section
             Section {
                 NavigationLink {
@@ -61,6 +112,17 @@ struct SettingsView: View {
                 }
             } header: {
                 Text("Account")
+            }
+
+            // Privacy Section
+            Section {
+                Toggle(isOn: Binding(get: { analytics.isEnabled }, set: { analytics.setConsent($0) })) {
+                    Label("Share usage analytics", systemImage: "chart.bar.fill")
+                }
+            } header: {
+                Text("Privacy")
+            } footer: {
+                Text("Off unless you choose to share. Usage statistics — such as which pages are read and which features are used — help us improve Comigo. They're linked to a random ID, not to your name, email or Apple ID, never include your voice, your answers or anything you type, and are never used for advertising. Turning this off stops them immediately.")
             }
 
             // About Section
@@ -96,6 +158,10 @@ struct SettingsView: View {
                 Toggle(isOn: hideCuesBinding) {
                     Label("Hide reading cues", systemImage: "hand.point.up.left")
                 }
+
+                if AccessModelService.shared.isTestEnvironment {
+                    AccessModelTesterRow()
+                }
             } header: {
                 Text("Diagnostics")
             } footer: {
@@ -114,6 +180,41 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Settings")
+        .task { await reminders.refreshAuthorization() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await reminders.refreshAuthorization() } }
+        }
+    }
+}
+
+/// Settings → Spanish level: change the level chosen on first run.
+struct SpanishLevelSettingsView: View {
+    @AppStorage(SpanishLevel.storageKey) private var spanishLevelRaw = ""
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(SpanishLevel.allCases) { level in
+                    Button {
+                        SpanishLevel.select(level)
+                    } label: {
+                        HStack(alignment: .center, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(level.title).foregroundStyle(.primary)
+                                Text(level.detail).font(.footnote).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if spanishLevelRaw == level.rawValue {
+                                Image(systemName: "checkmark").foregroundStyle(.tint).fontWeight(.semibold)
+                            }
+                        }
+                    }
+                }
+            } footer: {
+                Text("Stored on this device.")
+            }
+        }
+        .navigationTitle("Spanish level")
     }
 }
 
@@ -176,24 +277,52 @@ struct SpeechLogView: View {
 }
 
 // MARK: - Subscription settings
-/// Real subscription status + actions, backed by StoreService. Replaces the
-/// old placeholder screen.
+/// Subscription status + actions, all from StoreKit via StoreService.
 struct SubscriptionSettingsView: View {
     @StateObject private var store = StoreService.shared
+    @ObservedObject private var access = AccessModelService.shared
     @State private var showPaywall = false
+    @State private var showManage = false
     @State private var restoring = false
+
+    private var status: (title: String, detail: String?, active: Bool) {
+        let date = { (d: Date?) in d.map { $0.formatted(date: .abbreviated, time: .omitted) } }
+        switch store.entitlement {
+        case .lifetime:
+            return ("Lifetime access", nil, true)
+        case .subscribed:
+            let verb = store.autoRenews == false ? "Ends" : "Renews"
+            return ("Comigo Unlimited", date(store.renewsAt).map { "\(verb) \($0)" }, true)
+        case .trial:
+            let then = store.autoRenews == false
+                ? " Auto-renew is off, so it won't become a paid subscription."
+                : (store.monthlyProduct.map { " Then \($0.displayPrice)/\(StoreService.billingPeriodText($0)) unless cancelled." } ?? "")
+            return ("Free trial", (date(store.trialEndsAt).map { "Ends \($0)." } ?? "") + then, true)
+        case .free:
+            return (store.trialExpired && access.isNewModel ? "Free trial ended" : "Not subscribed", nil, false)
+        }
+    }
+
+    private var footer: String {
+        access.isNewModel
+            ? "Comigo Unlimited unlocks every episode — as a monthly subscription (with a free trial if you're eligible) or a one-time lifetime purchase."
+            : "The first episode of every series is free. Comigo Unlimited unlocks every episode — as a monthly subscription or a one-time lifetime purchase."
+    }
 
     var body: some View {
         List {
             Section {
-                HStack {
-                    Label("Comigo Unlimited", systemImage: store.hasUnlimited ? "checkmark.seal.fill" : "lock.fill")
+                HStack(alignment: .firstTextBaseline) {
+                    Label(status.title, systemImage: status.active ? "checkmark.seal.fill" : "lock.fill")
                     Spacer()
-                    Text(store.hasUnlimited ? "Active" : "Not subscribed")
-                        .foregroundStyle(store.hasUnlimited ? .green : .secondary)
+                    Text(status.active ? "Active" : "Inactive")
+                        .foregroundStyle(status.active ? .green : .secondary)
+                }
+                if let detail = status.detail {
+                    Text(detail).font(.footnote).foregroundStyle(.secondary)
                 }
             } footer: {
-                Text("The first episode of every series is free. Comigo Unlimited unlocks every episode — as a monthly subscription or a one-time lifetime purchase.")
+                Text(footer)
             }
 
             Section {
@@ -201,7 +330,7 @@ struct SubscriptionSettingsView: View {
                     Button {
                         showPaywall = true
                     } label: {
-                        Label("View plans", systemImage: "sparkles")
+                        Label(store.freeTrialAvailable ? "Start your free trial" : "View plans", systemImage: "sparkles")
                     }
                 }
 
@@ -222,14 +351,39 @@ struct SubscriptionSettingsView: View {
                 }
                 .disabled(restoring)
 
-                Link(destination: URL(string: "https://apps.apple.com/account/subscriptions")!) {
+                Button {
+                    showManage = true
+                } label: {
                     Label("Manage subscription", systemImage: "gearshape.fill")
                 }
             }
         }
         .navigationTitle("Subscription")
-        .sheet(isPresented: $showPaywall) { PaywallView() }
+        .sheet(isPresented: $showPaywall) { PaywallView(source: .settings) }
+        .manageSubscriptionsSheet(isPresented: $showManage)
+        .onChange(of: showManage) { _, open in
+            if !open { Task { await store.refreshEntitlement() } }
+        }
         .task { await store.refreshEntitlement() }
+    }
+}
+
+/// Sandbox / TestFlight / Xcode only: Apple reports originalAppVersion "1.0"
+/// outside production, so testers choose the access model here. The App Store
+/// build never shows this and ignores the setting.
+struct AccessModelTesterRow: View {
+    @ObservedObject private var access = AccessModelService.shared
+    @State private var choice = AccessModelService.shared.testerOverride
+
+    var body: some View {
+        Picker(selection: $choice) {
+            Text("Automatic (new model)").tag(AccessModelService.TesterOverride.automatic)
+            Text("Legacy user").tag(AccessModelService.TesterOverride.legacy)
+            Text("New-model user").tag(AccessModelService.TesterOverride.newModel)
+        } label: {
+            Label("Access model (testing)", systemImage: "person.badge.clock")
+        }
+        .onChange(of: choice) { _, value in access.testerOverride = value }
     }
 }
 

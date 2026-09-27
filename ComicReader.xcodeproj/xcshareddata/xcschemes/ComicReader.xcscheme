@@ -34,6 +34,16 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "C3000001000000000000C03"
+               BuildableName = "ComicReaderTests.xctest"
+               BlueprintName = "ComicReaderTests"
+               ReferencedContainer = "container:ComicReader.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "B2000001000000000000106"
                BuildableName = "ComicReaderUITests.xctest"
                BlueprintName = "ComicReaderUITests"

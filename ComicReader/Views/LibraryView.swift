@@ -25,6 +25,20 @@ struct LibraryView: View {
     @AppStorage("creatorMessage.seen") private var creatorMessageSeen = false
     @State private var showCreatorBanner = false
     @State private var showCreatorMessage = false
+    // Analytics choice card: waits until the creator message has been read,
+    // so the two first-run cards don't arrive together — except that if the
+    // message is still unread on a later launch, the card no longer waits.
+    @ObservedObject private var analytics = AnalyticsService.shared
+    // Trial banner: eligible new-model customers only. Deliberately NOT tied
+    // to analytics consent — it's product functionality.
+    @ObservedObject private var store = StoreService.shared
+    @State private var showTrialPaywall = false
+    // Reminder offer fallback (e.g. they went straight into practice after
+    // finishing their first comic, so the comic screen didn't show it).
+    @ObservedObject private var reminders = ReminderService.shared
+    @State private var showReminderPrompt = false
+    @AppStorage("analytics.consentCardDeferred") private var consentCardDeferred = false
+    @State private var consentCardReady = false
 
     private var showInitialLoader: Bool {
         localStorage.isLoading && localStorage.downloadedComics.isEmpty
@@ -99,25 +113,51 @@ struct LibraryView: View {
             }
         }
         .overlay(alignment: .bottom) {
-            if showCreatorBanner && !creatorMessageSeen {
-                creatorBanner
-                    .frame(maxWidth: 652)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 10)
+            VStack(spacing: 10) {
+                // Held back while a first-run tooltip is on screen — one thing at a time.
+                if consentCardReady && analytics.needsConsentChoice && !showLibraryTitleTip && !showChooseCollection {
+                    AnalyticsConsentCard { granted in
+                        withAnimation(.easeInOut(duration: 0.25)) { analytics.setConsent(granted) }
+                    }
                     .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .zIndex(40)
+                }
+                if store.showsTrialBanner {
+                    trialBanner
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                if showCreatorBanner && !creatorMessageSeen {
+                    creatorBanner
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
+            .frame(maxWidth: 652)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 10)
+            .zIndex(40)
         }
+        .sheet(isPresented: $showTrialPaywall) { PaywallView(source: .libraryBanner) }
+        .sheet(isPresented: $showReminderPrompt) { ReminderPromptView(reminders: reminders) }
         .sheet(isPresented: $showCreatorMessage, onDismiss: {
             creatorMessageSeen = true
             withAnimation(.easeInOut(duration: 0.25)) { showCreatorBanner = false }
             // The creator message opens the first-launch experience; the intro
             // tooltips follow only once it has been read and closed.
             startIntroTooltipsIfNeeded(after: 0.8)
+            showConsentCardIfNeeded(after: 1.2)
         }) {
             CreatorMessageView()
         }
         .onAppear {
+            if reminders.shouldOfferPrompt {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    if reminders.shouldOfferPrompt { showReminderPrompt = true }
+                }
+            }
+            if creatorMessageSeen || consentCardDeferred {
+                showConsentCardIfNeeded(after: 1.2)
+            } else {
+                consentCardDeferred = true
+            }
             if !creatorMessageSeen {
                 // First launch: only the creator banner — the intro tooltips
                 // hold back until the message has been opened and closed.
@@ -206,6 +246,13 @@ struct LibraryView: View {
     // First visit: the library-title tip opens the sequence (the old "?"
     // intro was retired — the reader's closing tooltip covers the ? button);
     // the "Choose a collection." prompt is last.
+    private func showConsentCardIfNeeded(after delay: TimeInterval) {
+        guard analytics.needsConsentChoice, !consentCardReady else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { consentCardReady = true }
+        }
+    }
+
     private func startIntroTooltipsIfNeeded(after delay: TimeInterval) {
         if HelpDebug.forceShowTooltips || !seenLibraryTitleTip {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
@@ -220,6 +267,31 @@ struct LibraryView: View {
     }
 
     // Bottom banner inviting first-time users to read the creator's welcome.
+    private var trialBanner: some View {
+        Button {
+            showTrialPaywall = true
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "sparkles")
+                Text("Start your \(StoreService.trialDays(store.monthlyProduct) ?? 7)-day free trial")
+                    .fontWeight(.semibold)
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.up")
+                    .font(.footnote.weight(.bold))
+                    .opacity(0.8)
+            }
+            .font(.subheadline)
+            .foregroundStyle(Color.comigoInk)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 13)
+            .background(Color(red: 0xFF/255, green: 0xD2/255, blue: 0x3F/255), in: RoundedRectangle(cornerRadius: 15))
+            .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.comigoInk, lineWidth: 2))
+            .shadow(color: .black.opacity(0.25), radius: 8, y: 3)
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Shows the free trial offer and its terms")
+    }
+
     private var creatorBanner: some View {
         Button {
             showCreatorMessage = true

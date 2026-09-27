@@ -87,7 +87,10 @@ struct SpeakingTestView: View {
             if !testComplete { progressManager.saveWordPosition(comicId: comic.id, index: currentIndex) }
         }
         .onChange(of: testComplete) { _, done in
-            if done { progressManager.clearWordPosition(for: comic.id) }
+            if done {
+                progressManager.clearWordPosition(for: comic.id)
+                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .speaking))
+            }
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
