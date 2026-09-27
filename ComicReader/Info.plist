@@ -33,6 +33,12 @@
 	<string>We need microphone access to record your Spanish pronunciation for speaking practice.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>We use speech recognition to help you practice Spanish pronunciation.</string>
+	<key>PostHogDevelopmentToken</key>
+	<string>phc_whZo6ogGNqZKudyLrFvSadWYF89ykxFqmNVLAs4yJ7Wd</string>
+	<key>PostHogHost</key>
+	<string>https://eu.i.posthog.com</string>
+	<key>PostHogProductionToken</key>
+	<string>phc_y35jxC3Ph8S4VzRK9RZoExisXAcarCPKPxfH3AFSPJDH</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>ComicRelief-Regular.ttf</string>

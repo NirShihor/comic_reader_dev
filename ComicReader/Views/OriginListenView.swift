@@ -82,6 +82,11 @@ struct OriginListenView: View {
                 handleAudioFinished()
             }
         }
+        .onChange(of: state) { old, new in
+            if new == .completed && old != .completed {
+                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .originListen))
+            }
+        }
         .onDisappear {
             cleanup()
             teardownRemoteCommands()

@@ -25,6 +25,12 @@ struct LibraryView: View {
     @AppStorage("creatorMessage.seen") private var creatorMessageSeen = false
     @State private var showCreatorBanner = false
     @State private var showCreatorMessage = false
+    // Analytics choice card: waits until the creator message has been read,
+    // so the two first-run cards don't arrive together — except that if the
+    // message is still unread on a later launch, the card no longer waits.
+    @ObservedObject private var analytics = AnalyticsService.shared
+    @AppStorage("analytics.consentCardDeferred") private var consentCardDeferred = false
+    @State private var consentCardReady = false
 
     private var showInitialLoader: Bool {
         localStorage.isLoading && localStorage.downloadedComics.isEmpty
@@ -99,14 +105,23 @@ struct LibraryView: View {
             }
         }
         .overlay(alignment: .bottom) {
-            if showCreatorBanner && !creatorMessageSeen {
-                creatorBanner
-                    .frame(maxWidth: 652)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 10)
+            VStack(spacing: 10) {
+                // Held back while a first-run tooltip is on screen — one thing at a time.
+                if consentCardReady && analytics.needsConsentChoice && !showLibraryTitleTip && !showChooseCollection {
+                    AnalyticsConsentCard { granted in
+                        withAnimation(.easeInOut(duration: 0.25)) { analytics.setConsent(granted) }
+                    }
                     .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .zIndex(40)
+                }
+                if showCreatorBanner && !creatorMessageSeen {
+                    creatorBanner
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
+            .frame(maxWidth: 652)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 10)
+            .zIndex(40)
         }
         .sheet(isPresented: $showCreatorMessage, onDismiss: {
             creatorMessageSeen = true
@@ -114,10 +129,16 @@ struct LibraryView: View {
             // The creator message opens the first-launch experience; the intro
             // tooltips follow only once it has been read and closed.
             startIntroTooltipsIfNeeded(after: 0.8)
+            showConsentCardIfNeeded(after: 1.2)
         }) {
             CreatorMessageView()
         }
         .onAppear {
+            if creatorMessageSeen || consentCardDeferred {
+                showConsentCardIfNeeded(after: 1.2)
+            } else {
+                consentCardDeferred = true
+            }
             if !creatorMessageSeen {
                 // First launch: only the creator banner — the intro tooltips
                 // hold back until the message has been opened and closed.
@@ -206,6 +227,13 @@ struct LibraryView: View {
     // First visit: the library-title tip opens the sequence (the old "?"
     // intro was retired — the reader's closing tooltip covers the ? button);
     // the "Choose a collection." prompt is last.
+    private func showConsentCardIfNeeded(after delay: TimeInterval) {
+        guard analytics.needsConsentChoice, !consentCardReady else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { consentCardReady = true }
+        }
+    }
+
     private func startIntroTooltipsIfNeeded(after delay: TimeInterval) {
         if HelpDebug.forceShowTooltips || !seenLibraryTitleTip {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {

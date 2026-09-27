@@ -91,6 +91,9 @@ struct KeyPhrasePracticeView: View {
                 }
             }
         }
+        .onChange(of: complete) { _, done in
+            if done { AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .keyPhrases)) }
+        }
         .onDisappear {
             audioManager.stop()
             whisperService.cancelRecording()

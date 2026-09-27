@@ -54,6 +54,15 @@
 		A1000001222222220000032 /* HelpMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000032 /* HelpMode.swift */; };
 		A1000001222222220000033 /* FlowPracticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000033 /* FlowPracticeView.swift */; };
 		A1000001222222220000034 /* KeyPhrasePracticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001111111110000034 /* KeyPhrasePracticeView.swift */; };
+		C3000001000000000000A11 /* AnalyticsEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A01 /* AnalyticsEvent.swift */; };
+		C3000001000000000000A12 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A02 /* AnalyticsService.swift */; };
+		C3000001000000000000A13 /* PostHogAnalyticsBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A03 /* PostHogAnalyticsBackend.swift */; };
+		C3000001000000000000A14 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A04 /* PrivacyInfo.xcprivacy */; };
+		C3000001000000000000A15 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = C3000001000000000000B02 /* PostHog */; };
+		C3000001000000000000A16 /* AnalyticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A06 /* AnalyticsTests.swift */; };
+		C3000001000000000000A17 /* PurchaseAttribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A07 /* PurchaseAttribution.swift */; };
+		C3000001000000000000A18 /* AnalyticsConsentCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A08 /* AnalyticsConsentCard.swift */; };
+		C3000001000000000000A19 /* ComigoStore.storekit in Resources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A09 /* ComigoStore.storekit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -107,6 +116,15 @@
 		A1000001111111110000032 /* HelpMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpMode.swift; sourceTree = "<group>"; };
 		A1000001111111110000033 /* FlowPracticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowPracticeView.swift; sourceTree = "<group>"; };
 		A1000001111111110000034 /* KeyPhrasePracticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyPhrasePracticeView.swift; sourceTree = "<group>"; };
+		C3000001000000000000A01 /* AnalyticsEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsEvent.swift; sourceTree = "<group>"; };
+		C3000001000000000000A02 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		C3000001000000000000A03 /* PostHogAnalyticsBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostHogAnalyticsBackend.swift; sourceTree = "<group>"; };
+		C3000001000000000000A04 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		C3000001000000000000A05 /* ComicReaderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ComicReaderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C3000001000000000000A06 /* AnalyticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsTests.swift; sourceTree = "<group>"; };
+		C3000001000000000000A07 /* PurchaseAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseAttribution.swift; sourceTree = "<group>"; };
+		C3000001000000000000A08 /* AnalyticsConsentCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsConsentCard.swift; sourceTree = "<group>"; };
+		C3000001000000000000A09 /* ComigoStore.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = ComigoStore.storekit; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +136,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		A1000001333333330000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C3000001000000000000A15 /* PostHog in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C3000001000000000000C04 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -141,6 +167,7 @@
 				A1000001444444440000002 /* ComicReader */,
 				A1000001444444440000003 /* Products */,
 				B2000001000000000000105 /* ComicReaderUITests */,
+				C3000001000000000000C01 /* ComicReaderTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -151,6 +178,26 @@
 				B2000001000000000000192 /* BubbleReel.swift */,
 			);
 			path = ComicReaderUITests;
+			sourceTree = "<group>";
+		};
+		C3000001000000000000C01 /* ComicReaderTests */ = {
+			isa = PBXGroup;
+			children = (
+				C3000001000000000000A06 /* AnalyticsTests.swift */,
+				C3000001000000000000A09 /* ComigoStore.storekit */,
+			);
+			path = ComicReaderTests;
+			sourceTree = "<group>";
+		};
+		C3000001000000000000C02 /* Analytics */ = {
+			isa = PBXGroup;
+			children = (
+				C3000001000000000000A01 /* AnalyticsEvent.swift */,
+				C3000001000000000000A02 /* AnalyticsService.swift */,
+				C3000001000000000000A03 /* PostHogAnalyticsBackend.swift */,
+				C3000001000000000000A07 /* PurchaseAttribution.swift */,
+			);
+			path = Analytics;
 			sourceTree = "<group>";
 		};
 		A1000001444444440000002 /* ComicReader */ = {
@@ -165,6 +212,7 @@
 				A1000001111111110000022 /* BundledComics */,
 				A1000001111111110000016 /* Assets.xcassets */,
 				A1000001111111110000017 /* Info.plist */,
+				C3000001000000000000A04 /* PrivacyInfo.xcprivacy */,
 				819A36E62F9EA3EA004A1687 /* correct.mp3 */,
 				81A80AE72FF055D100B9D2C2 /* no_audio.mp3 */,
 				819A36E72F9EA3EA004A1687 /* not_quite_listen_again.mp3 */,
@@ -182,6 +230,7 @@
 			children = (
 				A1000001000000000000001 /* ComicReader.app */,
 				B2000001000000000000103 /* ComicReaderUITests.xctest */,
+				C3000001000000000000A05 /* ComicReaderTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -218,6 +267,7 @@
 				A1000001111111110000032 /* HelpMode.swift */,
 				A1000001111111110000033 /* FlowPracticeView.swift */,
 				A1000001111111110000034 /* KeyPhrasePracticeView.swift */,
+				C3000001000000000000A08 /* AnalyticsConsentCard.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -235,6 +285,7 @@
 				A1000001111111110000023 /* ComicImageLoader.swift */,
 				A1000001111111110000025 /* SpeechRecognizer.swift */,
 				A1000001111111110000027 /* ZIPExtractor.swift */,
+				C3000001000000000000C02 /* Analytics */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -256,6 +307,9 @@
 			);
 			name = ComicReader;
 			productName = ComicReader;
+			packageProductDependencies = (
+				C3000001000000000000B02 /* PostHog */,
+			);
 			productReference = A1000001000000000000001 /* ComicReader.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -276,6 +330,24 @@
 			productReference = B2000001000000000000103 /* ComicReaderUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		C3000001000000000000C03 /* ComicReaderTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C3000001000000000000C08 /* Build configuration list for PBXNativeTarget "ComicReaderTests" */;
+			buildPhases = (
+				C3000001000000000000C05 /* Sources */,
+				C3000001000000000000C04 /* Frameworks */,
+				C3000001000000000000C0C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C3000001000000000000C0A /* PBXTargetDependency */,
+			);
+			name = ComicReaderTests;
+			productName = ComicReaderTests;
+			productReference = C3000001000000000000A05 /* ComicReaderTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -293,6 +365,10 @@
 						CreatedOnToolsVersion = 15.0;
 						TestTargetID = A1000001555555550000001;
 					};
+					C3000001000000000000C03 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = A1000001555555550000001;
+					};
 				};
 			};
 			buildConfigurationList = A1000001777777770000002 /* Build configuration list for PBXProject "ComicReader" */;
@@ -306,11 +382,15 @@
 			);
 			mainGroup = A1000001444444440000001;
 			productRefGroup = A1000001444444440000003 /* Products */;
+			packageReferences = (
+				C3000001000000000000B01 /* XCRemoteSwiftPackageReference "posthog-ios" */,
+			);
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				A1000001555555550000001 /* ComicReader */,
 				B2000001000000000000106 /* ComicReaderUITests */,
+				C3000001000000000000C03 /* ComicReaderTests */,
 			);
 		};
 /* End PBXProject section */
@@ -330,6 +410,15 @@
 				81A80AEC2FF1A2AE00B9D2C2 /* Inter-Variable.ttf in Resources */,
 				A1000001222222220000022 /* BundledComics in Resources */,
 				A1000001222222220000016 /* Assets.xcassets in Resources */,
+				C3000001000000000000A14 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C3000001000000000000C0C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C3000001000000000000A19 /* ComigoStore.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -343,6 +432,13 @@
 			remoteGlobalIDString = A1000001555555550000001;
 			remoteInfo = ComicReader;
 		};
+		C3000001000000000000C0B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1000001888888880000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1000001555555550000001;
+			remoteInfo = ComicReader;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXTargetDependency section */
@@ -350,6 +446,11 @@
 			isa = PBXTargetDependency;
 			target = A1000001555555550000001 /* ComicReader */;
 			targetProxy = B2000001000000000000110 /* PBXContainerItemProxy */;
+		};
+		C3000001000000000000C0A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A1000001555555550000001 /* ComicReader */;
+			targetProxy = C3000001000000000000C0B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -402,6 +503,19 @@
 				A1000001222222220000032 /* HelpMode.swift in Sources */,
 				A1000001222222220000033 /* FlowPracticeView.swift in Sources */,
 				A1000001222222220000034 /* KeyPhrasePracticeView.swift in Sources */,
+				C3000001000000000000A11 /* AnalyticsEvent.swift in Sources */,
+				C3000001000000000000A12 /* AnalyticsService.swift in Sources */,
+				C3000001000000000000A13 /* PostHogAnalyticsBackend.swift in Sources */,
+				C3000001000000000000A17 /* PurchaseAttribution.swift in Sources */,
+				C3000001000000000000A18 /* AnalyticsConsentCard.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C3000001000000000000C05 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C3000001000000000000A16 /* AnalyticsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -633,6 +747,48 @@
 			};
 			name = Release;
 		};
+		C3000001000000000000C06 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M2YB4CVVQP;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.comicreader.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ComicReader.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ComicReader";
+			};
+			name = Debug;
+		};
+		C3000001000000000000C07 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M2YB4CVVQP;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.comicreader.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ComicReader.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ComicReader";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -663,7 +819,34 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		C3000001000000000000C08 /* Build configuration list for PBXNativeTarget "ComicReaderTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C3000001000000000000C06 /* Debug */,
+				C3000001000000000000C07 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+/* Begin XCRemoteSwiftPackageReference section */
+		C3000001000000000000B01 /* XCRemoteSwiftPackageReference "posthog-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/PostHog/posthog-ios.git";
+			requirement = {
+				kind = exactVersion;
+				version = 3.85.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C3000001000000000000B02 /* PostHog */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C3000001000000000000B01 /* XCRemoteSwiftPackageReference "posthog-ios" */;
+			productName = PostHog;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A1000001888888880000001 /* Project object */;
 }

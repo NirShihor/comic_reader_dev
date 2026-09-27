@@ -125,6 +125,11 @@ struct RepeatListenView: View {
                 }
             }
         }
+        .onChange(of: state) { old, new in
+            if new == .completed && old != .completed {
+                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .repeatListen))
+            }
+        }
         .onDisappear {
             if state != .completed && state != .idle && !sentences.isEmpty {
                 savePracticeSpot()

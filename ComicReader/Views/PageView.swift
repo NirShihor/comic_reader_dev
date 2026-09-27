@@ -441,6 +441,12 @@ struct PageView: View {
     @State private var flashGeneration = 0
     // Armed when a hotspot with advanceOnClose is opened by a tap; consumed on dismiss.
     @State private var hotspotAdvanceOnClose = false
+    // Analytics: one comic_started per reading session, one comic_completed per
+    // session, one read_speak completion per guided run. @State survives the
+    // view re-appearing (sheets, redraws), so lifecycle callbacks can't repeat them.
+    @State private var readingSessionTracked = false
+    @State private var completionTracked = false
+    @State private var guidedCompletionTracked = false
 
     // A visible tooltip owns the reader's attention — the pointing hand
     // stays off while any is up (checked at start AND at each pulse step,
@@ -1127,6 +1133,7 @@ struct PageView: View {
             if guidedOnScreenPractice {
                 handleGuidedEnd()
             } else {
+                trackComicCompleted()
                 showEndOfEpisode = true
             }
             return
@@ -1143,6 +1150,10 @@ struct PageView: View {
     /// offer to start listening practice; after listening, the run is complete.
     private func handleGuidedEnd() {
         if settingsManager.speakingPracticeMode {
+            if !guidedCompletionTracked {
+                guidedCompletionTracked = true
+                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .readSpeak))
+            }
             showSpeakingDonePrompt = true
         } else {
             showOnScreenComplete = true
@@ -1226,6 +1237,28 @@ struct PageView: View {
         navForward = false                      // PagedImageView slides the artwork
         currentPageIndex -= 1
         textRevealed = false
+    }
+
+    // MARK: - Analytics
+
+    /// Plain reading sessions only: guided Read & speak runs are practice, and
+    /// context views (a word's page from Vocabulary, a note's link) aren't reading.
+    private var tracksReading: Bool { savesProgress && !guidedOnScreenPractice }
+
+    /// The page as the reader sees it ("3/12" in the top bar).
+    private func trackPageViewed() {
+        AnalyticsService.shared.track(.comicPageViewed(
+            comicId: comic.id, pageNumber: currentPage.pageNumber, totalPages: sortedPages.count))
+    }
+
+    /// The reader moved past the last page — the same moment the End of Episode
+    /// card appears. Once per reading session.
+    private func trackComicCompleted() {
+        guard tracksReading, !completionTracked else { return }
+        completionTracked = true
+        AnalyticsService.shared.track(.comicCompleted(
+            comicId: comic.id, comicName: comic.title, collectionId: comic.collectionId,
+            level: comic.level.rawValue))
     }
 
     var body: some View {
@@ -1567,8 +1600,19 @@ struct PageView: View {
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarBackground(.visible, for: .tabBar)
         .toolbarColorScheme(.light, for: .tabBar)
+        .environment(\.analyticsComicContext,
+                     AnalyticsComicContext(comicId: comic.id, pageNumber: currentPage.pageNumber))
         .onAppear {
             AudioManager.shared.activeComicId = comic.id   // fast, direct audio lookup
+            if tracksReading && !readingSessionTracked {
+                readingSessionTracked = true
+                AnalyticsService.shared.track(.comicStarted(
+                    comicId: comic.id, comicName: comic.title, collectionId: comic.collectionId,
+                    level: comic.level.rawValue,
+                    isFree: StoreService.isFreeEpisode(episodeNumber: comic.episodeNumber,
+                                                       collectionId: comic.collectionId ?? comic.collectionTitle)))
+                trackPageViewed()
+            }
             loadPageAspect()
             maybeShowCoverTip()
             maybeShowHotspotTip()
@@ -1613,6 +1657,7 @@ struct PageView: View {
             WhisperService.shared.endCaptureSession()
         }
         .onChange(of: currentPageIndex) { oldPage, newPage in
+            if tracksReading && readingSessionTracked { trackPageViewed() }
             // Close the bubble card and refresh the artwork aspect for the new page
             selectedBubbleIndex = nil
             flashBubbleId = nil          // never carry a stale pulse across pages
@@ -1784,6 +1829,7 @@ struct BubbleContentView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var audioManager = AudioManager.shared
     @StateObject private var whisperService = WhisperService.shared
+    @Environment(\.analyticsComicContext) private var analyticsContext
 
     @State private var translationRevealed: Set<String> = []
     @State private var grammarRevealed: Set<String> = []
@@ -1950,6 +1996,10 @@ struct BubbleContentView: View {
                 Button {
                     withAnimation { translationRevealed.insert(sentence.id) }
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    if let analyticsContext {
+                        AnalyticsService.shared.track(.translationRevealed(
+                            comicId: analyticsContext.comicId, pageNumber: analyticsContext.pageNumber))
+                    }
                 } label: {
                     Label("Show translation", systemImage: "eye").font(.subheadline).foregroundStyle(Color.translationLink)
                 }
@@ -2035,6 +2085,7 @@ struct BubbleContentView: View {
             } else {
                 playingSentenceId = sentence.id
                 audioManager.play(audioUrl, enableHighlighting: true)
+                trackSentenceAudio()
             }
         } label: {
             let isThis = audioManager.isPlaying && playingSentenceId == sentence.id
@@ -2081,6 +2132,7 @@ struct BubbleContentView: View {
             } else {
                 playingSentenceId = sentence.id
                 playAudio(sentence.audioUrl)
+                trackSentenceAudio()
             }
         } label: {
             Image(systemName: isThis ? "stop.fill" : "speaker.wave.2.fill")
@@ -2177,6 +2229,14 @@ struct BubbleContentView: View {
     private func playAudio(_ url: String?) {
         guard let url else { return }
         audioManager.play(url, enableHighlighting: true)
+    }
+
+    /// A tap on Play / Listen — never the automatic playback after a practice
+    /// answer or on opening a listening-practice bubble.
+    private func trackSentenceAudio() {
+        guard let analyticsContext else { return }
+        AnalyticsService.shared.track(.audioPlayed(
+            comicId: analyticsContext.comicId, pageNumber: analyticsContext.pageNumber, audioType: .sentence))
     }
 
     private func startRecording(for sentence: Sentence) {

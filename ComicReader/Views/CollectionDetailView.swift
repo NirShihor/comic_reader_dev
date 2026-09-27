@@ -18,6 +18,9 @@ struct CollectionDetailView: View {
     @State private var downloadTipDismissed = false
     // True while "?" is replaying this screen's tooltip — bypasses the "seen" flags.
     @State private var helpReplay = false
+    // One collection_viewed per visit: coming back from an episode re-runs
+    // .task, but this @State survives while the screen stays in the stack.
+    @State private var viewTracked = false
 
     // All episodes from the catalog (when loaded), in episode order.
     private var catalogEpisodes: [StoreComic] {
@@ -187,10 +190,21 @@ struct CollectionDetailView: View {
             }
             // Catalog may have only just landed — re-check now that episodes exist.
             maybeShowDownloadTip()
+            trackViewed()
         }
         .refreshable {
             await storeService.fetchCatalog()
         }
+    }
+
+    private func trackViewed() {
+        guard !viewTracked else { return }
+        viewTracked = true
+        let levels = Set(episodeLevels)
+        AnalyticsService.shared.track(.collectionViewed(
+            collectionId: catalogEpisodes.first?.collectionId ?? downloadedEpisodes.first?.collectionId,
+            collectionName: title,
+            level: levels.count == 1 ? levels.first! : (levels.isEmpty ? "unknown" : "mixed")))
     }
 
     private var header: some View {

@@ -400,6 +400,7 @@ struct StoreComicCard: View {
         case .notDownloaded:
             if isLocked {
                 Button {
+                    AnalyticsService.shared.track(.lockedContentTapped(comicId: comic.id, collectionId: comic.collectionId))
                     showPaywall = true
                 } label: {
                     Label("Unlock with Comigo Unlimited", systemImage: "lock.fill")
@@ -409,7 +410,7 @@ struct StoreComicCard: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255))
-                .sheet(isPresented: $showPaywall) { PaywallView() }
+                .sheet(isPresented: $showPaywall) { PaywallView(source: .comicLocked) }
             } else {
                 Button {
                     onDownloadStart?()

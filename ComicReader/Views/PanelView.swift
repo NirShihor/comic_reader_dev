@@ -1225,6 +1225,7 @@ struct WordButton: View {
     @State private var isSaved = false
     @ObservedObject private var vocabularyManager = VocabularyManager.shared
     @StateObject private var audioManager = AudioManager.shared
+    @Environment(\.analyticsComicContext) private var analyticsContext
 
     var body: some View {
         Button {
@@ -1260,6 +1261,7 @@ struct WordButton: View {
 
                     // Play word audio (exact word as spoken in sentence)
                     Button {
+                        AnalyticsService.shared.trackWordAudio(analyticsContext)
                         if let wordAudio = word.wordAudioUrl {
                             // Use narrator's word audio
                             audioManager.play(wordAudio, volume: 1.0)
@@ -1301,6 +1303,7 @@ struct WordButton: View {
 
                         // Play base form audio
                         Button {
+                            AnalyticsService.shared.trackWordAudio(analyticsContext)
                             if let baseFormAudio = word.baseFormAudioUrl {
                                 // Use narrator's base form audio
                                 audioManager.play(baseFormAudio, volume: 1.0)
@@ -1481,6 +1484,7 @@ struct WordFormsView: View {
     let word: Word
     @Environment(\.dismiss) private var dismiss
     @StateObject private var audioManager = AudioManager.shared
+    @Environment(\.analyticsComicContext) private var analyticsContext
     @State private var showingExplanations = false
 
     /// The grammatical form the sentence uses: the matching row's label from
@@ -1507,6 +1511,7 @@ struct WordFormsView: View {
                             .font(.title2)
                             .bold()
                         Button {
+                            AnalyticsService.shared.trackWordAudio(analyticsContext)
                             // Same file the base-form rows use elsewhere —
                             // accents kept, punctuation stripped.
                             if let baseAudio = word.baseFormAudioUrl {
@@ -1565,6 +1570,7 @@ struct WordFormsView: View {
                         }
                         Spacer()
                         Button {
+                            AnalyticsService.shared.trackWordAudio(analyticsContext)
                             // The export's wordAudioUrl names the exact file
                             // (accents KEPT, punctuation stripped). Deriving it
                             // from displayText broke every accented word — the
@@ -1605,6 +1611,7 @@ struct WordFormsView: View {
                                 if let audioUrl = form.audioUrl {
                                     Button {
                                         audioManager.play(audioUrl, volume: 1.0)
+                                        AnalyticsService.shared.trackWordAudio(analyticsContext)
                                     } label: {
                                         Image(systemName: "speaker.wave.2.fill")
                                             .font(.caption)

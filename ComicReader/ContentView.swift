@@ -77,7 +77,7 @@ struct ContentView: View {
             }
             #endif
         }
-        .sheet(isPresented: $showDebugPaywall) { PaywallView() }
+        .sheet(isPresented: $showDebugPaywall) { PaywallView(source: nil) }
     }
 
     /// Pay the one-time costs (custom-font glyph load + keyboard subsystem init)
@@ -1159,7 +1159,10 @@ final class StoreService: ObservableObject {
         // Keep entitlement current across renewals/refunds/family sharing.
         updatesTask = Task { [weak self] in
             for await update in Transaction.updates {
-                if case .verified(let t) = update { await t.finish() }
+                if case .verified(let t) = update {
+                    await t.finish()
+                    self?.reportPurchase(t, purchasedHere: false)
+                }
                 await self?.refreshEntitlement()
             }
         }
@@ -1179,13 +1182,20 @@ final class StoreService: ObservableObject {
         // Active subscription OR the lifetime unlock — a non-consumable stays
         // in currentEntitlements forever unless refunded (revocationDate).
         var active = false
+        var kind = Entitlement.free   // reported to analytics only; access uses `active`
         for await entitlement in Transaction.currentEntitlements {
             if case .verified(let t) = entitlement,
                t.productID == Self.monthlyProductID || t.productID == Self.lifetimeProductID,
                t.revocationDate == nil {
                 active = true
+                if t.productID == Self.lifetimeProductID {
+                    kind = .lifetime
+                } else if kind != .lifetime {
+                    kind = Self.isFreeTrialPeriod(t) ? .trial : .subscribed
+                }
             }
         }
+        AnalyticsService.shared.entitlement = kind
         #if DEBUG
         // Marketing recordings on the Simulator: `-demo.unlimited YES` opens every episode
         // without a purchase (debug builds only — never in the App Store build).
@@ -1196,10 +1206,15 @@ final class StoreService: ObservableObject {
 
     /// Returns true when the purchase completed and the entitlement is live.
     func purchase(_ product: Product) async throws -> Bool {
-        let result = try await product.purchase()
+        // Attribution token only when the user has opted into analytics.
+        let token = PurchaseAttribution.shared.tokenForPurchase()
+        let result = try await product.purchase(options: token.map { [.appAccountToken($0)] } ?? [])
         switch result {
         case .success(let verification):
-            if case .verified(let t) = verification { await t.finish() }
+            if case .verified(let t) = verification {
+                await t.finish()
+                reportPurchase(t, purchasedHere: true)
+            }
             await refreshEntitlement()
             return hasUnlimited
         case .userCancelled, .pending:
@@ -1212,6 +1227,80 @@ final class StoreService: ObservableObject {
     func restore() async {
         try? await AppStore.sync()
         await refreshEntitlement()
+    }
+
+    // MARK: - Purchase analytics
+    // The app reports the moments only it sees reliably: a free trial starting
+    // and a lifetime purchase. Paid subscription periods (direct starts, trial
+    // conversions, renewals) are reported by the server from App Store Server
+    // Notifications, so no event has two sources.
+
+    private static let reportedKey = "analytics.reportedTransactions"
+
+    /// `purchasedHere`: the transaction came back from this device's own
+    /// purchase call. Otherwise (Transaction.updates — Ask to Buy approvals,
+    /// purchases on the user's other devices, restores) it's only reported when
+    /// it carries this install's attribution token, i.e. it was started here.
+    func reportPurchase(_ t: StoreKit.Transaction, purchasedHere: Bool,
+                        analytics: AnalyticsService = .shared,
+                        defaults: UserDefaults = .standard,
+                        installToken: UUID?? = .none) {
+        let installToken = installToken ?? PurchaseAttribution.shared.existingToken
+        guard analytics.isEnabled,
+              t.revocationDate == nil,
+              t.ownershipType == .purchased,
+              purchasedHere || (t.appAccountToken != nil && t.appAccountToken == installToken)
+        else { return }
+        // Once per transaction: the purchase result and Transaction.updates can
+        // both deliver the same transaction, and updates replay at launch.
+        var reported = defaults.stringArray(forKey: Self.reportedKey) ?? []
+        let id = String(t.id)
+        guard !reported.contains(id), let event = Self.purchaseEvent(for: t) else { return }
+        analytics.track(event)
+        reported.append(id)
+        defaults.set(Array(reported.suffix(100)), forKey: Self.reportedKey)
+    }
+
+    /// The app-side purchase event for a verified transaction, if any: a paid
+    /// lifetime purchase, or the first transaction of a subscription whose
+    /// period is its free trial. Paid subscription periods → nil (server's job).
+    static func purchaseEvent(for t: StoreKit.Transaction) -> AnalyticsEvent? {
+        if t.productID == lifetimeProductID {
+            // Free lifetime unlocks (offer codes) aren't purchases.
+            guard t.price.map({ $0 > 0 }) ?? true else { return nil }
+            return .purchaseCompleted(productId: t.productID, purchaseType: .lifetime)
+        }
+        if t.productID == monthlyProductID, t.id == t.originalID, isFreeTrialPeriod(t) {
+            return .trialStarted(productId: t.productID)
+        }
+        return nil
+    }
+
+    /// Whether `product` offers a free-trial introductory offer this user is
+    /// eligible for, according to StoreKit.
+    func isEligibleForFreeTrial(_ product: Product) async -> Bool {
+        guard let sub = product.subscription, sub.introductoryOffer?.paymentMode == .freeTrial else { return false }
+        return await sub.isEligibleForIntroOffer
+    }
+
+    /// Call when a paywall has put the free-trial offer for `product` on
+    /// screen. Sends `trial_offer_viewed` only if StoreKit confirms this user is
+    /// eligible for that free trial — so a paywall shown to someone who has
+    /// already used their trial doesn't count. Once per paywall presentation is
+    /// the caller's job (as with paywall_viewed).
+    func trialOfferShown(_ product: Product, source: PaywallSource, analytics: AnalyticsService = .shared) async {
+        guard await isEligibleForFreeTrial(product) else { return }
+        analytics.track(.trialOfferViewed(source: source, productId: product.id))
+    }
+
+    /// The current period of this subscription transaction is its free-trial
+    /// introductory offer. (iOS 17.0–17.1 can't read the payment mode; the only
+    /// introductory offer Comigo configures is the free trial.)
+    static func isFreeTrialPeriod(_ t: StoreKit.Transaction) -> Bool {
+        if #available(iOS 17.2, *) {
+            return t.offer?.type == .introductory && t.offer?.paymentMode == .freeTrial
+        }
+        return t.offerType == .introductory
     }
 
     /// First episode of every collection is free; standalone comics are free.
@@ -1233,10 +1322,13 @@ final class StoreService: ObservableObject {
 // MARK: - Paywall
 
 struct PaywallView: View {
+    /// What opened the paywall, for analytics; nil for the debug screenshot preview.
+    let source: PaywallSource?
     @Environment(\.dismiss) private var dismiss
     @StateObject private var store = StoreService.shared
     @State private var purchasing = false
     @State private var errorMessage: String?
+    @State private var viewTracked = false
 
     // Debug screenshot mode (--paywall-preview): products can't load via
     // simctl (no StoreKit config outside Xcode), so show the real store
@@ -1370,6 +1462,10 @@ struct PaywallView: View {
         }
         .background(violet.ignoresSafeArea())
         .onAppear {
+            if let source, !viewTracked {
+                viewTracked = true
+                AnalyticsService.shared.track(.paywallViewed(source: source))
+            }
             if store.monthlyProduct == nil {
                 Task { await store.loadProducts() }
             }

@@ -216,7 +216,10 @@ struct ListeningTestView: View {
         }
         .onChange(of: testComplete) { _, done in
             // Finished the whole set → next launch starts fresh.
-            if done { progressManager.clearWordPosition(for: comic.id) }
+            if done {
+                progressManager.clearWordPosition(for: comic.id)
+                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .listening))
+            }
         }
     }
 

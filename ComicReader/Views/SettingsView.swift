@@ -5,6 +5,7 @@ struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @AppStorage("appearanceMode") private var appearanceMode = "system"
     @AppStorage("demo.hideCues") private var hideCues = false
+    @ObservedObject private var analytics = AnalyticsService.shared
 
     private var hideCuesBinding: Binding<Bool> {
         Binding(get: { hideCues }, set: { hideCues = $0 })
@@ -61,6 +62,17 @@ struct SettingsView: View {
                 }
             } header: {
                 Text("Account")
+            }
+
+            // Privacy Section
+            Section {
+                Toggle(isOn: Binding(get: { analytics.isEnabled }, set: { analytics.setConsent($0) })) {
+                    Label("Share usage analytics", systemImage: "chart.bar.fill")
+                }
+            } header: {
+                Text("Privacy")
+            } footer: {
+                Text("Off unless you choose to share. Usage statistics — such as which pages are read and which features are used — help us improve Comigo. They're linked to a random ID, not to your name, email or Apple ID, never include your voice, your answers or anything you type, and are never used for advertising. Turning this off stops them immediately.")
             }
 
             // About Section
@@ -228,7 +240,7 @@ struct SubscriptionSettingsView: View {
             }
         }
         .navigationTitle("Subscription")
-        .sheet(isPresented: $showPaywall) { PaywallView() }
+        .sheet(isPresented: $showPaywall) { PaywallView(source: .settings) }
         .task { await store.refreshEntitlement() }
     }
 }
