@@ -54,11 +54,15 @@ final class AccessModelService: ObservableObject {
 
     private let fetchRecord: () async throws -> Record
     private let defaults: UserDefaults
+    /// False for Xcode, TestFlight and App Review builds (sandbox receipt / Debug).
+    private let isAppStoreBuild: Bool
     private var resolving = false
 
     init(defaults: UserDefaults = .standard,
+         isAppStoreBuild: Bool = AnalyticsEnvironment.current == .production,
          fetchRecord: @escaping () async throws -> Record = AccessModelService.appTransactionRecord) {
         self.defaults = defaults
+        self.isAppStoreBuild = isAppStoreBuild
         self.fetchRecord = fetchRecord
     }
 
@@ -90,10 +94,7 @@ final class AccessModelService: ObservableObject {
             guard !build.isEmpty, build.allSatisfy(\.isNumber), let number = Int(build) else { return .unknown }
             return number < firstNewModelBuild ? .legacy : .newModel
         case .sandbox, .xcode:
-            switch testerOverride {
-            case .legacy: return .legacy
-            case .automatic, .newModel: return .newModel
-            }
+            return testerClassification(testerOverride)
         default:
             return .unknown
         }
@@ -102,15 +103,32 @@ final class AccessModelService: ObservableObject {
     /// Resolves at launch, on returning to the foreground while still unknown,
     /// and after a restore. Runs in the background; until it succeeds the app
     /// uses legacy rules. A failure never replaces an answer already found.
+    ///
+    /// App Store builds only ever classify from a verified production
+    /// AppTransaction — anything else stays unknown (= legacy access). In
+    /// Xcode / TestFlight / App Review builds the sandbox often can't supply
+    /// the record, so there the tester choice (default: new model) is used
+    /// instead of falling back to legacy.
     func resolve() async {
         guard !resolving else { return }
         resolving = true
         defer { resolving = false }
-        guard let record = try? await fetchRecord() else { return }
-        isTestEnvironment = record.environment == .sandbox || record.environment == .xcode
-        let result = Self.classify(record, testerOverride: testerOverride)
+        let record = try? await fetchRecord()
+        if let record {
+            isTestEnvironment = record.environment == .sandbox || record.environment == .xcode
+        }
+        var result = Self.classify(record, testerOverride: testerOverride)
+        if result == .unknown && !isAppStoreBuild {
+            isTestEnvironment = true
+            result = Self.testerClassification(testerOverride)
+        }
         if result == .unknown && classification != .unknown { return }
+        guard result != .unknown else { return }
         apply(result)
+    }
+
+    static func testerClassification(_ override: TesterOverride) -> Classification {
+        override == .legacy ? .legacy : .newModel
     }
 
     /// After "Restore purchases" (a user action), ask Apple for a fresh

@@ -56,8 +56,11 @@ final class AccessModelClassificationTests: XCTestCase {
 @MainActor
 final class AccessModelResolveTests: XCTestCase {
     struct Unavailable: Error {}
-    private func service(_ fetch: @escaping () async throws -> AccessModelService.Record) -> AccessModelService {
-        AccessModelService(defaults: UserDefaults(suiteName: "AccessModelResolveTests.\(UUID().uuidString)")!, fetchRecord: fetch)
+    /// Defaults to App Store build semantics (the strict rules real users get).
+    private func service(appStoreBuild: Bool = true,
+                         _ fetch: @escaping () async throws -> AccessModelService.Record) -> AccessModelService {
+        AccessModelService(defaults: UserDefaults(suiteName: "AccessModelResolveTests.\(UUID().uuidString)")!,
+                           isAppStoreBuild: appStoreBuild, fetchRecord: fetch)
     }
     private let legacyRecord = AccessModelService.Record(originalAppVersion: "125", environment: .production, verified: true)
     private let newRecord = AccessModelService.Record(originalAppVersion: "200", environment: .production, verified: true)
@@ -96,6 +99,33 @@ final class AccessModelResolveTests: XCTestCase {
             XCTAssertEqual(first.classification, reinstalled.classification)
             XCTAssertNotEqual(first.classification, .unknown)
         }
+    }
+
+    func testTestBuildsUseTheNewModelWhenTheSandboxCantSupplyTheRecord() async {
+        let s = service(appStoreBuild: false) { throw Unavailable() }
+        await s.resolve()
+        XCTAssertEqual(s.classification, .newModel, "TestFlight / Xcode / App Review see the new-customer experience")
+        XCTAssertTrue(s.isTestEnvironment, "and the tester picker is available")
+        let unverified = service(appStoreBuild: false) {
+            AccessModelService.Record(originalAppVersion: "1.0", environment: .sandbox, verified: false)
+        }
+        await unverified.resolve()
+        XCTAssertEqual(unverified.classification, .newModel)
+    }
+
+    func testTestBuildsHonourTheLegacyTesterChoiceWhenTheRecordIsUnavailable() async {
+        let defaults = UserDefaults(suiteName: "AccessModelResolveTests.legacyChoice.\(UUID().uuidString)")!
+        defaults.set(AccessModelService.TesterOverride.legacy.rawValue, forKey: AccessModelService.testerOverrideKey)
+        let s = AccessModelService(defaults: defaults, isAppStoreBuild: false) { throw Unavailable() }
+        await s.resolve()
+        XCTAssertEqual(s.classification, .legacy)
+    }
+
+    func testAppStoreBuildsNeverUseTheTesterFallback() async {
+        let s = service(appStoreBuild: true) { throw Unavailable() }
+        await s.resolve()
+        XCTAssertEqual(s.classification, .unknown, "real users: unknown stays unknown (= legacy access)")
+        XCTAssertFalse(s.isTestEnvironment)
     }
 
     func testTesterChoiceOnlyMattersOutsideProduction() async {
