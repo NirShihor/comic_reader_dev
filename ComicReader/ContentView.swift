@@ -1186,6 +1186,11 @@ final class StoreService: ObservableObject {
                 active = true
             }
         }
+        #if DEBUG
+        // Marketing recordings on the Simulator: `-demo.unlimited YES` opens every episode
+        // without a purchase (debug builds only — never in the App Store build).
+        if UserDefaults.standard.bool(forKey: "demo.unlimited") { active = true }
+        #endif
         hasUnlimited = active
     }
 
