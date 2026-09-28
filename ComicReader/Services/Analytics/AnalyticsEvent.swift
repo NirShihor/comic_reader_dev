@@ -10,7 +10,7 @@ enum PaywallSource: String, CaseIterable {
     case comicLocked = "comic_locked"
     case settings
     case trialExpired = "trial_expired"
-    case libraryBanner = "library_banner"
+    case landingScreen = "landing_screen"
 }
 
 enum PracticeType: String, CaseIterable {

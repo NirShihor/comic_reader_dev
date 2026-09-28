@@ -27,6 +27,10 @@ struct ContentView: View {
     // Asked once, right after the landing screen, until a level is chosen —
     // a Comigo screen, not a system prompt, and unrelated to analytics consent.
     @AppStorage(SpanishLevel.storageKey) private var spanishLevelRaw = ""
+    // Free-trial offer on the landing screen: eligible new-model users only
+    // (StoreKit-confirmed), independent of analytics consent.
+    @ObservedObject private var store = StoreService.shared
+    @State private var showTrialPaywall = false
     @EnvironmentObject private var progressManager: ReadingProgressManager
     @EnvironmentObject private var notebookManager: NotebookManager
     private var returningUser: Bool {
@@ -62,11 +66,17 @@ struct ContentView: View {
             if showSplash {
                 LandingView(
                     ctaTitle: returningUser ? "Continue learning" : "Get started",
-                    onGetStarted: {
-                        hasLaunchedBefore = true
-                        withAnimation(.easeInOut(duration: 0.4)) { showSplash = false }
-                    }
+                    onGetStarted: enterApp,
+                    trialOffer: store.showsTrialBanner ? LandingView.TrialOffer(
+                        days: StoreService.trialDays(store.monthlyProduct) ?? 7,
+                        priceLine: store.monthlyProduct.map {
+                            "then \($0.displayPrice) / \(StoreService.billingPeriodText($0)) · cancel anytime"
+                        }) : nil,
+                    onStartTrial: { showTrialPaywall = true }
                 )
+                // The trial button is the way in for eligible new users: whether
+                // they start the trial or close the paywall, they then enter the app.
+                .sheet(isPresented: $showTrialPaywall, onDismiss: enterApp) { PaywallView(source: .landingScreen) }
             } else if SpanishLevel(rawValue: spanishLevelRaw) == nil {
                 SpanishLevelView { level in
                     withAnimation(.easeInOut(duration: 0.35)) { SpanishLevel.select(level) }
@@ -87,6 +97,11 @@ struct ContentView: View {
             #endif
         }
         .sheet(isPresented: $showDebugPaywall) { PaywallView(source: nil) }
+    }
+
+    private func enterApp() {
+        hasLaunchedBefore = true
+        withAnimation(.easeInOut(duration: 0.4)) { showSplash = false }
     }
 
     /// Pay the one-time costs (custom-font glyph load + keyboard subsystem init)
@@ -257,8 +272,16 @@ private struct Squiggle: Shape {
 /// First-run / landing screen — COMIGO logo on a solid violet field with the
 /// "Spanish." tagline and "Get started" CTA.
 struct LandingView: View {
+    struct TrialOffer: Equatable {
+        let days: Int
+        let priceLine: String?
+    }
+
     var ctaTitle: String = "Get started"
     var onGetStarted: () -> Void = {}
+    /// Shown only when StoreKit says this new-model user is eligible.
+    var trialOffer: TrialOffer? = nil
+    var onStartTrial: () -> Void = {}
     // iPad (regular width): the iPhone layout's hand-tuned offsets pin content
     // low and stretch the CTA — centre a fixed-width column instead.
     @Environment(\.horizontalSizeClass) private var hSize
@@ -311,17 +334,42 @@ struct LandingView: View {
                     .offset(y: isPad ? 0 : -70)
                     .padding(.top, 24)
 
-                Button(action: onGetStarted) {
-                    Text(ctaTitle)
-                        .font(Brand.body(16, .heavy))
+                // Eligible new users: the free trial is the way in (the paywall
+                // opens, then they enter the app either way). Everyone else:
+                // Get started / Continue learning.
+                if let trialOffer {
+                    Button(action: onStartTrial) {
+                        VStack(spacing: 3) {
+                            Label("Start your \(trialOffer.days)-day free trial", systemImage: "sparkles")
+                                .font(Brand.body(16, .heavy))
+                            if let line = trialOffer.priceLine {
+                                Text(line)
+                                    .font(Brand.body(12.5, .semibold))
+                                    .opacity(0.75)
+                            }
+                        }
                         .foregroundColor(Brand.ink)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
+                        .padding(.vertical, 13)
                         .background(RoundedRectangle(cornerRadius: 15, style: .continuous).fill(Color.white))
                         .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(Brand.ink, lineWidth: 3.5))
                         .shadow(color: Brand.ink.opacity(0.25), radius: 10, x: 0, y: 8)
+                    }
+                    .padding(.top, 30)
+                    .transition(.opacity)
+                } else {
+                    Button(action: onGetStarted) {
+                        Text(ctaTitle)
+                            .font(Brand.body(16, .heavy))
+                            .foregroundColor(Brand.ink)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(RoundedRectangle(cornerRadius: 15, style: .continuous).fill(Color.white))
+                            .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(Brand.ink, lineWidth: 3.5))
+                            .shadow(color: Brand.ink.opacity(0.25), radius: 10, x: 0, y: 8)
+                    }
+                    .padding(.top, 30)
                 }
-                .padding(.top, 30)
 
                 if isPad { Spacer() }
             }
@@ -1424,8 +1472,9 @@ final class StoreService: ObservableObject {
                                 entitled: hasUnlimited, eligibleForTrial: eligible)
     }
 
-    /// Eligible new-model customers without an entitlement see the Library's
-    /// "Start your 7-day free trial" banner. Independent of analytics consent.
+    /// Eligible new-model customers without an entitlement get the "Start your
+    /// 7-day free trial" offer on the landing screen and on locked episodes.
+    /// Independent of analytics consent.
     var showsTrialBanner: Bool {
         AccessModelService.shared.isNewModel && !hasUnlimited && freeTrialAvailable
     }

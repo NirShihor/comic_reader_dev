@@ -190,7 +190,7 @@ final class AccessRuleTests: XCTestCase {
 
     func testTrialExpiredIsTheAnalyticsSourceForNewModelUsersWhoseTrialEnded() {
         XCTAssertEqual(StoreService.analyticsSource(requested: .comicLocked, mode: .trialExpired), .trialExpired)
-        XCTAssertEqual(StoreService.analyticsSource(requested: .libraryBanner, mode: .trialExpired), .trialExpired)
+        XCTAssertEqual(StoreService.analyticsSource(requested: .landingScreen, mode: .trialExpired), .trialExpired)
         XCTAssertEqual(StoreService.analyticsSource(requested: .comicLocked, mode: .subscribe), .comicLocked)
         XCTAssertEqual(StoreService.analyticsSource(requested: .settings, mode: .freeTrial), .settings)
         XCTAssertNil(StoreService.analyticsSource(requested: nil, mode: .trialExpired), "debug preview isn't tracked")
