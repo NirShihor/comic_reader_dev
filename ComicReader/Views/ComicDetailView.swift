@@ -152,6 +152,11 @@ struct ComicDetailView: View {
                     .id(page.id)  // Force new view instance for each page
             }
             .onChange(of: selectedPage) { _, newValue in
+                // Opening a page while a cockpit tip is up means they did what the
+                // screen is for — most often tapping "Start/Continue reading" under
+                // the last tip ("Let's start.") instead of the tip itself. End the
+                // sequence, or that tip would still be waiting when they come back.
+                if newValue != nil && cockpitStep != 0 { finishCockpitTips() }
                 // Once the page view is dismissed, the next open is a normal read again.
                 if newValue == nil {
                     guidedOnScreen = false
@@ -301,14 +306,19 @@ struct ComicDetailView: View {
             if cockpitStep < 3 {
                 cockpitStep += 1
             } else {
-                cockpitStep = 0
-                seenCockpitTips = true
-                // End of a "?" replay — close help mode too.
-                if helpReplay {
-                    helpReplay = false
-                    help.isActive = false
-                }
+                finishCockpitTips()
             }
+        }
+    }
+
+    /// The sequence is over: hide the callout and don't show it again ("?" replays it).
+    private func finishCockpitTips() {
+        cockpitStep = 0
+        seenCockpitTips = true
+        // End of a "?" replay — close help mode too.
+        if helpReplay {
+            helpReplay = false
+            help.isActive = false
         }
     }
 
