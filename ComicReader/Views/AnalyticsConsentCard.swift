@@ -19,6 +19,10 @@ struct AnalyticsConsentCard: View {
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+            Text("Separately, Comigo keeps anonymous usage counts with no identifier at all (on by default; switch off in Settings → Privacy).")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             Link("Privacy Policy", destination: URL(string: "https://comigo.net/privacy")!)
                 .font(.footnote.weight(.semibold))
             HStack(spacing: 10) {

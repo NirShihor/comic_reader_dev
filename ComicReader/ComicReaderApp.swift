@@ -6,6 +6,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         AnalyticsService.shared.start()
+        AggregateTelemetryService.shared.start()
         // Classify the access model (AppTransaction) and read the StoreKit
         // entitlement in the background. Nothing waits on either: until they
         // answer, the app uses legacy (never-reduced) access rules.
