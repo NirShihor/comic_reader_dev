@@ -6,6 +6,7 @@ struct SettingsView: View {
     @AppStorage("appearanceMode") private var appearanceMode = "system"
     @AppStorage("demo.hideCues") private var hideCues = false
     @ObservedObject private var analytics = AnalyticsService.shared
+    @ObservedObject private var aggregateCounts = AggregateTelemetryService.shared
     @ObservedObject private var reminders = ReminderService.shared
     @AppStorage(SpanishLevel.storageKey) private var spanishLevelRaw = ""
     @Environment(\.scenePhase) private var scenePhase
@@ -114,15 +115,24 @@ struct SettingsView: View {
                 Text("Account")
             }
 
-            // Privacy Section
+            // Privacy Section — two separate things: anonymous counts (default
+            // on, switchable off) and optional individual analytics (opt-in).
             Section {
-                Toggle(isOn: Binding(get: { analytics.isEnabled }, set: { analytics.setConsent($0) })) {
-                    Label("Share usage analytics", systemImage: "chart.bar.fill")
+                Toggle(isOn: Binding(get: { aggregateCounts.isEnabled }, set: { aggregateCounts.setEnabled($0) })) {
+                    Label("Anonymous usage counts", systemImage: "number")
                 }
             } header: {
                 Text("Privacy")
             } footer: {
-                Text("Off unless you choose to share. Usage statistics — such as which pages are read and which features are used — help us improve Comigo. They're linked to a random ID, not to your name, email or Apple ID, never include your voice, your answers or anything you type, and are never used for advertising. Turning this off stops them immediately.")
+                Text("On by default; switch it off here any time. Counts of actions — a page read, a practice finished, a paywall shown — are sent without any identifier: no account, device, install or session ID, no name, email or Apple ID, no location, and never your voice, your answers or any text. They can't be linked to you or combined into a profile. Turning this off also discards any counts not yet sent.")
+            }
+
+            Section {
+                Toggle(isOn: Binding(get: { analytics.isEnabled }, set: { analytics.setConsent($0) })) {
+                    Label("Share usage analytics", systemImage: "chart.bar.fill")
+                }
+            } footer: {
+                Text("Optional and off unless you choose to share. Individual usage statistics — such as which pages are read and which features are used, in sequence — help us understand how Comigo is used. They're linked to a random ID, not to your name, email or Apple ID, never include your voice, your answers or anything you type, and are never used for advertising. Turning this off stops them immediately.")
             }
 
             // About Section

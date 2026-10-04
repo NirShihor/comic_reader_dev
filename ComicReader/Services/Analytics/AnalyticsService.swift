@@ -79,7 +79,8 @@ enum AnalyticsConsent: String {
 /// network requests at all.
 @MainActor
 final class AnalyticsService: ObservableObject {
-    static let shared = AnalyticsService(waitsForAccessModel: true)
+    static let shared = AnalyticsService(waitsForAccessModel: true,
+                                         aggregate: { AggregateTelemetryService.shared.record($0) })
 
     static let consentKey = "analytics.consent"
     private static let logger = Logger(subsystem: "net.comigo.reader", category: "Analytics")
@@ -116,7 +117,13 @@ final class AnalyticsService: ObservableObject {
     private let workQueue = DispatchQueue(label: "net.comigo.analytics", qos: .utility)
     private let waitsForAccessModel: Bool
     private let currentSpanishLevel: () -> SpanishLevel?
+    /// The separate anonymous aggregate layer (AggregateTelemetryService): it
+    /// counts the same actions under its own event names, with or without
+    /// consent, and is told about each event here so that call sites stay
+    /// single. Nothing else is shared between the two layers.
+    private let aggregate: (AnalyticsEvent) -> Void
     private var accessModelKnown = false
+    private var aggregateOpenTracked = false
 
     private var backend: AnalyticsBackend?
     private var backendOptedOut = false
@@ -145,8 +152,10 @@ final class AnalyticsService: ObservableObject {
          log: ((String) -> Void)? = nil,
          onConsentChange: ((Bool) -> Void)? = nil,
          waitsForAccessModel: Bool = false,
-         spanishLevel: (() -> SpanishLevel?)? = nil) {
+         spanishLevel: (() -> SpanishLevel?)? = nil,
+         aggregate: @escaping (AnalyticsEvent) -> Void = { _ in }) {
         self.defaults = defaults
+        self.aggregate = aggregate
         self.waitsForAccessModel = waitsForAccessModel
         self.currentSpanishLevel = spanishLevel ?? { SpanishLevel.stored() }
         self.configuration = configuration
@@ -204,14 +213,20 @@ final class AnalyticsService: ObservableObject {
         backgroundedAt = nil
         if now().timeIntervalSince(since) >= Self.reopenAfter {
             sessionOpenTracked = false
+            aggregateOpenTracked = false
             trackAppOpened()
         }
     }
 
     private func trackAppOpened() {
+        // The aggregate open is counted once per session whatever the consent.
+        if !aggregateOpenTracked {
+            aggregateOpenTracked = true
+            aggregate(.appOpened)
+        }
         guard isEnabled, !sessionOpenTracked else { return }
         sessionOpenTracked = true
-        track(.appOpened)
+        capture(.appOpened)
     }
 
     // MARK: - Consent
@@ -244,10 +259,9 @@ final class AnalyticsService: ObservableObject {
     // MARK: - Tracking
 
     func track(_ event: AnalyticsEvent) {
-        guard isEnabled else {
-            log("[Analytics] \(event.name) — not captured (\(consent == nil ? "no consent yet" : "declined"))")
-            return
-        }
+        // Duplicate suppression first, so the aggregate layer sees each
+        // occurrence once too; then the aggregate count, consent or not; then
+        // the opt-in layer, which needs consent.
         let key = event.dedupeKey
         let t = now()
         if let last = lastSent[key], t.timeIntervalSince(last) < Self.dedupeWindow {
@@ -256,7 +270,16 @@ final class AnalyticsService: ObservableObject {
         }
         lastSent[key] = t
         if lastSent.count > 500 { lastSent = lastSent.filter { t.timeIntervalSince($0.value) < Self.dedupeWindow } }
+        aggregate(event)
+        capture(event)
+    }
 
+    /// The opt-in layer: needs consent; waits for readiness.
+    private func capture(_ event: AnalyticsEvent) {
+        guard isEnabled else {
+            log("[Analytics] \(event.name) — not captured (\(consent == nil ? "no consent yet" : "declined"))")
+            return
+        }
         if isReady {
             send(event)
         } else if pending.count < Self.maxPending {
