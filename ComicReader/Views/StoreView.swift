@@ -517,6 +517,15 @@ struct StoreComicCard: View {
                         .font(.caption)
                         .foregroundStyle(.red)
                 }
+                // The reason (no storage, offline, timed out…) — so the fix is obvious.
+                if !error.isEmpty {
+                    Text(error)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 8)
+                }
 
                 Button("Retry") {
                     Task {

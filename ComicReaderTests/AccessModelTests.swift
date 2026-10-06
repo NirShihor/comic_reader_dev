@@ -377,3 +377,29 @@ final class RealAppTransactionTests: XCTestCase {
         XCTAssertNotEqual(s.classification, .unknown, "tester choice applies outside production")
     }
 }
+
+// MARK: - Download storage check
+
+@MainActor
+final class DownloadStorageTests: XCTestCase {
+    func testStorageNeededIsAboutTwiceTheBundlePlusAMargin() {
+        // 94 MB bundle: zip + unzipped copy (2.2×) + 40 MB margin ≈ 247 MB
+        let need = ComicStoreService.storageNeededBytes(fileSizeMB: 94)
+        XCTAssertEqual(Double(need) / (1024 * 1024), 94 * 2.2 + 40, accuracy: 1)
+        // Tiny or unknown sizes still ask for a sensible minimum.
+        XCTAssertGreaterThan(ComicStoreService.storageNeededBytes(fileSizeMB: 0), 50 * 1024 * 1024)
+    }
+
+    func testMessageNamesTheNumbersAndWhereToFreeSpace() {
+        let msg = ComicStoreService.notEnoughStorageMessage(fileSizeMB: 94, availableBytes: 120 * 1024 * 1024)
+        XCTAssertTrue(msg.contains("about 247 MB free"), msg)
+        XCTAssertTrue(msg.contains("the phone has 120 MB"), msg)
+        XCTAssertTrue(msg.contains("iPhone Storage"), msg)
+    }
+
+    func testAvailableStorageIsReadableForARealFolder() {
+        let bytes = ComicStoreService.availableStorageBytes(at: FileManager.default.temporaryDirectory)
+        XCTAssertNotNil(bytes)
+        XCTAssertGreaterThan(bytes ?? 0, 0)
+    }
+}

@@ -219,7 +219,32 @@ class ComicStoreService: ObservableObject {
     // MARK: - Downloads
 
     /// Download a comic from the store as a single ZIP bundle
+    /// Free space a download needs: the zip, plus the unzipped comic (about
+    /// the same size again) while both exist, plus a margin for the system.
+    static func storageNeededBytes(fileSizeMB: Double) -> Int64 {
+        Int64(max(fileSizeMB, 10) * 2.2 * 1024 * 1024) + 40 * 1024 * 1024
+    }
+
+    /// The message shown when the phone doesn't have room for a comic.
+    static func notEnoughStorageMessage(fileSizeMB: Double, availableBytes: Int64) -> String {
+        let needMB = Int((Double(storageNeededBytes(fileSizeMB: fileSizeMB)) / (1024 * 1024)).rounded(.up))
+        let haveMB = Int(Double(availableBytes) / (1024 * 1024))
+        return "Not enough storage: this comic needs about \(needMB) MB free and the phone has \(haveMB) MB. Free up space in Settings → General → iPhone Storage, then try again."
+    }
+
+    /// Free space the system is willing to give to something the user asked for.
+    static func availableStorageBytes(at url: URL) -> Int64? {
+        (try? url.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]))?.volumeAvailableCapacityForImportantUsage
+    }
+
     func downloadComic(_ comic: StoreComic) async {
+        // Say so up front when the comic won't fit — iOS otherwise reports it as
+        // a generic failure part-way through, after the whole download.
+        if let available = Self.availableStorageBytes(at: localStorage.comicsDirectory),
+           available < Self.storageNeededBytes(fileSizeMB: comic.fileSizeMB) {
+            downloadStates[comic.id] = .failed(error: Self.notEnoughStorageMessage(fileSizeMB: comic.fileSizeMB, availableBytes: available))
+            return
+        }
         downloadStates[comic.id] = .downloading(progress: 0)
 
         // Store the task so cancelDownload can cancel it
