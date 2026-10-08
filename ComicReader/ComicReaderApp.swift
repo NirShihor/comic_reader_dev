@@ -14,6 +14,19 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Reads the current notification permission only; never requests it.
         ReminderService.shared.startObserving()
         _ = StoreService.shared
+        // Comics left part-way through a progressive download (the app was
+        // killed, the connection dropped) carry on — now and whenever the app
+        // comes back to the foreground.
+        Task { await ComicStoreService.shared.resumePartialDownloads() }
+        NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { _ in
+            Task { await ComicStoreService.shared.resumePartialDownloads() }
+        }
+        // …and when the network returns, including downloads that failed for
+        // lack of it (the reader may be waiting on one of their pages).
+        ComicAssetAvailability.shared.onNetworkReturned = {
+            Task { await ComicStoreService.shared.resumePartialDownloads(retryingFailed: true) }
+        }
+        ComicAssetAvailability.shared.startMonitoringNetwork()
         return true
     }
 

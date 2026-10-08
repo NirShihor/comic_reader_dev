@@ -1,5 +1,6 @@
 import Foundation
 import AVFoundation
+import Combine
 import UIKit
 
 @MainActor
@@ -20,6 +21,24 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     /// audio directly from that comic's folder instead of recursively scanning
     /// the whole downloaded library (which stalls the play tap).
     var activeComicId: String?
+
+    /// Where downloaded comics live (Documents/Comics; tests point elsewhere).
+    var comicsDirectory: URL = LocalComicStorage.defaultComicsDirectory
+    /// Tells `play` whether a missing clip is still on its way, and when it lands.
+    var availability: ComicAssetAvailability = .shared
+
+    /// A tap on a clip that hasn't arrived yet (the comic is downloading):
+    /// remembered, requested, and played when the file lands — unless
+    /// something else was played or stopped in the meantime.
+    private struct PendingPlayback {
+        let filename: String
+        let volume: Float
+        let enableHighlighting: Bool
+    }
+    private var pending: PendingPlayback?
+    private var landingWatch: AnyCancellable?
+    /// The clip a tap is waiting for, if any (tests / UI).
+    var waitingFor: String? { pending?.filename }
 
     private var player: AVAudioPlayer?
     private var timer: Timer?
@@ -143,13 +162,14 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
         // 0. Fast path: the active comic's own audio folder — a direct file check,
         //    no full-library scan. Handles "words/<x>" filenames too.
+        var activeComicDownloading = false
         if let cid = activeComicId, !cid.isEmpty {
-            let comicDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                .appendingPathComponent("Comics").appendingPathComponent(cid)
+            let comicDir = comicsDirectory.appendingPathComponent(cid)
             for candidate in [comicDir.appendingPathComponent("audio/\(filename).mp3"),
                               comicDir.appendingPathComponent("\(filename).mp3")] {
                 if FileManager.default.fileExists(atPath: candidate.path) { url = candidate; break }
             }
+            activeComicDownloading = availability.isDownloading(cid) || LocalComicStorage.isPartial(folder: comicDir)
         }
 
         // 1. Try BundledComics folder first (sentence audio - comic specific)
@@ -157,11 +177,13 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
             url = findAudioFile(named: filename, in: bundledComicsURL)
         }
 
-        // 2. Try Documents/Comics folder (downloaded comics)
-        if url == nil {
-            let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            let comicsDir = documents.appendingPathComponent("Comics")
-            url = findAudioFile(named: filename, in: comicsDir)
+        // 2. With no comic context (a vocabulary word whose comic is gone): any
+        //    complete comic's copy of the word. Never when a comic is active —
+        //    its clips come from its own folder, and the files are named by
+        //    sentence position, which repeats from comic to comic — and never
+        //    from a folder still downloading.
+        if url == nil, activeComicId == nil || activeComicId?.isEmpty == true {
+            url = findAudioFile(named: filename, in: comicsDirectory)
         }
 
         // 3. Try Dictionary folder (word pronunciations - shared across comics)
@@ -175,6 +197,12 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         }
 
         guard let audioUrl = url else {
+            if activeComicDownloading, let cid = activeComicId {
+                // Not here yet: ask the download for it and play when it lands.
+                print("⏳ Audio not downloaded yet, waiting: \(filename).mp3")
+                waitForClip(filename, comicId: cid, volume: volume, enableHighlighting: enableHighlighting)
+                return
+            }
             print("❌ Audio file not found: \(filename).mp3")
             print("   Searched in BundledComics, Dictionary, and root bundle")
             return
@@ -266,7 +294,25 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         }
     }
 
+    /// Remember the tap, request the clip, and play it once it's on disk.
+    private func waitForClip(_ filename: String, comicId: String, volume: Float, enableHighlighting: Bool) {
+        pending = PendingPlayback(filename: filename, volume: volume, enableHighlighting: enableHighlighting)
+        isLoading = true
+        availability.request(audio: filename, comicId: comicId)
+        landingWatch = availability.$landed.sink { [weak self] landed in
+            guard let self, let p = self.pending,
+                  ComicAssetAvailability.includes(audio: p.filename, comicId: comicId, in: landed) else { return }
+            self.pending = nil
+            self.landingWatch = nil
+            self.play(p.filename, volume: p.volume, enableHighlighting: p.enableHighlighting)
+        }
+    }
+
     func stop() {
+        // A tap still waiting for its clip is cancelled by any stop/new play.
+        pending = nil
+        landingWatch = nil
+        isLoading = false
         player?.stop()
         player = nil
 
@@ -364,11 +410,26 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         let targetFilename = "\(baseName).mp3"
 
         for case let fileURL as URL in enumerator {
-            if fileURL.lastPathComponent == targetFilename {
+            // A folder still downloading isn't a source for anything.
+            if fileURL.lastPathComponent == PartialDownloadMarker.fileName {
+                enumerator.skipDescendants()
+                continue
+            }
+            if fileURL.lastPathComponent == targetFilename, !insidePartialFolder(fileURL, under: directory) {
                 return fileURL
             }
         }
 
         return nil
+    }
+
+    /// Whether any folder between `directory` and the file carries the partial marker.
+    private func insidePartialFolder(_ file: URL, under directory: URL) -> Bool {
+        var folder = file.deletingLastPathComponent()
+        while folder.path.count > directory.path.count {
+            if LocalComicStorage.isPartial(folder: folder) { return true }
+            folder = folder.deletingLastPathComponent()
+        }
+        return false
     }
 }

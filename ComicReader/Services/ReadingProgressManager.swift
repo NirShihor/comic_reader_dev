@@ -37,6 +37,14 @@ class ReadingProgressManager: ObservableObject {
         progressMap[comicId]
     }
 
+    /// The persisted reading position, for code that has no manager instance
+    /// at hand (the store deciding which page a downloading comic opens on).
+    nonisolated static func savedProgress(for comicId: String, defaults: UserDefaults = .standard) -> ReadingProgress? {
+        guard let data = defaults.data(forKey: "readingProgress"),
+              let map = try? JSONDecoder().decode([String: ReadingProgress].self, from: data) else { return nil }
+        return map[comicId]
+    }
+
     /// Reading position — also marks the last interaction as reading, unless
     /// `asPractice` is set (e.g. the on-screen "Read & speak" guided run, which
     /// still advances the page position but should count as practice).

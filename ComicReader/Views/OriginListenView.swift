@@ -71,6 +71,7 @@ struct OriginListenView: View {
         .helpTooltipLayer()
         .environmentObject(help)
         .onAppear {
+            audioManager.activeComicId = comic.id   // this comic's own clips, nobody else's
             buildSentences()
             setupRemoteCommands()
             setupNowPlaying()

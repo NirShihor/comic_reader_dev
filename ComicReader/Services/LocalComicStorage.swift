@@ -9,6 +9,12 @@ class LocalComicStorage: ObservableObject {
     @Published private(set) var downloadedComics: [Comic] = []
     @Published private(set) var isLoading = false
 
+    /// Comics still downloading progressively that can already be opened —
+    /// comic.json and the image of the page the reader will show first have
+    /// landed (see `InitialReaderPage`). Keyed by comic id. Never in
+    /// `downloadedComics`: a partial comic is readable, not downloaded.
+    @Published private(set) var availablePartials: [String: Comic] = [:]
+
     /// Per-comic sort order from the live catalog, keyed by comic id. Lets the
     /// Library reflect the author's order without re-exporting/re-downloading —
     /// it overrides the (possibly stale) `order` baked into each bundle.
@@ -25,12 +31,15 @@ class LocalComicStorage: ObservableObject {
     }
 
     /// Base directory for downloaded comics
-    var comicsDirectory: URL {
-        let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    let comicsDirectory: URL
+
+    nonisolated static var defaultComicsDirectory: URL {
+        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         return documents.appendingPathComponent("Comics", isDirectory: true)
     }
 
-    init() {
+    init(comicsDirectory: URL = LocalComicStorage.defaultComicsDirectory) {
+        self.comicsDirectory = comicsDirectory
         catalogOrders = (UserDefaults.standard.dictionary(forKey: catalogOrdersKey) as? [String: Int]) ?? [:]
         createComicsDirectoryIfNeeded()
         Task {
@@ -147,11 +156,96 @@ class LocalComicStorage: ObservableObject {
         downloadedComics.contains { $0.id == comicId }
     }
 
+    // MARK: Partial downloads
+    //
+    // A progressive download (ProgressiveDownloader) builds the comic's folder
+    // in place, file by file, and keeps `.partial.json` in it until every file
+    // has landed. Such a folder is NOT a downloaded comic: it's skipped when
+    // loading the library and doesn't count as existing on the device.
+
+    /// The marker a folder carries while a progressive download is under way.
+    nonisolated static func partialMarkerURL(in folder: URL) -> URL { folder.appendingPathComponent(PartialDownloadMarker.fileName) }
+
+    nonisolated static func isPartial(folder: URL) -> Bool {
+        FileManager.default.fileExists(atPath: partialMarkerURL(in: folder).path)
+    }
+
+    /// A progressive download of this comic is on disk, unfinished.
+    func isPartiallyDownloaded(_ comicId: String) -> Bool {
+        Self.isPartial(folder: comicsDirectory.appendingPathComponent(comicId))
+    }
+
+    /// The comic's folder is complete on disk (comic.json, no marker) —
+    /// whether or not it's hidden from the library.
+    func isCompleteOnDisk(_ comicId: String) -> Bool {
+        let folder = comicsDirectory.appendingPathComponent(comicId)
+        return fileManager.fileExists(atPath: folder.appendingPathComponent("comic.json").path) && !Self.isPartial(folder: folder)
+    }
+
+    // MARK: Available partials (instant reading)
+
+    /// The comic can be opened: it's downloaded, or it's a partial whose
+    /// opening requirements have landed. Technically readable — entitlement
+    /// is the detail screen's business, as for any comic.
+    func isAvailable(_ comicId: String) -> Bool {
+        isDownloaded(comicId) || availablePartials[comicId] != nil
+    }
+
+    /// The comic to open, if it can be: the downloaded one, else the partial.
+    func availableComic(_ comicId: String) -> Comic? {
+        downloadedComics.first { $0.id == comicId } ?? availablePartials[comicId]
+    }
+
+    /// The store found a partial's opening requirements on disk.
+    func markPartialAvailable(_ comic: Comic) {
+        guard !isDownloaded(comic.id), availablePartials[comic.id] == nil else { return }
+        availablePartials[comic.id] = comic
+    }
+
+    /// The partial finished, was cancelled or deleted.
+    func clearPartial(_ comicId: String) {
+        availablePartials[comicId] = nil
+    }
+
+    /// The partial comic in `folder` if it can be opened now: comic.json is
+    /// here, its id matches the folder (the reader loads assets by comic id),
+    /// and the image the reader will show first exists. Off the main actor —
+    /// it decodes comic.json.
+    nonisolated static func openablePartial(in folder: URL, progress: ReadingProgress?) -> Comic? {
+        guard isPartial(folder: folder), let comic = loadComicIncludingPartial(from: folder),
+              comic.id == folder.lastPathComponent else { return nil }
+        return openingImageExists(for: comic, in: folder, progress: progress) ? comic : nil
+    }
+
+    nonisolated static func openingImageExists(for comic: Comic, in folder: URL, progress: ReadingProgress?) -> Bool {
+        guard let image = InitialReaderPage.openingImage(for: comic, progress: progress) else { return false }
+        return ComicAssetPlan.imageEntryNames(image).contains { FileManager.default.fileExists(atPath: folder.appendingPathComponent($0).path) }
+    }
+
+    /// Every file of the comic is here: a complete download or a bundled
+    /// comic. Whole-comic modes (practice, tests, key phrases) need this; a
+    /// comic still arriving isn't ready for them, however much has landed.
+    func isWholeComicAvailable(_ comicId: String) -> Bool {
+        if isCompleteOnDisk(comicId) { return true }
+        if fileManager.fileExists(atPath: comicsDirectory.appendingPathComponent(comicId).path) { return false }
+        return existsOnDevice(comicId)   // bundled
+    }
+
+    /// A comic from a folder whether or not it still carries the partial
+    /// marker. The normal library path (`loadComic`, `loadDownloadedComics`,
+    /// `existsOnDevice`) never does this; the instant-reading path does, via
+    /// `openablePartial`, once the opening requirements are on disk.
+    nonisolated static func loadComicIncludingPartial(from folder: URL) -> Comic? {
+        guard let data = try? Data(contentsOf: folder.appendingPathComponent("comic.json")),
+              let comicJSON = try? JSONDecoder().decode(ComicJSON.self, from: data) else { return nil }
+        return comicJSON.toComic(basePath: folder)
+    }
+
     /// Check if a comic exists on device (bundled or downloaded), even if hidden
     func existsOnDevice(_ comicId: String) -> Bool {
-        // Check Documents/Comics
+        // Check Documents/Comics (a partial download doesn't count)
         let comicFolder = comicsDirectory.appendingPathComponent(comicId)
-        if fileManager.fileExists(atPath: comicFolder.path) {
+        if fileManager.fileExists(atPath: comicFolder.path) && !Self.isPartial(folder: comicFolder) {
             return true
         }
         // Check BundledComics
@@ -230,6 +324,8 @@ class LocalComicStorage: ObservableObject {
     }
 
     private nonisolated static func loadComic(from folder: URL) -> Comic? {
+        // Still being downloaded progressively: not a comic yet.
+        guard !isPartial(folder: folder) else { return nil }
         let jsonFile = folder.appendingPathComponent("comic.json")
 
         guard let data = try? Data(contentsOf: jsonFile),
@@ -595,5 +691,25 @@ struct WordJSON: Codable {
             manual: manual,
             forms: forms?.map { $0.toWordForm() }
         )
+    }
+}
+
+// MARK: - The reader's first page
+
+/// Which page the reader shows first — the rule the comic screen's
+/// "Start/Continue reading" uses: the saved reading position when the comic
+/// has that page, otherwise the first page by number (every export's cover).
+/// The instant-reading gate waits for exactly that page's image.
+enum InitialReaderPage {
+    static func page(for comic: Comic, progress: ReadingProgress?) -> Page? {
+        if let progress, let page = comic.pages.first(where: { $0.pageNumber == progress.pageNumber }) {
+            return page
+        }
+        return comic.pages.min { $0.pageNumber < $1.pageNumber }
+    }
+
+    /// The image plain reading draws for that page (the full bake with text).
+    static func openingImage(for comic: Comic, progress: ReadingProgress?) -> String? {
+        page(for: comic, progress: progress)?.masterImage
     }
 }

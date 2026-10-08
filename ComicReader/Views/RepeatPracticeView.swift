@@ -160,6 +160,7 @@ struct RepeatPracticeView: View {
         .helpTooltipLayer()
         .environmentObject(help)
         .onAppear {
+            audioManager.activeComicId = comic.id   // this comic's own clips, nobody else's
             buildSentences()
             synthesizer.delegate = ttsDelegate
             setupRemoteCommands()

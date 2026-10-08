@@ -217,10 +217,31 @@ struct StoreComicCard: View {
     @StateObject private var storeService = ComicStoreService.shared
     @StateObject private var localStorage = LocalComicStorage.shared
     @StateObject private var store = StoreService.shared
+    @ObservedObject private var instantOpen = InstantOpenCoordinator.shared
     @State private var showPaywall = false
+    /// The comic this card opened by itself once it became readable (a
+    /// progressive download with its first page in) — pushed to its screen,
+    /// which goes straight into the reader.
+    @State private var autoOpened: Comic?
+    @State private var isAutoOpening = false
 
     var downloadState: DownloadState {
         storeService.downloadState(for: comic.id)
+    }
+
+    /// Readable now though still downloading (comic.json + the first page are in).
+    private var availablePartial: Comic? {
+        guard !localStorage.isDownloaded(comic.id) else { return nil }
+        return localStorage.availableComic(comic.id)
+    }
+
+    /// The tap that started this download asked for the reader to open as
+    /// soon as it can; do that once, through the same screen and entitlement
+    /// check as any open.
+    private func openIfReady(available: Comic? = nil) {
+        let candidate = available ?? localStorage.availableComic(comic.id)
+        guard autoOpened == nil, let ready = instantOpen.comicToOpen(comic.id, available: candidate, unlocked: { !isLocked }) else { return }
+        if let onOpenComic { onOpenComic(ready) } else { autoOpened = ready; isAutoOpening = true }
     }
 
     /// Locked unless the customer's access (trial, subscription, lifetime, or
@@ -392,6 +413,31 @@ struct StoreComicCard: View {
                 RoundedRectangle(cornerRadius: 12).stroke(Color.comigoInk, lineWidth: 2)
             }
         }
+        // The automatic open: a link the card triggers itself (a per-card link,
+        // like Open below — not a navigationDestination, which mustn't live in
+        // a lazy list).
+        .background {
+            NavigationLink(destination: autoOpened.map { ComicDetailView(comic: $0, autoOpenReader: true) },
+                           isActive: $isAutoOpening) { EmptyView() }
+                .hidden()
+        }
+        .onAppear { openIfReady() }
+        // (The publisher fires before the new value is stored — use what it carries.)
+        .onReceive(localStorage.$availablePartials) { partials in openIfReady(available: partials[comic.id]) }
+    }
+
+    /// "Open" for a comic that's readable while it finishes downloading.
+    @ViewBuilder
+    private func openPartialButton(_ ready: Comic) -> some View {
+        Group {
+            if let onOpenComic {
+                Button { onOpenComic(ready) } label: { openLabel }
+            } else {
+                NavigationLink(destination: ComicDetailView(comic: ready)) { openLabel }
+            }
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(.green)
     }
 
     @ViewBuilder
@@ -412,9 +458,15 @@ struct StoreComicCard: View {
                 .buttonStyle(.borderedProminent)
                 .tint(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255))
                 .sheet(isPresented: $showPaywall) { PaywallView(source: .comicLocked) }
+            } else if let ready = availablePartial {
+                // Left part-way through (relaunch, offline): readable as it is;
+                // the download picks itself up.
+                openPartialButton(ready)
             } else {
                 Button {
                     onDownloadStart?()
+                    // Opens by itself once the first page is in.
+                    instantOpen.openWhenAvailable(comic.id)
                     Task {
                         await storeService.downloadComic(comic)
                     }
@@ -440,7 +492,11 @@ struct StoreComicCard: View {
 
                     Spacer()
 
+                    // Readable already — the rest arrives while they read.
+                    if let ready = availablePartial { openPartialButton(ready) }
+
                     Button("Cancel") {
+                        instantOpen.forget(comic.id)
                         storeService.cancelDownload(comic.id)
                     }
                     .font(.caption)
@@ -527,12 +583,15 @@ struct StoreComicCard: View {
                         .padding(.horizontal, 8)
                 }
 
-                Button("Retry") {
-                    Task {
-                        await storeService.downloadComic(comic)
+                HStack {
+                    if let ready = availablePartial { openPartialButton(ready) }
+                    Button("Retry") {
+                        Task {
+                            await storeService.downloadComic(comic)
+                        }
                     }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.bordered)
             }
         }
     }

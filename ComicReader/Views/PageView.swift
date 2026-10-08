@@ -11,57 +11,124 @@ struct PagedImageView: UIViewRepresentable {
     let comicId: String
     let pageKey: Int     // changes on a real page turn (drives the slide)
     let forward: Bool    // turn direction
+    /// Bumped when files of this comic land (ComicAssetAvailability) — a page
+    /// that wasn't on disk is re-read then. 0 for a complete comic.
+    var assetStamp: Int = 0
+    /// The device has no network: the placeholder says so instead of spinning.
+    var offline: Bool = false
 
-    final class Coordinator {
-        weak var imageView: UIImageView?
-        var lastKey: Int?
-        var lastImageName: String?
-    }
-    func makeCoordinator() -> Coordinator { Coordinator() }
-
-    // Plain container (no intrinsic size) so SwiftUI's frame drives the size; the
-    // image view is pinned to fill it and aspect-fits the artwork within.
-    func makeUIView(context: Context) -> UIView {
-        let container = UIView()
-        container.backgroundColor = .black
-        container.clipsToBounds = true
-        let iv = UIImageView()
-        iv.contentMode = .scaleAspectFit
-        iv.clipsToBounds = true
-        iv.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(iv)
-        NSLayoutConstraint.activate([
-            iv.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            iv.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            iv.topAnchor.constraint(equalTo: container.topAnchor),
-            iv.bottomAnchor.constraint(equalTo: container.bottomAnchor)
-        ])
-        iv.image = ComicImageLoader.shared.loadImage(named: imageName, forComic: comicId)
-        context.coordinator.imageView = iv
-        context.coordinator.lastKey = pageKey
-        context.coordinator.lastImageName = imageName
+    func makeUIView(context: Context) -> PagedImageContainer {
+        let container = PagedImageContainer()
+        container.show(imageName: imageName, comicId: comicId, pageKey: pageKey, forward: forward, offline: offline)
         return container
     }
 
-    func updateUIView(_ uiView: UIView, context: Context) {
-        let coord = context.coordinator
-        guard let iv = coord.imageView else { return }
-        let newImage = ComicImageLoader.shared.loadImage(named: imageName, forComic: comicId)
-        if coord.lastKey != pageKey {
+    func updateUIView(_ uiView: PagedImageContainer, context: Context) {
+        uiView.show(imageName: imageName, comicId: comicId, pageKey: pageKey, forward: forward, offline: offline, assetStamp: assetStamp)
+    }
+}
+
+/// The UIKit side of PagedImageView: an aspect-fit image view, and a
+/// page-shaped placeholder shown while the page's file isn't on disk yet
+/// (a progressive download still under way). The real page replaces it as
+/// soon as `show` is called again with a new `assetStamp` and the file is
+/// there — no navigation needed.
+final class PagedImageContainer: UIView {
+    let imageView = UIImageView()
+    let placeholder = UIView()
+    private let spinner = UIActivityIndicatorView(style: .medium)
+    private let note = UILabel()
+    private(set) var lastKey: Int?
+    private(set) var lastImageName: String?
+    private(set) var lastStamp = 0
+    var loader: ComicImageLoader = .shared
+    /// What the placeholder says (tests).
+    var placeholderText: String? { note.text }
+    var isShowingPlaceholder: Bool { !placeholder.isHidden }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .black
+        clipsToBounds = true
+        imageView.contentMode = .scaleAspectFit
+        imageView.clipsToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(imageView)
+        NSLayoutConstraint.activate([
+            imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            imageView.topAnchor.constraint(equalTo: topAnchor),
+            imageView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+        // A page-shaped card (portrait, the comics' aspect), centred, with a
+        // spinner and a line of text.
+        placeholder.backgroundColor = UIColor.white.withAlphaComponent(0.08)
+        placeholder.layer.cornerRadius = 12
+        placeholder.layer.borderWidth = 1
+        placeholder.layer.borderColor = UIColor.white.withAlphaComponent(0.15).cgColor
+        placeholder.translatesAutoresizingMaskIntoConstraints = false
+        placeholder.isHidden = true
+        addSubview(placeholder)
+        NSLayoutConstraint.activate([
+            placeholder.centerXAnchor.constraint(equalTo: centerXAnchor),
+            placeholder.centerYAnchor.constraint(equalTo: centerYAnchor),
+            placeholder.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.8),
+            placeholder.heightAnchor.constraint(equalTo: placeholder.widthAnchor, multiplier: 1.4),
+            placeholder.heightAnchor.constraint(lessThanOrEqualTo: heightAnchor, multiplier: 0.85)
+        ])
+        spinner.color = .white
+        spinner.hidesWhenStopped = true
+        note.textColor = UIColor.white.withAlphaComponent(0.7)
+        note.font = .preferredFont(forTextStyle: .footnote)
+        note.textAlignment = .center
+        note.numberOfLines = 0
+        let stack = UIStackView(arrangedSubviews: [spinner, note])
+        stack.axis = .vertical
+        stack.spacing = 10
+        stack.alignment = .center
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        placeholder.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.centerXAnchor.constraint(equalTo: placeholder.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: placeholder.centerYAnchor),
+            stack.leadingAnchor.constraint(greaterThanOrEqualTo: placeholder.leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(lessThanOrEqualTo: placeholder.trailingAnchor, constant: -16)
+        ])
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    func show(imageName: String, comicId: String, pageKey: Int, forward: Bool, offline: Bool, assetStamp: Int = 0) {
+        let turned = lastKey != nil && lastKey != pageKey
+        let swapped = lastKey != nil && !turned && lastImageName != imageName
+        let landed = lastKey != nil && !turned && !swapped && imageView.image == nil && assetStamp != lastStamp
+        lastStamp = assetStamp
+        if lastKey == nil {
+            imageView.image = loader.loadImage(named: imageName, forComic: comicId)
+        } else if turned {
             // Real page turn → slide the artwork in from the side we're heading toward.
             let t = CATransition()
             t.type = .push
             t.subtype = forward ? .fromRight : .fromLeft
             t.duration = 0.35
             t.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            iv.layer.add(t, forKey: "pageTurn")
-            iv.image = newImage
-            coord.lastKey = pageKey
-            coord.lastImageName = imageName
-        } else if coord.lastImageName != imageName {
-            // Same page, different bake (e.g. a practice-mode toggle) → swap, no slide.
-            iv.image = newImage
-            coord.lastImageName = imageName
+            imageView.layer.add(t, forKey: "pageTurn")
+            imageView.image = loader.loadImage(named: imageName, forComic: comicId)
+        } else if swapped || landed {
+            // Same page, different bake (e.g. a practice-mode toggle), or the
+            // page's file has just arrived → swap, no slide.
+            imageView.image = loader.loadImage(named: imageName, forComic: comicId)
+        }
+        lastKey = pageKey
+        lastImageName = imageName
+        // Nothing to show yet: the page is on its way (or waiting for a network).
+        let missing = imageView.image == nil
+        placeholder.isHidden = !missing
+        if missing {
+            note.text = offline ? "Waiting for connection…" : "Loading page…"
+            if offline { spinner.stopAnimating() } else { spinner.startAnimating() }
+        } else {
+            spinner.stopAnimating()
         }
     }
 }
@@ -74,6 +141,8 @@ struct PagedImageView: UIViewRepresentable {
 /// border can't leak into the rest of the page.
 enum BubbleFill {
     static let cache = NSCache<NSString, UIImage>()
+    /// Where the bakes come from (tests point at a temporary comics folder).
+    nonisolated(unsafe) static var loader: ComicImageLoader = .shared
     // Tight normalized bounding box of the flood, cached alongside interiorMask's
     // image so a cache hit can still return it (used to cover a sound-effect balloon).
     static let boundsCache = NSCache<NSString, NSValue>()
@@ -101,7 +170,7 @@ enum BubbleFill {
 
         if let cached = cache.object(forKey: cacheKey as NSString) { return (cached, region) }
 
-        guard let maskImg = ComicImageLoader.shared.loadImage(named: maskSource, forComic: comicId),
+        guard let maskImg = loader.loadImage(named: maskSource, forComic: comicId),
               let maskCG = maskImg.cgImage else { return nil }
         let iw = maskCG.width, ih = maskCG.height
         guard iw > 0, ih > 0 else { return nil }
@@ -134,7 +203,7 @@ enum BubbleFill {
         // different size, in which case we just fill the whole interior.
         var inkBuf: [UInt8]? = nil
         if inkSource != maskSource,
-           let inkImg = ComicImageLoader.shared.loadImage(named: inkSource, forComic: comicId),
+           let inkImg = loader.loadImage(named: inkSource, forComic: comicId),
            let inkCG = inkImg.cgImage, inkCG.width == iw, inkCG.height == ih,
            let inkCrop = inkCG.cropping(to: cropRect) {
             inkBuf = readPixels(inkCrop)
@@ -249,7 +318,7 @@ enum BubbleFill {
             return (cached, region, bv.cgRectValue)
         }
 
-        guard let maskImg = ComicImageLoader.shared.loadImage(named: maskSource, forComic: comicId),
+        guard let maskImg = loader.loadImage(named: maskSource, forComic: comicId),
               let maskCG = maskImg.cgImage else { return nil }
         let iw = maskCG.width, ih = maskCG.height
         guard iw > 0, ih > 0 else { return nil }
@@ -490,6 +559,10 @@ struct PageView: View {
     }
     @State private var pageImageAspect: CGFloat?   // width/height of the page artwork
     @StateObject private var help = HelpModeController()
+    // Files of a still-downloading comic landing: the page image and the
+    // bubble fills re-check the disk; the page the reader is on goes first.
+    @ObservedObject private var availability = ComicAssetAvailability.shared
+    private var assetStamp: Int { availability.generation[comic.id] ?? 0 }
 
     // First-visit callout on the cover: "Click on the text." — points at the
     // tappable cover title bubble. Once-only (or always under forceShowTooltips).
@@ -1081,6 +1154,10 @@ struct PageView: View {
             if let size, size.height > 0 {
                 let aspect = size.width / size.height
                 await MainActor.run { pageImageAspect = aspect }
+            } else {
+                // Not on disk yet (still downloading): ask for it; the stamp
+                // change when it lands runs this again.
+                await MainActor.run { ComicAssetAvailability.shared.request(image: name, comicId: comicId) }
             }
         }
     }
@@ -1282,7 +1359,8 @@ struct PageView: View {
                     : currentPage.masterImage
 
                 PagedImageView(imageName: imageName, comicId: comic.id,
-                               pageKey: currentPageIndex, forward: navForward)
+                               pageKey: currentPageIndex, forward: navForward,
+                               assetStamp: assetStamp, offline: !availability.isNetworkReachable)
                     .frame(width: geometry.size.width, height: geometry.size.height)
                     .overlay {
                         // Tap targets, mapped into the actual aspect-fit image rect
@@ -1607,8 +1685,14 @@ struct PageView: View {
         .toolbarColorScheme(.light, for: .tabBar)
         .environment(\.analyticsComicContext,
                      AnalyticsComicContext(comicId: comic.id, pageNumber: currentPage.pageNumber))
+        .onChange(of: assetStamp) { _, _ in
+            // Something of this comic arrived: the page's own image, if it was
+            // missing, is re-read by PagedImageView; its aspect is still unknown.
+            if pageImageAspect == nil { loadPageAspect() }
+        }
         .onAppear {
             AudioManager.shared.activeComicId = comic.id   // fast, direct audio lookup
+            availability.reader(comic.id, isOnPage: currentPageIndex)
             if tracksReading && !readingSessionTracked {
                 readingSessionTracked = true
                 AnalyticsService.shared.track(.comicStarted(
@@ -1667,9 +1751,12 @@ struct PageView: View {
         }
         .onChange(of: currentPageIndex) { oldPage, newPage in
             if tracksReading && readingSessionTracked { trackPageViewed() }
+            // A comic still downloading fetches this page first from now on.
+            availability.reader(comic.id, isOnPage: newPage)
             // Close the bubble card and refresh the artwork aspect for the new page
             selectedBubbleIndex = nil
             flashBubbleId = nil          // never carry a stale pulse across pages
+            pageImageAspect = nil
             loadPageAspect()
             flashFirstBubble()
             // Leaving the cover hides the cover callout; returning to it re-offers it.
@@ -2101,7 +2188,14 @@ struct BubbleContentView: View {
             }
         } label: {
             let isThis = audioManager.isPlaying && playingSentenceId == sentence.id
-            Label(isThis ? "Stop" : "Play", systemImage: isThis ? "stop.fill" : "play.fill")
+            // The clip is still arriving (comic downloading): show that, keep the tap.
+            let isWaiting = audioManager.isLoading && playingSentenceId == sentence.id
+            Label {
+                Text(isThis ? "Stop" : (isWaiting ? "Loading" : "Play"))
+            } icon: {
+                if isWaiting { ProgressView().tint(.white) }
+                else { Image(systemName: isThis ? "stop.fill" : "play.fill") }
+            }
                 .font(.subheadline).fontWeight(.medium).foregroundStyle(.white)
                 .padding(.horizontal, 16).padding(.vertical, 10)
                 .background(isThis ? Color.red : Color.blue)
