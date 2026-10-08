@@ -25,16 +25,22 @@ struct LibraryView: View {
     @AppStorage("creatorMessage.seen") private var creatorMessageSeen = false
     @State private var showCreatorBanner = false
     @State private var showCreatorMessage = false
-    // Analytics choice card: waits until the creator message has been read,
-    // so the two first-run cards don't arrive together — except that if the
-    // message is still unread on a later launch, the card no longer waits.
+    // Analytics choice card: only once a few pages have been read, never over
+    // a tooltip, a help replay or the reminder offer (AnalyticsConsentPrompt).
     @ObservedObject private var analytics = AnalyticsService.shared
+    @ObservedObject private var consentPrompt = AnalyticsConsentPrompt.shared
     // Reminder offer fallback (e.g. they went straight into practice after
     // finishing their first comic, so the comic screen didn't show it).
     @ObservedObject private var reminders = ReminderService.shared
     @State private var showReminderPrompt = false
-    @AppStorage("analytics.consentCardDeferred") private var consentCardDeferred = false
     @State private var consentCardReady = false
+
+    private var consentCardSituation: AnalyticsConsentPrompt.Situation {
+        .init(consent: analytics.consent,
+              eligible: consentPrompt.isEligible,
+              onboardingActive: showLibraryTitleTip || showChooseCollection || help.isActive,
+              otherPresentation: showReminderPrompt || reminders.shouldOfferPrompt || showCreatorMessage)
+    }
 
     private var showInitialLoader: Bool {
         localStorage.isLoading && localStorage.downloadedComics.isEmpty
@@ -110,8 +116,8 @@ struct LibraryView: View {
         }
         .overlay(alignment: .bottom) {
             VStack(spacing: 10) {
-                // Held back while a first-run tooltip is on screen — one thing at a time.
-                if consentCardReady && analytics.needsConsentChoice && !showLibraryTitleTip && !showChooseCollection {
+                // One thing at a time: after the first comic, and never over a tooltip or another prompt.
+                if consentCardReady && AnalyticsConsentPrompt.shouldShow(consentCardSituation) {
                     AnalyticsConsentCard { granted in
                         withAnimation(.easeInOut(duration: 0.25)) { analytics.setConsent(granted) }
                     }
@@ -134,7 +140,6 @@ struct LibraryView: View {
             // The creator message opens the first-launch experience; the intro
             // tooltips follow only once it has been read and closed.
             startIntroTooltipsIfNeeded(after: 0.8)
-            showConsentCardIfNeeded(after: 1.2)
         }) {
             CreatorMessageView()
         }
@@ -144,11 +149,7 @@ struct LibraryView: View {
                     if reminders.shouldOfferPrompt { showReminderPrompt = true }
                 }
             }
-            if creatorMessageSeen || consentCardDeferred {
-                showConsentCardIfNeeded(after: 1.2)
-            } else {
-                consentCardDeferred = true
-            }
+            showConsentCardIfNeeded(after: 1.2)
             if !creatorMessageSeen {
                 // First launch: only the creator banner — the intro tooltips
                 // hold back until the message has been opened and closed.
@@ -234,15 +235,19 @@ struct LibraryView: View {
     // Indigo brand accent (reserved for primary actions / selected chips).
     private var accentColor: Color { Color(red: 91/255, green: 91/255, blue: 214/255) }
 
-    // First visit: the library-title tip opens the sequence (the old "?"
-    // intro was retired — the reader's closing tooltip covers the ? button);
-    // the "Choose a collection." prompt is last.
+    // The analytics card slides in a moment after arriving on the Library —
+    // the first time the situation allows it (first comic done, nothing else
+    // up); the overlay's condition keeps re-checking the situation after that.
     private func showConsentCardIfNeeded(after delay: TimeInterval) {
-        guard analytics.needsConsentChoice, !consentCardReady else { return }
+        guard !consentCardReady, AnalyticsConsentPrompt.shouldShow(consentCardSituation) else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { consentCardReady = true }
         }
     }
+
+    // First visit: the library-title tip opens the sequence (the old "?"
+    // intro was retired — the reader's closing tooltip covers the ? button);
+    // the "Choose a collection." prompt is last.
 
     private func startIntroTooltipsIfNeeded(after delay: TimeInterval) {
         if HelpDebug.forceShowTooltips || !seenLibraryTitleTip {

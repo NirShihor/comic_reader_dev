@@ -65,6 +65,8 @@
 		C3000001000000000000A19 /* ComigoStore.storekit in Resources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A09 /* ComigoStore.storekit */; };
 		C3000001000000000000D03 /* AggregateTelemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000D01 /* AggregateTelemetry.swift */; };
 		C3000001000000000000D04 /* AggregateTelemetryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000D02 /* AggregateTelemetryTests.swift */; };
+		C3000001000000000000E03 /* AnalyticsConsentPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000E01 /* AnalyticsConsentPrompt.swift */; };
+		C3000001000000000000E04 /* AnalyticsConsentPromptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000E02 /* AnalyticsConsentPromptTests.swift */; };
 		D4000001000000000000A11 /* AccessModelService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4000001000000000000A01 /* AccessModelService.swift */; };
 		D4000001000000000000A12 /* AccessModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4000001000000000000A02 /* AccessModelTests.swift */; };
 		F6000001000000000000A11 /* SpanishLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6000001000000000000A01 /* SpanishLevel.swift */; };
@@ -153,6 +155,8 @@
 		C3000001000000000000A09 /* ComigoStore.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = ComigoStore.storekit; sourceTree = "<group>"; };
 		C3000001000000000000D01 /* AggregateTelemetry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AggregateTelemetry.swift; sourceTree = "<group>"; };
 		C3000001000000000000D02 /* AggregateTelemetryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AggregateTelemetryTests.swift; sourceTree = "<group>"; };
+		C3000001000000000000E01 /* AnalyticsConsentPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsConsentPrompt.swift; sourceTree = "<group>"; };
+		C3000001000000000000E02 /* AnalyticsConsentPromptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsConsentPromptTests.swift; sourceTree = "<group>"; };
 		D4000001000000000000A01 /* AccessModelService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessModelService.swift; sourceTree = "<group>"; };
 		D4000001000000000000A02 /* AccessModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessModelTests.swift; sourceTree = "<group>"; };
 		F6000001000000000000A01 /* SpanishLevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpanishLevel.swift; sourceTree = "<group>"; };
@@ -315,6 +319,7 @@
 			children = (
 				C3000001000000000000A06 /* AnalyticsTests.swift */,
 				C3000001000000000000D02 /* AggregateTelemetryTests.swift */,
+				C3000001000000000000E02 /* AnalyticsConsentPromptTests.swift */,
 				D4000001000000000000A02 /* AccessModelTests.swift */,
 				F6000001000000000000A05 /* LevelAndReminderTests.swift */,
 				C3000001000000000000A09 /* ComigoStore.storekit */,
@@ -330,6 +335,7 @@
 				C3000001000000000000A03 /* PostHogAnalyticsBackend.swift */,
 				C3000001000000000000A07 /* PurchaseAttribution.swift */,
 				C3000001000000000000D01 /* AggregateTelemetry.swift */,
+				C3000001000000000000E01 /* AnalyticsConsentPrompt.swift */,
 			);
 			path = Analytics;
 			sourceTree = "<group>";
@@ -513,6 +519,7 @@
 				C3000001000000000000A13 /* PostHogAnalyticsBackend.swift in Sources */,
 				C3000001000000000000A17 /* PurchaseAttribution.swift in Sources */,
 				C3000001000000000000D03 /* AggregateTelemetry.swift in Sources */,
+				C3000001000000000000E03 /* AnalyticsConsentPrompt.swift in Sources */,
 				C3000001000000000000A18 /* AnalyticsConsentCard.swift in Sources */,
 				D4000001000000000000A11 /* AccessModelService.swift in Sources */,
 				F6000001000000000000A14 /* ReminderPromptView.swift in Sources */,
@@ -537,6 +544,7 @@
 			files = (
 				C3000001000000000000A16 /* AnalyticsTests.swift in Sources */,
 				C3000001000000000000D04 /* AggregateTelemetryTests.swift in Sources */,
+				C3000001000000000000E04 /* AnalyticsConsentPromptTests.swift in Sources */,
 				D4000001000000000000A12 /* AccessModelTests.swift in Sources */,
 				F6000001000000000000A15 /* LevelAndReminderTests.swift in Sources */,
 			);

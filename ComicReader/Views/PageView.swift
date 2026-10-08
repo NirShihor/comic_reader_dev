@@ -1245,10 +1245,14 @@ struct PageView: View {
     /// context views (a word's page from Vocabulary, a note's link) aren't reading.
     private var tracksReading: Bool { savesProgress && !guidedOnScreenPractice }
 
-    /// The page as the reader sees it ("3/12" in the top bar).
+    /// The page as the reader sees it ("3/12" in the top bar). A story page
+    /// (not the cover, which is the first page) also counts towards the
+    /// analytics-choice request becoming eligible (asked later, on the
+    /// Library — never here).
     private func trackPageViewed() {
         AnalyticsService.shared.track(.comicPageViewed(
             comicId: comic.id, pageNumber: currentPage.pageNumber, totalPages: sortedPages.count))
+        if currentPageIndex > 0 { AnalyticsConsentPrompt.shared.recordPageRead() }
     }
 
     /// The reader moved past the last page — the same moment the End of Episode
