@@ -14,6 +14,9 @@ struct HotspotView: View {
     @State private var currentSlideIndex = 0
     @State private var audioPlayer: AVAudioPlayer?
     @State private var isPlayingAudio = false
+    /// A tapped clip that hasn't downloaded yet — played when it lands.
+    @State private var waitingForAudio: String?
+    @ObservedObject private var availability = ComicAssetAvailability.shared
     @State private var selectedWord: Word?
 
     // Test mode state
@@ -199,6 +202,13 @@ struct HotspotView: View {
             .onDisappear {
                 whisperService.cancelRecording()
                 whisperService.endCaptureSession()
+            }
+            .onReceive(availability.$landed) { landed in
+                // The clip a tap was waiting for has arrived: play it now.
+                if let name = waitingForAudio, ComicAssetAvailability.includes(audio: name, comicId: comicId, in: landed) {
+                    waitingForAudio = nil
+                    playAudio(name, isTranslation: false)
+                }
             }
             .alert("Speech Recognition Error", isPresented: $showingError) {
                 Button("OK", role: .cancel) { }
@@ -966,10 +976,8 @@ struct HotspotView: View {
 
     private func playAudio(_ audioName: String, isTranslation: Bool) {
         stopAudio()
-        let basePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let audioPath = basePath
-            .appendingPathComponent("Comics")
-            .appendingPathComponent(comicId)
+        let comicFolder = LocalComicStorage.defaultComicsDirectory.appendingPathComponent(comicId)
+        let audioPath = comicFolder
             .appendingPathComponent("audio")
             .appendingPathComponent("\(audioName).mp3")
 
@@ -982,6 +990,10 @@ struct HotspotView: View {
                 } catch {
                     print("Failed to play bundled audio: \(error)")
                 }
+            } else if availability.isDownloading(comicId) || LocalComicStorage.isPartial(folder: comicFolder) {
+                // Still downloading: ask for this clip; onReceive plays it on landing.
+                waitingForAudio = audioName
+                availability.request(audio: audioName, comicId: comicId)
             }
             return
         }
@@ -996,6 +1008,7 @@ struct HotspotView: View {
     }
 
     private func stopAudio() {
+        waitingForAudio = nil
         audioPlayer?.stop()
         audioPlayer = nil
         isPlayingAudio = false

@@ -47,6 +47,10 @@ struct ComicDetailView: View {
     /// When true (e.g. opened from the Library "Continue" card), immediately
     /// resume reading/practice exactly like tapping the primary button here.
     var autoResume: Bool = false
+    /// When true (a download that just became readable), go straight into
+    /// plain reading at the usual starting page — the tap on Download was the
+    /// tap to read.
+    var autoOpenReader: Bool = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hSize
     @EnvironmentObject var progressManager: ReadingProgressManager
@@ -58,6 +62,8 @@ struct ComicDetailView: View {
     @State private var showReminderPrompt = false
 
     @State private var didAutoResume = false
+    @State private var showFinishingDownload = false   // a whole-comic mode on a comic still arriving
+    @ObservedObject private var storeService = ComicStoreService.shared
     @State private var practiceDestination: PracticeDestination?
     @State private var selectedPage: Page?
     @State private var showingDeleteConfirmation = false
@@ -104,12 +110,21 @@ struct ComicDetailView: View {
             .alert("Delete Comic", isPresented: $showingDeleteConfirmation) {
                 Button("Cancel", role: .cancel) { }
                 Button("Delete", role: .destructive) {
-                    localStorage.deleteComic(comic.id)
+                    if isStillDownloading {
+                        storeService.deleteDownload(comic.id)   // stops the download, removes the partial
+                    } else {
+                        localStorage.deleteComic(comic.id)
+                    }
                     progressManager.clearProgress(for: comic.id)
                     dismiss()
                 }
             } message: {
                 Text("Delete \"\(comic.title)\"? This will remove it from your device. You can re-download it later.")
+            }
+            .alert("Finishing download…", isPresented: $showFinishingDownload) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("This comic is still downloading. You can keep reading it now — practice modes will be ready as soon as the download finishes.")
             }
             .navigationDestination(item: $practiceDestination) {
                 destinationView($0)
@@ -121,6 +136,13 @@ struct ComicDetailView: View {
                     // practice mode funnels through here, so one gate covers all.
                     guard requireUnlocked() else {
                         practiceDestination = nil
+                        return
+                    }
+                    // Whole-comic modes need every file; a comic still arriving
+                    // keeps downloading while they read instead.
+                    guard localStorage.isWholeComicAvailable(comic.id) else {
+                        practiceDestination = nil
+                        showFinishingDownload = true
                         return
                     }
                     // Coming from the episode-end "Practice" button: they just finished
@@ -255,6 +277,13 @@ struct ComicDetailView: View {
             }
             .onAppear {
                 startCockpitTips()
+                // A download that just became readable: straight into the reader,
+                // at the page it would open on anyway.
+                if autoOpenReader, !didAutoResume {
+                    didAutoResume = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { startNormalReading(startingPage) }
+                    return
+                }
                 // Opened via the Library "Continue" card: pick up exactly where the
                 // user left off (same spot and mode as the primary button here).
                 guard autoResume, !didAutoResume else { return }
@@ -290,7 +319,7 @@ struct ComicDetailView: View {
 
     private func startCockpitTips() {
         // Skip when auto-resuming straight into the reader — the screen is leaving.
-        guard !autoResume, cockpitStep == 0 else { return }
+        guard !autoResume, !autoOpenReader, cockpitStep == 0 else { return }
         if !HelpDebug.forceShowTooltips { guard !seenCockpitTips else { return } }
         if !HelpDebug.forceShowTooltips && !helpReplay, HelpTipCap.spent("comic-cockpit") { seenCockpitTips = true; return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
@@ -480,6 +509,20 @@ struct ComicDetailView: View {
                         .explains("Restart",
                                   "Start over from the beginning — the same practice mode, or reading.")
                 }
+            }
+
+            // Still arriving: one quiet line — reading is already on.
+            if isStillDownloading {
+                Group {
+                    if case .downloading(let p) = storeService.downloadState(for: comic.id) {
+                        Label("Downloading the rest in the background · \(Int(p * 100))%", systemImage: "arrow.down.circle")
+                    } else {
+                        Label("Download paused — it continues when you're back online", systemImage: "wifi.slash")
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             // When the primary button is practice-focused, keep reading one tap away.
@@ -955,6 +998,11 @@ struct ComicDetailView: View {
         sortedPages.first ?? comic.pages[0]
     }
 
+    /// Still arriving (readable, not complete) — the instant-reading state.
+    private var isStillDownloading: Bool {
+        localStorage.availablePartials[comic.id] != nil || localStorage.isPartiallyDownloaded(comic.id)
+    }
+
     /// Open a page for plain reading. Clears any leftover practice-mode flags so
     /// the reader shows the real (text) artwork, not the empty-bubble practice art.
     private func startNormalReading(_ page: Page) {
@@ -966,13 +1014,10 @@ struct ComicDetailView: View {
         selectedPage = page
     }
 
+    /// The page reading opens on — the one rule, shared with the instant-reading
+    /// gate (InitialReaderPage), which waits for exactly this page's image.
     private var startingPage: Page {
-        if let progress = progressManager.getProgress(for: comic.id),
-           let page = comic.pages.first(where: { $0.pageNumber == progress.pageNumber }) {
-            return page
-        }
-        // Return the first page (cover)
-        return firstPage
+        InitialReaderPage.page(for: comic, progress: progressManager.getProgress(for: comic.id)) ?? firstPage
     }
 
     // MARK: - Pages Grid
@@ -1010,7 +1055,7 @@ struct PageThumbnail: View {
                 let imageName = practiceActive
                     ? (page.noTextImage ?? page.masterImage)
                     : page.masterImage
-                ComicImage(imageName: imageName, comicId: comic.id)
+                ComicImage(imageName: imageName, comicId: comic.id, requestsWhenMissing: false)
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: geo.size.height, alignment: isCover ? .top : .center)
             }

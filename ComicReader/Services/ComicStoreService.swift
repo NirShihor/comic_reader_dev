@@ -120,23 +120,61 @@ enum DownloadState: Equatable {
 class ComicStoreService: ObservableObject {
     static let shared = ComicStoreService()
 
-    private let baseURL = Secrets.serverBaseURL
+    private let baseURL: String
 
     @Published private(set) var catalog: [StoreComic] = []
     @Published private(set) var isLoadingCatalog = false
     @Published private(set) var catalogError: String?
     @Published var downloadStates: [String: DownloadState] = [:]
 
-    private let localStorage = LocalComicStorage.shared
-    private var activeDownloadTask: Task<Void, Never>?
-    private var activeDownloadHelper: DownloadHelper?
+    private let localStorage: LocalComicStorage
+    private let defaults: UserDefaults
+    private let rangeReader: BundleRangeReader
+    private let progressiveConfiguration: ProgressiveDownloader.Configuration
+    /// Where the reader hears about files landing and sends page/asset requests.
+    private let availability: ComicAssetAvailability
+    /// The saved reading position — decides which page a comic opens on, so
+    /// which image a partial needs before it can be opened.
+    private let savedProgress: (String) -> ReadingProgress?
 
-    init() {
+    /// Per partial download: the comic (decoded once comic.json landed) and
+    /// the image the reader will show first. When that image lands, the comic
+    /// becomes available — readable while the rest keeps downloading.
+    private var openingRequirements: [String: (comic: Comic, image: String)] = [:]
+
+    /// Comics are fetched progressively — file by file, by byte range, straight
+    /// into their folder (ProgressiveDownloader) — unless the bundle can't be
+    /// read that way, when the whole-zip download below takes over. Off = the
+    /// whole-zip path for everything.
+    var progressiveDownloadsEnabled = true
+
+    /// What's running for a comic: the task, and whichever downloader it's using.
+    private struct ActiveDownload {
+        let task: Task<Void, Never>
+        var helper: DownloadHelper?
+        var progressive: ProgressiveDownloader?
+    }
+    private var activeDownloads: [String: ActiveDownload] = [:]
+
+    init(localStorage: LocalComicStorage = .shared, baseURL: String = Secrets.serverBaseURL,
+         defaults: UserDefaults = .standard, rangeReader: BundleRangeReader = BundleRangeReader(),
+         progressiveConfiguration: ProgressiveDownloader.Configuration = .init(),
+         availability: ComicAssetAvailability = .shared,
+         savedProgress: @escaping (String) -> ReadingProgress? = { ReadingProgressManager.savedProgress(for: $0) }) {
+        self.localStorage = localStorage
+        self.baseURL = baseURL
+        self.defaults = defaults
+        self.rangeReader = rangeReader
+        self.progressiveConfiguration = progressiveConfiguration
+        self.availability = availability
+        self.savedProgress = savedProgress
         // Initialize download states for downloaded comics
         for comic in localStorage.downloadedComics {
             downloadStates[comic.id] = .downloaded
         }
     }
+
+    func isDownloading(_ comicId: String) -> Bool { activeDownloads[comicId] != nil }
 
     // MARK: - Catalog
 
@@ -201,9 +239,12 @@ class ComicStoreService: ObservableObject {
     /// comicId → bundleVersion recorded when that bundle was downloaded.
     private let bundleVersionsKey = "downloadedBundleVersions.v1"
     private var downloadedBundleVersions: [String: String] {
-        get { UserDefaults.standard.dictionary(forKey: bundleVersionsKey) as? [String: String] ?? [:] }
-        set { UserDefaults.standard.set(newValue, forKey: bundleVersionsKey) }
+        get { defaults.dictionary(forKey: bundleVersionsKey) as? [String: String] ?? [:] }
+        set { defaults.set(newValue, forKey: bundleVersionsKey) }
     }
+
+    /// The bundle version recorded for a downloaded comic (tests).
+    func recordedBundleVersion(for comicId: String) -> String? { downloadedBundleVersions[comicId] }
 
     /// True when the server's bundle differs from what this device downloaded.
     /// Devices that downloaded before version tracking existed have no record,
@@ -238,6 +279,7 @@ class ComicStoreService: ObservableObject {
     }
 
     func downloadComic(_ comic: StoreComic) async {
+        if activeDownloads[comic.id] != nil { return }   // already on its way
         // Say so up front when the comic won't fit — iOS otherwise reports it as
         // a generic failure part-way through, after the whole download.
         if let available = Self.availableStorageBytes(at: localStorage.comicsDirectory),
@@ -250,58 +292,31 @@ class ComicStoreService: ObservableObject {
         // Store the task so cancelDownload can cancel it
         let task = Task {
             do {
-                // 1. Build the bundle URL
                 guard let bundleUrl = URL(string: "\(baseURL)\(comic.downloadUrl)/bundle") else {
                     downloadStates[comic.id] = .failed(error: "Invalid download URL")
                     return
                 }
-
-                // 2. Download ZIP with progress tracking
-                let estimatedBytes = Int64(comic.fileSizeMB * 1024 * 1024)
-                let (zipFileURL, _) = try await downloadWithProgress(
-                    url: bundleUrl,
-                    comicId: comic.id,
-                    downloadPhaseWeight: 0.8, // 80% of progress bar for download
-                    estimatedSizeBytes: estimatedBytes
-                )
-
-                try Task.checkCancellation()
-
-                // 3. Unzip to a temp directory first, then determine comic ID from comic.json
-                downloadStates[comic.id] = .downloading(progress: 0.85)
-
-                let fm = FileManager.default
-                let tempDir = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-                try fm.createDirectory(at: tempDir, withIntermediateDirectories: true)
-
-                // Always clean up the zip file
-                defer { try? fm.removeItem(at: zipFileURL) }
-
-                try ZIPExtractor.extract(zipFileURL: zipFileURL, to: tempDir)
-
-                try Task.checkCancellation()
-
-                downloadStates[comic.id] = .downloading(progress: 0.92)
-
-                // 4. Read comic.json to get the actual comic ID for the folder name
-                let comicJsonURL = tempDir.appendingPathComponent("comic.json")
-                let comicJsonData = try Data(contentsOf: comicJsonURL)
-                let comicJson = try JSONDecoder().decode(ComicJSON.self, from: comicJsonData)
-                let folderName = comicJson.id
-
-                // 5. Move to final location in Documents/Comics/{comicId}/
-                let comicDir = localStorage.comicsDirectory.appendingPathComponent(folderName)
-
-                // Remove existing if re-downloading
-                if fm.fileExists(atPath: comicDir.path) {
-                    try fm.removeItem(at: comicDir)
+                // Progressively, unless the comic is already complete here (an
+                // update keeps the old copy readable until the new zip is in —
+                // today's path does that; the in-place one can't).
+                var folderName: String?
+                if progressiveDownloadsEnabled && !localStorage.isCompleteOnDisk(comic.id) {
+                    do {
+                        folderName = try await downloadProgressively(comic, bundleUrl: bundleUrl)
+                    } catch ProgressiveDownloader.DownloadError.rangeUnsupported(let why) {
+                        // Nothing usable by ranges: whole zip instead, from a clean slate.
+                        print("[download] \(comic.id): progressive unavailable (\(why.localizedDescription)); falling back to the whole bundle")
+                        try? FileManager.default.removeItem(at: localStorage.comicsDirectory.appendingPathComponent(comic.id))
+                    }
                 }
-
-                try fm.moveItem(at: tempDir, to: comicDir)
+                if folderName == nil {
+                    folderName = try await downloadWholeBundle(comic, bundleUrl: bundleUrl)
+                }
+                guard let folderName else { return }
 
                 downloadStates[comic.id] = .downloading(progress: 1.0)
 
-                // 6. Done — clear image cache, URL cache, and unhide
+                // Done — clear image cache, URL cache, and unhide
                 ComicImageLoader.shared.clearCache(forComic: folderName)
                 URLCache.shared.removeAllCachedResponses()
                 localStorage.unhideComic(folderName)
@@ -310,19 +325,154 @@ class ComicStoreService: ObservableObject {
                 }
                 downloadStates[comic.id] = .downloaded
                 await localStorage.loadDownloadedComics()
+                // Now a downloaded comic; no longer an available partial.
+                openingRequirements[comic.id] = nil
+                localStorage.clearPartial(comic.id)
 
             } catch is CancellationError {
-                // User cancelled — state already reset by cancelDownload
+                // User cancelled — state already reset by cancelDownload. The
+                // task owns the partial folder: now that no write is in flight,
+                // remove it.
+                discardPartial(comic.id)
+            } catch ProgressiveDownloader.DownloadError.folderGone {
+                // Deleted while downloading — deleteDownload set the state.
+                discardPartial(comic.id)
             } catch {
                 if !Task.isCancelled {
                     downloadStates[comic.id] = .failed(error: error.localizedDescription)
                 }
             }
         }
-        activeDownloadTask = task
+        activeDownloads[comic.id] = ActiveDownload(task: task)
         await task.value
-        activeDownloadTask = nil
-        activeDownloadHelper = nil
+        activeDownloads[comic.id] = nil
+    }
+
+    /// File by file, by byte range, into Documents/Comics/<id>/ (resuming
+    /// whatever is already there). Returns the folder name once the comic is
+    /// complete. If the server's bundle changed under a partial download, the
+    /// partial is discarded and the download started once more from scratch.
+    private func downloadProgressively(_ comic: StoreComic, bundleUrl: URL) async throws -> String {
+        var restarted = false
+        while true {
+            let availability = availability
+            let downloader = ProgressiveDownloader(
+                comicId: comic.id, bundleRoute: bundleUrl, downloadUrl: comic.downloadUrl, fileSizeMB: comic.fileSizeMB,
+                comicsDirectory: localStorage.comicsDirectory, reader: rangeReader, configuration: progressiveConfiguration,
+                onProgress: { progress in
+                    Task { @MainActor [weak self] in
+                        // Only while still downloading: a late report must not
+                        // overwrite "downloaded" / "failed" / "cancelled".
+                        guard let self, self.activeDownloads[comic.id] != nil,
+                              case .downloading(let shown) = self.downloadStates[comic.id] ?? .notDownloaded, shown < 1 else { return }
+                        self.downloadStates[comic.id] = .downloading(progress: max(shown, progress * 0.99))
+                    }
+                },
+                onLanded: { name in
+                    Task { @MainActor [weak self] in
+                        availability.didLand(comicId: comic.id, entryName: name)
+                        self?.noteLanded(comic.id, entryName: name)
+                    }
+                })
+            activeDownloads[comic.id]?.progressive = downloader
+            // The reader can now steer this download (which page it's on, which
+            // file it's waiting for).
+            availability.register(comic.id, handle: .init(
+                focus: { index in Task { await downloader.focus(onPage: index) } },
+                request: { names in Task { await downloader.request(names) } }))
+            defer { availability.unregister(comic.id) }
+            do {
+                try await downloader.run()
+            } catch ProgressiveDownloader.DownloadError.bundleChanged where !restarted {
+                restarted = true
+                try? FileManager.default.removeItem(at: downloader.folder)
+                continue
+            }
+            try Task.checkCancellation()
+            // The folder is named after the catalog id; the comic's own id (what
+            // today's path names the folder) is normally the same — if not, rename.
+            let folder = downloader.folder
+            let comicJson = try JSONDecoder().decode(ComicJSON.self, from: Data(contentsOf: folder.appendingPathComponent("comic.json")))
+            if comicJson.id != comic.id {
+                let dest = localStorage.comicsDirectory.appendingPathComponent(comicJson.id)
+                if FileManager.default.fileExists(atPath: dest.path) { try FileManager.default.removeItem(at: dest) }
+                try FileManager.default.moveItem(at: folder, to: dest)
+            }
+            return comicJson.id
+        }
+    }
+
+    /// Tests stand in for the whole-zip path (its background URLSession can't
+    /// be stubbed) to check when it's chosen.
+    var wholeBundleDownloaderForTesting: ((StoreComic, URL) async throws -> String)?
+
+    /// Today's path: the whole zip to a temp file, unzipped to a temp folder,
+    /// moved into place in one go. Returns the folder name.
+    private func downloadWholeBundle(_ comic: StoreComic, bundleUrl: URL) async throws -> String {
+        if let stub = wholeBundleDownloaderForTesting { return try await stub(comic, bundleUrl) }
+        // Download ZIP with progress tracking
+        let estimatedBytes = Int64(comic.fileSizeMB * 1024 * 1024)
+        let (zipFileURL, _) = try await downloadWithProgress(
+            url: bundleUrl,
+            comicId: comic.id,
+            downloadPhaseWeight: 0.8, // 80% of progress bar for download
+            estimatedSizeBytes: estimatedBytes
+        )
+
+        try Task.checkCancellation()
+
+        // Unzip to a temp directory first, then determine comic ID from comic.json
+        downloadStates[comic.id] = .downloading(progress: 0.85)
+
+        let fm = FileManager.default
+        let tempDir = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try fm.createDirectory(at: tempDir, withIntermediateDirectories: true)
+
+        // Always clean up the zip file
+        defer { try? fm.removeItem(at: zipFileURL) }
+
+        try ZIPExtractor.extract(zipFileURL: zipFileURL, to: tempDir)
+
+        try Task.checkCancellation()
+
+        downloadStates[comic.id] = .downloading(progress: 0.92)
+
+        // Read comic.json to get the actual comic ID for the folder name
+        let comicJsonURL = tempDir.appendingPathComponent("comic.json")
+        let comicJsonData = try Data(contentsOf: comicJsonURL)
+        let comicJson = try JSONDecoder().decode(ComicJSON.self, from: comicJsonData)
+        let folderName = comicJson.id
+
+        // Move to final location in Documents/Comics/{comicId}/
+        let comicDir = localStorage.comicsDirectory.appendingPathComponent(folderName)
+
+        // Remove existing if re-downloading
+        if fm.fileExists(atPath: comicDir.path) {
+            try fm.removeItem(at: comicDir)
+        }
+
+        try fm.moveItem(at: tempDir, to: comicDir)
+        return folderName
+    }
+
+    /// Pick up progressive downloads left unfinished on disk (the app was
+    /// killed, lost its connection, …) — at launch and on return to the
+    /// foreground. A comic already downloading is left alone, and so is one
+    /// waiting on a Retry after a failure this session — unless the network
+    /// just came back (`retryingFailed`), the usual reason it failed.
+    func resumePartialDownloads(retryingFailed: Bool = false) async {
+        for marker in ProgressiveDownloader.partialDownloads(in: localStorage.comicsDirectory) {
+            // Whatever landed before (a relaunch): if it's enough to open, the
+            // comic is available right away, download or no download.
+            await evaluateAvailability(marker.comicId)
+            if activeDownloads[marker.comicId] != nil { continue }
+            if case .failed = downloadStates[marker.comicId], !retryingFailed { continue }
+            let comic = catalog.first(where: { $0.id == marker.comicId }) ?? StoreComic(
+                id: marker.comicId, title: marker.comicId, description: "", coverThumbnailUrl: "", level: "", totalPages: 0,
+                estimatedMinutes: 0, language: "", fileSizeMB: marker.fileSizeMB, version: "1.0", bundleVersion: marker.bundleVersion,
+                downloadUrl: marker.downloadUrl)
+            Task { await downloadComic(comic) }
+        }
     }
 
     /// Download a file with progress tracking
@@ -343,7 +493,7 @@ class ComicStoreService: ObservableObject {
                 self?.downloadStates[comicId] = .downloading(progress: progress * downloadPhaseWeight)
             }
         }
-        activeDownloadHelper = downloadHelper
+        activeDownloads[comicId]?.helper = downloadHelper
 
         return try await downloadHelper.download(from: url)
     }
@@ -351,8 +501,7 @@ class ComicStoreService: ObservableObject {
     /// Restore a hidden comic back to the library
     /// If the downloaded files were deleted, re-download from the server
     func restoreComic(_ comicId: String) async {
-        let comicFolder = localStorage.comicsDirectory.appendingPathComponent(comicId)
-        let hasDownloadedFiles = FileManager.default.fileExists(atPath: comicFolder.path)
+        let hasDownloadedFiles = localStorage.isCompleteOnDisk(comicId)
 
         if hasDownloadedFiles {
             // Files still on disk — just unhide
@@ -371,20 +520,78 @@ class ComicStoreService: ObservableObject {
         }
     }
 
-    /// Cancel an in-progress download
+    /// Cancel an in-progress download: stop the work and remove whatever it
+    /// left (the temp zip, or the partly built folder and its marker). A
+    /// running task removes its own folder once it has unwound; a partial
+    /// with no task (from an earlier session) is removed here.
     func cancelDownload(_ comicId: String) {
-        activeDownloadHelper?.cancel()
-        activeDownloadHelper = nil
-        activeDownloadTask?.cancel()
-        activeDownloadTask = nil
+        let wasRunning = stopDownload(comicId)
         downloadStates[comicId] = .notDownloaded
-        // Clean up any temp zip file
-        let tempZip = FileManager.default.temporaryDirectory.appendingPathComponent("\(comicId).zip")
-        try? FileManager.default.removeItem(at: tempZip)
+        openingRequirements[comicId] = nil
+        localStorage.clearPartial(comicId)
+        if !wasRunning { discardPartial(comicId) }
     }
 
-    /// Delete a downloaded comic (hides it; can be restored)
+    // MARK: Instant reading — when a partial becomes openable
+
+    /// A file of a progressive download is in place.
+    private func noteLanded(_ comicId: String, entryName: String) {
+        if entryName == "comic.json" {
+            Task { await evaluateAvailability(comicId) }
+        } else if let req = openingRequirements[comicId], ComicAssetPlan.imageEntryNames(req.image).contains(entryName) {
+            localStorage.markPartialAvailable(req.comic)
+        }
+    }
+
+    /// Decode the partial's comic.json (once, off the main actor) and, if the
+    /// image of the page the reader will open on is here, make it available.
+    private func evaluateAvailability(_ comicId: String) async {
+        guard !localStorage.isCompleteOnDisk(comicId), localStorage.availablePartials[comicId] == nil else { return }
+        let folder = localStorage.comicsDirectory.appendingPathComponent(comicId)
+        if openingRequirements[comicId] == nil {
+            let progress = savedProgress(comicId)
+            let decoded: (Comic, String)? = await Task.detached(priority: .userInitiated) {
+                guard LocalComicStorage.isPartial(folder: folder),
+                      let comic = LocalComicStorage.loadComicIncludingPartial(from: folder),
+                      comic.id == folder.lastPathComponent,   // the reader loads assets by comic id
+                      let image = InitialReaderPage.openingImage(for: comic, progress: progress) else { return nil }
+                return (comic, image)
+            }.value
+            guard let decoded else { return }
+            openingRequirements[comicId] = decoded
+        }
+        guard let req = openingRequirements[comicId], LocalComicStorage.isPartial(folder: folder),
+              LocalComicStorage.openingImageExists(for: req.comic, in: folder, progress: savedProgress(comicId)) else { return }
+        localStorage.markPartialAvailable(req.comic)
+    }
+
+    @discardableResult
+    private func stopDownload(_ comicId: String) -> Bool {
+        guard let active = activeDownloads.removeValue(forKey: comicId) else { return false }
+        active.helper?.cancel()
+        if let p = active.progressive { Task { await p.cancel() } }
+        active.task.cancel()
+        return true
+    }
+
+    /// Remove the traces of an unfinished download — never a complete comic.
+    private func discardPartial(_ comicId: String) {
+        openingRequirements[comicId] = nil
+        localStorage.clearPartial(comicId)
+        let fm = FileManager.default
+        try? fm.removeItem(at: fm.temporaryDirectory.appendingPathComponent("\(comicId).zip"))
+        if localStorage.isPartiallyDownloaded(comicId) {
+            try? fm.removeItem(at: localStorage.comicsDirectory.appendingPathComponent(comicId))
+        }
+    }
+
+    /// Delete a downloaded comic (hides it; can be restored). A comic still
+    /// downloading is stopped and its partial folder removed instead.
     func deleteDownload(_ comicId: String) {
+        if activeDownloads[comicId] != nil || localStorage.isPartiallyDownloaded(comicId) {
+            cancelDownload(comicId)
+            return
+        }
         localStorage.deleteComic(comicId)
         downloadStates[comicId] = .hidden
     }
@@ -392,8 +599,7 @@ class ComicStoreService: ObservableObject {
     /// Delete all comics in a collection (hides them all; can be restored individually)
     func deleteCollection(_ comicIds: [String]) {
         for comicId in comicIds {
-            localStorage.deleteComic(comicId)
-            downloadStates[comicId] = .hidden
+            deleteDownload(comicId)
         }
     }
 }

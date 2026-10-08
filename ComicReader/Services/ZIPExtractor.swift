@@ -113,7 +113,7 @@ struct ZIPExtractor {
             case 0: // Stored (no compression)
                 fileData = compressedData
             case 8: // Deflate
-                guard let decompressed = decompress(compressedData, uncompressedSize: entry.uncompressedSize) else {
+                guard let decompressed = inflate(compressedData, uncompressedSize: entry.uncompressedSize) else {
                     throw ZIPError.decompressionFailed
                 }
                 fileData = decompressed
@@ -144,8 +144,9 @@ struct ZIPExtractor {
         (UInt32(bytes[offset + 3]) << 24)
     }
 
-    /// Decompress deflate data using the Compression framework
-    private static func decompress(_ data: Data, uncompressedSize: Int) -> Data? {
+    /// Decompress raw deflate data using the Compression framework (also used
+    /// by the progressive downloader for the rare deflated entry).
+    static func inflate(_ data: Data, uncompressedSize: Int) -> Data? {
         // Raw deflate — use COMPRESSION_ZLIB with the raw flag
         let sourceSize = data.count
         let destinationSize = uncompressedSize + uncompressedSize / 10 + 12 // small safety margin

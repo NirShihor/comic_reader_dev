@@ -167,6 +167,9 @@ struct WordRow: View {
             // Play audio button
             if let audioUrl = savedWord.word.audioUrl {
                 Button {
+                    // The comic the word was saved from; with none (deleted), any
+                    // complete comic's copy of the word will do.
+                    audioManager.activeComicId = wordContext?.comic.id
                     audioManager.play(audioUrl)
                 } label: {
                     Image(systemName: "speaker.wave.2.fill")

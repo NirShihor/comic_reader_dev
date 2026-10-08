@@ -7,8 +7,11 @@ class ComicImageLoader {
 
     private let fileManager = FileManager.default
     private var imageCache = NSCache<NSString, UIImage>()
+    /// Where downloaded comics live (Documents/Comics; tests point elsewhere).
+    let comicsDirectory: URL
 
-    init() {
+    init(comicsDirectory: URL = LocalComicStorage.defaultComicsDirectory) {
+        self.comicsDirectory = comicsDirectory
         imageCache.countLimit = 50 // Cache up to 50 images
     }
 
@@ -32,9 +35,7 @@ class ComicImageLoader {
         let extensions = ["jpg", "png"]
 
         // 1. Try Documents/Comics folder (downloaded comics — checked first for updates)
-        let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let downloadedBase = documents
-            .appendingPathComponent("Comics")
+        let downloadedBase = comicsDirectory
             .appendingPathComponent(comicId)
             .appendingPathComponent("images")
 
@@ -143,16 +144,48 @@ struct RetryingAsyncImage<Content: View>: View {
     }
 }
 
+// MARK: - Loading placeholder
+/// What stands in for an asset that hasn't arrived yet — a light grey block
+/// with a spinner, or a "waiting for connection" note when the device is
+/// offline. Minimal by design; it's replaced the moment the file lands.
+struct AssetLoadingPlaceholder: View {
+    var offline = false
+
+    var body: some View {
+        Rectangle()
+            .fill(Color.gray.opacity(0.2))
+            .overlay {
+                if offline {
+                    VStack(spacing: 6) {
+                        Image(systemName: "wifi.slash").foregroundStyle(.secondary)
+                        Text("Waiting for connection…").font(.caption2).foregroundStyle(.secondary)
+                    }
+                } else {
+                    ProgressView()
+                }
+            }
+    }
+}
+
 // MARK: - SwiftUI View for async loading
+/// A comic's image from its folder. While the file hasn't arrived (the comic
+/// is still downloading) it shows a placeholder, asks the download for that
+/// file, and swaps the real image in by itself when it lands.
 struct ComicImage: View {
     let imageName: String
     let comicId: String
     /// Catalog thumbnail path (e.g. "/api/reader/cover-thumbnail/<id>") shown when
     /// the local image isn't on device yet — so covers appear before download.
     var remoteFallbackPath: String? = nil
+    /// Ask a running download for the file when it's missing. Off for views
+    /// that show many images at once (page thumbnails) — they'd push every
+    /// page ahead of the one being read.
+    var requestsWhenMissing = true
 
     @State private var uiImage: UIImage?
     @State private var localMissing = false
+    @State private var reloads = 0
+    @ObservedObject private var availability = ComicAssetAvailability.shared
 
     var body: some View {
         Group {
@@ -174,14 +207,10 @@ struct ComicImage: View {
                     }
                 }
             } else {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.2))
-                    .overlay(
-                        ProgressView()
-                    )
+                AssetLoadingPlaceholder(offline: localMissing && !availability.isNetworkReachable)
             }
         }
-        .task(id: imageName) {
+        .task(id: "\(imageName)#\(reloads)") {
             // This runs when view appears AND when imageName changes
             // It also cancels the previous task automatically
             uiImage = nil
@@ -191,6 +220,13 @@ struct ComicImage: View {
             if !Task.isCancelled {
                 uiImage = image
                 localMissing = (image == nil)
+                // Not here yet: ask for it; the landing below reloads.
+                if image == nil, requestsWhenMissing { availability.request(image: imageName, comicId: comicId) }
+            }
+        }
+        .onReceive(availability.$landed) { landed in
+            if uiImage == nil, ComicAssetAvailability.includes(image: imageName, comicId: comicId, in: landed) {
+                reloads += 1
             }
         }
     }

@@ -88,6 +88,7 @@ struct QuizView: View {
             }
         }
         .onAppear {
+            audioManager.activeComicId = comic.id   // this comic's own clips, nobody else's
             // Resume at the word the learner left off on (Continue practicing).
             let saved = progressManager.wordStartIndex(for: comic.id)
             if saved > 0 && saved < reviewWords.count { currentIndex = saved }
