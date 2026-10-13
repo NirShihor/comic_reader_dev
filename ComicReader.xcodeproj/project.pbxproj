@@ -83,6 +83,8 @@
 		F6000001000000000000A13 /* SpanishLevelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6000001000000000000A03 /* SpanishLevelView.swift */; };
 		F6000001000000000000A14 /* ReminderPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6000001000000000000A04 /* ReminderPromptView.swift */; };
 		F6000001000000000000A15 /* LevelAndReminderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6000001000000000000A05 /* LevelAndReminderTests.swift */; };
+		R7000001000000000000A11 /* ReviewRequestPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = R7000001000000000000A01 /* ReviewRequestPolicy.swift */; };
+		R7000001000000000000A12 /* ReviewRequestPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = R7000001000000000000A02 /* ReviewRequestPolicyTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -182,6 +184,8 @@
 		F6000001000000000000A03 /* SpanishLevelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpanishLevelView.swift; sourceTree = "<group>"; };
 		F6000001000000000000A04 /* ReminderPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderPromptView.swift; sourceTree = "<group>"; };
 		F6000001000000000000A05 /* LevelAndReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelAndReminderTests.swift; sourceTree = "<group>"; };
+		R7000001000000000000A01 /* ReviewRequestPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequestPolicy.swift; sourceTree = "<group>"; };
+		R7000001000000000000A02 /* ReviewRequestPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequestPolicyTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -322,6 +326,7 @@
 				C3000001000000000000F21 /* InstantOpenCoordinator.swift */,
 				D4000001000000000000A01 /* AccessModelService.swift */,
 				F6000001000000000000A02 /* ReminderService.swift */,
+				R7000001000000000000A01 /* ReviewRequestPolicy.swift */,
 				F6000001000000000000A01 /* SpanishLevel.swift */,
 				C3000001000000000000C02 /* Analytics */,
 			);
@@ -349,6 +354,7 @@
 				C3000001000000000000F07 /* Fixtures */,
 				D4000001000000000000A02 /* AccessModelTests.swift */,
 				F6000001000000000000A05 /* LevelAndReminderTests.swift */,
+				R7000001000000000000A02 /* ReviewRequestPolicyTests.swift */,
 				C3000001000000000000A09 /* ComigoStore.storekit */,
 			);
 			path = ComicReaderTests;
@@ -558,6 +564,7 @@
 				F6000001000000000000A14 /* ReminderPromptView.swift in Sources */,
 				F6000001000000000000A13 /* SpanishLevelView.swift in Sources */,
 				F6000001000000000000A12 /* ReminderService.swift in Sources */,
+				R7000001000000000000A11 /* ReviewRequestPolicy.swift in Sources */,
 				F6000001000000000000A11 /* SpanishLevel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -583,6 +590,7 @@
 				C3000001000000000000F24 /* InstantOpenTests.swift in Sources */,
 				D4000001000000000000A12 /* AccessModelTests.swift in Sources */,
 				F6000001000000000000A15 /* LevelAndReminderTests.swift in Sources */,
+				R7000001000000000000A12 /* ReviewRequestPolicyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

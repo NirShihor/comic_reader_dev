@@ -1333,11 +1333,13 @@ struct PageView: View {
     }
 
     /// The reader moved past the last page — the same moment the End of Episode
-    /// card appears. Once per reading session.
+    /// card appears. Once per reading session. Also counts towards the App
+    /// Store rating request (asked later, on the Library — never here).
     private func trackComicCompleted() {
         guard tracksReading, !completionTracked else { return }
         completionTracked = true
         ReminderService.shared.markComicCompleted()
+        ReviewRequestPolicy.shared.recordComicCompleted(comic.id)
         AnalyticsService.shared.track(.comicCompleted(
             comicId: comic.id, comicName: comic.title, collectionId: comic.collectionId,
             level: comic.level.rawValue))
