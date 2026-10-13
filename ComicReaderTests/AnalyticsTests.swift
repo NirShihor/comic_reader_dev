@@ -504,7 +504,9 @@ final class PurchaseEventTests: XCTestCase {
         let products = try await Product.products(for: [monthly])
         let product = try XCTUnwrap(products.first)
         let a = analytics(consent: nil)
-        let outcome = await StoreService.shared.purchase(product, source: .landingScreen, analytics: a)
+        // The test session reuses transaction ids across runs, so the
+        // once-per-transaction record must be this test's own, not the app's.
+        let outcome = await StoreService.shared.purchase(product, source: .landingScreen, analytics: a, defaults: analyticsDefaults)
         XCTAssertEqual(outcome, .success)
         XCTAssertEqual(counted, ["aggregate_app_opened", "aggregate_trial_started", "aggregate_purchase_result"],
                        "the start is reported from the verified transaction, then the call's outcome; the tap is the paywall's")
@@ -516,13 +518,16 @@ final class PurchaseEventTests: XCTestCase {
         let products = try await Product.products(for: [monthly])
         let product = try XCTUnwrap(products.first)
         let a = analytics()
-        let outcome = await StoreService.shared.purchase(product, source: .comicLocked, analytics: a)
+        await StoreService.shared.refreshEntitlement()
+        let entitledBefore = StoreService.shared.hasUnlimited   // other StoreKit tests may have left one
+        let outcome = await StoreService.shared.purchase(product, source: .comicLocked, analytics: a, defaults: analyticsDefaults)
         XCTAssertEqual(outcome, .pending)
         XCTAssertEqual(counted.last, "aggregate_purchase_result")
         XCTAssertFalse(counted.contains("aggregate_trial_started"))
         XCTAssertEqual(sent(a).last, "purchase_result")
         XCTAssertEqual(recorder.events.last?.properties["result"] as? String, "pending")
-        XCTAssertFalse(StoreService.shared.hasUnlimited)
+        await StoreService.shared.refreshEntitlement()
+        XCTAssertEqual(StoreService.shared.hasUnlimited, entitledBefore, "a pending purchase changes no entitlement")
     }
 
     func testAFailedPurchaseIsCountedAsFailedWithoutTheError() async throws {
@@ -530,7 +535,7 @@ final class PurchaseEventTests: XCTestCase {
         let products = try await Product.products(for: [monthly])
         let product = try XCTUnwrap(products.first)
         let a = analytics()
-        let outcome = await StoreService.shared.purchase(product, source: .comicLocked, analytics: a)
+        let outcome = await StoreService.shared.purchase(product, source: .comicLocked, analytics: a, defaults: analyticsDefaults)
         guard case .failed(let error) = outcome else { return XCTFail("expected .failed, got \(outcome)") }
         XCTAssertFalse(error.localizedDescription.isEmpty, "the paywall gets the error to show")
         let props = try XCTUnwrap(recorder.events.last?.properties)
@@ -551,7 +556,7 @@ final class PurchaseEventTests: XCTestCase {
         let products = try await Product.products(for: [monthly])
         let product = try XCTUnwrap(products.first)
         let a = analytics()
-        _ = await StoreService.shared.purchase(product, source: nil, analytics: a)
+        _ = await StoreService.shared.purchase(product, source: nil, analytics: a, defaults: analyticsDefaults)
         XCTAssertFalse(counted.contains("aggregate_purchase_result"))
         XCTAssertFalse(sent(a).contains("purchase_result"))
     }

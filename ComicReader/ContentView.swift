@@ -1358,15 +1358,19 @@ final class StoreService: ObservableObject {
     /// `source`: the paywall this purchase was started from (nil for the
     /// debug preview, which reports nothing). Never throws: a StoreKit error
     /// comes back as `.failed`, and every outcome is counted once.
-    func purchase(_ product: Product, source: PaywallSource?, analytics: AnalyticsService = .shared) async -> PurchaseOutcome {
-        let outcome = await performPurchase(product, source: source, analytics: analytics)
+    func purchase(_ product: Product, source: PaywallSource?, analytics: AnalyticsService? = nil,
+                  defaults: UserDefaults = .standard) async -> PurchaseOutcome {
+        let analytics = analytics ?? .shared
+        let outcome = await performPurchase(product, source: source, analytics: analytics, defaults: defaults)
         if let source {
             analytics.track(.purchaseResult(source: source, productId: product.id, result: outcome.analyticsValue))
         }
         return outcome
     }
 
-    private func performPurchase(_ product: Product, source: PaywallSource?, analytics: AnalyticsService) async -> PurchaseOutcome {
+    /// `defaults`: where reported transaction ids are remembered (tests use their own).
+    private func performPurchase(_ product: Product, source: PaywallSource?, analytics: AnalyticsService,
+                                 defaults: UserDefaults) async -> PurchaseOutcome {
         // Attribution token only when the user has opted into analytics.
         let token = PurchaseAttribution.shared.tokenForPurchase()
         let result: Product.PurchaseResult
@@ -1379,7 +1383,7 @@ final class StoreService: ObservableObject {
         case .success(let verification):
             if case .verified(let t) = verification {
                 await t.finish()
-                reportPurchase(t, purchasedHere: true, source: source, analytics: analytics)
+                reportPurchase(t, purchasedHere: true, source: source, analytics: analytics, defaults: defaults)
             }
             await refreshEntitlement()
             return hasUnlimited ? .success : .failed(StoreError.notUnlocked)
