@@ -519,6 +519,12 @@ enum HelpTipCap {
         UserDefaults.standard.set(n + 1, forKey: k)
         return false
     }
+
+    /// The same answer without counting a display — for deciding whether a
+    /// tip is still to come before the screen that shows it is even chosen.
+    static func isSpent(_ key: String, cap: Int = 1, defaults: UserDefaults = .standard) -> Bool {
+        defaults.integer(forKey: "help.shown.\(key)") >= cap
+    }
 }
 
 struct HelpIntroCallout: View {

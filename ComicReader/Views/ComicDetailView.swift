@@ -83,6 +83,22 @@ struct ComicDetailView: View {
     // HelpDebug.forceShowTooltips is on.
     @AppStorage("help.seen.comic-cockpit") private var seenCockpitTips = false
     @State private var cockpitStep = 0
+    /// The first-run cockpit tips are still to come. An automatic open into
+    /// the reader (instant open after Download) would skip the very screen
+    /// they explain, so while they're due the open lands here instead and the
+    /// reader opens from "Start reading", as it did before instant open.
+    private var cockpitTipsDue: Bool {
+        Self.cockpitTipsDue(seen: seenCockpitTips, capSpent: HelpTipCap.isSpent("comic-cockpit"))
+    }
+
+    static func cockpitTipsDue(seen: Bool, capSpent: Bool) -> Bool {
+        HelpDebug.forceShowTooltips || (!seen && !capSpent)
+    }
+
+    /// Whether an `autoOpenReader` arrival goes straight into the reader.
+    static func opensReaderAutomatically(autoOpenReader: Bool, tipsDue: Bool) -> Bool {
+        autoOpenReader && !tipsDue
+    }
     // True while "?" is replaying the sequence — bypasses the "seen" flag.
     @State private var helpReplay = false
 
@@ -278,8 +294,9 @@ struct ComicDetailView: View {
             .onAppear {
                 startCockpitTips()
                 // A download that just became readable: straight into the reader,
-                // at the page it would open on anyway.
-                if autoOpenReader, !didAutoResume {
+                // at the page it would open on anyway — unless the first-run tips
+                // for this screen haven't been shown yet (see cockpitTipsDue).
+                if Self.opensReaderAutomatically(autoOpenReader: autoOpenReader, tipsDue: cockpitTipsDue), !didAutoResume {
                     didAutoResume = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { startNormalReading(startingPage) }
                     return
@@ -319,7 +336,9 @@ struct ComicDetailView: View {
 
     private func startCockpitTips() {
         // Skip when auto-resuming straight into the reader — the screen is leaving.
-        guard !autoResume, !autoOpenReader, cockpitStep == 0 else { return }
+        // An instant open stays here when the tips are due, so then they run.
+        guard !autoResume, cockpitStep == 0 else { return }
+        if Self.opensReaderAutomatically(autoOpenReader: autoOpenReader, tipsDue: cockpitTipsDue) { return }
         if !HelpDebug.forceShowTooltips { guard !seenCockpitTips else { return } }
         if !HelpDebug.forceShowTooltips && !helpReplay, HelpTipCap.spent("comic-cockpit") { seenCockpitTips = true; return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
