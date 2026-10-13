@@ -76,20 +76,28 @@ final class AnalyticsTests: XCTestCase {
             .lockedContentTapped(comicId: "x", collectionId: "c"),
             .paywallViewed(source: .comicLocked),
             .trialOfferViewed(source: .comicLocked, productId: "p"),
-            .trialStarted(productId: "p"),
+            .trialStarted(productId: "p", source: .landingScreen),
             .subscriptionStarted(productId: "p"),
             .purchaseCompleted(productId: "p", purchaseType: .lifetime),
+            .landingViewed(returning: false, trialOfferShown: true),
+            .landingCtaTapped(cta: .getStarted, trialOfferShown: false),
+            .paywallDismissed(source: .landingScreen, mode: .freeTrial),
+            .purchaseAttempted(source: .comicLocked, mode: .subscribe, productId: "p"),
+            .purchaseResult(source: .comicLocked, productId: "p", result: .pending),
+            .onboardingStep(step: .creatorMessageOpened),
         ]
         XCTAssertEqual(events.map(\.name), [
             "app_opened", "collection_viewed", "comic_started", "comic_page_viewed", "comic_completed",
             "audio_played", "translation_revealed", "practice_started", "practice_completed",
             "locked_content_tapped", "paywall_viewed", "trial_offer_viewed", "trial_started",
             "subscription_started", "purchase_completed",
+            "landing_viewed", "landing_cta_tapped", "paywall_dismissed", "purchase_attempted", "purchase_result", "onboarding_step",
         ])
         // Only structured metadata — no key could carry dialogue, translations or user text.
         let allowed: Set<String> = ["collection_id", "collection_name", "level", "comic_id", "comic_name", "is_free",
                                     "page_number", "total_pages", "audio_type", "practice_type", "source",
-                                    "product_id", "purchase_type"]
+                                    "product_id", "purchase_type", "returning", "trial_offer_shown", "cta", "mode",
+                                    "result", "step"]
         let snake = try! NSRegularExpression(pattern: "^[a-z]+(_[a-z]+)*$")
         for e in events {
             XCTAssertNotNil(snake.firstMatch(in: e.name, range: NSRange(e.name.startIndex..., in: e.name)), e.name)
@@ -329,16 +337,21 @@ final class PurchaseEventTests: XCTestCase {
 
     private var recorder: RecordingBackend!
     private var analyticsDefaults: UserDefaults!
+    /// What the anonymous aggregate layer was told (its event names).
+    private var counted: [String] = []
 
-    /// An opted-in analytics service that records what it would send.
+    /// An analytics service (opted in unless told otherwise) that records what
+    /// it would send to the opt-in layer, and what it counts anonymously.
     private func analytics(consent: AnalyticsConsent? = .granted) -> AnalyticsService {
         recorder = RecordingBackend()
+        counted = []
         analyticsDefaults = UserDefaults(suiteName: "PurchaseEventTests.\(UUID().uuidString)")
         if let consent { analyticsDefaults.set(consent.rawValue, forKey: AnalyticsService.consentKey) }
         let config = AnalyticsConfiguration(environment: .development, projectToken: "phc_test", host: "https://eu.i.posthog.com")
         let s = AnalyticsService(defaults: analyticsDefaults, configuration: config,
                                  makeBackend: { [unowned self] in self.recorder },
-                                 log: { _ in }, onConsentChange: { _ in })
+                                 log: { _ in }, onConsentChange: { _ in },
+                                 aggregate: { [unowned self] in if let a = AggregateEvent($0) { self.counted.append(a.name) } })
         s.start()
         s.entitlement = .free
         return s
@@ -437,10 +450,33 @@ final class PurchaseEventTests: XCTestCase {
         let token = UUID()
         let t = try await buy(monthly, token: token)
         let a = analytics()
-        StoreService.shared.reportPurchase(t, purchasedHere: true, analytics: a, defaults: analyticsDefaults, installToken: token)
+        StoreService.shared.reportPurchase(t, purchasedHere: true, source: .landingScreen, analytics: a, defaults: analyticsDefaults, installToken: token)
         StoreService.shared.reportPurchase(t, purchasedHere: false, analytics: a, defaults: analyticsDefaults, installToken: token)
         XCTAssertEqual(sent(a), ["trial_started"])
         XCTAssertEqual(recorder.events.last?.properties["entitlement"] as? String, "free", "common properties attached")
+        XCTAssertEqual(recorder.events.last?.properties["source"] as? String, "landing_screen")
+        XCTAssertEqual(counted.filter { $0 == "aggregate_trial_started" }.count, 1, "counted once anonymously too")
+    }
+
+    /// A verified trial start is counted anonymously whatever the consent —
+    /// and still only once per transaction, across launches (the record is
+    /// persisted) and across the two delivery paths.
+    func testTrialStartIsCountedAnonymouslyWithoutConsentAndStillOnlyOnce() async throws {
+        let t = try await buy(monthly)
+        for consent in [AnalyticsConsent.denied, nil] {
+            let a = analytics(consent: consent)
+            StoreService.shared.reportPurchase(t, purchasedHere: true, source: .comicLocked, analytics: a, defaults: analyticsDefaults, installToken: nil)
+            StoreService.shared.reportPurchase(t, purchasedHere: true, source: .comicLocked, analytics: a, defaults: analyticsDefaults, installToken: nil)
+            XCTAssertEqual(sent(a), [], "the opt-in layer needs consent (\(String(describing: consent)))")
+            XCTAssertEqual(counted.filter { $0 == "aggregate_trial_started" }.count, 1, "counted once (\(String(describing: consent)))")
+            // Next launch, same install: Transaction.updates replays it — already recorded.
+            let later = AnalyticsService(defaults: analyticsDefaults, configuration: AnalyticsConfiguration(environment: .development, projectToken: "phc_test", host: "https://eu.i.posthog.com"),
+                                         makeBackend: { RecordingBackend() }, log: { _ in }, onConsentChange: { _ in },
+                                         aggregate: { [unowned self] in if let x = AggregateEvent($0) { self.counted.append(x.name) } })
+            later.start(); later.entitlement = .free
+            StoreService.shared.reportPurchase(t, purchasedHere: true, analytics: later, defaults: analyticsDefaults, installToken: nil)
+            XCTAssertEqual(counted.filter { $0 == "aggregate_trial_started" }.count, 1, "not again after a relaunch")
+        }
     }
 
     func testTransactionsFromElsewhereAreOnlyReportedWithThisInstallsToken() async throws {
@@ -452,13 +488,72 @@ final class PurchaseEventTests: XCTestCase {
         XCTAssertEqual(sent(a), ["purchase_completed"])
     }
 
-    func testPurchasesWithoutConsentAreNotReported() async throws {
+    func testPaidPurchasesWithoutConsentAreNotReportedAnywhere() async throws {
         let t = try await buy(lifetime)
         for consent in [AnalyticsConsent.denied, nil] {
             let a = analytics(consent: consent)
             StoreService.shared.reportPurchase(t, purchasedHere: true, analytics: a, defaults: analyticsDefaults, installToken: nil)
             XCTAssertEqual(sent(a), [])
+            XCTAssertEqual(counted, ["aggregate_app_opened"], "a paid purchase has no anonymous count")
         }
+    }
+
+    // MARK: Purchase outcomes (StoreService.purchase)
+
+    func testASuccessfulTrialPurchaseIsCountedAsAttemptResultAndTrialStart() async throws {
+        let products = try await Product.products(for: [monthly])
+        let product = try XCTUnwrap(products.first)
+        let a = analytics(consent: nil)
+        let outcome = await StoreService.shared.purchase(product, source: .landingScreen, analytics: a)
+        XCTAssertEqual(outcome, .success)
+        XCTAssertEqual(counted, ["aggregate_app_opened", "aggregate_trial_started", "aggregate_purchase_result"],
+                       "the start is reported from the verified transaction, then the call's outcome; the tap is the paywall's")
+        XCTAssertEqual(sent(a), [], "no consent: nothing to the opt-in layer")
+    }
+
+    func testAPendingPurchaseIsCountedAsPendingAndUnlocksNothing() async throws {
+        session.askToBuyEnabled = true
+        let products = try await Product.products(for: [monthly])
+        let product = try XCTUnwrap(products.first)
+        let a = analytics()
+        let outcome = await StoreService.shared.purchase(product, source: .comicLocked, analytics: a)
+        XCTAssertEqual(outcome, .pending)
+        XCTAssertEqual(counted.last, "aggregate_purchase_result")
+        XCTAssertFalse(counted.contains("aggregate_trial_started"))
+        XCTAssertEqual(sent(a).last, "purchase_result")
+        XCTAssertEqual(recorder.events.last?.properties["result"] as? String, "pending")
+        XCTAssertFalse(StoreService.shared.hasUnlimited)
+    }
+
+    func testAFailedPurchaseIsCountedAsFailedWithoutTheError() async throws {
+        session.failTransactionsEnabled = true
+        let products = try await Product.products(for: [monthly])
+        let product = try XCTUnwrap(products.first)
+        let a = analytics()
+        let outcome = await StoreService.shared.purchase(product, source: .comicLocked, analytics: a)
+        guard case .failed(let error) = outcome else { return XCTFail("expected .failed, got \(outcome)") }
+        XCTAssertFalse(error.localizedDescription.isEmpty, "the paywall gets the error to show")
+        let props = try XCTUnwrap(recorder.events.last?.properties)
+        XCTAssertEqual(recorder.events.last?.name, "purchase_result")
+        XCTAssertEqual(props["result"] as? String, "failed")
+        XCTAssertEqual(Set(props.keys).intersection(["error", "message", "code", "description", "reason"]), [], "the error never travels")
+        XCTAssertFalse(counted.contains("aggregate_trial_started"))
+    }
+
+    func testEveryOutcomeHasItsStageValueAndCancelledIsOneOfThem() {
+        XCTAssertEqual(StoreService.PurchaseOutcome.success.analyticsValue, .success)
+        XCTAssertEqual(StoreService.PurchaseOutcome.cancelled.analyticsValue, .cancelled)
+        XCTAssertEqual(StoreService.PurchaseOutcome.pending.analyticsValue, .pending)
+        XCTAssertEqual(StoreService.PurchaseOutcome.failed(StoreService.StoreError.notUnlocked).analyticsValue, .failed)
+    }
+
+    func testTheDebugPreviewPaywallCountsNothing() async throws {
+        let products = try await Product.products(for: [monthly])
+        let product = try XCTUnwrap(products.first)
+        let a = analytics()
+        _ = await StoreService.shared.purchase(product, source: nil, analytics: a)
+        XCTAssertFalse(counted.contains("aggregate_purchase_result"))
+        XCTAssertFalse(sent(a).contains("purchase_result"))
     }
 
     func testAccessModelIsAttachedOnceTheSubscriptionModelSetsIt() async throws {

@@ -26,6 +26,9 @@ struct LibraryView: View {
     @AppStorage("creatorMessage.seen") private var creatorMessageSeen = false
     @State private var showCreatorBanner = false
     @State private var showCreatorMessage = false
+    // Stage count: the first time the Library is ever on screen (persisted, so
+    // tab switches and later launches don't count again).
+    @AppStorage("telemetry.libraryFirstViewed") private var libraryFirstViewedCounted = false
     // Analytics choice card: only once a few pages have been read, never over
     // a tooltip, a help replay or the reminder offer (AnalyticsConsentPrompt).
     @ObservedObject private var analytics = AnalyticsService.shared
@@ -165,6 +168,10 @@ struct LibraryView: View {
             CreatorMessageView()
         }
         .onAppear {
+            if !libraryFirstViewedCounted {
+                libraryFirstViewedCounted = true
+                AnalyticsService.shared.track(.onboardingStep(step: .libraryFirstViewed))
+            }
             if reminders.shouldOfferPrompt {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                     if reminders.shouldOfferPrompt { showReminderPrompt = true }
@@ -301,6 +308,8 @@ struct LibraryView: View {
     // Bottom banner inviting first-time users to read the creator's welcome.
     private var creatorBanner: some View {
         Button {
+            // Once: the banner is gone for good after the message is read.
+            if !creatorMessageSeen { AnalyticsService.shared.track(.onboardingStep(step: .creatorMessageOpened)) }
             showCreatorMessage = true
         } label: {
             HStack(spacing: 10) {
