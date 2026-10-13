@@ -55,11 +55,20 @@ struct AggregateEvent: Equatable {
         "aggregate_locked_content_tapped": ["comic_id", "collection_id"],
         "aggregate_paywall_viewed": ["source"],
         "aggregate_trial_offer_viewed": ["source", "product_id"],
+        // Trial-conversion stages (1.2.2) — counts of moments, not of people.
+        "aggregate_landing_viewed": ["returning", "trial_offer_shown"],
+        "aggregate_landing_cta_tapped": ["cta", "trial_offer_shown"],
+        "aggregate_paywall_dismissed": ["source", "mode"],
+        "aggregate_purchase_attempted": ["source", "mode", "product_id"],
+        "aggregate_purchase_result": ["source", "product_id", "result"],
+        "aggregate_trial_started": ["product_id", "source"],
+        "aggregate_onboarding_step": ["step"],
     ]
     static let commonProperties: Set<String> = ["app_version", "build_number", "entitlement", "access_model"]
 
     /// The aggregate counterpart of an analytics event, or nil for events that
-    /// have none (purchases, trial starts and level choices are not counted).
+    /// have none (paid purchases and level choices are not counted; a trial
+    /// start is — it is the stage the other counts lead to).
     init?(_ event: AnalyticsEvent) {
         let aggregateName: String
         switch event {
@@ -75,7 +84,14 @@ struct AggregateEvent: Equatable {
         case .lockedContentTapped: aggregateName = "aggregate_locked_content_tapped"
         case .paywallViewed: aggregateName = "aggregate_paywall_viewed"
         case .trialOfferViewed: aggregateName = "aggregate_trial_offer_viewed"
-        case .trialStarted, .subscriptionStarted, .purchaseCompleted, .spanishLevelSelected: return nil
+        case .trialStarted: aggregateName = "aggregate_trial_started"
+        case .landingViewed: aggregateName = "aggregate_landing_viewed"
+        case .landingCtaTapped: aggregateName = "aggregate_landing_cta_tapped"
+        case .paywallDismissed: aggregateName = "aggregate_paywall_dismissed"
+        case .purchaseAttempted: aggregateName = "aggregate_purchase_attempted"
+        case .purchaseResult: aggregateName = "aggregate_purchase_result"
+        case .onboardingStep: aggregateName = "aggregate_onboarding_step"
+        case .subscriptionStarted, .purchaseCompleted, .spanishLevelSelected: return nil
         }
         let allowed = Self.allowedProperties[aggregateName] ?? []
         var props: [String: AnyHashable] = [:]
@@ -110,6 +126,10 @@ final class AggregateTelemetryService: ObservableObject {
     /// Entitlement and access model, as AnalyticsService knows them (both are
     /// coarse tiers — never an identifier).
     private let context: () -> (entitlement: Entitlement?, accessModel: AccessModel?)
+    /// Keeps the process alive while a batch is in flight after the app has
+    /// left the foreground (UIApplication's background task). Returns the
+    /// matching "done" call. Injected so tests can count begin/end pairs.
+    private let holdProcess: () -> (@Sendable () -> Void)
     private var buffer: [AggregateEvent] = []
     private var flushTask: Task<Void, Never>?
     private var started = false
@@ -120,12 +140,14 @@ final class AggregateTelemetryService: ObservableObject {
          endpoint: URL = URL(string: "\(Secrets.serverBaseURL)/api/reader/telemetry")!,
          transport: AggregateTelemetryTransport = URLSessionTelemetryTransport(),
          flushAfter: TimeInterval = AggregateTelemetryService.flushAfter,
-         context: (() -> (entitlement: Entitlement?, accessModel: AccessModel?))? = nil) {
+         context: (() -> (entitlement: Entitlement?, accessModel: AccessModel?))? = nil,
+         holdProcess: (() -> (@Sendable () -> Void))? = nil) {
         self.defaults = defaults
         self.environment = environment
         self.endpoint = endpoint
         self.transport = transport
         self.flushAfter = flushAfter
+        self.holdProcess = holdProcess ?? Self.systemBackgroundTask
         self.context = context ?? { (AnalyticsService.shared.entitlement, AnalyticsService.shared.accessModel) }
         isEnabled = defaults.object(forKey: Self.enabledKey) as? Bool ?? true
     }
@@ -172,6 +194,9 @@ final class AggregateTelemetryService: ObservableObject {
 
     /// Send what is buffered now. The buffer is cleared before the request
     /// goes out: a failed send loses the batch — there is no retry queue.
+    /// The process is held for the request's duration (a background task), so
+    /// the batch flushed on the way to the background — someone opening the
+    /// app briefly and leaving — isn't cut off by suspension.
     func flush() {
         flushTask?.cancel()
         flushTask = nil
@@ -180,7 +205,25 @@ final class AggregateTelemetryService: ObservableObject {
         buffer.removeAll()
         guard let body = Self.body(for: batch, environment: environment, common: commonProperties) else { return }
         batchesSent += 1
-        transport.post(body, to: endpoint) { _ in }
+        let release = holdProcess()
+        transport.post(body, to: endpoint) { _ in release() }
+    }
+
+    /// UIApplication's background task: begins one, and returns the call that
+    /// ends it. Ending twice is harmless (the expiration handler and the
+    /// completion can both arrive), and is guarded anyway.
+    private static func systemBackgroundTask() -> (@Sendable () -> Void) {
+        final class Handle: @unchecked Sendable { var id: UIBackgroundTaskIdentifier = .invalid }
+        let handle = Handle()
+        let end: @Sendable () -> Void = {
+            DispatchQueue.main.async {
+                guard handle.id != .invalid else { return }
+                UIApplication.shared.endBackgroundTask(handle.id)
+                handle.id = .invalid
+            }
+        }
+        handle.id = UIApplication.shared.beginBackgroundTask(withName: "comigo.telemetry.flush", expirationHandler: end)
+        return end
     }
 
     /// What the server may use to break counts down — coarse values only.

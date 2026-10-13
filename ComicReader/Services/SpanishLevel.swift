@@ -46,5 +46,7 @@ enum SpanishLevel: String, CaseIterable, Identifiable {
         guard stored(in: defaults) != level else { return }
         defaults.set(level.rawValue, forKey: storageKey)
         analytics.track(.spanishLevelSelected(level: level))
+        // The stage, without the level (the choice itself isn't counted anonymously).
+        analytics.track(.onboardingStep(step: .levelSelected))
     }
 }

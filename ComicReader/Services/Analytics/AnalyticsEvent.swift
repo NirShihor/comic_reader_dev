@@ -64,6 +64,37 @@ enum AccessModel: String, CaseIterable {
     case newModel = "new_model"
 }
 
+// Trial-conversion stages (1.2.2). Every value is a closed enumeration: a
+// stage count can carry an outcome, never an error message or anything typed.
+
+enum LandingCTA: String, CaseIterable {
+    case getStarted = "get_started"
+    case continueLearning = "continue_learning"
+    case startTrial = "start_trial"
+}
+
+/// Which offer the paywall showed (StoreService.PaywallMode, as reported).
+enum PaywallOffer: String, CaseIterable {
+    case freeTrial = "free_trial"
+    case subscribe
+    case trialExpired = "trial_expired"
+}
+
+/// How a StoreKit purchase call ended. `failed` is the fact alone — the
+/// error itself is never reported.
+enum PurchaseResult: String, CaseIterable {
+    case success
+    case cancelled
+    case pending
+    case failed
+}
+
+enum OnboardingStep: String, CaseIterable {
+    case levelSelected = "level_selected"
+    case creatorMessageOpened = "creator_message_opened"
+    case libraryFirstViewed = "library_first_viewed"
+}
+
 enum AnalyticsEvent {
     case appOpened
     case collectionViewed(collectionId: String?, collectionName: String, level: String)
@@ -77,10 +108,19 @@ enum AnalyticsEvent {
     case lockedContentTapped(comicId: String, collectionId: String?)
     case paywallViewed(source: PaywallSource)
     case trialOfferViewed(source: PaywallSource, productId: String)
-    case trialStarted(productId: String)
+    /// `source`: the paywall the trial was started from, when it was this
+    /// device's own purchase call; nil for Transaction.updates.
+    case trialStarted(productId: String, source: PaywallSource?)
     case subscriptionStarted(productId: String)
     case purchaseCompleted(productId: String, purchaseType: PurchaseType)
     case spanishLevelSelected(level: SpanishLevel)
+    // Trial-conversion stages
+    case landingViewed(returning: Bool, trialOfferShown: Bool)
+    case landingCtaTapped(cta: LandingCTA, trialOfferShown: Bool)
+    case paywallDismissed(source: PaywallSource, mode: PaywallOffer)
+    case purchaseAttempted(source: PaywallSource, mode: PaywallOffer, productId: String)
+    case purchaseResult(source: PaywallSource, productId: String, result: PurchaseResult)
+    case onboardingStep(step: OnboardingStep)
 
     var name: String {
         switch self {
@@ -100,6 +140,12 @@ enum AnalyticsEvent {
         case .subscriptionStarted: return "subscription_started"
         case .purchaseCompleted: return "purchase_completed"
         case .spanishLevelSelected: return "spanish_level_selected"
+        case .landingViewed: return "landing_viewed"
+        case .landingCtaTapped: return "landing_cta_tapped"
+        case .paywallDismissed: return "paywall_dismissed"
+        case .purchaseAttempted: return "purchase_attempted"
+        case .purchaseResult: return "purchase_result"
+        case .onboardingStep: return "onboarding_step"
         }
     }
 
@@ -148,13 +194,35 @@ enum AnalyticsEvent {
         case let .trialOfferViewed(source, productId):
             set("source", source.rawValue)
             set("product_id", productId)
-        case let .trialStarted(productId), let .subscriptionStarted(productId):
+        case let .trialStarted(productId, source):
+            set("product_id", productId)
+            set("source", source?.rawValue)
+        case let .subscriptionStarted(productId):
             set("product_id", productId)
         case let .purchaseCompleted(productId, purchaseType):
             set("product_id", productId)
             set("purchase_type", purchaseType.rawValue)
         case let .spanishLevelSelected(level):
             set("spanish_level", level.rawValue)
+        case let .landingViewed(returning, trialOfferShown):
+            set("returning", returning)
+            set("trial_offer_shown", trialOfferShown)
+        case let .landingCtaTapped(cta, trialOfferShown):
+            set("cta", cta.rawValue)
+            set("trial_offer_shown", trialOfferShown)
+        case let .paywallDismissed(source, mode):
+            set("source", source.rawValue)
+            set("mode", mode.rawValue)
+        case let .purchaseAttempted(source, mode, productId):
+            set("source", source.rawValue)
+            set("mode", mode.rawValue)
+            set("product_id", productId)
+        case let .purchaseResult(source, productId, result):
+            set("source", source.rawValue)
+            set("product_id", productId)
+            set("result", result.rawValue)
+        case let .onboardingStep(step):
+            set("step", step.rawValue)
         }
         return p
     }

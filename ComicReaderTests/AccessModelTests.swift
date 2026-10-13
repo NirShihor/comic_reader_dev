@@ -232,8 +232,8 @@ final class SubscriptionAccessStoreKitTests: XCTestCase {
 
     private func buy(_ id: String) async throws {
         let product = try XCTUnwrap(id == monthly ? store.monthlyProduct : store.lifetimeProduct)
-        let ok = try await store.purchase(product)
-        XCTAssertTrue(ok, "purchase of \(id)")
+        let outcome = await store.purchase(product, source: nil)
+        XCTAssertEqual(outcome, .success, "purchase of \(id)")
     }
 
     private func isUnlocked(ep: Int) -> Bool { store.isUnlocked(episodeNumber: ep, collectionId: "el_visitante") }

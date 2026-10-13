@@ -24,6 +24,12 @@ struct ContentView: View {
     // Returning user = has launched before (flag set on first Get started) or
     // already has reading progress. They see "Continue learning".
     @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore = false
+    /// landing_viewed is counted once per launch (ContentView lives for the whole launch).
+    @State private var landingTracked = false
+    /// How long landing_viewed waits so `trial_offer_shown` reflects what the
+    /// user actually saw: products and eligibility arrive from StoreKit shortly
+    /// after launch, and the landing intro itself runs longer than this.
+    static let landingViewedDelay: TimeInterval = 2.0
     // Asked once, right after the landing screen, until a level is chosen —
     // a Comigo screen, not a system prompt, and unrelated to analytics consent.
     @AppStorage(SpanishLevel.storageKey) private var spanishLevelRaw = ""
@@ -66,17 +72,35 @@ struct ContentView: View {
             if showSplash {
                 LandingView(
                     ctaTitle: returningUser ? "Continue learning" : "Get started",
-                    onGetStarted: enterApp,
+                    onGetStarted: {
+                        AnalyticsService.shared.track(.landingCtaTapped(
+                            cta: returningUser ? .continueLearning : .getStarted, trialOfferShown: store.showsTrialBanner))
+                        enterApp()
+                    },
                     trialOffer: store.showsTrialBanner ? LandingView.TrialOffer(
                         days: StoreService.trialDays(store.monthlyProduct) ?? 7,
                         priceLine: store.monthlyProduct.map {
                             "then \($0.displayPrice) / \(StoreService.billingPeriodText($0)) · cancel anytime"
                         }) : nil,
-                    onStartTrial: { showTrialPaywall = true }
+                    onStartTrial: {
+                        AnalyticsService.shared.track(.landingCtaTapped(cta: .startTrial, trialOfferShown: true))
+                        showTrialPaywall = true
+                    }
                 )
                 // The trial button is the way in for eligible new users: whether
                 // they start the trial or close the paywall, they then enter the app.
                 .sheet(isPresented: $showTrialPaywall, onDismiss: enterApp) { PaywallView(source: .landingScreen) }
+                // Counted once per launch, a moment in so the trial offer (which
+                // waits on StoreKit) has had its chance to appear; re-renders of
+                // the landing screen don't count again.
+                .onAppear {
+                    guard !landingTracked else { return }
+                    landingTracked = true
+                    let returning = returningUser
+                    DispatchQueue.main.asyncAfter(deadline: .now() + Self.landingViewedDelay) {
+                        AnalyticsService.shared.track(.landingViewed(returning: returning, trialOfferShown: store.showsTrialBanner))
+                    }
+                }
             } else if SpanishLevel(rawValue: spanishLevelRaw) == nil {
                 SpanishLevelView { level in
                     withAnimation(.easeInOut(duration: 0.35)) { SpanishLevel.select(level) }
@@ -1304,23 +1328,67 @@ final class StoreService: ObservableObject {
         hasUnlimited = active
     }
 
-    /// Returns true when the purchase completed and the entitlement is live.
-    func purchase(_ product: Product) async throws -> Bool {
+    /// How a purchase call ended, for the caller and for the stage counts.
+    enum PurchaseOutcome: Equatable {
+        /// The purchase completed and the entitlement is live.
+        case success
+        case cancelled
+        /// Awaiting approval (Ask to Buy) — nothing to unlock yet.
+        case pending
+        /// StoreKit threw; the error is for the paywall to show, not to report.
+        case failed(Error)
+
+        static func == (a: PurchaseOutcome, b: PurchaseOutcome) -> Bool {
+            switch (a, b) {
+            case (.success, .success), (.cancelled, .cancelled), (.pending, .pending), (.failed, .failed): return true
+            default: return false
+            }
+        }
+
+        var analyticsValue: PurchaseResult {
+            switch self {
+            case .success: return .success
+            case .cancelled: return .cancelled
+            case .pending: return .pending
+            case .failed: return .failed
+            }
+        }
+    }
+
+    /// `source`: the paywall this purchase was started from (nil for the
+    /// debug preview, which reports nothing). Never throws: a StoreKit error
+    /// comes back as `.failed`, and every outcome is counted once.
+    func purchase(_ product: Product, source: PaywallSource?, analytics: AnalyticsService = .shared) async -> PurchaseOutcome {
+        let outcome = await performPurchase(product, source: source, analytics: analytics)
+        if let source {
+            analytics.track(.purchaseResult(source: source, productId: product.id, result: outcome.analyticsValue))
+        }
+        return outcome
+    }
+
+    private func performPurchase(_ product: Product, source: PaywallSource?, analytics: AnalyticsService) async -> PurchaseOutcome {
         // Attribution token only when the user has opted into analytics.
         let token = PurchaseAttribution.shared.tokenForPurchase()
-        let result = try await product.purchase(options: token.map { [.appAccountToken($0)] } ?? [])
+        let result: Product.PurchaseResult
+        do {
+            result = try await product.purchase(options: token.map { [.appAccountToken($0)] } ?? [])
+        } catch {
+            return .failed(error)
+        }
         switch result {
         case .success(let verification):
             if case .verified(let t) = verification {
                 await t.finish()
-                reportPurchase(t, purchasedHere: true)
+                reportPurchase(t, purchasedHere: true, source: source, analytics: analytics)
             }
             await refreshEntitlement()
-            return hasUnlimited
-        case .userCancelled, .pending:
-            return false
+            return hasUnlimited ? .success : .failed(StoreError.notUnlocked)
+        case .userCancelled:
+            return .cancelled
+        case .pending:
+            return .pending
         @unknown default:
-            return false
+            return .failed(StoreError.notUnlocked)
         }
     }
 
@@ -1347,20 +1415,25 @@ final class StoreService: ObservableObject {
     // and a lifetime purchase. Paid subscription periods (direct starts, trial
     // conversions, renewals) are reported by the server from App Store Server
     // Notifications, so no event has two sources.
+    //
+    // The event goes through AnalyticsService.track, which counts it in the
+    // anonymous aggregate layer with or without consent (a trial start is the
+    // stage the other counts lead to) and sends it to the opt-in layer only
+    // with consent — the same split as every other event.
 
     private static let reportedKey = "analytics.reportedTransactions"
 
     /// `purchasedHere`: the transaction came back from this device's own
-    /// purchase call. Otherwise (Transaction.updates — Ask to Buy approvals,
-    /// purchases on the user's other devices, restores) it's only reported when
-    /// it carries this install's attribution token, i.e. it was started here.
-    func reportPurchase(_ t: StoreKit.Transaction, purchasedHere: Bool,
+    /// purchase call (`source` says from which paywall). Otherwise
+    /// (Transaction.updates — Ask to Buy approvals, purchases on the user's
+    /// other devices, restores) it's only reported when it carries this
+    /// install's attribution token, i.e. it was started here.
+    func reportPurchase(_ t: StoreKit.Transaction, purchasedHere: Bool, source: PaywallSource? = nil,
                         analytics: AnalyticsService = .shared,
                         defaults: UserDefaults = .standard,
                         installToken: UUID?? = .none) {
         let installToken = installToken ?? PurchaseAttribution.shared.existingToken
-        guard analytics.isEnabled,
-              t.revocationDate == nil,
+        guard t.revocationDate == nil,
               t.ownershipType == .purchased,
               purchasedHere || (t.appAccountToken != nil && t.appAccountToken == installToken)
         else { return }
@@ -1368,7 +1441,7 @@ final class StoreService: ObservableObject {
         // both deliver the same transaction, and updates replay at launch.
         var reported = defaults.stringArray(forKey: Self.reportedKey) ?? []
         let id = String(t.id)
-        guard !reported.contains(id), let event = Self.purchaseEvent(for: t) else { return }
+        guard !reported.contains(id), let event = Self.purchaseEvent(for: t, source: purchasedHere ? source : nil) else { return }
         analytics.track(event)
         reported.append(id)
         defaults.set(Array(reported.suffix(100)), forKey: Self.reportedKey)
@@ -1377,14 +1450,14 @@ final class StoreService: ObservableObject {
     /// The app-side purchase event for a verified transaction, if any: a paid
     /// lifetime purchase, or the first transaction of a subscription whose
     /// period is its free trial. Paid subscription periods → nil (server's job).
-    static func purchaseEvent(for t: StoreKit.Transaction) -> AnalyticsEvent? {
+    static func purchaseEvent(for t: StoreKit.Transaction, source: PaywallSource? = nil) -> AnalyticsEvent? {
         if t.productID == lifetimeProductID {
             // Free lifetime unlocks (offer codes) aren't purchases.
             guard t.price.map({ $0 > 0 }) ?? true else { return nil }
             return .purchaseCompleted(productId: t.productID, purchaseType: .lifetime)
         }
         if t.productID == monthlyProductID, t.id == t.originalID, isFreeTrialPeriod(t) {
-            return .trialStarted(productId: t.productID)
+            return .trialStarted(productId: t.productID, source: source)
         }
         return nil
     }
@@ -1506,7 +1579,15 @@ final class StoreService: ObservableObject {
 
     enum StoreError: LocalizedError {
         case productUnavailable
-        var errorDescription: String? { "The subscription isn't available right now. Please try again in a moment." }
+        /// StoreKit returned success but the transaction couldn't be verified,
+        /// or the entitlement didn't become live — nothing was unlocked.
+        case notUnlocked
+        var errorDescription: String? {
+            switch self {
+            case .productUnavailable: return "The subscription isn't available right now. Please try again in a moment."
+            case .notUnlocked: return "The purchase couldn't be confirmed. Please try again, or use Restore purchases."
+            }
+        }
     }
 }
 
@@ -1523,6 +1604,8 @@ struct PaywallView: View {
     @State private var restoring = false
     @State private var errorMessage: String?
     @State private var viewTracked = false
+    /// Set when this paywall's own purchase succeeded, so its closing isn't a dismissal.
+    @State private var purchased = false
 
     private let violet = Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255)
     private let ink = Color(red: 0x15/255, green: 0x17/255, blue: 0x2A/255)
@@ -1650,6 +1733,13 @@ struct PaywallView: View {
         .onChange(of: store.hasUnlimited) { _, unlocked in
             if unlocked { dismiss() }
         }
+        .onDisappear {
+            // Closed without an entitlement (the X, a swipe down, or after a
+            // cancelled/failed purchase): one dismissal per presentation. A
+            // paywall that was never resolved (no offer on screen) isn't counted.
+            guard let source, let offer, !purchased, !store.hasUnlimited else { return }
+            AnalyticsService.shared.track(.paywallDismissed(source: source, mode: offer))
+        }
     }
 
     @ViewBuilder
@@ -1719,15 +1809,33 @@ struct PaywallView: View {
             Task { await store.loadProducts(); await resolveMode() }
             return
         }
+        // The tap, counted before StoreKit's sheet; the outcome is counted by
+        // StoreService.purchase, once, whatever happens.
+        if let source, let offer {
+            AnalyticsService.shared.track(.purchaseAttempted(source: source, mode: offer, productId: product.id))
+        }
         purchasing = true
         Task {
-            do {
-                let ok = try await StoreService.shared.purchase(product)
-                if ok { dismiss() }
-            } catch {
+            switch await StoreService.shared.purchase(product, source: source) {
+            case .success:
+                purchased = true
+                dismiss()
+            case .failed(let error):
                 errorMessage = error.localizedDescription
+            case .cancelled, .pending:
+                break
             }
             purchasing = false
+        }
+    }
+
+    /// The offer on screen, as the stage counts name it.
+    private var offer: PaywallOffer? {
+        switch mode {
+        case .freeTrial: return .freeTrial
+        case .subscribe: return .subscribe
+        case .trialExpired: return .trialExpired
+        case nil: return nil
         }
     }
 

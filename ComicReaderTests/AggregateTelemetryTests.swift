@@ -14,6 +14,19 @@ final class RecordingTransport: AggregateTelemetryTransport, @unchecked Sendable
     }
 }
 
+/// A transport whose request stays in flight until the test completes it.
+final class HeldTransport: AggregateTelemetryTransport, @unchecked Sendable {
+    private let lock = NSLock()
+    private var completions: [@Sendable (Bool) -> Void] = []
+    func post(_ body: Data, to url: URL, completion: @escaping @Sendable (Bool) -> Void) {
+        lock.withLock { completions.append(completion) }
+    }
+    func complete(success: Bool) {
+        let c = lock.withLock { completions.removeFirst() }
+        c(success)
+    }
+}
+
 @MainActor
 final class AggregateTelemetryTests: XCTestCase {
     private var defaults: UserDefaults!
@@ -62,6 +75,22 @@ final class AggregateTelemetryTests: XCTestCase {
             (.paywallViewed(source: .comicLocked), "aggregate_paywall_viewed", ["source": "comic_locked"]),
             (.trialOfferViewed(source: .settings, productId: "com.comigo.unlimited.monthly"),
              "aggregate_trial_offer_viewed", ["source": "settings", "product_id": "com.comigo.unlimited.monthly"]),
+            // Trial-conversion stages (1.2.2)
+            (.landingViewed(returning: false, trialOfferShown: true),
+             "aggregate_landing_viewed", ["returning": false, "trial_offer_shown": true]),
+            (.landingCtaTapped(cta: .startTrial, trialOfferShown: true),
+             "aggregate_landing_cta_tapped", ["cta": "start_trial", "trial_offer_shown": true]),
+            (.paywallDismissed(source: .landingScreen, mode: .freeTrial),
+             "aggregate_paywall_dismissed", ["source": "landing_screen", "mode": "free_trial"]),
+            (.purchaseAttempted(source: .comicLocked, mode: .freeTrial, productId: "com.comigo.unlimited.monthly"),
+             "aggregate_purchase_attempted", ["source": "comic_locked", "mode": "free_trial", "product_id": "com.comigo.unlimited.monthly"]),
+            (.purchaseResult(source: .landingScreen, productId: "com.comigo.unlimited.monthly", result: .cancelled),
+             "aggregate_purchase_result", ["source": "landing_screen", "product_id": "com.comigo.unlimited.monthly", "result": "cancelled"]),
+            (.trialStarted(productId: "com.comigo.unlimited.monthly", source: .landingScreen),
+             "aggregate_trial_started", ["product_id": "com.comigo.unlimited.monthly", "source": "landing_screen"]),
+            (.trialStarted(productId: "com.comigo.unlimited.monthly", source: nil),
+             "aggregate_trial_started", ["product_id": "com.comigo.unlimited.monthly"]),
+            (.onboardingStep(step: .levelSelected), "aggregate_onboarding_step", ["step": "level_selected"]),
         ]
         for (event, name, props) in cases {
             let a = AggregateEvent(event)
@@ -72,16 +101,27 @@ final class AggregateTelemetryTests: XCTestCase {
         }
     }
 
-    func testPurchasesTrialStartsAndLevelChoicesAreNotCounted() {
-        XCTAssertNil(AggregateEvent(.trialStarted(productId: "p")))
+    func testPaidPurchasesAndLevelChoicesAreNotCountedButATrialStartIs() {
         XCTAssertNil(AggregateEvent(.subscriptionStarted(productId: "p")))
         XCTAssertNil(AggregateEvent(.purchaseCompleted(productId: "p", purchaseType: .lifetime)))
         XCTAssertNil(AggregateEvent(.spanishLevelSelected(level: .beginner)))
+        XCTAssertEqual(AggregateEvent(.trialStarted(productId: "p", source: nil))?.name, "aggregate_trial_started")
     }
 
     func testTheAllowListCoversExactlyTheCountedEvents() {
-        XCTAssertEqual(AggregateEvent.allowedProperties.count, 12)
+        XCTAssertEqual(AggregateEvent.allowedProperties.count, 19)
         XCTAssertEqual(AggregateEvent.commonProperties, ["app_version", "build_number", "entitlement", "access_model"])
+    }
+
+    /// Every stage value is a closed enumeration: a count can say how a
+    /// purchase ended, never why.
+    func testStageValuesAreClosedEnumerationsAndNeverCarryText() {
+        XCTAssertEqual(Set(PurchaseResult.allCases.map(\.rawValue)), ["success", "cancelled", "pending", "failed"])
+        XCTAssertEqual(Set(LandingCTA.allCases.map(\.rawValue)), ["get_started", "continue_learning", "start_trial"])
+        XCTAssertEqual(Set(PaywallOffer.allCases.map(\.rawValue)), ["free_trial", "subscribe", "trial_expired"])
+        XCTAssertEqual(Set(OnboardingStep.allCases.map(\.rawValue)), ["level_selected", "creator_message_opened", "library_first_viewed"])
+        let failed = AggregateEvent(.purchaseResult(source: .comicLocked, productId: "p", result: .failed))!
+        XCTAssertEqual(Set(failed.properties.keys), ["source", "product_id", "result"], "no error, message or code key exists to carry text")
     }
 
     // MARK: Nothing identifying
@@ -217,6 +257,33 @@ final class AggregateTelemetryTests: XCTestCase {
         XCTAssertLessThanOrEqual(AggregateTelemetryService.batchSize, AggregateTelemetryService.maxBuffered)
     }
 
+    // MARK: Leaving the foreground
+
+    /// A batch flushed on the way to the background is held open by a
+    /// background task for exactly as long as the request runs — begun on
+    /// flush, ended when the transport answers (success or not), never
+    /// begun when there is nothing to send.
+    func testAFlushHoldsTheProcessUntilTheRequestCompletes() {
+        var begun = 0, ended = 0
+        let slow = HeldTransport()
+        let s = AggregateTelemetryService(defaults: defaults, environment: .production, endpoint: endpoint, transport: slow,
+                                          flushAfter: 30, context: { (.free, .newModel) },
+                                          holdProcess: { begun += 1; return { ended += 1 } })
+        s.flush()
+        XCTAssertEqual(begun, 0, "nothing buffered, nothing held")
+        s.record(.landingViewed(returning: false, trialOfferShown: true))
+        s.flush()
+        XCTAssertEqual(begun, 1)
+        XCTAssertEqual(ended, 0, "still in flight")
+        slow.complete(success: false)
+        XCTAssertEqual(ended, 1, "released when the request ends, even on failure")
+        s.record(.appOpened)
+        s.flush()
+        slow.complete(success: true)
+        XCTAssertEqual(begun, 2)
+        XCTAssertEqual(ended, 2)
+    }
+
     func testAFailedSendIsDroppedNotRetried() {
         transport.succeed = false
         let s = makeService()
@@ -247,6 +314,40 @@ final class AggregateTelemetryTests: XCTestCase {
             XCTAssertEqual(counted, ["app_opened", "comic_page_viewed"], "counted once each, consent \(String(describing: consent))")
             XCTAssertEqual(backend.events.map(\.name), consent == .granted ? ["app_opened", "comic_page_viewed"] : [],
                            "the opt-in layer still needs consent")
+        }
+    }
+
+    /// The trial-conversion stages are counted with consent nil or denied —
+    /// a new customer can't have been asked yet (the card needs pages read,
+    /// reading needs the trial) — and reach the opt-in layer only with consent.
+    func testTrialConversionStagesAreCountedWithoutConsent() {
+        let stages: [AnalyticsEvent] = [
+            .landingViewed(returning: false, trialOfferShown: true),
+            .landingCtaTapped(cta: .startTrial, trialOfferShown: true),
+            .purchaseAttempted(source: .landingScreen, mode: .freeTrial, productId: "com.comigo.unlimited.monthly"),
+            .purchaseResult(source: .landingScreen, productId: "com.comigo.unlimited.monthly", result: .success),
+            .trialStarted(productId: "com.comigo.unlimited.monthly", source: .landingScreen),
+            .paywallDismissed(source: .comicLocked, mode: .freeTrial),
+            .onboardingStep(step: .libraryFirstViewed),
+        ]
+        for consent in [nil, AnalyticsConsent.denied, AnalyticsConsent.granted] {
+            var counted: [AnalyticsEvent] = []
+            let d = UserDefaults(suiteName: "AggregateTelemetryTests.stages.\(UUID().uuidString)")!
+            if let consent { d.set(consent.rawValue, forKey: AnalyticsService.consentKey) }
+            let backend = RecordingBackend()
+            let config = AnalyticsConfiguration(environment: .development, projectToken: "phc_test", host: "https://eu.i.posthog.com")
+            let s = AnalyticsService(defaults: d, configuration: config, makeBackend: { backend }, log: { _ in },
+                                     onConsentChange: { _ in }, aggregate: { counted.append($0) })
+            s.start()
+            s.entitlement = .free
+            stages.forEach(s.track)
+            s.waitForBackend()
+            let aggregateNames = counted.compactMap { AggregateEvent($0)?.name }
+            XCTAssertEqual(aggregateNames, ["aggregate_app_opened", "aggregate_landing_viewed", "aggregate_landing_cta_tapped",
+                                            "aggregate_purchase_attempted", "aggregate_purchase_result", "aggregate_trial_started",
+                                            "aggregate_paywall_dismissed", "aggregate_onboarding_step"],
+                           "consent \(String(describing: consent))")
+            XCTAssertEqual(backend.events.count, consent == .granted ? stages.count + 1 : 0, "the opt-in layer still needs consent")
         }
     }
 
