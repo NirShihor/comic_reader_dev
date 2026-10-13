@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit   // requestReview
 
 extension Color {
     /// Navy outline matching the logo bubble (#15172A).
@@ -34,12 +35,32 @@ struct LibraryView: View {
     @ObservedObject private var reminders = ReminderService.shared
     @State private var showReminderPrompt = false
     @State private var consentCardReady = false
+    // App Store rating request: after the second comic, on arriving here with
+    // nothing else up, once per installation (ReviewRequestPolicy). iOS owns
+    // the dialog itself.
+    @ObservedObject private var reviewPolicy = ReviewRequestPolicy.shared
+    @Environment(\.requestReview) private var requestReview
+    @Environment(\.scenePhase) private var scenePhase
 
     private var consentCardSituation: AnalyticsConsentPrompt.Situation {
         .init(consent: analytics.consent,
               eligible: consentPrompt.isEligible,
               onboardingActive: showLibraryTitleTip || showChooseCollection || help.isActive,
               otherPresentation: showReminderPrompt || reminders.shouldOfferPrompt || showCreatorMessage)
+    }
+
+    // The rating request yields to everything the analytics card yields to,
+    // and to the card itself (showing or about to), the creator banner and
+    // the delete alerts.
+    private var reviewSituation: ReviewRequestPolicy.Situation {
+        let s = consentCardSituation
+        return .init(due: reviewPolicy.isDue,
+                     onboardingActive: s.onboardingActive,
+                     otherPresentation: s.otherPresentation
+                        || AnalyticsConsentPrompt.shouldShow(s)
+                        || (showCreatorBanner && !creatorMessageSeen)
+                        || comicToDelete != nil || collectionToDelete != nil,
+                     sceneActive: scenePhase == .active)
     }
 
     private var showInitialLoader: Bool {
@@ -150,6 +171,7 @@ struct LibraryView: View {
                 }
             }
             showConsentCardIfNeeded(after: 1.2)
+            requestReviewIfDue(after: 1.5)
             if !creatorMessageSeen {
                 // First launch: only the creator banner — the intro tooltips
                 // hold back until the message has been opened and closed.
@@ -242,6 +264,20 @@ struct LibraryView: View {
         guard !consentCardReady, AnalyticsConsentPrompt.shouldShow(consentCardSituation) else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { consentCardReady = true }
+        }
+    }
+
+    // The rating request, a moment after the analytics card would have
+    // appeared (so the card wins when both are pending). The situation is
+    // checked at the moment of the call, not on arrival; if something is up,
+    // the request simply waits for a later visit — the milestone persists.
+    // Main queue + active scene, as `requestReview` requires.
+    private func requestReviewIfDue(after delay: TimeInterval) {
+        guard reviewPolicy.isDue else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            guard ReviewRequestPolicy.shouldRequest(reviewSituation) else { return }
+            reviewPolicy.markRequested()
+            requestReview()
         }
     }
 
