@@ -292,11 +292,15 @@ struct ComicDetailView: View {
                 }
             }
             .onAppear {
-                startCockpitTips()
+                // Decide ONCE, before the tips start: starting them spends the
+                // one-shot cap, after which they would no longer look "due".
+                let tipsDue = cockpitTipsDue
+                let autoOpens = Self.opensReaderAutomatically(autoOpenReader: autoOpenReader, tipsDue: tipsDue)
+                startCockpitTips(autoOpens: autoOpens)
                 // A download that just became readable: straight into the reader,
                 // at the page it would open on anyway — unless the first-run tips
                 // for this screen haven't been shown yet (see cockpitTipsDue).
-                if Self.opensReaderAutomatically(autoOpenReader: autoOpenReader, tipsDue: cockpitTipsDue), !didAutoResume {
+                if autoOpens, !didAutoResume {
                     didAutoResume = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { startNormalReading(startingPage) }
                     return
@@ -334,11 +338,11 @@ struct ComicDetailView: View {
         }
     }
 
-    private func startCockpitTips() {
+    /// `autoOpens`: this arrival is leaving for the reader at once (see onAppear).
+    private func startCockpitTips(autoOpens: Bool) {
         // Skip when auto-resuming straight into the reader — the screen is leaving.
         // An instant open stays here when the tips are due, so then they run.
-        guard !autoResume, cockpitStep == 0 else { return }
-        if Self.opensReaderAutomatically(autoOpenReader: autoOpenReader, tipsDue: cockpitTipsDue) { return }
+        guard !autoResume, !autoOpens, cockpitStep == 0 else { return }
         if !HelpDebug.forceShowTooltips { guard !seenCockpitTips else { return } }
         if !HelpDebug.forceShowTooltips && !helpReplay, HelpTipCap.spent("comic-cockpit") { seenCockpitTips = true; return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
