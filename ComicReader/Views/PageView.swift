@@ -529,6 +529,7 @@ struct PageView: View {
     /// Opened short of the page that was asked for (a saved position, a
     /// thumbnail or a word's context beyond the preview): say why on appear.
     private let openedShortOfRequest: Bool
+    @State private var shortfallExplained = false
 
     // A visible tooltip owns the reader's attention — the pointing hand
     // stays off while any is up (checked at start AND at each pulse step,
@@ -1792,7 +1793,8 @@ struct PageView: View {
             }
             // Asked for a page beyond the preview: they're on the last free
             // page; once the push has settled, say what's past it.
-            if openedShortOfRequest {
+            if openedShortOfRequest && !shortfallExplained {
+                shortfallExplained = true   // once — not again when a sheet closes and the reader re-appears
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { reachPreviewLimit(wantedNextPage: false) }
             }
             loadPageAspect()
