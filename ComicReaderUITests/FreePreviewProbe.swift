@@ -59,20 +59,29 @@ final class FreePreviewProbe: XCTestCase {
         }
         for expected in 2...4 { turn(to: expected) }
         swipeLeft()
+        // The End-of-preview card: practise these pages, or unlock the rest.
+        let card = app.staticTexts["End of the free preview"]
+        XCTAssertTrue(card.waitForExistence(timeout: 10), "end-of-preview card; counter \(counter.label)")
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'The story goes on for 8 more pages'")).firstMatch.exists, "says the story goes on")
+        XCTAssertTrue(app.buttons["Practise these pages"].exists, "the practice option")
+        let unlock = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Start your' OR label BEGINSWITH 'Unlock with'")).firstMatch
+        XCTAssertTrue(unlock.exists, "the unlock option")
+        unlock.tap()
         let heading = app.staticTexts["Want to know what happens next?"]
-        XCTAssertTrue(heading.waitForExistence(timeout: 10), "preview paywall; counter \(counter.label)")
+        XCTAssertTrue(heading.waitForExistence(timeout: 10), "preview paywall from the card")
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS 'free trial' OR label CONTAINS 'Subscribe'")).firstMatch.exists, "the subscription offer")
 
         // 5. Close: still on page 4, and back works.
         app.buttons["Close"].firstMatch.tap()
         Thread.sleep(forTimeInterval: 1.0)
         XCTAssertFalse(heading.exists, "paywall closed")
+        XCTAssertFalse(card.exists, "card closed too")
         XCTAssertTrue(counter.label.hasPrefix("4/"), "stays on the last free page, got \(counter.label)")
         app.swipeRight(); Thread.sleep(forTimeInterval: 1.5)
         XCTAssertTrue(counter.label.hasPrefix("3/"), "can go back, got \(counter.label)")
         turn(to: 4)
         swipeLeft()
-        XCTAssertTrue(heading.waitForExistence(timeout: 10), "asks again on the next attempt")
+        XCTAssertTrue(card.waitForExistence(timeout: 10), "asks again on the next attempt")
         app.buttons["Close"].firstMatch.tap()
         Thread.sleep(forTimeInterval: 1.0)
 
@@ -84,7 +93,7 @@ final class FreePreviewProbe: XCTestCase {
         for _ in 0..<8 where !page7.exists { app.swipeUp(); Thread.sleep(forTimeInterval: 0.6) }
         XCTAssertTrue(page7.waitForExistence(timeout: 5), "thumbnail grid")
         page7.tap()
-        XCTAssertTrue(heading.waitForExistence(timeout: 10), "locked thumbnail: the paywall")
+        XCTAssertTrue(card.waitForExistence(timeout: 10), "locked thumbnail: the end-of-preview card")
         XCTAssertTrue(counter.label.hasPrefix("4/"), "…over the last free page, got \(counter.label)")
         app.buttons["Close"].firstMatch.tap()
         Thread.sleep(forTimeInterval: 1.0)
@@ -97,19 +106,28 @@ final class FreePreviewProbe: XCTestCase {
         XCTAssertTrue(counter.waitForExistence(timeout: 10), "reader after Continue reading")
         Thread.sleep(forTimeInterval: 1.0)
         XCTAssertTrue(counter.label.hasPrefix("4/"), "resumes on the last free page, got \(counter.label)")
-        XCTAssertFalse(heading.exists, "no paywall when the saved page is itself free")
+        XCTAssertFalse(card.exists, "no card when the saved page is itself free")
 
         // 7. The paywall says the story goes on and what the offer opens.
         swipeLeft()
+        XCTAssertTrue(card.waitForExistence(timeout: 10))
+        unlock.tap()
         XCTAssertTrue(heading.waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'That\\'s the end of the free preview — the story goes on for 8 more pages.'")).firstMatch.exists,
                       "the preview line; texts: \(app.staticTexts.allElementsBoundByIndex.map(\.label).prefix(12))")
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'The rest of this comic — 8 more pages'")).firstMatch.exists, "the rest-of-comic row")
+        XCTAssertTrue(app.staticTexts["The rest of this comic and all its practice modes"].exists, "the rest-of-comic row")
         app.buttons["Close"].firstMatch.tap()
         Thread.sleep(forTimeInterval: 1.0)
 
-        // 8. Practice in the preview: its own pages only; Key phrases locked.
-        app.buttons["Home"].firstMatch.tap()
+        // 8. "Practise these pages" from the card lands on the practice options;
+        // practice in the preview: its own pages only; Key phrases locked.
+        swipeLeft()
+        XCTAssertTrue(card.waitForExistence(timeout: 10))
+        app.buttons["Practise these pages"].tap()
+        XCTAssertTrue(app.staticTexts["Practice"].firstMatch.waitForExistence(timeout: 10), "practice options after the card")
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Practising the first 3 pages'")).firstMatch.waitForExistence(timeout: 5), "the preview practice note in the popup")
+        app.buttons["Close"].firstMatch.tap()
+        Thread.sleep(forTimeInterval: 1.0)
         let note = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Practising the first 3 pages'")).firstMatch
         for _ in 0..<8 where !note.exists { app.swipeUp(); Thread.sleep(forTimeInterval: 0.6) }
         XCTAssertTrue(note.waitForExistence(timeout: 5), "the preview practice note")

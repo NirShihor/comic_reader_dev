@@ -1663,10 +1663,10 @@ struct PaywallView: View {
                     Image("comicgo_logo_yoni_1_alpha_layer_2")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 170)
+                        .frame(width: source == .previewLimit ? 120 : 170)
 
                     Text(headline)
-                        .font(.system(size: 27, weight: .heavy, design: .rounded))
+                        .font(.system(size: source == .previewLimit ? 24 : 27, weight: .heavy, design: .rounded))
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .padding(.top, 16)
@@ -1690,8 +1690,7 @@ struct PaywallView: View {
                             paywallRow("sparkles", "Full access free for \(trialDays) days")
                         }
                         if source == .previewLimit {
-                            paywallRow("book.pages", pagesToGo.map { "The rest of this comic — \($0) more pages — and all its practice modes" }
-                                                     ?? "The rest of this comic and all its practice modes")
+                            paywallRow("book.pages", "The rest of this comic and all its practice modes")
                         }
                         paywallRow("book.fill", "Every episode of every series — current and future")
                         paywallRow("waveform", "All audio, translations and practice modes")
@@ -1701,10 +1700,11 @@ struct PaywallView: View {
                         }
                     }
                     .padding(.horizontal, 34)
-                    .padding(.top, 18)
+                    .padding(.top, source == .previewLimit ? 14 : 18)
                 }
-                .padding(.bottom, 12)
+                .padding(.bottom, 16)
             }
+            .scrollIndicators(.visible)
 
             VStack(spacing: 10) {
                 subscribeButton
@@ -1807,9 +1807,9 @@ struct PaywallView: View {
         let story = pagesToGo.map { "That's the end of the free preview — the story goes on for \($0) more pages." }
             ?? "That's the end of the free preview — the story goes on."
         switch mode {
-        case .freeTrial: return story + " Start your \(trialDays)-day free trial to unlock all of it, every other comic and every practice mode."
-        case .trialExpired: return story + " Subscribe to unlock all of it, every other comic and every practice mode."
-        default: return story + " Comigo Unlimited unlocks all of it, every other comic and every practice mode."
+        case .freeTrial: return story + " Your free trial unlocks all of it."
+        case .trialExpired: return story + " Subscribe to unlock all of it."
+        default: return story + " Comigo Unlimited unlocks all of it."
         }
     }
 

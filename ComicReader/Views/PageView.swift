@@ -521,6 +521,8 @@ struct PageView: View {
     // normally; the way on to the next page meets the paywall instead. The
     // paywall leaves them on the last free page; a purchase takes them on.
     @ObservedObject private var store = StoreService.shared
+    /// The "End of the free preview" card: practise these pages, or unlock the rest.
+    @State private var showPreviewEnd = false
     @State private var showPreviewPaywall = false
     @State private var previewLimitTracked = false
     /// The paywall opened because they wanted the next page: once they're
@@ -818,7 +820,83 @@ struct PageView: View {
             AnalyticsService.shared.track(.previewLimitReached(comicId: comic.id, collectionId: comic.collectionId, level: comic.level.rawValue))
         }
         advanceAfterUnlock = wantedNextPage
-        showPreviewPaywall = true
+        withAnimation { showPreviewEnd = true }
+    }
+
+    /// The story pages still to come after this one.
+    private var pagesToGo: Int { max(0, sortedPages.count - 1 - currentPageIndex) }
+
+    // The end of the free preview: like the End of Episode card, but clear that
+    // the story goes on — practise the free pages, or unlock the whole comic.
+    @ViewBuilder
+    private var previewEndOverlay: some View {
+        if showPreviewEnd {
+            ZStack {
+                Color.black.opacity(0.55)
+                    .ignoresSafeArea()
+                    .onTapGesture { withAnimation { showPreviewEnd = false } }
+
+                VStack(spacing: 14) {
+                    Text("End of the free preview")
+                        .font(.system(size: 20, weight: .heavy, design: .rounded))
+                    Text("The story goes on for \(pagesToGo) more pages. Practise the pages you've read, or unlock the whole comic — and every practice mode — with Comigo Unlimited.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button {
+                        showPreviewEnd = false
+                        showPreviewPaywall = true
+                    } label: {
+                        VStack(spacing: 2) {
+                            Text(store.freeTrialAvailable ? "Start your \(StoreService.trialDays(store.monthlyProduct) ?? 7)-day free trial" : "Unlock with Comigo Unlimited")
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                            Text("Unlocks every page, every comic and every practice mode")
+                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                .opacity(0.85)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255), in: RoundedRectangle(cornerRadius: 14))
+                        .foregroundStyle(.white)
+                    }
+                    if onRequestPractice != nil {
+                        Button {
+                            showPreviewEnd = false
+                            onRequestPractice?()
+                            dismiss()
+                        } label: {
+                            Text("Practise these pages")
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color(red: 91/255, green: 91/255, blue: 214/255).opacity(0.15), in: RoundedRectangle(cornerRadius: 14))
+                                .foregroundStyle(Color(red: 91/255, green: 91/255, blue: 214/255))
+                        }
+                    }
+                }
+                .padding(20)
+                .frame(maxWidth: 320)
+                .background(Color(.secondarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .overlay(alignment: .topTrailing) {
+                    Button {
+                        withAnimation { showPreviewEnd = false }
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.secondary)
+                            .padding(10)
+                    }
+                    .accessibilityLabel("Close")
+                }
+                .shadow(radius: 20)
+                .padding(.horizontal, 36)
+            }
+            .transition(.opacity)
+            .zIndex(3)
+        }
     }
 
     var currentPage: Page {
@@ -1414,12 +1492,13 @@ struct PageView: View {
     private var backdrop: some View {
         Color.black.ignoresSafeArea()
             .sheet(isPresented: $showPreviewPaywall) {
-                PaywallView(source: .previewLimit, pagesToGo: max(0, sortedPages.count - 1 - currentPageIndex))
+                PaywallView(source: .previewLimit, pagesToGo: pagesToGo)
             }
             .onChange(of: store.hasUnlimited) { _, unlocked in
                 // Subscribed (here, or in Settings underneath): the paywall closes
                 // itself; the page they were reaching for follows. A lapse mid-read
                 // changes nothing until the next page turn, which then asks.
+                if unlocked { showPreviewEnd = false }
                 guard unlocked, advanceAfterUnlock else { return }
                 advanceAfterUnlock = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -1614,6 +1693,7 @@ struct PageView: View {
             }
 
             endOfEpisodeOverlay
+            previewEndOverlay
         }
         .sheet(item: $selectedHotspot, onDismiss: {
             // Opt-in per hotspot: closing its popup turns the page (never on
