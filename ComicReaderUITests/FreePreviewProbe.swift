@@ -126,7 +126,39 @@ final class FreePreviewProbe: XCTestCase {
         app.buttons["Practise these pages"].tap()
         XCTAssertTrue(app.staticTexts["Practice"].firstMatch.waitForExistence(timeout: 10), "practice options after the card")
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Practising the first 3 pages'")).firstMatch.waitForExistence(timeout: 5), "the preview practice note in the popup")
-        app.buttons["Close"].firstMatch.tap()
+        // Read & speak from the card starts on the cover, not the page they left.
+        // Two "Read & speak" cards exist (the inline section under the popup's
+        // scrim, and the popup's own); the popup's is the last in the tree.
+        XCTAssertTrue(app.staticTexts["Read & speak"].firstMatch.waitForExistence(timeout: 5))
+        let readSpeak = app.staticTexts.matching(identifier: "Read & speak").allElementsBoundByIndex.last!
+        readSpeak.tap()
+        if !counter.waitForExistence(timeout: 10) {
+            print("PROBE after Read & speak: texts \(app.staticTexts.allElementsBoundByIndex.map(\.label).prefix(20)) buttons \(app.buttons.allElementsBoundByIndex.map(\.label).prefix(15))")
+        }
+        XCTAssertTrue(counter.exists, "guided run opens")
+        Thread.sleep(forTimeInterval: 1.0)
+        print("PROBE read&speak opened on \(counter.label)")
+        XCTAssertTrue(counter.label.hasPrefix("1/"), "Read & speak from the card starts on the cover, got \(counter.label)")
+        app.buttons["Home"].firstMatch.tap()
+        Thread.sleep(forTimeInterval: 1.0)
+        if app.buttons["Close"].firstMatch.exists { app.buttons["Close"].firstMatch.tap(); Thread.sleep(forTimeInterval: 1.0) }
+        // The home's own Practice section, after plain reading up to page 4:
+        // Read & speak still starts on the cover (not the saved reading page).
+        // After a guided run the primary button is "Continue practicing"; read instead.
+        let readAgain = app.staticTexts["Continue reading instead"].firstMatch.exists ? app.staticTexts["Continue reading instead"].firstMatch : cont
+        XCTAssertTrue(readAgain.waitForExistence(timeout: 5), "a way back into reading")
+        readAgain.tap()                              // read again: the saved page is 4
+        XCTAssertTrue(counter.waitForExistence(timeout: 10))
+        Thread.sleep(forTimeInterval: 1.0)
+        app.buttons["Home"].firstMatch.tap()
+        let inlineReadSpeak = app.staticTexts["Read & speak"].firstMatch
+        for _ in 0..<8 where !inlineReadSpeak.exists { app.swipeUp(); Thread.sleep(forTimeInterval: 0.6) }
+        XCTAssertTrue(inlineReadSpeak.waitForExistence(timeout: 5), "inline Read & speak card")
+        inlineReadSpeak.tap()
+        XCTAssertTrue(counter.waitForExistence(timeout: 10), "guided run from the home")
+        Thread.sleep(forTimeInterval: 1.0)
+        XCTAssertTrue(counter.label.hasPrefix("1/"), "Read & speak from the home starts on the cover, got \(counter.label)")
+        app.buttons["Home"].firstMatch.tap()
         Thread.sleep(forTimeInterval: 1.0)
         let note = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Practising the first 3 pages'")).firstMatch
         for _ in 0..<8 where !note.exists { app.swipeUp(); Thread.sleep(forTimeInterval: 0.6) }

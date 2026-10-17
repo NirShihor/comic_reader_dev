@@ -1022,8 +1022,12 @@ struct ComicDetailView: View {
     /// left off — same page AND same bubble (mirrors "Continue reading"). Restart
     /// routes through the `from:` variant with the cover and no bubble.
     private func startReadAndSpeak() {
-        if practiceFromEnd {
-            // Episode just finished → restart from the cover, no saved bubble.
+        // A run picked from the practice menu starts at the cover — unless a
+        // guided run is what they were last doing, which it picks up (the same
+        // rule as the Continue practicing button). The saved *reading* page is
+        // never a practice starting point: after the free preview it would open
+        // on the last free page, with nothing before it practised.
+        if practiceFromEnd || !lastWasPractice {
             progressManager.clearPracticePosition(for: comic.id)
             progressManager.clearWordPosition(for: comic.id)
             progressManager.clearPracticeBubble(for: comic.id)
