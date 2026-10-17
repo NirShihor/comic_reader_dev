@@ -186,6 +186,7 @@
 		F6000001000000000000A05 /* LevelAndReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelAndReminderTests.swift; sourceTree = "<group>"; };
 		R7000001000000000000A01 /* ReviewRequestPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequestPolicy.swift; sourceTree = "<group>"; };
 		R7000001000000000000A02 /* ReviewRequestPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequestPolicyTests.swift; sourceTree = "<group>"; };
+		D4000001000000000000S01 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -229,6 +230,7 @@
 				A1000001444444440000003 /* Products */,
 				B2000001000000000000105 /* ComicReaderUITests */,
 				C3000001000000000000C01 /* ComicReaderTests */,
+				D4000001000000000000S01 /* Products.storekit */,
 			);
 			sourceTree = "<group>";
 		};
