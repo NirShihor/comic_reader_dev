@@ -22,7 +22,8 @@ struct ListeningTestView: View {
     @StateObject private var help = HelpModeController()
 
     var reviewWords: [ReviewWord] {
-        comic.reviewWords ?? []
+        // The free preview drills its own pages' words only (StoreService.readableReviewWords).
+        StoreService.shared.readableReviewWords(of: comic)
     }
 
     var currentWord: ReviewWord? {
@@ -219,7 +220,7 @@ struct ListeningTestView: View {
             // Finished the whole set → next launch starts fresh.
             if done {
                 progressManager.clearWordPosition(for: comic.id)
-                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .listening))
+                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .listening, access: StoreService.shared.accessKind(of: comic)))
             }
         }
     }

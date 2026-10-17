@@ -20,7 +20,8 @@ struct QuizView: View {
     @StateObject private var help = HelpModeController()
 
     var reviewWords: [ReviewWord] {
-        comic.reviewWords ?? []
+        // The free preview drills its own pages' words only (StoreService.readableReviewWords).
+        StoreService.shared.readableReviewWords(of: comic)
     }
 
     var currentWord: ReviewWord? {
@@ -102,7 +103,7 @@ struct QuizView: View {
         .onChange(of: quizComplete) { _, done in
             if done {
                 progressManager.clearWordPosition(for: comic.id)
-                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .quiz))
+                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .quiz, access: StoreService.shared.accessKind(of: comic)))
             }
         }
         .sheet(isPresented: $showingContext) {

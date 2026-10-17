@@ -65,8 +65,8 @@ private enum FlowError: LocalizedError {
 /// Vocabulary for the conversation: the comic's curated key words if present,
 /// otherwise every word in the comic. Deduped to base form + meaning,
 /// excluding manual phrase entries and words without a meaning.
-private func flowVocabulary(from comic: Comic) -> [FlowVocabWord] {
-    let reviewWords = comic.reviewWords ?? []
+@MainActor private func flowVocabulary(from comic: Comic) -> [FlowVocabWord] {
+    let reviewWords = StoreService.shared.readableReviewWords(of: comic)   // the preview: its own pages' words
     let source: [Word] = reviewWords.isEmpty ? allSentenceWords(comic) : reviewWords.map { $0.word }
 
     var seen = Set<String>()
@@ -85,9 +85,9 @@ private func flowVocabulary(from comic: Comic) -> [FlowVocabWord] {
 }
 
 /// Every word across the comic's sentences (fallback when there are no key words).
-private func allSentenceWords(_ comic: Comic) -> [Word] {
+@MainActor private func allSentenceWords(_ comic: Comic) -> [Word] {
     var out: [Word] = []
-    for page in comic.pages {
+    for page in StoreService.shared.readablePages(of: comic) {
         for panel in page.panels {
             for bubble in panel.bubbles {
                 for sentence in bubble.sentences {

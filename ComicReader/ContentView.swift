@@ -1502,6 +1502,35 @@ final class StoreService: ObservableObject {
         access == .full || pageNumber <= 1 + previewPages
     }
 
+    /// The comic's story pages a reader with `access` may use, in reading
+    /// order — what every practice mode draws its sentences and words from.
+    static func readablePages(of comic: Comic, access: ComicAccess) -> [Page] {
+        comic.pages.sorted { $0.pageNumber < $1.pageNumber }
+            .filter { isPageReadable(pageNumber: $0.pageNumber, access: access) }
+    }
+
+    /// The drill words from those pages. Words on the key-phrase practice
+    /// pages belong to the whole comic and aren't part of the preview.
+    static func readableReviewWords(of comic: Comic, access: ComicAccess) -> [ReviewWord] {
+        let words = comic.reviewWords ?? []
+        guard access == .preview else { return words }
+        let pageIds = Set(readablePages(of: comic, access: access).map(\.id))
+        return words.filter { pageIds.contains($0.pageId) }
+    }
+
+    func readablePages(of comic: Comic) -> [Page] {
+        Self.readablePages(of: comic, access: access(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle))
+    }
+
+    /// `access`, as the stage counts name it.
+    func accessKind(of comic: Comic) -> ComicAccessKind {
+        access(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle) == .full ? .full : .preview
+    }
+
+    func readableReviewWords(of comic: Comic) -> [ReviewWord] {
+        Self.readableReviewWords(of: comic, access: access(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle))
+    }
+
     // MARK: - Paywall state
 
     enum PaywallMode: Equatable {
@@ -1584,6 +1613,9 @@ final class StoreService: ObservableObject {
 struct PaywallView: View {
     /// What opened the paywall, for analytics; nil for the debug screenshot preview.
     let source: PaywallSource?
+    /// From the free preview's last page: how much of this comic is still to
+    /// come, so the offer reads as the way on, not the end of the story.
+    var pagesToGo: Int? = nil
     @Environment(\.dismiss) private var dismiss
     @StateObject private var store = StoreService.shared
     @ObservedObject private var access = AccessModelService.shared
@@ -1639,11 +1671,13 @@ struct PaywallView: View {
                         .multilineTextAlignment(.center)
                         .padding(.top, 16)
                         .padding(.horizontal, 24)
-                    if source == .previewLimit, mode == .freeTrial {
-                        Text("Try Comigo free for \(trialDays) days.")
+                    if source == .previewLimit {
+                        Text(previewLine)
                             .font(.system(size: 15, weight: .medium, design: .rounded))
                             .foregroundColor(.white.opacity(0.85))
-                            .padding(.top, 6)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 8)
+                            .padding(.horizontal, 28)
                     } else if mode == .trialExpired {
                         Text("Subscribe to keep reading every comic.")
                             .font(.system(size: 15, weight: .medium, design: .rounded))
@@ -1654,6 +1688,10 @@ struct PaywallView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         if mode == .freeTrial {
                             paywallRow("sparkles", "Full access free for \(trialDays) days")
+                        }
+                        if source == .previewLimit {
+                            paywallRow("book.pages", pagesToGo.map { "The rest of this comic — \($0) more pages — and all its practice modes" }
+                                                     ?? "The rest of this comic and all its practice modes")
                         }
                         paywallRow("book.fill", "Every episode of every series — current and future")
                         paywallRow("waveform", "All audio, translations and practice modes")
@@ -1761,6 +1799,18 @@ struct PaywallView: View {
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(ink, lineWidth: 3))
         }
         .disabled(purchasing || mode == nil)
+    }
+
+    /// Under the preview heading: this is the end of the free pages, not of
+    /// the story, and what the offer opens.
+    private var previewLine: String {
+        let story = pagesToGo.map { "That's the end of the free preview — the story goes on for \($0) more pages." }
+            ?? "That's the end of the free preview — the story goes on."
+        switch mode {
+        case .freeTrial: return story + " Start your \(trialDays)-day free trial to unlock all of it, every other comic and every practice mode."
+        case .trialExpired: return story + " Subscribe to unlock all of it, every other comic and every practice mode."
+        default: return story + " Comigo Unlimited unlocks all of it, every other comic and every practice mode."
+        }
     }
 
     /// Apple's required auto-renewal disclosure, with StoreKit's localised price.

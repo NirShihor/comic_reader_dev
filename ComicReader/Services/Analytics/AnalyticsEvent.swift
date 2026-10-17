@@ -111,8 +111,8 @@ enum AnalyticsEvent {
     case comicCompleted(comicId: String, comicName: String, collectionId: String?, level: String)
     case audioPlayed(comicId: String, pageNumber: Int?, audioType: AudioType)
     case translationRevealed(comicId: String, pageNumber: Int?)
-    case practiceStarted(comicId: String, practiceType: PracticeType)
-    case practiceCompleted(comicId: String, practiceType: PracticeType)
+    case practiceStarted(comicId: String, practiceType: PracticeType, access: ComicAccessKind? = nil)
+    case practiceCompleted(comicId: String, practiceType: PracticeType, access: ComicAccessKind? = nil)
     case lockedContentTapped(comicId: String, collectionId: String?)
     case paywallViewed(source: PaywallSource)
     case trialOfferViewed(source: PaywallSource, productId: String)
@@ -195,9 +195,10 @@ enum AnalyticsEvent {
         case let .translationRevealed(comicId, pageNumber):
             set("comic_id", comicId)
             set("page_number", pageNumber)
-        case let .practiceStarted(comicId, practiceType), let .practiceCompleted(comicId, practiceType):
+        case let .practiceStarted(comicId, practiceType, access), let .practiceCompleted(comicId, practiceType, access):
             set("comic_id", comicId)
             set("practice_type", practiceType.rawValue)
+            set("access", access?.rawValue)
         case let .lockedContentTapped(comicId, collectionId):
             set("comic_id", comicId)
             set("collection_id", collectionId)

@@ -1293,7 +1293,7 @@ struct PageView: View {
         if settingsManager.speakingPracticeMode {
             if !guidedCompletionTracked {
                 guidedCompletionTracked = true
-                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .readSpeak))
+                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .readSpeak, access: StoreService.shared.accessKind(of: comic)))
             }
             showSpeakingDonePrompt = true
         } else {
@@ -1414,7 +1414,7 @@ struct PageView: View {
     private var backdrop: some View {
         Color.black.ignoresSafeArea()
             .sheet(isPresented: $showPreviewPaywall) {
-                PaywallView(source: .previewLimit)
+                PaywallView(source: .previewLimit, pagesToGo: max(0, sortedPages.count - 1 - currentPageIndex))
             }
             .onChange(of: store.hasUnlimited) { _, unlocked in
                 // Subscribed (here, or in Settings underneath): the paywall closes

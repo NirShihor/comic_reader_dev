@@ -91,13 +91,48 @@ final class FreePreviewProbe: XCTestCase {
         app.buttons["Home"].firstMatch.tap()
         let cont = app.staticTexts["Continue reading"].firstMatch
         XCTAssertTrue(cont.waitForExistence(timeout: 10), "Continue reading")
+        Thread.sleep(forTimeInterval: 1.0)   // let the pop settle before tapping
         cont.tap()
-        XCTAssertTrue(counter.waitForExistence(timeout: 10))
+        if !counter.waitForExistence(timeout: 6), cont.exists { cont.tap() }
+        XCTAssertTrue(counter.waitForExistence(timeout: 10), "reader after Continue reading")
         Thread.sleep(forTimeInterval: 1.0)
         XCTAssertTrue(counter.label.hasPrefix("4/"), "resumes on the last free page, got \(counter.label)")
         XCTAssertFalse(heading.exists, "no paywall when the saved page is itself free")
 
-        // 7. (Subscribing and carrying on to page 5 is verified on a device run
+        // 7. The paywall says the story goes on and what the offer opens.
+        swipeLeft()
+        XCTAssertTrue(heading.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'That\\'s the end of the free preview — the story goes on for 8 more pages.'")).firstMatch.exists,
+                      "the preview line; texts: \(app.staticTexts.allElementsBoundByIndex.map(\.label).prefix(12))")
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'The rest of this comic — 8 more pages'")).firstMatch.exists, "the rest-of-comic row")
+        app.buttons["Close"].firstMatch.tap()
+        Thread.sleep(forTimeInterval: 1.0)
+
+        // 8. Practice in the preview: its own pages only; Key phrases locked.
+        app.buttons["Home"].firstMatch.tap()
+        let note = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Practising the first 3 pages'")).firstMatch
+        for _ in 0..<8 where !note.exists { app.swipeUp(); Thread.sleep(forTimeInterval: 0.6) }
+        XCTAssertTrue(note.waitForExistence(timeout: 5), "the preview practice note")
+        let keyPhrases = app.staticTexts["Key phrases"].firstMatch
+        if keyPhrases.exists {
+            keyPhrases.tap()
+            let locked = app.staticTexts.matching(NSPredicate(format: "label == 'Keep the story going' OR label BEGINSWITH 'Try Comigo free'")).firstMatch
+            XCTAssertTrue(locked.waitForExistence(timeout: 10), "Key phrases: the subscription paywall")
+            app.buttons["Close"].firstMatch.tap()
+            Thread.sleep(forTimeInterval: 1.0)
+        }
+        let listenSpeak = app.staticTexts["Listen & speak"].firstMatch
+        XCTAssertTrue(listenSpeak.waitForExistence(timeout: 5), "Listen & speak card")
+        listenSpeak.tap()
+        let esEs = app.buttons["Spanish → Spanish & English"].firstMatch
+        XCTAssertTrue(esEs.waitForExistence(timeout: 10), "the Listen & speak chooser")
+        esEs.tap()
+        let count = app.staticTexts.matching(NSPredicate(format: "label MATCHES '^[0-9]+ sentences$'")).firstMatch
+        XCTAssertTrue(count.waitForExistence(timeout: 15), "the Listen & speak intro")
+        let n = Int(count.label.split(separator: " ").first ?? "") ?? 0
+        XCTAssertTrue(n > 0 && n <= 23, "the preview's sentences only (EN EL SENDERO: 17 of 56), got \(count.label)")
+
+        // 9. (Subscribing and carrying on to page 5 is verified on a device run
         // from Xcode: under `xcodebuild test` the simulator reaches the App Store
         // sandbox, not the local StoreKit configuration, and asks to sign in.)
     }

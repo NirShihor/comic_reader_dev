@@ -148,15 +148,17 @@ struct ComicDetailView: View {
             }
             .onChange(of: practiceDestination) { _, newValue in
                 if let dest = newValue {
-                    // Locked (e.g. subscription lapsed after download) — every
-                    // practice mode funnels through here, so one gate covers all.
-                    guard requireUnlocked() else {
+                    // Every practice mode funnels through here, so one gate
+                    // covers all. The free preview practises its own pages
+                    // (each mode draws on StoreService.readablePages); Key
+                    // phrases are drawn from the whole story and stay locked.
+                    guard dest != .keyPhrases || requireUnlocked() else {
                         practiceDestination = nil
                         return
                     }
-                    // Whole-comic modes need every file; a comic still arriving
-                    // keeps downloading while they read instead.
-                    guard localStorage.isWholeComicAvailable(comic.id) else {
+                    // The pages a mode uses need every file; a comic still
+                    // arriving keeps downloading while they read instead.
+                    guard practicePagesAvailable else {
                         practiceDestination = nil
                         showFinishingDownload = true
                         return
@@ -174,7 +176,7 @@ struct ComicDetailView: View {
                     progressManager.setPracticeMode(comic.id, mode: dest.modeKey)
                     showPracticeOptions = false
                     if let type = PracticeType(modeKey: dest.modeKey) {
-                        AnalyticsService.shared.track(.practiceStarted(comicId: comic.id, practiceType: type))
+                        AnalyticsService.shared.track(.practiceStarted(comicId: comic.id, practiceType: type, access: StoreService.shared.accessKind(of: comic)))
                     }
                     Task { await reminders.recordEngagement() }
                 }
@@ -239,6 +241,15 @@ struct ComicDetailView: View {
     /// The free preview is all they have of this comic.
     private var isPreview: Bool {
         store.access(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle) == .preview
+    }
+
+    /// The files the practice modes need are on disk: the whole comic, or —
+    /// for the preview — just its pages, which a download fetches first.
+    private var practicePagesAvailable: Bool {
+        if isPreview {
+            return localStorage.arePagesAvailable(Set(store.readablePages(of: comic).map(\.pageNumber)), of: comic)
+        }
+        return localStorage.isWholeComicAvailable(comic.id)
     }
 
     /// Gate for every "start practicing" entry point. Returns true when the
@@ -584,8 +595,9 @@ struct ComicDetailView: View {
 
     // Launch the last-used practice mode. `restart` clears the saved spot so it
     // begins from the first sentence; otherwise it resumes where it left off.
+    // (The preview practises its own pages; the modes themselves limit what
+    // they draw on, and Key phrases is gated where it's chosen.)
     private func launchPractice(restart: Bool) {
-        guard requireUnlocked() else { return }
         if restart {
             progressManager.clearPracticePosition(for: comic.id)
             progressManager.clearWordPosition(for: comic.id)
@@ -610,6 +622,14 @@ struct ComicDetailView: View {
 
 
 
+    /// What the preview's practice covers.
+    private var previewPracticeNote: some View {
+        Label("Practising the first \(StoreService.previewPages) pages — Comigo Unlimited practises the whole story", systemImage: "book.pages")
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255))
+            .padding(.bottom, 4)
+    }
+
     // MARK: - Practice Options (floating panel)
     @ViewBuilder
     private var practiceOptionsOverlay: some View {
@@ -629,6 +649,7 @@ struct ComicDetailView: View {
                             .font(.system(size: 20, weight: .heavy, design: .rounded))
                             .foregroundStyle(.primary)
                             .padding(.bottom, 2)
+                        if isPreview { previewPracticeNote }
 
                         practiceOptionsContent
                     }
@@ -840,6 +861,7 @@ struct ComicDetailView: View {
                 .tracking(0.5)
                 .foregroundStyle(.secondary)
                 .padding(.leading, 4)
+            if isPreview { previewPracticeNote.padding(.leading, 4) }
 
             practiceOptionsContent
         }
@@ -861,9 +883,11 @@ struct ComicDetailView: View {
                              description: "Screen off, eyes free. Hear each line and speak — Spanish → English, or English → Spanish.",
                              action: { showingListenSpeakChooser = true })
             if !(comic.keyPhrases ?? []).isEmpty {
-                practiceModeCard(icon: "quote.bubble.fill",
-                                 title: "Key phrases", tag: "ON SCREEN",
-                                 description: "Everyday phrases from this story. See the English, say it in Spanish, then hear it in its scene.",
+                practiceModeCard(icon: isPreview ? "lock.fill" : "quote.bubble.fill",
+                                 title: "Key phrases", tag: isPreview ? "COMIGO UNLIMITED" : "ON SCREEN",
+                                 description: isPreview
+                                     ? "Everyday phrases drawn from the whole story — part of Comigo Unlimited."
+                                     : "Everyday phrases from this story. See the English, say it in Spanish, then hear it in its scene.",
                                  action: { practiceDestination = .keyPhrases })
             }
         } else {
@@ -1012,14 +1036,13 @@ struct ComicDetailView: View {
     /// On-screen "Read & speak": text stays visible, learner speaks each line.
     /// Mirrors the legacy On-Screen guided run. Opens at `page`, at `bubbleId` when set.
     private func startReadAndSpeak(from page: Page, bubbleId: String? = nil) {
-        guard requireUnlocked() else { return }
         settingsManager.speakingPracticeMode = true
         settingsManager.listeningPracticeMode = false
         guidedOnScreen = true
         pendingBubbleId = bubbleId
         showPracticeOptions = false
         progressManager.setPracticeMode(comic.id, mode: "readSpeak")
-        AnalyticsService.shared.track(.practiceStarted(comicId: comic.id, practiceType: .readSpeak))
+        AnalyticsService.shared.track(.practiceStarted(comicId: comic.id, practiceType: .readSpeak, access: StoreService.shared.accessKind(of: comic)))
         selectedPage = page
     }
 

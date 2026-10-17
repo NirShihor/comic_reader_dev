@@ -503,3 +503,49 @@ final class ReaderPreviewGateTests: XCTestCase {
         XCTAssertEqual(shuffled[3].pageNumber, 4)
     }
 }
+
+/// What the practice modes may draw on: the preview's own pages, in order —
+/// always a prefix of the whole comic's, so a saved spot means the same thing
+/// before and after subscribing.
+@MainActor
+final class PreviewPracticeContentTests: XCTestCase {
+    private func word(_ id: String) -> Word { Word(id: id, text: id, meaning: id) }
+    private func comic(pages count: Int, wordsPerPage: Int = 2, practiceWords: Int = 3) -> Comic {
+        let pages = (1...count).map { Page(id: "p\($0)", pageNumber: $0, masterImage: "img\($0)", panels: []) }
+        var words: [ReviewWord] = []
+        for p in pages { for k in 0..<wordsPerPage { words.append(ReviewWord(word: word("\(p.id)-w\(k)"), panelId: "panel", pageId: p.id)) } }
+        for k in 0..<practiceWords { words.append(ReviewWord(word: word("kp-w\(k)"), panelId: "panel", pageId: "p1001")) }
+        var c = Comic(id: "c", title: "C", description: "", coverImage: "cover", level: .beginner, isPremium: false, pages: pages.reversed())
+        c.reviewWords = words
+        return c
+    }
+
+    func testThePreviewPractisesTheCoverAndThreeStoryPagesInOrder() {
+        let c = comic(pages: 12)
+        XCTAssertEqual(StoreService.readablePages(of: c, access: .preview).map(\.pageNumber), [1, 2, 3, 4])
+        XCTAssertEqual(StoreService.readablePages(of: c, access: .full).map(\.pageNumber), Array(1...12), "sorted, whatever the array order")
+    }
+
+    func testThePreviewsPagesAreAPrefixOfTheWholeComics() {
+        let c = comic(pages: 12)
+        let preview = StoreService.readablePages(of: c, access: .preview).map(\.id)
+        let full = StoreService.readablePages(of: c, access: .full).map(\.id)
+        XCTAssertEqual(Array(full.prefix(preview.count)), preview)
+    }
+
+    func testDrillWordsComeOnlyFromThePreviewPagesNeverFromKeyPhrasePages() {
+        let c = comic(pages: 12, wordsPerPage: 2, practiceWords: 3)
+        let preview = StoreService.readableReviewWords(of: c, access: .preview)
+        XCTAssertEqual(preview.count, 8, "two words on each of the cover and three story pages")
+        XCTAssertTrue(preview.allSatisfy { ["p1", "p2", "p3", "p4"].contains($0.pageId) })
+        let full = StoreService.readableReviewWords(of: c, access: .full)
+        XCTAssertEqual(full.count, 27, "everything, key-phrase pages included")
+        XCTAssertEqual(Array(full.prefix(8).map(\.word.id)), preview.map(\.word.id), "a prefix: a saved word index survives subscribing")
+    }
+
+    func testAShortComicPreviewsInFull() {
+        let c = comic(pages: 3)
+        XCTAssertEqual(StoreService.readablePages(of: c, access: .preview).count, 3)
+        XCTAssertEqual(StoreService.readableReviewWords(of: c, access: .preview).count, 6)
+    }
+}
