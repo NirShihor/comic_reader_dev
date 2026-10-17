@@ -11,6 +11,14 @@ enum PaywallSource: String, CaseIterable {
     case settings
     case trialExpired = "trial_expired"
     case landingScreen = "landing_screen"
+    /// The reader tried to turn past the free preview pages.
+    case previewLimit = "preview_limit"
+}
+
+/// What a reader may do with a comic, as the stage counts name it.
+enum ComicAccessKind: String {
+    case full
+    case preview
 }
 
 enum PracticeType: String, CaseIterable {
@@ -98,7 +106,7 @@ enum OnboardingStep: String, CaseIterable {
 enum AnalyticsEvent {
     case appOpened
     case collectionViewed(collectionId: String?, collectionName: String, level: String)
-    case comicStarted(comicId: String, comicName: String, collectionId: String?, level: String, isFree: Bool)
+    case comicStarted(comicId: String, comicName: String, collectionId: String?, level: String, isFree: Bool, access: ComicAccessKind)
     case comicPageViewed(comicId: String, pageNumber: Int, totalPages: Int)
     case comicCompleted(comicId: String, comicName: String, collectionId: String?, level: String)
     case audioPlayed(comicId: String, pageNumber: Int?, audioType: AudioType)
@@ -121,6 +129,8 @@ enum AnalyticsEvent {
     case purchaseAttempted(source: PaywallSource, mode: PaywallOffer, productId: String)
     case purchaseResult(source: PaywallSource, productId: String, result: PurchaseResult)
     case onboardingStep(step: OnboardingStep)
+    /// A preview reader tried to turn past the free pages (once per reading session).
+    case previewLimitReached(comicId: String, collectionId: String?, level: String)
 
     var name: String {
         switch self {
@@ -146,6 +156,7 @@ enum AnalyticsEvent {
         case .purchaseAttempted: return "purchase_attempted"
         case .purchaseResult: return "purchase_result"
         case .onboardingStep: return "onboarding_step"
+        case .previewLimitReached: return "preview_limit_reached"
         }
     }
 
@@ -161,12 +172,13 @@ enum AnalyticsEvent {
             set("collection_id", collectionId)
             set("collection_name", collectionName)
             set("level", level)
-        case let .comicStarted(comicId, comicName, collectionId, level, isFree):
+        case let .comicStarted(comicId, comicName, collectionId, level, isFree, access):
             set("comic_id", comicId)
             set("comic_name", comicName)
             set("collection_id", collectionId)
             set("level", level)
             set("is_free", isFree)
+            set("access", access.rawValue)
         case let .comicPageViewed(comicId, pageNumber, totalPages):
             set("comic_id", comicId)
             set("page_number", pageNumber)
@@ -223,6 +235,10 @@ enum AnalyticsEvent {
             set("result", result.rawValue)
         case let .onboardingStep(step):
             set("step", step.rawValue)
+        case let .previewLimitReached(comicId, collectionId, level):
+            set("comic_id", comicId)
+            set("collection_id", collectionId)
+            set("level", level)
         }
         return p
     }

@@ -226,16 +226,23 @@ struct ComicDetailView: View {
     }
 
     // MARK: - Subscription gate
-    // First episode of every collection (and standalone comics) is free; other
-    // episodes need Comigo Unlimited. Matters when the subscription lapses after
-    // an episode was downloaded — the file stays, reading it re-locks.
+    // Reading is never locked here: every comic opens, and the reader itself
+    // stops a preview at the free pages (StoreService.previewPages). What
+    // needs Comigo Unlimited is the whole comic — the practice modes, which
+    // walk every page. Matters when the subscription lapses after an episode
+    // was downloaded: the file stays, practising it re-locks.
     private var isLocked: Bool {
         !store.isUnlocked(episodeNumber: comic.episodeNumber,
                           collectionId: comic.collectionId ?? comic.collectionTitle)
     }
 
-    /// Gate for every "start reading/practicing" entry point. Returns true when
-    /// the user may proceed; otherwise pops the paywall.
+    /// The free preview is all they have of this comic.
+    private var isPreview: Bool {
+        store.access(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle) == .preview
+    }
+
+    /// Gate for every "start practicing" entry point. Returns true when the
+    /// user may proceed; otherwise pops the paywall.
     private func requireUnlocked() -> Bool {
         if isLocked {
             AnalyticsService.shared.track(.lockedContentTapped(comicId: comic.id, collectionId: comic.collectionId))
@@ -799,6 +806,11 @@ struct ComicDetailView: View {
                 Text("· \(comic.pages.count) pages")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                if isPreview {
+                    Text("· \(StoreService.previewPages) pages free")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255))
+                }
             }
             .padding(.top, 2)
         }
@@ -1028,8 +1040,9 @@ struct ComicDetailView: View {
 
     /// Open a page for plain reading. Clears any leftover practice-mode flags so
     /// the reader shows the real (text) artwork, not the empty-bubble practice art.
+    /// Never gated: the reader opens no further than the preview allows and
+    /// offers the subscription there.
     private func startNormalReading(_ page: Page) {
-        guard requireUnlocked() else { return }
         settingsManager.speakingPracticeMode = false
         settingsManager.listeningPracticeMode = false
         guidedOnScreen = false
@@ -1046,8 +1059,11 @@ struct ComicDetailView: View {
     // MARK: - Pages Grid
     private var pagesGrid: some View {
         LazyVGrid(columns: columns, spacing: 12) {
-            ForEach(comic.pages) { page in
-                PageThumbnail(page: page, comic: comic, isCover: page.pageNumber <= 1)
+            ForEach(sortedPages) { page in
+                // Pages past the preview are shown locked; tapping one opens the
+                // reader on the last free page, where the paywall explains.
+                PageThumbnail(page: page, comic: comic, isCover: page.pageNumber <= 1,
+                              isLocked: isPreview && !StoreService.isPageReadable(pageNumber: page.pageNumber, access: .preview))
                     .contentShape(Rectangle())
                     .onTapGesture {
                         startNormalReading(page)
@@ -1068,6 +1084,8 @@ struct PageThumbnail: View {
     let page: Page
     let comic: Comic
     var isCover: Bool = false
+    /// Beyond the free preview: dimmed, with a lock, art unreadable.
+    var isLocked: Bool = false
     @EnvironmentObject var progressManager: ReadingProgressManager
     @EnvironmentObject var settingsManager: SettingsManager
 
@@ -1081,6 +1099,8 @@ struct PageThumbnail: View {
                 ComicImage(imageName: imageName, comicId: comic.id, requestsWhenMissing: false)
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: geo.size.height, alignment: isCover ? .top : .center)
+                    .blur(radius: isLocked ? 6 : 0)
+                    .opacity(isLocked ? 0.55 : 1)
             }
             // Portrait page aspect (2:3), matching the actual comic page art,
             // instead of the old fixed square-ish height.
@@ -1090,6 +1110,16 @@ struct PageThumbnail: View {
                     Rectangle()
                         .stroke(isCurrentPage ? .green : Color.clear, lineWidth: 3)
                 )
+                .overlay {
+                    if isLocked {
+                        Image(systemName: "lock.fill")
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(10)
+                            .background(.black.opacity(0.55), in: Circle())
+                            .accessibilityLabel("Locked — Comigo Unlimited")
+                    }
+                }
 
             HStack {
                 Text("Page \(page.pageNumber)")

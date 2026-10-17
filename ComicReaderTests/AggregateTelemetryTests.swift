@@ -56,8 +56,13 @@ final class AggregateTelemetryTests: XCTestCase {
             (.appOpened, "aggregate_app_opened", [:]),
             (.collectionViewed(collectionId: "col-1", collectionName: "EL REY NEGRO", level: "beginner"),
              "aggregate_collection_viewed", ["collection_id": "col-1", "collection_name": "EL REY NEGRO", "level": "beginner"]),
-            (.comicStarted(comicId: "comic-1", comicName: "La casa", collectionId: "col-1", level: "beginner", isFree: true),
-             "aggregate_comic_started", ["comic_id": "comic-1", "comic_name": "La casa", "collection_id": "col-1", "level": "beginner", "is_free": true]),
+            (.comicStarted(comicId: "comic-1", comicName: "La casa", collectionId: "col-1", level: "beginner", isFree: true, access: .full),
+             "aggregate_comic_started", ["comic_id": "comic-1", "comic_name": "La casa", "collection_id": "col-1", "level": "beginner", "is_free": true, "access": "full"]),
+            (.comicStarted(comicId: "comic-2", comicName: "La carta", collectionId: "col-1", level: "beginner", isFree: false, access: .preview),
+             "aggregate_comic_started", ["comic_id": "comic-2", "comic_name": "La carta", "collection_id": "col-1", "level": "beginner", "is_free": false, "access": "preview"]),
+            (.previewLimitReached(comicId: "comic-2", collectionId: "col-1", level: "beginner"),
+             "aggregate_preview_limit_reached", ["comic_id": "comic-2", "collection_id": "col-1", "level": "beginner"]),
+            (.paywallViewed(source: .previewLimit), "aggregate_paywall_viewed", ["source": "preview_limit"]),
             (.comicPageViewed(comicId: "comic-1", pageNumber: 3, totalPages: 14),
              "aggregate_comic_page_viewed", ["comic_id": "comic-1", "page_number": 3, "total_pages": 14]),
             (.comicCompleted(comicId: "comic-1", comicName: "La casa", collectionId: nil, level: "beginner"),
@@ -109,7 +114,7 @@ final class AggregateTelemetryTests: XCTestCase {
     }
 
     func testTheAllowListCoversExactlyTheCountedEvents() {
-        XCTAssertEqual(AggregateEvent.allowedProperties.count, 19)
+        XCTAssertEqual(AggregateEvent.allowedProperties.count, 20)
         XCTAssertEqual(AggregateEvent.commonProperties, ["app_version", "build_number", "entitlement", "access_model"])
     }
 
@@ -149,7 +154,7 @@ final class AggregateTelemetryTests: XCTestCase {
     func testNothingIsWrittenToDiskExceptTheOptOutChoice() {
         let s = makeService()
         s.record(.appOpened)
-        s.record(.comicStarted(comicId: "comic-1", comicName: "x", collectionId: nil, level: "beginner", isFree: true))
+        s.record(.comicStarted(comicId: "comic-1", comicName: "x", collectionId: nil, level: "beginner", isFree: true, access: .full))
         s.flush()
         XCTAssertTrue(defaults.dictionaryRepresentation().keys.filter { $0.hasPrefix("telemetry.") }.isEmpty, "nothing persisted while on")
         s.setEnabled(false)

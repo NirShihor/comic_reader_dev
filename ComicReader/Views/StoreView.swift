@@ -218,7 +218,6 @@ struct StoreComicCard: View {
     @StateObject private var localStorage = LocalComicStorage.shared
     @StateObject private var store = StoreService.shared
     @ObservedObject private var instantOpen = InstantOpenCoordinator.shared
-    @State private var showPaywall = false
     /// The comic this card opened by itself once it became readable (a
     /// progressive download with its first page in) — pushed to its screen,
     /// which goes straight into the reader.
@@ -236,23 +235,20 @@ struct StoreComicCard: View {
     }
 
     /// The tap that started this download asked for the reader to open as
-    /// soon as it can; do that once, through the same screen and entitlement
-    /// check as any open.
+    /// soon as it can; do that once. Every comic may be opened — the free
+    /// preview is the reader's business — so the open is never refused here.
     private func openIfReady(available: Comic? = nil) {
         let candidate = available ?? localStorage.availableComic(comic.id)
-        guard autoOpened == nil, let ready = instantOpen.comicToOpen(comic.id, available: candidate, unlocked: { !isLocked }) else { return }
+        guard autoOpened == nil, let ready = instantOpen.comicToOpen(comic.id, available: candidate, unlocked: { true }) else { return }
         if let onOpenComic { onOpenComic(ready) } else { autoOpened = ready; isAutoOpening = true }
     }
 
-    /// Locked unless the customer's access (trial, subscription, lifetime, or
-    /// the legacy first-episode rule) covers it — see StoreService.isUnlocked.
-    private var isLocked: Bool {
-        !store.isUnlocked(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle)
-    }
-
-    private var showLockBadge: Bool {
-        if case .notDownloaded = downloadState { return isLocked }
-        return false
+    /// Only the free preview of this comic — the cover and the first
+    /// StoreService.previewPages story pages — unless the customer's access
+    /// (trial, subscription, lifetime, or the legacy first-episode rule)
+    /// covers it; see StoreService.access.
+    private var isPreview: Bool {
+        store.access(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle) == .preview
     }
 
     private var openLabel: some View {
@@ -296,16 +292,6 @@ struct StoreComicCard: View {
                     }
                 }
                 .frame(width: coverSize.width, height: coverSize.height)
-                .overlay(alignment: .topTrailing) {
-                    if showLockBadge {
-                        Image(systemName: "lock.fill")
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(.white)
-                            .padding(5)
-                            .background(.black.opacity(0.55), in: Circle())
-                            .padding(4)
-                    }
-                }
 
                 // Info
                 VStack(alignment: .leading, spacing: compact ? 4 : 8) {
@@ -440,25 +426,19 @@ struct StoreComicCard: View {
         .tint(.green)
     }
 
+    /// What a download gets them without Comigo Unlimited.
+    private var previewNote: some View {
+        Label("\(StoreService.previewPages) pages free", systemImage: "book.pages")
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255))
+            .padding(.top, 2)
+    }
+
     @ViewBuilder
     private var downloadButton: some View {
         switch downloadState {
         case .notDownloaded:
-            if isLocked {
-                Button {
-                    AnalyticsService.shared.track(.lockedContentTapped(comicId: comic.id, collectionId: comic.collectionId))
-                    showPaywall = true
-                } label: {
-                    Label(store.showsTrialBanner ? "Start your \(StoreService.trialDays(store.monthlyProduct) ?? 7)-day free trial" : "Unlock with Comigo Unlimited",
-                          systemImage: store.showsTrialBanner ? "sparkles" : "lock.fill")
-                        .font(.subheadline)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255))
-                .sheet(isPresented: $showPaywall) { PaywallView(source: .comicLocked) }
-            } else if let ready = availablePartial {
+            if let ready = availablePartial {
                 // Left part-way through (relaunch, offline): readable as it is;
                 // the download picks itself up.
                 openPartialButton(ready)
@@ -478,6 +458,7 @@ struct StoreComicCard: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.green)
+                if isPreview { previewNote }
             }
 
         case .downloading(let progress):

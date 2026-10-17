@@ -66,7 +66,7 @@ final class AnalyticsTests: XCTestCase {
         let events: [AnalyticsEvent] = [
             .appOpened,
             .collectionViewed(collectionId: "c", collectionName: "C", level: "beginner"),
-            .comicStarted(comicId: "x", comicName: "X", collectionId: "c", level: "beginner", isFree: true),
+            .comicStarted(comicId: "x", comicName: "X", collectionId: "c", level: "beginner", isFree: true, access: .full),
             .comicPageViewed(comicId: "x", pageNumber: 1, totalPages: 9),
             .comicCompleted(comicId: "x", comicName: "X", collectionId: "c", level: "beginner"),
             .audioPlayed(comicId: "x", pageNumber: 2, audioType: .sentence),
@@ -85,6 +85,7 @@ final class AnalyticsTests: XCTestCase {
             .purchaseAttempted(source: .comicLocked, mode: .subscribe, productId: "p"),
             .purchaseResult(source: .comicLocked, productId: "p", result: .pending),
             .onboardingStep(step: .creatorMessageOpened),
+            .previewLimitReached(comicId: "x", collectionId: "c", level: "beginner"),
         ]
         XCTAssertEqual(events.map(\.name), [
             "app_opened", "collection_viewed", "comic_started", "comic_page_viewed", "comic_completed",
@@ -92,12 +93,13 @@ final class AnalyticsTests: XCTestCase {
             "locked_content_tapped", "paywall_viewed", "trial_offer_viewed", "trial_started",
             "subscription_started", "purchase_completed",
             "landing_viewed", "landing_cta_tapped", "paywall_dismissed", "purchase_attempted", "purchase_result", "onboarding_step",
+            "preview_limit_reached",
         ])
         // Only structured metadata — no key could carry dialogue, translations or user text.
         let allowed: Set<String> = ["collection_id", "collection_name", "level", "comic_id", "comic_name", "is_free",
                                     "page_number", "total_pages", "audio_type", "practice_type", "source",
                                     "product_id", "purchase_type", "returning", "trial_offer_shown", "cta", "mode",
-                                    "result", "step"]
+                                    "result", "step", "access"]
         let snake = try! NSRegularExpression(pattern: "^[a-z]+(_[a-z]+)*$")
         for e in events {
             XCTAssertNotNil(snake.firstMatch(in: e.name, range: NSRange(e.name.startIndex..., in: e.name)), e.name)
@@ -106,7 +108,7 @@ final class AnalyticsTests: XCTestCase {
     }
 
     func testControlledValuesAreSnakeCase() {
-        XCTAssertEqual(PaywallSource.allCases.map(\.rawValue), ["comic_locked", "settings", "trial_expired", "landing_screen"])
+        XCTAssertEqual(PaywallSource.allCases.map(\.rawValue), ["comic_locked", "settings", "trial_expired", "landing_screen", "preview_limit"])
         XCTAssertEqual(AudioType.allCases.map(\.rawValue), ["sentence", "word"])
         XCTAssertEqual(PurchaseType.allCases.map(\.rawValue), ["subscription", "lifetime"])
         XCTAssertEqual(Entitlement.allCases.map(\.rawValue), ["free", "trial", "subscribed", "lifetime"])
