@@ -59,23 +59,21 @@ final class FreePreviewProbe: XCTestCase {
         }
         for expected in 2...4 { turn(to: expected) }
         swipeLeft()
-        // The End-of-preview card: practise these pages, or unlock the rest.
+        // First, once a launch, the covers mosaic: the page tiles with covers,
+        // holds, and gives way to the End-of-preview card.
+        let mosaic = app.otherElements["Cover mosaic"]
         let card = app.staticTexts["End of the free preview"]
-        XCTAssertTrue(card.waitForExistence(timeout: 10), "end-of-preview card; counter \(counter.label)")
+        XCTAssertTrue(mosaic.waitForExistence(timeout: 5), "the covers mosaic first; counter \(counter.label)")
+        XCTAssertFalse(card.exists, "no card while the mosaic plays")
+        let mosaicEnd = Date().addingTimeInterval(10)
+        while mosaic.exists, Date() < mosaicEnd { Thread.sleep(forTimeInterval: 0.25) }
+        XCTAssertFalse(mosaic.exists, "the mosaic is over")
+        // The End-of-preview card: practise these pages, or unlock the rest.
+        XCTAssertTrue(card.waitForExistence(timeout: 5), "end-of-preview card after the mosaic; counter \(counter.label)")
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'The story goes on for 8 more pages'")).firstMatch.exists, "says the story goes on")
         XCTAssertTrue(app.buttons["Practice sample pages"].exists, "the practice option")
         let unlock = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Start your' OR label BEGINSWITH 'Unlock with'")).firstMatch
         XCTAssertTrue(unlock.exists, "the unlock option")
-        // The card has a beat, then the covers mosaic plays once (about three
-        // seconds) and the card comes back as it was.
-        let mosaic = app.otherElements["Cover mosaic"]
-        XCTAssertTrue(mosaic.waitForExistence(timeout: 5), "the covers mosaic after the card's beat")
-        XCTAssertFalse(unlock.isHittable, "the mosaic covers the card")
-        let mosaicEnd = Date().addingTimeInterval(8)
-        while mosaic.exists, Date() < mosaicEnd { Thread.sleep(forTimeInterval: 0.25) }
-        XCTAssertFalse(mosaic.exists, "the mosaic is over")
-        XCTAssertTrue(card.waitForExistence(timeout: 3), "the card is back")
-        XCTAssertTrue(unlock.waitForExistence(timeout: 3) && unlock.isHittable, "…with its buttons")
         unlock.tap()
         let heading = app.staticTexts["Want to know what happens next?"]
         XCTAssertTrue(heading.waitForExistence(timeout: 10), "preview paywall from the card")
