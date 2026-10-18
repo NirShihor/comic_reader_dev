@@ -19,7 +19,7 @@ enum CoverMosaic {
     static let crossfade: TimeInterval = 0.35
     /// The pop-in and the hold once the last cover is in.
     static let popIn: TimeInterval = 0.18
-    static let hold: TimeInterval = 2.0
+    static let hold: TimeInterval = 3.0
     static let violet = Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255)
 
     static var playedThisLaunch = false

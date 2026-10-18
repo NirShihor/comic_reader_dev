@@ -96,7 +96,7 @@ final class CoverMosaicTests: XCTestCase {
             let steps = zip(times.dropFirst(), times).map { $0 - $1 }
             for s in steps { XCTAssertGreaterThanOrEqual(s, 0.03 - 1e-9); XCTAssertLessThanOrEqual(s, 0.14 + 1e-9) }
             XCTAssertEqual(CoverMosaic.duration(count: count), times.last! + CoverMosaic.popIn + CoverMosaic.hold, accuracy: 1e-9)
-            XCTAssertLessThanOrEqual(CoverMosaic.duration(count: count), 4.3, "\(count) covers: tiled in about two seconds, then the two-second hold")
+            XCTAssertLessThanOrEqual(CoverMosaic.duration(count: count), 5.3, "\(count) covers: tiled in about two seconds, then the three-second hold")
         }
         XCTAssertEqual(CoverMosaic.entrances(count: 0), [])
     }
