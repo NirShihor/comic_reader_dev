@@ -66,6 +66,16 @@ final class FreePreviewProbe: XCTestCase {
         XCTAssertTrue(app.buttons["Practice sample pages"].exists, "the practice option")
         let unlock = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Start your' OR label BEGINSWITH 'Unlock with'")).firstMatch
         XCTAssertTrue(unlock.exists, "the unlock option")
+        // The card has a beat, then the covers mosaic plays once (about three
+        // seconds) and the card comes back as it was.
+        let mosaic = app.otherElements["Cover mosaic"]
+        XCTAssertTrue(mosaic.waitForExistence(timeout: 5), "the covers mosaic after the card's beat")
+        XCTAssertFalse(unlock.isHittable, "the mosaic covers the card")
+        let mosaicEnd = Date().addingTimeInterval(8)
+        while mosaic.exists, Date() < mosaicEnd { Thread.sleep(forTimeInterval: 0.25) }
+        XCTAssertFalse(mosaic.exists, "the mosaic is over")
+        XCTAssertTrue(card.waitForExistence(timeout: 3), "the card is back")
+        XCTAssertTrue(unlock.waitForExistence(timeout: 3) && unlock.isHittable, "…with its buttons")
         unlock.tap()
         let heading = app.staticTexts["Want to know what happens next?"]
         XCTAssertTrue(heading.waitForExistence(timeout: 10), "preview paywall from the card")
@@ -191,7 +201,7 @@ final class FreePreviewProbe: XCTestCase {
     /// leave the reader and land on the comic home's practice options.
     func testPracticeSamplePagesLeavesTheReader() throws {
         let app = XCUIApplication()
-        var args = ["-demo.hideCues", "YES", "-creatorMessage.seen", "YES", "-spanishLevel", "beginner"]
+        var args = ["-demo.hideCues", "YES", "-creatorMessage.seen", "YES", "-spanishLevel", "beginner", "-preview.coverMosaic", "NO"]
         for k in ["library-title", "choose-collection", "comic-cockpit", "cover-text", "page-swipe", "story-bubble",
                   "hotspot-info", "bubble-panel", "word-detail", "story-arrows", "help-reminder",
                   "collection-download", "collection-open-after-download"] {
@@ -238,7 +248,7 @@ final class FreePreviewProbe: XCTestCase {
     /// tapped away as they appear, like a new user would.
     func testPracticeSamplePagesLeavesTheReaderWithFirstRunTips() throws {
         let app = XCUIApplication()
-        app.launchArguments = ["-creatorMessage.seen", "YES", "-spanishLevel", "beginner"]
+        app.launchArguments = ["-creatorMessage.seen", "YES", "-spanishLevel", "beginner", "-preview.coverMosaic", "NO"]
         app.launch()
         let known: Set<String> = ["Get started", "Download", "Library", "Vocabulary", "Notebook", "Settings", "Back", "Close", "Home",
                                   "Practice sample pages", "Bin", "questionmark.circle", "Help", "Exit help"]

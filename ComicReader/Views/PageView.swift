@@ -532,6 +532,12 @@ struct PageView: View {
     /// thumbnail or a word's context beyond the preview): say why on appear.
     private let openedShortOfRequest: Bool
     @State private var shortfallExplained = false
+    /// The covers mosaic that plays once behind the card (see CoverMosaic):
+    /// the covers are fetched as a preview opens, so they're in hand by then.
+    @State private var mosaicCovers: [UIImage] = []
+    @State private var showCoverMosaic = false
+    @State private var mosaicArm = 0   // closing the card before its beat is up cancels the mosaic
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // A visible tooltip owns the reader's attention — the pointing hand
     // stays off while any is up (checked at start AND at each pulse step,
@@ -821,6 +827,32 @@ struct PageView: View {
         }
         advanceAfterUnlock = wantedNextPage
         withAnimation { showPreviewEnd = true }
+        armCoverMosaic()
+    }
+
+    /// After the card's beat, hand over to the covers mosaic — once a launch,
+    /// only with the covers in hand, and only if the card is still up.
+    private func armCoverMosaic() {
+        guard CoverMosaic.isEnabled(), !CoverMosaic.playedThisLaunch, !reduceMotion,
+              mosaicCovers.count >= CoverMosaic.minimumCovers else { return }
+        mosaicArm += 1
+        let arm = mosaicArm
+        DispatchQueue.main.asyncAfter(deadline: .now() + CoverMosaic.cardBeat) {
+            guard arm == mosaicArm, showPreviewEnd, !showPreviewPaywall, !CoverMosaic.playedThisLaunch else { return }
+            CoverMosaic.playedThisLaunch = true
+            withAnimation(.easeInOut(duration: CoverMosaic.crossfade)) { showCoverMosaic = true }
+        }
+    }
+
+    @ViewBuilder
+    private var coverMosaicOverlay: some View {
+        if showCoverMosaic {
+            CoverMosaicView(covers: mosaicCovers) {
+                withAnimation(.easeInOut(duration: CoverMosaic.crossfade)) { showCoverMosaic = false }
+            }
+            .transition(.opacity)
+            .zIndex(4)
+        }
     }
 
     /// The story pages still to come after this one.
@@ -1494,6 +1526,12 @@ struct PageView: View {
             .sheet(isPresented: $showPreviewPaywall) {
                 PaywallView(source: .previewLimit, pagesToGo: pagesToGo)
             }
+            .onChange(of: showPreviewEnd) { _, up in
+                // The card went (a button, ✕, a tap outside): no mosaic for it.
+                guard !up else { return }
+                mosaicArm += 1
+                if showCoverMosaic { showCoverMosaic = false }
+            }
             .onChange(of: store.hasUnlimited) { _, unlocked in
                 // Subscribed (here, or in Settings underneath): the paywall closes
                 // itself; the page they were reaching for follows. A lapse mid-read
@@ -1694,6 +1732,7 @@ struct PageView: View {
 
             endOfEpisodeOverlay
             previewEndOverlay
+            coverMosaicOverlay
         }
         .sheet(item: $selectedHotspot, onDismiss: {
             // Opt-in per hotspot: closing its popup turns the page (never on
@@ -1859,6 +1898,14 @@ struct PageView: View {
         }
         .onAppear {
             AudioManager.shared.activeComicId = comic.id   // fast, direct audio lookup
+            // A preview may end at the card: have the covers ready for its mosaic.
+            if comicAccess == .preview, CoverMosaic.isEnabled(), !CoverMosaic.playedThisLaunch, mosaicCovers.isEmpty {
+                Task {
+                    let store = ComicStoreService.shared
+                    if store.catalog.isEmpty { await store.fetchCatalog() }
+                    mosaicCovers = await CoverMosaic.loadCovers(catalog: store.catalog)
+                }
+            }
             availability.reader(comic.id, isOnPage: currentPageIndex)
             if tracksReading && !readingSessionTracked {
                 readingSessionTracked = true
