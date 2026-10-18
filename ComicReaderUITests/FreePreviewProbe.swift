@@ -63,7 +63,7 @@ final class FreePreviewProbe: XCTestCase {
         let card = app.staticTexts["End of the free preview"]
         XCTAssertTrue(card.waitForExistence(timeout: 10), "end-of-preview card; counter \(counter.label)")
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'The story goes on for 8 more pages'")).firstMatch.exists, "says the story goes on")
-        XCTAssertTrue(app.buttons["Practise these pages"].exists, "the practice option")
+        XCTAssertTrue(app.buttons["Practice sample pages"].exists, "the practice option")
         let unlock = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Start your' OR label BEGINSWITH 'Unlock with'")).firstMatch
         XCTAssertTrue(unlock.exists, "the unlock option")
         unlock.tap()
@@ -119,13 +119,13 @@ final class FreePreviewProbe: XCTestCase {
         app.buttons["Close"].firstMatch.tap()
         Thread.sleep(forTimeInterval: 1.0)
 
-        // 8. "Practise these pages" from the card lands on the practice options;
+        // 8. "Practice sample pages" from the card lands on the practice options;
         // practice in the preview: its own pages only; Key phrases locked.
         swipeLeft()
         XCTAssertTrue(card.waitForExistence(timeout: 10))
-        app.buttons["Practise these pages"].tap()
+        app.buttons["Practice sample pages"].tap()
         XCTAssertTrue(app.staticTexts["Practice"].firstMatch.waitForExistence(timeout: 10), "practice options after the card")
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Practising the first 3 pages'")).firstMatch.waitForExistence(timeout: 5), "the preview practice note in the popup")
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Practicing the first 3 sample pages'")).firstMatch.waitForExistence(timeout: 5), "the preview practice note in the popup")
         // Read & speak from the card starts on the cover, not the page they left.
         // Two "Read & speak" cards exist (the inline section under the popup's
         // scrim, and the popup's own); the popup's is the last in the tree.
@@ -160,7 +160,7 @@ final class FreePreviewProbe: XCTestCase {
         XCTAssertTrue(counter.label.hasPrefix("1/"), "Read & speak from the home starts on the cover, got \(counter.label)")
         app.buttons["Home"].firstMatch.tap()
         Thread.sleep(forTimeInterval: 1.0)
-        let note = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Practising the first 3 pages'")).firstMatch
+        let note = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Practicing the first 3 sample pages'")).firstMatch
         for _ in 0..<8 where !note.exists { app.swipeUp(); Thread.sleep(forTimeInterval: 0.6) }
         XCTAssertTrue(note.waitForExistence(timeout: 5), "the preview practice note")
         let keyPhrases = app.staticTexts["Key phrases"].firstMatch
@@ -185,5 +185,125 @@ final class FreePreviewProbe: XCTestCase {
         // 9. (Subscribing and carrying on to page 5 is verified on a device run
         // from Xcode: under `xcodebuild test` the simulator reaches the App Store
         // sandbox, not the local StoreKit configuration, and asks to sign in.)
+    }
+
+    /// Device check: from the End-of-preview card, "Practice sample pages" must
+    /// leave the reader and land on the comic home's practice options.
+    func testPracticeSamplePagesLeavesTheReader() throws {
+        let app = XCUIApplication()
+        var args = ["-demo.hideCues", "YES", "-creatorMessage.seen", "YES", "-spanishLevel", "beginner"]
+        for k in ["library-title", "choose-collection", "comic-cockpit", "cover-text", "page-swipe", "story-bubble",
+                  "hotspot-info", "bubble-panel", "word-detail", "story-arrows", "help-reminder",
+                  "collection-download", "collection-open-after-download"] {
+            args += ["-help.seen.\(k)", "YES"]
+        }
+        app.launchArguments = args
+        app.launch()
+        let getStarted = app.buttons["Get started"]
+        XCTAssertTrue(getStarted.waitForExistence(timeout: 15), "landing CTA")
+        getStarted.tap()
+        let collection = app.staticTexts["EL REY NEGRO"].firstMatch
+        XCTAssertTrue(collection.waitForExistence(timeout: 20), "collection in the library")
+        collection.tap()
+        let downloads = app.buttons.matching(NSPredicate(format: "label == 'Download'"))
+        XCTAssertTrue(downloads.firstMatch.waitForExistence(timeout: 20), "Download buttons")
+        let download = downloads.count > 1 ? downloads.element(boundBy: 1) : downloads.firstMatch
+        download.tap()
+        let start = app.staticTexts["Start reading"].firstMatch
+        let counter = app.staticTexts.matching(NSPredicate(format: "label MATCHES '^[0-9]+/[0-9]+$'")).firstMatch
+        let deadline = Date().addingTimeInterval(180)
+        while Date() < deadline, !counter.exists, !start.exists { Thread.sleep(forTimeInterval: 1.0) }
+        if !counter.waitForExistence(timeout: 5), start.waitForExistence(timeout: 5), start.exists { start.tap() }
+        XCTAssertTrue(counter.waitForExistence(timeout: 20), "page counter")
+        func swipeLeft() { app.swipeLeft(); Thread.sleep(forTimeInterval: 1.5) }
+        func turn(to expected: Int) {
+            for _ in 0..<3 where !counter.label.hasPrefix("\(expected)/") { swipeLeft() }
+            XCTAssertTrue(counter.label.hasPrefix("\(expected)/"), "expected page \(expected), got \(counter.label)")
+        }
+        for expected in 2...4 { turn(to: expected) }
+        swipeLeft()
+        let card = app.staticTexts["End of the free preview"]
+        XCTAssertTrue(card.waitForExistence(timeout: 10), "end-of-preview card; counter \(counter.label)")
+        let practice = app.buttons["Practice sample pages"]
+        XCTAssertTrue(practice.exists, "the practice option")
+        practice.tap()
+        let popup = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Practicing the first 3 sample pages'")).firstMatch
+        let landed = popup.waitForExistence(timeout: 8)
+        print("PROBE after tap: card=\(card.exists) counter=\(counter.exists ? counter.label : "gone") popup=\(landed) texts=\(app.staticTexts.allElementsBoundByIndex.map(\.label).prefix(16)) buttons=\(app.buttons.allElementsBoundByIndex.map(\.label).prefix(12))")
+        XCTAssertTrue(landed, "practice options after the card")
+        XCTAssertFalse(counter.exists, "the reader has gone")
+    }
+
+    /// Same, as a genuine first run: the amber first-run tips are live and get
+    /// tapped away as they appear, like a new user would.
+    func testPracticeSamplePagesLeavesTheReaderWithFirstRunTips() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-creatorMessage.seen", "YES", "-spanishLevel", "beginner"]
+        app.launch()
+        let known: Set<String> = ["Get started", "Download", "Library", "Vocabulary", "Notebook", "Settings", "Back", "Close", "Home",
+                                  "Practice sample pages", "Bin", "questionmark.circle", "Help", "Exit help"]
+        // Tap away any amber tip (a long-labelled button that isn't a control).
+        func clearTips() {
+            for _ in 0..<4 {
+                // Tips read as sentences ("Now choose a collection."); cards and controls don't.
+                let tip = app.buttons.matching(NSPredicate(format: "(label ENDSWITH '.' OR label ENDSWITH '!') AND NOT (label CONTAINS ',') AND NOT (label BEGINSWITH 'Start your') AND NOT (label BEGINSWITH 'Unlock with')")).firstMatch
+                if tip.exists, !known.contains(tip.label), tip.isHittable {
+                    print("PROBE tip: \(tip.label)")
+                    tip.tap(); Thread.sleep(forTimeInterval: 0.8); continue
+                }
+                let close = app.buttons["Close"].firstMatch
+                if close.exists, close.isHittable {
+                    print("PROBE help tooltip closed")
+                    close.tap(); Thread.sleep(forTimeInterval: 0.8); continue
+                }
+                return
+            }
+        }
+        func dump(_ where_: String) {
+            print("PROBE \(where_): texts=\(app.staticTexts.allElementsBoundByIndex.map(\.label).prefix(14)) buttons=\(app.buttons.allElementsBoundByIndex.map(\.label).prefix(14))")
+        }
+        let getStarted = app.buttons["Get started"]
+        XCTAssertTrue(getStarted.waitForExistence(timeout: 15), "landing CTA")
+        getStarted.tap()
+        clearTips()
+        let collection = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'EL REY NEGRO'")).firstMatch
+        XCTAssertTrue(collection.waitForExistence(timeout: 20), "collection in the library")
+        collection.tap()
+        clearTips()
+        let downloads = app.buttons.matching(NSPredicate(format: "label == 'Download'"))
+        for _ in 0..<3 where !downloads.firstMatch.waitForExistence(timeout: 8) {
+            dump("no Download yet"); clearTips()
+            if collection.exists, collection.isHittable { collection.tap() }
+        }
+        XCTAssertTrue(downloads.firstMatch.waitForExistence(timeout: 20), "Download buttons")
+        let download = downloads.count > 1 ? downloads.element(boundBy: 1) : downloads.firstMatch
+        download.tap()
+        let start = app.staticTexts["Start reading"].firstMatch
+        let counter = app.staticTexts.matching(NSPredicate(format: "label MATCHES '^[0-9]+/[0-9]+$'")).firstMatch
+        let deadline = Date().addingTimeInterval(180)
+        while Date() < deadline, !counter.exists, !start.exists { clearTips(); Thread.sleep(forTimeInterval: 1.0) }
+        for _ in 0..<6 where !counter.exists {
+            clearTips()
+            if start.exists, start.isHittable { start.tap() }
+            _ = counter.waitForExistence(timeout: 4)
+        }
+        XCTAssertTrue(counter.waitForExistence(timeout: 20), "page counter; texts \(app.staticTexts.allElementsBoundByIndex.map(\.label).prefix(12))")
+        func swipeLeft() { clearTips(); app.swipeLeft(); Thread.sleep(forTimeInterval: 1.5) }
+        func turn(to expected: Int) {
+            for _ in 0..<4 where !counter.label.hasPrefix("\(expected)/") { swipeLeft() }
+            XCTAssertTrue(counter.label.hasPrefix("\(expected)/"), "expected page \(expected), got \(counter.label)")
+        }
+        for expected in 2...4 { turn(to: expected) }
+        let card = app.staticTexts["End of the free preview"]
+        for _ in 0..<3 where !card.exists { swipeLeft() }
+        XCTAssertTrue(card.waitForExistence(timeout: 10), "end-of-preview card; counter \(counter.label)")
+        let practice = app.buttons["Practice sample pages"]
+        XCTAssertTrue(practice.exists, "the practice option")
+        practice.tap()
+        let popup = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Practicing the first 3 sample pages'")).firstMatch
+        let landed = popup.waitForExistence(timeout: 8)
+        print("PROBE after tap (tips live): card=\(card.exists) counter=\(counter.exists ? counter.label : "gone") popup=\(landed) texts=\(app.staticTexts.allElementsBoundByIndex.map(\.label).prefix(16)) buttons=\(app.buttons.allElementsBoundByIndex.map(\.label).prefix(12))")
+        XCTAssertTrue(landed, "practice options after the card")
+        XCTAssertFalse(counter.exists, "the reader has gone")
     }
 }

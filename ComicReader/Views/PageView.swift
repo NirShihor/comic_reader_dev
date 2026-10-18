@@ -839,7 +839,7 @@ struct PageView: View {
                 VStack(spacing: 14) {
                     Text("End of the free preview")
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
-                    Text("The story goes on for \(pagesToGo) more pages. Practise the pages you've read, or unlock the whole comic — and every practice mode — with Comigo Unlimited.")
+                    Text("The story goes on for \(pagesToGo) more pages. Practice the sample pages, or unlock the whole comic — and every practice mode — with Comigo Unlimited.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -866,7 +866,7 @@ struct PageView: View {
                             onRequestPractice?()
                             dismiss()
                         } label: {
-                            Text("Practise these pages")
+                            Text("Practice sample pages")
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)

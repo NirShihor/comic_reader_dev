@@ -99,6 +99,19 @@ struct ComicDetailView: View {
     static func opensReaderAutomatically(autoOpenReader: Bool, tipsDue: Bool) -> Bool {
         autoOpenReader && !tipsDue
     }
+
+    /// What this screen does by itself when it appears. Only its FIRST
+    /// appearance may open the reader: an arrival is one event, and the screen
+    /// appears again every time the reader pops back to it. Deciding afresh
+    /// then would re-open the reader on the page just left — a first run whose
+    /// instant open waited for the tips must not fire it late, once the tips
+    /// have been seen, the moment the reader is closed.
+    enum ArrivalOpen: Equatable { case none, reader, resume }
+    static func arrivalOpen(autoOpenReader: Bool, tipsDue: Bool, autoResume: Bool, firstAppearance: Bool) -> ArrivalOpen {
+        guard firstAppearance else { return .none }
+        if opensReaderAutomatically(autoOpenReader: autoOpenReader, tipsDue: tipsDue) { return .reader }
+        return autoResume ? .resume : .none
+    }
     // True while "?" is replaying the sequence — bypasses the "seen" flag.
     @State private var helpReplay = false
 
@@ -315,23 +328,28 @@ struct ComicDetailView: View {
                 let tipsDue = cockpitTipsDue
                 let autoOpens = Self.opensReaderAutomatically(autoOpenReader: autoOpenReader, tipsDue: tipsDue)
                 startCockpitTips(autoOpens: autoOpens)
-                // A download that just became readable: straight into the reader,
-                // at the page it would open on anyway — unless the first-run tips
-                // for this screen haven't been shown yet (see cockpitTipsDue).
-                if autoOpens, !didAutoResume {
-                    didAutoResume = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { startNormalReading(startingPage) }
-                    return
-                }
-                // Opened via the Library "Continue" card: pick up exactly where the
-                // user left off (same spot and mode as the primary button here).
-                guard autoResume, !didAutoResume else { return }
+                // The arrival is spent on the first appearance whatever it does —
+                // the reader popping back here must never open it again.
+                let firstAppearance = !didAutoResume
                 didAutoResume = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                    if lastWasPractice {
-                        launchPractice(restart: false)
-                    } else {
-                        startNormalReading(startingPage)
+                switch Self.arrivalOpen(autoOpenReader: autoOpenReader, tipsDue: tipsDue,
+                                        autoResume: autoResume, firstAppearance: firstAppearance) {
+                case .none:
+                    break
+                case .reader:
+                    // A download that just became readable: straight into the reader,
+                    // at the page it would open on anyway — unless the first-run tips
+                    // for this screen haven't been shown yet (see cockpitTipsDue).
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { startNormalReading(startingPage) }
+                case .resume:
+                    // Opened via the Library "Continue" card: pick up exactly where the
+                    // user left off (same spot and mode as the primary button here).
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        if lastWasPractice {
+                            launchPractice(restart: false)
+                        } else {
+                            startNormalReading(startingPage)
+                        }
                     }
                 }
             }
@@ -624,7 +642,7 @@ struct ComicDetailView: View {
 
     /// What the preview's practice covers.
     private var previewPracticeNote: some View {
-        Label("Practising the first \(StoreService.previewPages) pages — Comigo Unlimited practises the whole story", systemImage: "book.pages")
+        Label("Practicing the first \(StoreService.previewPages) sample pages — Comigo Unlimited practices the whole story", systemImage: "book.pages")
             .font(.footnote.weight(.semibold))
             .foregroundStyle(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255))
             .padding(.bottom, 4)
