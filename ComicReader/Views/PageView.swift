@@ -845,6 +845,13 @@ struct PageView: View {
     /// The story pages still to come after this one.
     private var pagesToGo: Int { max(0, sortedPages.count - 1 - currentPageIndex) }
 
+    /// The card's heading: with a trial on offer, the way on is free too.
+    private var previewEndHeading: String {
+        guard store.freeTrialAvailable else { return "End of the free preview" }
+        let days = StoreService.trialDays(store.monthlyProduct) ?? 7
+        return "End of the preview — but you can continue free for another \(days) days with full access"
+    }
+
     // The end of the free preview: like the End of Episode card, but clear that
     // the story goes on — practise the free pages, or unlock the whole comic.
     @ViewBuilder
@@ -856,8 +863,10 @@ struct PageView: View {
                     .onTapGesture { withAnimation { showPreviewEnd = false } }
 
                 VStack(spacing: 14) {
-                    Text("End of the free preview")
+                    Text(previewEndHeading)
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
                     Text("The story goes on for \(pagesToGo) more pages. Practice the sample pages, or unlock the whole comic — and every practice mode — with Comigo Unlimited.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)

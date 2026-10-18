@@ -62,7 +62,7 @@ final class FreePreviewProbe: XCTestCase {
         // First, once a launch, the covers mosaic: the page tiles with covers,
         // holds, and gives way to the End-of-preview card.
         let mosaic = app.otherElements["Cover mosaic"]
-        let card = app.staticTexts["End of the free preview"]
+        let card = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'End of the'")).firstMatch
         XCTAssertTrue(mosaic.waitForExistence(timeout: 5), "the covers mosaic first; counter \(counter.label)")
         XCTAssertFalse(card.exists, "no card while the mosaic plays")
         let mosaicEnd = Date().addingTimeInterval(10)
@@ -230,7 +230,7 @@ final class FreePreviewProbe: XCTestCase {
         }
         for expected in 2...4 { turn(to: expected) }
         swipeLeft()
-        let card = app.staticTexts["End of the free preview"]
+        let card = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'End of the'")).firstMatch
         XCTAssertTrue(card.waitForExistence(timeout: 10), "end-of-preview card; counter \(counter.label)")
         let practice = app.buttons["Practice sample pages"]
         XCTAssertTrue(practice.exists, "the practice option")
@@ -302,7 +302,7 @@ final class FreePreviewProbe: XCTestCase {
             XCTAssertTrue(counter.label.hasPrefix("\(expected)/"), "expected page \(expected), got \(counter.label)")
         }
         for expected in 2...4 { turn(to: expected) }
-        let card = app.staticTexts["End of the free preview"]
+        let card = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'End of the'")).firstMatch
         for _ in 0..<3 where !card.exists { swipeLeft() }
         XCTAssertTrue(card.waitForExistence(timeout: 10), "end-of-preview card; counter \(counter.label)")
         let practice = app.buttons["Practice sample pages"]
