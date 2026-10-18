@@ -314,4 +314,42 @@ final class FreePreviewProbe: XCTestCase {
         XCTAssertTrue(landed, "practice options after the card")
         XCTAssertFalse(counter.exists, "the reader has gone")
     }
+
+    /// Diagnostic: screenshots of the covers mosaic as it plays, written to
+    /// /tmp/claude-501/mosaic-*.png (simulator only).
+    func testMosaicScreenshots() throws {
+        let app = XCUIApplication()
+        var args = ["-demo.hideCues", "YES", "-creatorMessage.seen", "YES", "-spanishLevel", "beginner"]
+        for k in ["library-title", "choose-collection", "comic-cockpit", "cover-text", "page-swipe", "story-bubble",
+                  "hotspot-info", "bubble-panel", "word-detail", "story-arrows", "help-reminder",
+                  "collection-download", "collection-open-after-download"] {
+            args += ["-help.seen.\(k)", "YES"]
+        }
+        app.launchArguments = args
+        app.launch()
+        app.buttons["Get started"].tap()
+        let collection = app.staticTexts["EL REY NEGRO"].firstMatch
+        XCTAssertTrue(collection.waitForExistence(timeout: 20)); collection.tap()
+        let downloads = app.buttons.matching(NSPredicate(format: "label == 'Download'"))
+        XCTAssertTrue(downloads.firstMatch.waitForExistence(timeout: 20))
+        (downloads.count > 1 ? downloads.element(boundBy: 1) : downloads.firstMatch).tap()
+        let start = app.staticTexts["Start reading"].firstMatch
+        let counter = app.staticTexts.matching(NSPredicate(format: "label MATCHES '^[0-9]+/[0-9]+$'")).firstMatch
+        let deadline = Date().addingTimeInterval(180)
+        while Date() < deadline, !counter.exists, !start.exists { Thread.sleep(forTimeInterval: 1.0) }
+        if !counter.waitForExistence(timeout: 5), start.waitForExistence(timeout: 5), start.exists { start.tap() }
+        XCTAssertTrue(counter.waitForExistence(timeout: 20))
+        func swipeLeft() { app.swipeLeft(); Thread.sleep(forTimeInterval: 1.5) }
+        for expected in 2...4 { for _ in 0..<3 where !counter.label.hasPrefix("\(expected)/") { swipeLeft() } }
+        app.swipeLeft()
+        let mosaic = app.otherElements["Cover mosaic"]
+        XCTAssertTrue(mosaic.waitForExistence(timeout: 5))
+        for (i, wait) in [0.6, 1.2, 1.5].enumerated() {
+            Thread.sleep(forTimeInterval: wait)
+            let png = XCUIScreen.main.screenshot().pngRepresentation
+            try png.write(to: URL(fileURLWithPath: "/tmp/claude-501/mosaic-\(i).png"))
+        }
+        Thread.sleep(forTimeInterval: 2.5)
+        try XCUIScreen.main.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: "/tmp/claude-501/mosaic-card.png"))
+    }
 }

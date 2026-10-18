@@ -44,16 +44,19 @@ enum CoverMosaic {
         }
     }
 
-    /// Edge to edge: about three covers across a phone (more on a wider
-    /// page), 2:3 tiles, and as many rows as it takes to cover the page —
-    /// the last row runs off the bottom edge rather than leave a strip bare.
+    /// The page tiled exactly: about three covers across a phone (more on a
+    /// wider page), whole rows from top to bottom, nothing cut off. Tiles are
+    /// 2:3 as near as the rows allow — the last few points go into the tile
+    /// height, and the cover is cropped to it.
     static func grid(in size: CGSize, gap: CGFloat = 8) -> Grid? {
         guard size.width > 0, size.height > 0 else { return nil }
         let columns = max(3, Int((size.width / 130).rounded()))
         let w = floor((size.width - CGFloat(columns - 1) * gap) / CGFloat(columns))
-        let h = (w * 1.5).rounded()
         guard w > 0 else { return nil }
-        let rows = max(1, Int(ceil((size.height + gap) / (h + gap))))
+        let ideal = w * 1.5
+        let rows = max(1, Int(((size.height + gap) / (ideal + gap)).rounded()))
+        let h = floor((size.height - CGFloat(rows - 1) * gap) / CGFloat(rows))
+        guard h > 0 else { return nil }
         let gridW = CGFloat(columns) * w + CGFloat(columns - 1) * gap
         let gridH = CGFloat(rows) * h + CGFloat(rows - 1) * gap
         return Grid(columns: columns, rows: rows, tile: CGSize(width: w, height: h),
@@ -137,7 +140,7 @@ struct CoverMosaicView: View {
     @State private var shown: Set<Int> = []
     @State private var captionShown = false
     @State private var finished = false
-    @State private var cells = 0   // how many tiles this page takes, once laid out
+    @State private var started = false   // the run begins once, from a real layout
 
     var body: some View {
         GeometryReader { geo in
@@ -173,10 +176,9 @@ struct CoverMosaicView: View {
                 .frame(width: geo.size.width, height: geo.size.height)
             }
             .frame(width: geo.size.width, height: geo.size.height)
-            .clipped()
             .onAppear { play(cells: CoverMosaic.grid(in: geo.size)?.capacity ?? 0) }
+            .onChange(of: geo.size) { _, size in play(cells: CoverMosaic.grid(in: size)?.capacity ?? 0) }
         }
-        .ignoresSafeArea()
         .contentShape(Rectangle())
         .onTapGesture { finish() }
         .accessibilityElement(children: .ignore)
@@ -185,8 +187,10 @@ struct CoverMosaicView: View {
     }
 
     private func play(cells: Int) {
-        guard self.cells == 0 else { return }   // laid out once
-        self.cells = cells
+        // A first layout pass can be zero-sized: wait for the real one, then
+        // run exactly once — a second start would end the run early.
+        guard !started, cells > 0 else { return }
+        started = true
         let times = CoverMosaic.entrances(count: cells)
         for (index, at) in times.enumerated() {
             DispatchQueue.main.asyncAfter(deadline: .now() + at) {

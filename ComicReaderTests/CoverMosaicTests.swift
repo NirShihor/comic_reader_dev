@@ -9,24 +9,26 @@ import XCTest
 final class CoverMosaicTests: XCTestCase {
     private let phone = CGSize(width: 390, height: 844)
 
-    func testAPhonePageIsTiledEdgeToEdgeInThreeColumns() throws {
+    func testAPhonePageIsTiledExactlyInThreeColumns() throws {
         let grid = try XCTUnwrap(CoverMosaic.grid(in: phone))
         XCTAssertEqual(grid.columns, 3)
-        XCTAssertEqual(grid.tile.height, (grid.tile.width * 1.5).rounded(), "2:3 covers")
-        // Edge to edge: the first column starts at the left edge, the last ends
-        // at the right; the rows cover the whole height (the last may run off).
+        XCTAssertEqual(grid.rows, 4)
+        // Edge to edge both ways: nothing cut off, nothing left bare.
         XCTAssertEqual(grid.frame(of: 0).minX, 0, accuracy: 1)
-        XCTAssertEqual(grid.frame(of: 2).maxX, phone.width, accuracy: 1)
-        XCTAssertLessThanOrEqual(grid.frame(of: 0).minY, 0)
-        XCTAssertGreaterThanOrEqual(grid.frame(of: grid.capacity - 1).maxY, phone.height)
-        XCTAssertEqual(grid.capacity, grid.columns * grid.rows)
-        XCTAssertGreaterThanOrEqual(grid.capacity, 15, "a dozen published covers don't fill a phone page")
+        XCTAssertEqual(grid.frame(of: 0).minY, 0, accuracy: 1)
+        XCTAssertEqual(grid.frame(of: 2).maxX, phone.width, accuracy: 1.5)
+        XCTAssertEqual(grid.frame(of: grid.capacity - 1).maxY, phone.height, accuracy: 1.5)
+        // Near enough 2:3 that a cover crops only a little.
+        let ratio = grid.tile.height / grid.tile.width
+        XCTAssertGreaterThan(ratio, 1.4); XCTAssertLessThan(ratio, 1.75)
+        XCTAssertEqual(grid.capacity, 12)
     }
 
     func testAWiderPageTakesMoreColumns() throws {
         let pad = try XCTUnwrap(CoverMosaic.grid(in: CGSize(width: 820, height: 1180)))
         XCTAssertGreaterThan(pad.columns, 3)
-        XCTAssertEqual(pad.frame(of: pad.columns - 1).maxX, 820, accuracy: 1)
+        XCTAssertEqual(pad.frame(of: pad.columns - 1).maxX, 820, accuracy: 1.5)
+        XCTAssertEqual(pad.frame(of: pad.capacity - 1).maxY, 1180, accuracy: 1.5)
     }
 
     func testEveryCellGetsACoverGoingRoundAgainWhenShort() {
