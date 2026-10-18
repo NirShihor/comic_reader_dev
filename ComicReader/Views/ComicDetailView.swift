@@ -673,7 +673,10 @@ struct ComicDetailView: View {
                     }
                     .padding(18)
                 }
-                .frame(maxWidth: 360, maxHeight: 560)
+                // Tall enough for the preview note plus the cards on a phone;
+                // the rest (Drill the key words) scrolls, and says so.
+                .frame(maxWidth: 360, maxHeight: 640)
+                .scrollIndicators(.visible)
                 .background(Color(.systemGroupedBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .overlay(alignment: .topTrailing) {
