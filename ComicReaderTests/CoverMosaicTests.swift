@@ -1,34 +1,54 @@
 import XCTest
 @testable import ComicReader
 
-/// The covers mosaic before the End-of-preview card: the page tiled edge to
-/// edge with 2:3 covers (published first, unpublished to fill, round again if
-/// short), timed so every cover is in within about two seconds before the
-/// hold, and off for the UI probes that don't want it.
+/// The covers mosaic before the End-of-preview card: the reel's layout (from
+/// three columns up, the first count whose 2:3 tiles fit every cover inside
+/// the margin), every cover once (published first), timed so the lot is in
+/// within about two seconds before the hold, and off for the UI probes that
+/// don't want it.
 @MainActor
 final class CoverMosaicTests: XCTestCase {
     private let phone = CGSize(width: 390, height: 844)
 
-    func testAPhonePageIsTiledExactlyInThreeColumns() throws {
-        let grid = try XCTUnwrap(CoverMosaic.grid(in: phone))
-        XCTAssertEqual(grid.columns, 3)
-        XCTAssertEqual(grid.rows, 4)
-        // Edge to edge both ways: nothing cut off, nothing left bare.
-        XCTAssertEqual(grid.frame(of: 0).minX, 0, accuracy: 1)
-        XCTAssertEqual(grid.frame(of: 0).minY, 0, accuracy: 1)
-        XCTAssertEqual(grid.frame(of: 2).maxX, phone.width, accuracy: 1.5)
-        XCTAssertEqual(grid.frame(of: grid.capacity - 1).maxY, phone.height, accuracy: 1.5)
-        // Near enough 2:3 that a cover crops only a little.
-        let ratio = grid.tile.height / grid.tile.width
-        XCTAssertGreaterThan(ratio, 1.4); XCTAssertLessThan(ratio, 1.75)
-        XCTAssertEqual(grid.capacity, 12)
+    /// The reel's layout on a phone screen (below the status bar and above
+    /// the home indicator): thirty covers go five across in six rows.
+    func testThirtyCoversTileFiveAcrossOnAPhone() throws {
+        let screen = CGSize(width: 390, height: 763)
+        let grid = try XCTUnwrap(CoverMosaic.grid(count: 30, in: screen))
+        XCTAssertEqual(grid.columns, 5)
+        XCTAssertEqual(grid.rows, 6)
+        XCTAssertEqual(grid.capacity, 30)
+        XCTAssertEqual(grid.tile.height, (grid.tile.width * 1.5).rounded(), "2:3 covers")
+        // Inside the margin, centred.
+        XCTAssertGreaterThanOrEqual(grid.frame(of: 0).minX, 16)
+        XCTAssertGreaterThanOrEqual(grid.frame(of: 0).minY, 16)
+        let last = grid.frame(of: 29)
+        XCTAssertLessThanOrEqual(last.maxX, screen.width - 16)
+        XCTAssertLessThanOrEqual(last.maxY, screen.height - 16)
+        XCTAssertEqual(grid.frame(of: 0).minX, screen.width - last.maxX, accuracy: 1, "centred horizontally")
+        XCTAssertEqual(grid.frame(of: 0).minY, screen.height - last.maxY, accuracy: 1, "centred vertically")
     }
 
-    func testAWiderPageTakesMoreColumns() throws {
-        let pad = try XCTUnwrap(CoverMosaic.grid(in: CGSize(width: 820, height: 1180)))
-        XCTAssertGreaterThan(pad.columns, 3)
-        XCTAssertEqual(pad.frame(of: pad.columns - 1).maxX, 820, accuracy: 1.5)
-        XCTAssertEqual(pad.frame(of: pad.capacity - 1).maxY, 1180, accuracy: 1.5)
+    func testFewerCoversGetBiggerTiles() throws {
+        let screen = CGSize(width: 390, height: 763)
+        let dozen = try XCTUnwrap(CoverMosaic.grid(count: 12, in: screen))
+        XCTAssertEqual(dozen.columns, 3)
+        XCTAssertEqual(dozen.rows, 4)
+        let thirty = try XCTUnwrap(CoverMosaic.grid(count: 30, in: screen))
+        XCTAssertGreaterThan(dozen.tile.width, thirty.tile.width)
+    }
+
+    func testAScreenThatCannotHoldThemAllShowsTheFirstOnes() throws {
+        let grid = try XCTUnwrap(CoverMosaic.grid(count: 400, in: phone))
+        XCTAssertEqual(grid.columns, 8)
+        XCTAssertLessThan(grid.capacity, 400)
+        XCTAssertLessThanOrEqual(grid.frame(of: grid.capacity - 1).maxY, phone.height - 16)
+    }
+
+    func testAWiderScreenStillFitsInsideItsMargin() throws {
+        let pad = try XCTUnwrap(CoverMosaic.grid(count: 30, in: CGSize(width: 820, height: 1180)))
+        XCTAssertLessThanOrEqual(pad.frame(of: 29).maxX, 820 - 16)
+        XCTAssertLessThanOrEqual(pad.frame(of: 29).maxY, 1180 - 16)
     }
 
     func testEveryCellGetsACoverGoingRoundAgainWhenShort() {
@@ -39,7 +59,8 @@ final class CoverMosaicTests: XCTestCase {
     }
 
     func testNothingToLayOutIsNoGrid() {
-        XCTAssertNil(CoverMosaic.grid(in: .zero))
+        XCTAssertNil(CoverMosaic.grid(count: 0, in: phone))
+        XCTAssertNil(CoverMosaic.grid(count: 5, in: CGSize(width: 30, height: 30)))
     }
 
     func testTheServerListingLeadsPublishedFirstAndTheCatalogueIsTheFallback() {

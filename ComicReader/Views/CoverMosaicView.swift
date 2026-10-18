@@ -2,13 +2,13 @@ import SwiftUI
 import UIKit
 
 /// The covers mosaic that plays once at the end of the free preview, before
-/// the End-of-preview card: a violet page on which comic covers pop in, left
-/// to right, top to bottom, until the whole page is tiled (the reels'
-/// sign-off treatment), hold for two seconds, and give way to the card.
+/// the End-of-preview card: the reels' sign-off — a violet screen on which
+/// every comic's cover pops in, left to right, top to bottom, as the largest
+/// 2:3 tiles that fit them all; a two-second hold; then the card.
 ///
-/// Every published comic's cover comes first, in catalogue order; the
-/// unpublished ones fill the page out, and if that's still short the covers
-/// go round again. They're fetched when a preview opens (URLCache answers at
+/// Every published comic's cover comes first, in catalogue order, then the
+/// unpublished ones — each once; only a page with more cells than covers
+/// sees one again. They're fetched when a preview opens (URLCache answers at
 /// once for the ones the Library has shown). The mosaic plays at most once
 /// per launch, never under Reduce Motion, never without enough covers, and
 /// never when `preview.coverMosaic` is NO (the UI probes).
@@ -44,28 +44,33 @@ enum CoverMosaic {
         }
     }
 
-    /// The page tiled exactly: about three covers across a phone (more on a
-    /// wider page), whole rows from top to bottom, nothing cut off. Tiles are
-    /// 2:3 as near as the rows allow — the last few points go into the tile
-    /// height, and the cover is cropped to it.
-    static func grid(in size: CGSize, gap: CGFloat = 8) -> Grid? {
-        guard size.width > 0, size.height > 0 else { return nil }
-        let columns = max(3, Int((size.width / 130).rounded()))
-        let w = floor((size.width - CGFloat(columns - 1) * gap) / CGFloat(columns))
-        guard w > 0 else { return nil }
-        let ideal = w * 1.5
-        let rows = max(1, Int(((size.height + gap) / (ideal + gap)).rounded()))
-        let h = floor((size.height - CGFloat(rows - 1) * gap) / CGFloat(rows))
-        guard h > 0 else { return nil }
-        let gridW = CGFloat(columns) * w + CGFloat(columns - 1) * gap
-        let gridH = CGFloat(rows) * h + CGFloat(rows - 1) * gap
-        return Grid(columns: columns, rows: rows, tile: CGSize(width: w, height: h),
+    /// As the reel lays it out: inside the margin, from three columns up,
+    /// the first column count whose 2:3 tiles fit every cover on the screen.
+    /// Past eight columns the screen is full and the last covers are left out.
+    static func grid(count: Int, in size: CGSize, margin: CGFloat = 16, gap: CGFloat = 5) -> Grid? {
+        guard count > 0, size.width > 2 * margin, size.height > 2 * margin else { return nil }
+        let innerW = size.width - 2 * margin, innerH = size.height - 2 * margin
+        var chosen: (cols: Int, rows: Int, w: CGFloat, h: CGFloat)?
+        for cols in 3...8 {
+            let w = floor((innerW - CGFloat(cols - 1) * gap) / CGFloat(cols))
+            let h = (w * 1.5).rounded()
+            let rows = Int(ceil(Double(count) / Double(cols)))
+            if CGFloat(rows) * h + CGFloat(rows - 1) * gap <= innerH { chosen = (cols, rows, w, h); break }
+            if cols == 8 {
+                let fit = max(1, Int(floor((innerH + gap) / (h + gap))))
+                chosen = (cols, min(rows, fit), w, h)
+            }
+        }
+        guard let c = chosen, c.w > 0 else { return nil }
+        let gridW = CGFloat(c.cols) * c.w + CGFloat(c.cols - 1) * gap
+        let gridH = CGFloat(c.rows) * c.h + CGFloat(c.rows - 1) * gap
+        return Grid(columns: c.cols, rows: c.rows, tile: CGSize(width: c.w, height: c.h),
                     origin: CGPoint(x: ((size.width - gridW) / 2).rounded(), y: ((size.height - gridH) / 2).rounded()),
                     gap: gap)
     }
 
-    /// The cover for each cell: the list in order, then round again until
-    /// every cell has one.
+    /// The cover for each cell: the list in order — and only if the last row
+    /// still has empty cells, round again.
     static func fill<T>(_ covers: [T], cells: Int) -> [T] {
         guard !covers.isEmpty, cells > 0 else { return [] }
         return (0..<cells).map { covers[$0 % covers.count] }
@@ -131,30 +136,34 @@ enum CoverMosaic {
     }
 }
 
-/// The mosaic itself. Calls `onFinished` when the hold is over — or at once
-/// on a tap, for anyone who'd rather get on to the card.
+/// The mosaic itself, presented full screen over the reader (bars and all).
+/// It fades itself in and out — the cover is presented and dismissed without
+/// the system slide — and calls `onFinished` once faded out after the hold,
+/// or after a tap, for anyone who'd rather get on to the card.
 struct CoverMosaicView: View {
     let covers: [UIImage]
     let onFinished: () -> Void
 
+    @State private var visible = false
     @State private var shown: Set<Int> = []
     @State private var captionShown = false
-    @State private var finished = false
     @State private var started = false   // the run begins once, from a real layout
+    @State private var finished = false
 
     var body: some View {
         GeometryReader { geo in
+            let grid = CoverMosaic.grid(count: covers.count, in: geo.size)
             ZStack(alignment: .topLeading) {
-                CoverMosaic.violet
-                if let grid = CoverMosaic.grid(in: geo.size) {
+                CoverMosaic.violet.ignoresSafeArea()
+                if let grid {
                     ForEach(Array(CoverMosaic.fill(covers, cells: grid.capacity).enumerated()), id: \.offset) { index, cover in
                         let f = grid.frame(of: index)
                         Image(uiImage: cover)
                             .resizable()
                             .scaledToFill()
                             .frame(width: f.width, height: f.height)
-                            .clipShape(RoundedRectangle(cornerRadius: max(6, f.width * 0.09), style: .continuous))
-                            .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
+                            .clipShape(RoundedRectangle(cornerRadius: max(4, f.width * 0.09), style: .continuous))
+                            .shadow(color: .black.opacity(0.25), radius: 4, y: 2)
                             .scaleEffect(shown.contains(index) ? 1 : 0.5)
                             .opacity(shown.contains(index) ? 1 : 0)
                             .position(x: f.midX, y: f.midY)
@@ -170,20 +179,22 @@ struct CoverMosaicView: View {
                         .padding(.vertical, 10)
                         .background(.black.opacity(0.55), in: Capsule())
                         .padding(.horizontal, 24)
-                        .padding(.bottom, 36)
+                        .padding(.bottom, 8)
                         .opacity(captionShown ? 1 : 0)
                 }
                 .frame(width: geo.size.width, height: geo.size.height)
             }
             .frame(width: geo.size.width, height: geo.size.height)
-            .onAppear { play(cells: CoverMosaic.grid(in: geo.size)?.capacity ?? 0) }
-            .onChange(of: geo.size) { _, size in play(cells: CoverMosaic.grid(in: size)?.capacity ?? 0) }
+            .onAppear { play(cells: grid?.capacity ?? 0) }
+            .onChange(of: geo.size) { _, size in play(cells: CoverMosaic.grid(count: covers.count, in: size)?.capacity ?? 0) }
         }
+        .opacity(visible ? 1 : 0)
         .contentShape(Rectangle())
         .onTapGesture { finish() }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Every Comigo comic")
         .accessibilityIdentifier("Cover mosaic")
+        .onAppear { withAnimation(.easeInOut(duration: CoverMosaic.crossfade)) { visible = true } }
     }
 
     private func play(cells: Int) {
@@ -193,19 +204,20 @@ struct CoverMosaicView: View {
         started = true
         let times = CoverMosaic.entrances(count: cells)
         for (index, at) in times.enumerated() {
-            DispatchQueue.main.asyncAfter(deadline: .now() + at) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + CoverMosaic.crossfade + at) {
                 withAnimation(.easeOut(duration: CoverMosaic.popIn)) { _ = shown.insert(index) }
             }
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + (times.last ?? 0)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + CoverMosaic.crossfade + (times.last ?? 0)) {
             withAnimation(.easeOut(duration: 0.3)) { captionShown = true }
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + CoverMosaic.duration(count: cells)) { finish() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + CoverMosaic.crossfade + CoverMosaic.duration(count: cells)) { finish() }
     }
 
     private func finish() {
         guard !finished else { return }
         finished = true
-        onFinished()
+        withAnimation(.easeInOut(duration: CoverMosaic.crossfade)) { visible = false }
+        DispatchQueue.main.asyncAfter(deadline: .now() + CoverMosaic.crossfade) { onFinished() }
     }
 }

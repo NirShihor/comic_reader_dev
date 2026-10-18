@@ -829,24 +829,17 @@ struct PageView: View {
         if CoverMosaic.isEnabled(), !CoverMosaic.playedThisLaunch, !reduceMotion,
            mosaicCovers.count >= CoverMosaic.minimumCovers {
             CoverMosaic.playedThisLaunch = true
-            withAnimation(.easeInOut(duration: CoverMosaic.crossfade)) { showCoverMosaic = true }
+            Self.withoutPresentationAnimation { showCoverMosaic = true }   // it fades itself in
         } else {
             withAnimation { showPreviewEnd = true }
         }
     }
 
-    @ViewBuilder
-    private var coverMosaicOverlay: some View {
-        if showCoverMosaic {
-            CoverMosaicView(covers: mosaicCovers) {
-                withAnimation(.easeInOut(duration: CoverMosaic.crossfade)) {
-                    showCoverMosaic = false
-                    showPreviewEnd = true
-                }
-            }
-            .transition(.opacity)
-            .zIndex(4)
-        }
+    /// Present or dismiss a cover with no system slide (the content crossfades itself).
+    private static func withoutPresentationAnimation(_ change: () -> Void) {
+        var t = Transaction()
+        t.disablesAnimations = true
+        withTransaction(t, change)
     }
 
     /// The story pages still to come after this one.
@@ -1520,6 +1513,13 @@ struct PageView: View {
             .sheet(isPresented: $showPreviewPaywall) {
                 PaywallView(source: .previewLimit, pagesToGo: pagesToGo)
             }
+            // The covers mosaic, over everything — bars included — like the reel.
+            .fullScreenCover(isPresented: $showCoverMosaic, onDismiss: { withAnimation { showPreviewEnd = true } }) {
+                CoverMosaicView(covers: mosaicCovers) {
+                    Self.withoutPresentationAnimation { showCoverMosaic = false }
+                }
+                .presentationBackground(.clear)
+            }
 
             .onChange(of: store.hasUnlimited) { _, unlocked in
                 // Subscribed (here, or in Settings underneath): the paywall closes
@@ -1721,7 +1721,6 @@ struct PageView: View {
 
             endOfEpisodeOverlay
             previewEndOverlay
-            coverMosaicOverlay
         }
         .sheet(item: $selectedHotspot, onDismiss: {
             // Opt-in per hotspot: closing its popup turns the page (never on
