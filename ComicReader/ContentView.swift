@@ -1480,7 +1480,7 @@ final class StoreService: ObservableObject {
     }
 
     /// Story pages after the cover that anyone may read of a comic they
-    /// aren't entitled to ("3 pages free").
+    /// aren't entitled to.
     static let previewPages = 3
 
     static func access(entitled: Bool, classification: AccessModelService.Classification,

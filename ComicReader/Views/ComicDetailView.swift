@@ -852,11 +852,6 @@ struct ComicDetailView: View {
                 Text("· \(comic.pages.count) pages")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-                if isPreview {
-                    Text("· \(StoreService.previewPages) pages free")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255))
-                }
             }
             .padding(.top, 2)
         }

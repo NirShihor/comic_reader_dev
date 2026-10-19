@@ -806,26 +806,9 @@ struct LibraryView: View {
 }
 
 // MARK: - Comic Card
-/// "3 pages free": a downloaded comic the reader can only preview — the
-/// cover and the first StoreService.previewPages story pages.
-struct PreviewBadge: View {
-    var body: some View {
-        Text("\(StoreService.previewPages) pages free")
-            .font(.caption)
-            .fontWeight(.semibold)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255).opacity(0.15))
-            .foregroundStyle(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255))
-            .clipShape(Capsule())
-            .fixedSize()
-    }
-}
-
 struct ComicCard: View {
     let comic: Comic
     let progress: ReadingProgress?
-    @ObservedObject private var store = StoreService.shared
 
     var body: some View {
         HStack(spacing: 16) {
@@ -873,10 +856,6 @@ struct ComicCard: View {
                         Image(systemName: "star.fill")
                             .font(.caption)
                             .foregroundStyle(.yellow)
-                    }
-
-                    if store.access(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle) == .preview {
-                        PreviewBadge()
                     }
 
                     Spacer()
