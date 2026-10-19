@@ -26,17 +26,9 @@ struct ContentView: View {
     @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore = false
     /// landing_viewed is counted once per launch (ContentView lives for the whole launch).
     @State private var landingTracked = false
-    /// How long landing_viewed waits so `trial_offer_shown` reflects what the
-    /// user actually saw: products and eligibility arrive from StoreKit shortly
-    /// after launch, and the landing intro itself runs longer than this.
-    static let landingViewedDelay: TimeInterval = 2.0
     // Asked once, right after the landing screen, until a level is chosen —
     // a Comigo screen, not a system prompt, and unrelated to analytics consent.
     @AppStorage(SpanishLevel.storageKey) private var spanishLevelRaw = ""
-    // Free-trial offer on the landing screen: eligible new-model users only
-    // (StoreKit-confirmed), independent of analytics consent.
-    @ObservedObject private var store = StoreService.shared
-    @State private var showTrialPaywall = false
     @EnvironmentObject private var progressManager: ReadingProgressManager
     @EnvironmentObject private var notebookManager: NotebookManager
     private var returningUser: Bool {
@@ -70,36 +62,24 @@ struct ContentView: View {
         // until the splash is done keeps the intro smooth.
         Group {
             if showSplash {
+                // Nothing is sold on the way in: everyone gets straight to the
+                // comics, where the first three pages of each are free and the
+                // subscription is offered when they want page four.
                 LandingView(
                     ctaTitle: returningUser ? "Continue learning" : "Get started",
                     onGetStarted: {
                         AnalyticsService.shared.track(.landingCtaTapped(
-                            cta: returningUser ? .continueLearning : .getStarted, trialOfferShown: store.showsTrialBanner))
+                            cta: returningUser ? .continueLearning : .getStarted, trialOfferShown: false))
                         enterApp()
-                    },
-                    trialOffer: store.showsTrialBanner ? LandingView.TrialOffer(
-                        days: StoreService.trialDays(store.monthlyProduct) ?? 7,
-                        priceLine: store.monthlyProduct.map {
-                            "then \($0.displayPrice) / \(StoreService.billingPeriodText($0)) · cancel anytime"
-                        }) : nil,
-                    onStartTrial: {
-                        AnalyticsService.shared.track(.landingCtaTapped(cta: .startTrial, trialOfferShown: true))
-                        showTrialPaywall = true
                     }
                 )
-                // The trial button is the way in for eligible new users: whether
-                // they start the trial or close the paywall, they then enter the app.
-                .sheet(isPresented: $showTrialPaywall, onDismiss: enterApp) { PaywallView(source: .landingScreen) }
-                // Counted once per launch, a moment in so the trial offer (which
-                // waits on StoreKit) has had its chance to appear; re-renders of
-                // the landing screen don't count again.
+                // Counted once per launch; re-renders of the landing screen
+                // don't count again. (`trial_offer_shown` is kept for the
+                // server's schema — the landing screen no longer offers one.)
                 .onAppear {
                     guard !landingTracked else { return }
                     landingTracked = true
-                    let returning = returningUser
-                    DispatchQueue.main.asyncAfter(deadline: .now() + Self.landingViewedDelay) {
-                        AnalyticsService.shared.track(.landingViewed(returning: returning, trialOfferShown: store.showsTrialBanner))
-                    }
+                    AnalyticsService.shared.track(.landingViewed(returning: returningUser, trialOfferShown: false))
                 }
             } else if SpanishLevel(rawValue: spanishLevelRaw) == nil {
                 SpanishLevelView { level in
@@ -296,16 +276,8 @@ private struct Squiggle: Shape {
 /// First-run / landing screen — COMIGO logo on a solid violet field with the
 /// "Spanish." tagline and "Get started" CTA.
 struct LandingView: View {
-    struct TrialOffer: Equatable {
-        let days: Int
-        let priceLine: String?
-    }
-
     var ctaTitle: String = "Get started"
     var onGetStarted: () -> Void = {}
-    /// Shown only when StoreKit says this new-model user is eligible.
-    var trialOffer: TrialOffer? = nil
-    var onStartTrial: () -> Void = {}
     // iPad (regular width): the iPhone layout's hand-tuned offsets pin content
     // low and stretch the CTA — centre a fixed-width column instead.
     @Environment(\.horizontalSizeClass) private var hSize
@@ -358,42 +330,19 @@ struct LandingView: View {
                     .offset(y: isPad ? 0 : -70)
                     .padding(.top, 24)
 
-                // Eligible new users: the free trial is the way in (the paywall
-                // opens, then they enter the app either way). Everyone else:
-                // Get started / Continue learning.
-                if let trialOffer {
-                    Button(action: onStartTrial) {
-                        VStack(spacing: 3) {
-                            Label("Start your \(trialOffer.days)-day free trial", systemImage: "sparkles")
-                                .font(Brand.body(16, .heavy))
-                            if let line = trialOffer.priceLine {
-                                Text(line)
-                                    .font(Brand.body(12.5, .semibold))
-                                    .opacity(0.75)
-                            }
-                        }
+                // Get started / Continue learning — the only way in. The
+                // subscription is offered in the reader, after the free pages.
+                Button(action: onGetStarted) {
+                    Text(ctaTitle)
+                        .font(Brand.body(16, .heavy))
                         .foregroundColor(Brand.ink)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 13)
+                        .padding(.vertical, 16)
                         .background(RoundedRectangle(cornerRadius: 15, style: .continuous).fill(Color.white))
                         .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(Brand.ink, lineWidth: 3.5))
                         .shadow(color: Brand.ink.opacity(0.25), radius: 10, x: 0, y: 8)
-                    }
-                    .padding(.top, 30)
-                    .transition(.opacity)
-                } else {
-                    Button(action: onGetStarted) {
-                        Text(ctaTitle)
-                            .font(Brand.body(16, .heavy))
-                            .foregroundColor(Brand.ink)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(RoundedRectangle(cornerRadius: 15, style: .continuous).fill(Color.white))
-                            .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(Brand.ink, lineWidth: 3.5))
-                            .shadow(color: Brand.ink.opacity(0.25), radius: 10, x: 0, y: 8)
-                    }
-                    .padding(.top, 30)
                 }
+                .padding(.top, 30)
 
                 if isPad { Spacer() }
             }
@@ -1518,6 +1467,70 @@ final class StoreService: ObservableObject {
                         episodeNumber: episodeNumber, collectionId: collectionId)
     }
 
+    // MARK: - Free preview
+
+    /// What a reader may do with one comic: everything, or the free preview —
+    /// the cover plus the first `previewPages` story pages, with their audio,
+    /// translations and in-reader word features. Whole-comic practice modes
+    /// need `.full`. Nobody gets less than the preview: a comic that isn't
+    /// unlocked (see `isUnlocked`) can always be downloaded and previewed.
+    enum ComicAccess: Equatable {
+        case full
+        case preview
+    }
+
+    /// Story pages after the cover that anyone may read of a comic they
+    /// aren't entitled to ("3 pages free").
+    static let previewPages = 3
+
+    static func access(entitled: Bool, classification: AccessModelService.Classification,
+                       episodeNumber: Int?, collectionId: String?) -> ComicAccess {
+        isUnlocked(entitled: entitled, classification: classification,
+                   episodeNumber: episodeNumber, collectionId: collectionId) ? .full : .preview
+    }
+
+    func access(episodeNumber: Int?, collectionId: String?) -> ComicAccess {
+        Self.access(entitled: hasUnlimited, classification: AccessModelService.shared.classification,
+                    episodeNumber: episodeNumber, collectionId: collectionId)
+    }
+
+    /// Whether the page numbered `pageNumber` may be read under `access`. Every
+    /// export numbers its cover 1 and the story pages 2, 3, 4… (readerFormat),
+    /// so the preview is pages 1…previewPages+1 and the paywall meets the
+    /// reader on the way to page previewPages+2.
+    static func isPageReadable(pageNumber: Int, access: ComicAccess) -> Bool {
+        access == .full || pageNumber <= 1 + previewPages
+    }
+
+    /// The comic's story pages a reader with `access` may use, in reading
+    /// order — what every practice mode draws its sentences and words from.
+    static func readablePages(of comic: Comic, access: ComicAccess) -> [Page] {
+        comic.pages.sorted { $0.pageNumber < $1.pageNumber }
+            .filter { isPageReadable(pageNumber: $0.pageNumber, access: access) }
+    }
+
+    /// The drill words from those pages. Words on the key-phrase practice
+    /// pages belong to the whole comic and aren't part of the preview.
+    static func readableReviewWords(of comic: Comic, access: ComicAccess) -> [ReviewWord] {
+        let words = comic.reviewWords ?? []
+        guard access == .preview else { return words }
+        let pageIds = Set(readablePages(of: comic, access: access).map(\.id))
+        return words.filter { pageIds.contains($0.pageId) }
+    }
+
+    func readablePages(of comic: Comic) -> [Page] {
+        Self.readablePages(of: comic, access: access(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle))
+    }
+
+    /// `access`, as the stage counts name it.
+    func accessKind(of comic: Comic) -> ComicAccessKind {
+        access(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle) == .full ? .full : .preview
+    }
+
+    func readableReviewWords(of comic: Comic) -> [ReviewWord] {
+        Self.readableReviewWords(of: comic, access: access(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle))
+    }
+
     // MARK: - Paywall state
 
     enum PaywallMode: Equatable {
@@ -1600,6 +1613,9 @@ final class StoreService: ObservableObject {
 struct PaywallView: View {
     /// What opened the paywall, for analytics; nil for the debug screenshot preview.
     let source: PaywallSource?
+    /// From the free preview's last page: how much of this comic is still to
+    /// come, so the offer reads as the way on, not the end of the story.
+    var pagesToGo: Int? = nil
     @Environment(\.dismiss) private var dismiss
     @StateObject private var store = StoreService.shared
     @ObservedObject private var access = AccessModelService.shared
@@ -1619,6 +1635,9 @@ struct PaywallView: View {
     private var trialDays: Int { StoreService.trialDays(monthly) ?? 7 }
 
     private var headline: String {
+        // Met on the way to page four of a preview: the question the reader
+        // is already asking. Elsewhere the headline names the offer.
+        if source == .previewLimit { return "Want to know what happens next?" }
         switch mode {
         case .freeTrial: return "Try Comigo free for \(trialDays) days"
         case .trialExpired: return "Your free trial has ended"
@@ -1644,15 +1663,22 @@ struct PaywallView: View {
                     Image("comicgo_logo_yoni_1_alpha_layer_2")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 170)
+                        .frame(width: source == .previewLimit ? 120 : 170)
 
                     Text(headline)
-                        .font(.system(size: 27, weight: .heavy, design: .rounded))
+                        .font(.system(size: source == .previewLimit ? 24 : 27, weight: .heavy, design: .rounded))
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .padding(.top, 16)
                         .padding(.horizontal, 24)
-                    if mode == .trialExpired {
+                    if source == .previewLimit {
+                        Text(previewLine)
+                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                            .foregroundColor(.white.opacity(0.85))
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 8)
+                            .padding(.horizontal, 28)
+                    } else if mode == .trialExpired {
                         Text("Subscribe to keep reading every comic.")
                             .font(.system(size: 15, weight: .medium, design: .rounded))
                             .foregroundColor(.white.opacity(0.85))
@@ -1663,6 +1689,9 @@ struct PaywallView: View {
                         if mode == .freeTrial {
                             paywallRow("sparkles", "Full access free for \(trialDays) days")
                         }
+                        if source == .previewLimit {
+                            paywallRow("book.pages", "The rest of this comic and all its practice modes")
+                        }
                         paywallRow("book.fill", "Every episode of every series — current and future")
                         paywallRow("waveform", "All audio, translations and practice modes")
                         paywallRow("plus.circle.fill", "New comics added regularly")
@@ -1671,10 +1700,11 @@ struct PaywallView: View {
                         }
                     }
                     .padding(.horizontal, 34)
-                    .padding(.top, 18)
+                    .padding(.top, source == .previewLimit ? 14 : 18)
                 }
-                .padding(.bottom, 12)
+                .padding(.bottom, 16)
             }
+            .scrollIndicators(.visible)
 
             VStack(spacing: 10) {
                 subscribeButton
@@ -1769,6 +1799,18 @@ struct PaywallView: View {
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(ink, lineWidth: 3))
         }
         .disabled(purchasing || mode == nil)
+    }
+
+    /// Under the preview heading: this is the end of the free pages, not of
+    /// the story, and what the offer opens.
+    private var previewLine: String {
+        let story = pagesToGo.map { "That's the end of the free preview — the story goes on for \($0) more pages." }
+            ?? "That's the end of the free preview — the story goes on."
+        switch mode {
+        case .freeTrial: return story + " Your free trial unlocks all of it."
+        case .trialExpired: return story + " Subscribe to unlock all of it."
+        default: return story + " Comigo Unlimited unlocks all of it."
+        }
     }
 
     /// Apple's required auto-renewal disclosure, with StoreKit's localised price.

@@ -403,3 +403,149 @@ final class DownloadStorageTests: XCTestCase {
         XCTAssertGreaterThan(bytes ?? 0, 0)
     }
 }
+
+// MARK: - Free preview (pure)
+
+/// Who gets the free preview and how far it reaches: the cover and the first
+/// StoreService.previewPages story pages of any comic the reader isn't
+/// entitled to. Nothing anyone already has is taken away.
+@MainActor
+final class FreePreviewRuleTests: XCTestCase {
+    typealias C = AccessModelService.Classification
+    private func access(_ entitled: Bool, _ c: C, ep: Int?, collection: String? = "el_visitante") -> StoreService.ComicAccess {
+        StoreService.access(entitled: entitled, classification: c, episodeNumber: ep, collectionId: collection)
+    }
+
+    func testThreeStoryPagesAfterTheCover() {
+        XCTAssertEqual(StoreService.previewPages, 3)
+        for page in 1...4 { XCTAssertTrue(StoreService.isPageReadable(pageNumber: page, access: .preview), "page \(page)") }
+        XCTAssertFalse(StoreService.isPageReadable(pageNumber: 5, access: .preview), "page four of the story meets the paywall")
+        XCTAssertFalse(StoreService.isPageReadable(pageNumber: 12, access: .preview))
+        for page in [1, 5, 40] { XCTAssertTrue(StoreService.isPageReadable(pageNumber: page, access: .full)) }
+    }
+
+    func testEntitledCustomersKeepEverythingUnderEveryModel() {
+        for c in [C.legacy, .unknown, .newModel] {
+            XCTAssertEqual(access(true, c, ep: 1), .full)
+            XCTAssertEqual(access(true, c, ep: 7), .full)
+            XCTAssertEqual(access(true, c, ep: nil, collection: nil), .full)
+        }
+    }
+
+    func testLegacyUsersKeepTheirFreeFirstEpisodesAndPreviewTheRest() {
+        for c in [C.legacy, .unknown] {
+            XCTAssertEqual(access(false, c, ep: 1), .full, "first episode: free in full, as before")
+            XCTAssertEqual(access(false, c, ep: nil, collection: nil), .full, "standalone comic: free in full, as before")
+            XCTAssertEqual(access(false, c, ep: 2), .preview, "later episodes: the preview, where there was nothing")
+        }
+    }
+
+    func testNewModelUsersWithoutAnEntitlementPreviewEveryComic() {
+        XCTAssertEqual(access(false, .newModel, ep: 1), .preview)
+        XCTAssertEqual(access(false, .newModel, ep: 5), .preview)
+        XCTAssertEqual(access(false, .newModel, ep: nil, collection: nil), .preview)
+    }
+
+    /// The preview is defined by the page number the export gives each page —
+    /// the same rule the reader, the thumbnails and the saved position use.
+    func testAccessMatchesTheOldUnlockRuleExactly() {
+        for c in [C.legacy, .unknown, .newModel] {
+            for entitled in [true, false] {
+                for ep in [1, 2, 9] {
+                    let unlocked = StoreService.isUnlocked(entitled: entitled, classification: c, episodeNumber: ep, collectionId: "x")
+                    XCTAssertEqual(access(entitled, c, ep: ep), unlocked ? .full : .preview)
+                }
+            }
+        }
+    }
+}
+
+/// Where the reader opens and when a page turn goes ahead, for a preview:
+/// never beyond the last free page, however the page was asked for (a saved
+/// position, a thumbnail, a word's context, a cross-page move).
+final class ReaderPreviewGateTests: XCTestCase {
+    private func pages(_ count: Int) -> [Page] {
+        (1...count).map { Page(id: "p\($0)", pageNumber: $0, masterImage: "img\($0)", panels: []) }
+    }
+
+    func testOpensOnTheRequestedPageWhenItIsFree() {
+        let p = pages(12)
+        for i in 0...3 { XCTAssertEqual(PageView.openingIndex(requested: i, pages: p, access: .preview), i) }
+        for i in [0, 4, 11] { XCTAssertEqual(PageView.openingIndex(requested: i, pages: p, access: .full), i) }
+    }
+
+    func testOpensOnTheLastFreePageWhenAskedForOneBeyondThePreview() {
+        let p = pages(12)
+        for i in [4, 5, 11] { XCTAssertEqual(PageView.openingIndex(requested: i, pages: p, access: .preview), 3, "requested index \(i)") }
+    }
+
+    func testAnUnknownOrShortComicOpensSafely() {
+        XCTAssertEqual(PageView.openingIndex(requested: 40, pages: pages(12), access: .preview), 0, "out of range: the cover")
+        XCTAssertEqual(PageView.openingIndex(requested: 2, pages: pages(3), access: .preview), 2, "shorter than the preview: every page")
+        XCTAssertEqual(PageView.openingIndex(requested: 0, pages: [], access: .preview), 0)
+    }
+
+    func testTurningIntoThePreviewGoesAheadAndTurningPastItDoesNot() {
+        let p = pages(12)
+        XCTAssertTrue(PageView.mayTurn(to: 1, pages: p, access: .preview))
+        XCTAssertTrue(PageView.mayTurn(to: 3, pages: p, access: .preview), "the third story page")
+        XCTAssertFalse(PageView.mayTurn(to: 4, pages: p, access: .preview), "the fourth: the paywall")
+        XCTAssertFalse(PageView.mayTurn(to: 11, pages: p, access: .preview))
+        XCTAssertTrue(PageView.mayTurn(to: 4, pages: p, access: .full))
+        XCTAssertTrue(PageView.mayTurn(to: 11, pages: p, access: .full))
+        XCTAssertFalse(PageView.mayTurn(to: 12, pages: p, access: .full), "past the end is never a page turn")
+    }
+
+    /// Pages are gated by their numbers, not their order in the array.
+    func testGateFollowsPageNumbersNotArrayOrder() {
+        let shuffled = pages(12).reversed().sorted { $0.pageNumber < $1.pageNumber }
+        XCTAssertEqual(PageView.openingIndex(requested: 7, pages: shuffled, access: .preview), 3)
+        XCTAssertEqual(shuffled[3].pageNumber, 4)
+    }
+}
+
+/// What the practice modes may draw on: the preview's own pages, in order —
+/// always a prefix of the whole comic's, so a saved spot means the same thing
+/// before and after subscribing.
+@MainActor
+final class PreviewPracticeContentTests: XCTestCase {
+    private func word(_ id: String) -> Word { Word(id: id, text: id, meaning: id) }
+    private func comic(pages count: Int, wordsPerPage: Int = 2, practiceWords: Int = 3) -> Comic {
+        let pages = (1...count).map { Page(id: "p\($0)", pageNumber: $0, masterImage: "img\($0)", panels: []) }
+        var words: [ReviewWord] = []
+        for p in pages { for k in 0..<wordsPerPage { words.append(ReviewWord(word: word("\(p.id)-w\(k)"), panelId: "panel", pageId: p.id)) } }
+        for k in 0..<practiceWords { words.append(ReviewWord(word: word("kp-w\(k)"), panelId: "panel", pageId: "p1001")) }
+        var c = Comic(id: "c", title: "C", description: "", coverImage: "cover", level: .beginner, isPremium: false, pages: pages.reversed())
+        c.reviewWords = words
+        return c
+    }
+
+    func testThePreviewPractisesTheCoverAndThreeStoryPagesInOrder() {
+        let c = comic(pages: 12)
+        XCTAssertEqual(StoreService.readablePages(of: c, access: .preview).map(\.pageNumber), [1, 2, 3, 4])
+        XCTAssertEqual(StoreService.readablePages(of: c, access: .full).map(\.pageNumber), Array(1...12), "sorted, whatever the array order")
+    }
+
+    func testThePreviewsPagesAreAPrefixOfTheWholeComics() {
+        let c = comic(pages: 12)
+        let preview = StoreService.readablePages(of: c, access: .preview).map(\.id)
+        let full = StoreService.readablePages(of: c, access: .full).map(\.id)
+        XCTAssertEqual(Array(full.prefix(preview.count)), preview)
+    }
+
+    func testDrillWordsComeOnlyFromThePreviewPagesNeverFromKeyPhrasePages() {
+        let c = comic(pages: 12, wordsPerPage: 2, practiceWords: 3)
+        let preview = StoreService.readableReviewWords(of: c, access: .preview)
+        XCTAssertEqual(preview.count, 8, "two words on each of the cover and three story pages")
+        XCTAssertTrue(preview.allSatisfy { ["p1", "p2", "p3", "p4"].contains($0.pageId) })
+        let full = StoreService.readableReviewWords(of: c, access: .full)
+        XCTAssertEqual(full.count, 27, "everything, key-phrase pages included")
+        XCTAssertEqual(Array(full.prefix(8).map(\.word.id)), preview.map(\.word.id), "a prefix: a saved word index survives subscribing")
+    }
+
+    func testAShortComicPreviewsInFull() {
+        let c = comic(pages: 3)
+        XCTAssertEqual(StoreService.readablePages(of: c, access: .preview).count, 3)
+        XCTAssertEqual(StoreService.readableReviewWords(of: c, access: .preview).count, 6)
+    }
+}

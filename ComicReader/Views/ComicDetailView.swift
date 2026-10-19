@@ -99,6 +99,19 @@ struct ComicDetailView: View {
     static func opensReaderAutomatically(autoOpenReader: Bool, tipsDue: Bool) -> Bool {
         autoOpenReader && !tipsDue
     }
+
+    /// What this screen does by itself when it appears. Only its FIRST
+    /// appearance may open the reader: an arrival is one event, and the screen
+    /// appears again every time the reader pops back to it. Deciding afresh
+    /// then would re-open the reader on the page just left — a first run whose
+    /// instant open waited for the tips must not fire it late, once the tips
+    /// have been seen, the moment the reader is closed.
+    enum ArrivalOpen: Equatable { case none, reader, resume }
+    static func arrivalOpen(autoOpenReader: Bool, tipsDue: Bool, autoResume: Bool, firstAppearance: Bool) -> ArrivalOpen {
+        guard firstAppearance else { return .none }
+        if opensReaderAutomatically(autoOpenReader: autoOpenReader, tipsDue: tipsDue) { return .reader }
+        return autoResume ? .resume : .none
+    }
     // True while "?" is replaying the sequence — bypasses the "seen" flag.
     @State private var helpReplay = false
 
@@ -148,15 +161,17 @@ struct ComicDetailView: View {
             }
             .onChange(of: practiceDestination) { _, newValue in
                 if let dest = newValue {
-                    // Locked (e.g. subscription lapsed after download) — every
-                    // practice mode funnels through here, so one gate covers all.
-                    guard requireUnlocked() else {
+                    // Every practice mode funnels through here, so one gate
+                    // covers all. The free preview practises its own pages
+                    // (each mode draws on StoreService.readablePages); Key
+                    // phrases are drawn from the whole story and stay locked.
+                    guard dest != .keyPhrases || requireUnlocked() else {
                         practiceDestination = nil
                         return
                     }
-                    // Whole-comic modes need every file; a comic still arriving
-                    // keeps downloading while they read instead.
-                    guard localStorage.isWholeComicAvailable(comic.id) else {
+                    // The pages a mode uses need every file; a comic still
+                    // arriving keeps downloading while they read instead.
+                    guard practicePagesAvailable else {
                         practiceDestination = nil
                         showFinishingDownload = true
                         return
@@ -174,7 +189,7 @@ struct ComicDetailView: View {
                     progressManager.setPracticeMode(comic.id, mode: dest.modeKey)
                     showPracticeOptions = false
                     if let type = PracticeType(modeKey: dest.modeKey) {
-                        AnalyticsService.shared.track(.practiceStarted(comicId: comic.id, practiceType: type))
+                        AnalyticsService.shared.track(.practiceStarted(comicId: comic.id, practiceType: type, access: StoreService.shared.accessKind(of: comic)))
                     }
                     Task { await reminders.recordEngagement() }
                 }
@@ -226,16 +241,32 @@ struct ComicDetailView: View {
     }
 
     // MARK: - Subscription gate
-    // First episode of every collection (and standalone comics) is free; other
-    // episodes need Comigo Unlimited. Matters when the subscription lapses after
-    // an episode was downloaded — the file stays, reading it re-locks.
+    // Reading is never locked here: every comic opens, and the reader itself
+    // stops a preview at the free pages (StoreService.previewPages). What
+    // needs Comigo Unlimited is the whole comic — the practice modes, which
+    // walk every page. Matters when the subscription lapses after an episode
+    // was downloaded: the file stays, practising it re-locks.
     private var isLocked: Bool {
         !store.isUnlocked(episodeNumber: comic.episodeNumber,
                           collectionId: comic.collectionId ?? comic.collectionTitle)
     }
 
-    /// Gate for every "start reading/practicing" entry point. Returns true when
-    /// the user may proceed; otherwise pops the paywall.
+    /// The free preview is all they have of this comic.
+    private var isPreview: Bool {
+        store.access(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle) == .preview
+    }
+
+    /// The files the practice modes need are on disk: the whole comic, or —
+    /// for the preview — just its pages, which a download fetches first.
+    private var practicePagesAvailable: Bool {
+        if isPreview {
+            return localStorage.arePagesAvailable(Set(store.readablePages(of: comic).map(\.pageNumber)), of: comic)
+        }
+        return localStorage.isWholeComicAvailable(comic.id)
+    }
+
+    /// Gate for every "start practicing" entry point. Returns true when the
+    /// user may proceed; otherwise pops the paywall.
     private func requireUnlocked() -> Bool {
         if isLocked {
             AnalyticsService.shared.track(.lockedContentTapped(comicId: comic.id, collectionId: comic.collectionId))
@@ -297,23 +328,28 @@ struct ComicDetailView: View {
                 let tipsDue = cockpitTipsDue
                 let autoOpens = Self.opensReaderAutomatically(autoOpenReader: autoOpenReader, tipsDue: tipsDue)
                 startCockpitTips(autoOpens: autoOpens)
-                // A download that just became readable: straight into the reader,
-                // at the page it would open on anyway — unless the first-run tips
-                // for this screen haven't been shown yet (see cockpitTipsDue).
-                if autoOpens, !didAutoResume {
-                    didAutoResume = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { startNormalReading(startingPage) }
-                    return
-                }
-                // Opened via the Library "Continue" card: pick up exactly where the
-                // user left off (same spot and mode as the primary button here).
-                guard autoResume, !didAutoResume else { return }
+                // The arrival is spent on the first appearance whatever it does —
+                // the reader popping back here must never open it again.
+                let firstAppearance = !didAutoResume
                 didAutoResume = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                    if lastWasPractice {
-                        launchPractice(restart: false)
-                    } else {
-                        startNormalReading(startingPage)
+                switch Self.arrivalOpen(autoOpenReader: autoOpenReader, tipsDue: tipsDue,
+                                        autoResume: autoResume, firstAppearance: firstAppearance) {
+                case .none:
+                    break
+                case .reader:
+                    // A download that just became readable: straight into the reader,
+                    // at the page it would open on anyway — unless the first-run tips
+                    // for this screen haven't been shown yet (see cockpitTipsDue).
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { startNormalReading(startingPage) }
+                case .resume:
+                    // Opened via the Library "Continue" card: pick up exactly where the
+                    // user left off (same spot and mode as the primary button here).
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        if lastWasPractice {
+                            launchPractice(restart: false)
+                        } else {
+                            startNormalReading(startingPage)
+                        }
                     }
                 }
             }
@@ -534,10 +570,13 @@ struct ComicDetailView: View {
                 }
             }
 
-            // Still arriving: one quiet line — reading is already on.
+            // Still arriving: a progress bar and one quiet line — reading is already on.
             if isStillDownloading {
-                Group {
+                VStack(alignment: .leading, spacing: 6) {
                     if case .downloading(let p) = storeService.downloadState(for: comic.id) {
+                        ProgressView(value: p)
+                            .progressViewStyle(.linear)
+                            .tint(.green)
                         Label("Downloading the rest in the background · \(Int(p * 100))%", systemImage: "arrow.down.circle")
                     } else {
                         Label("Download paused — it continues when you're back online", systemImage: "wifi.slash")
@@ -546,6 +585,7 @@ struct ComicDetailView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityIdentifier("Download progress")
             }
 
             // When the primary button is practice-focused, keep reading one tap away.
@@ -577,8 +617,9 @@ struct ComicDetailView: View {
 
     // Launch the last-used practice mode. `restart` clears the saved spot so it
     // begins from the first sentence; otherwise it resumes where it left off.
+    // (The preview practises its own pages; the modes themselves limit what
+    // they draw on, and Key phrases is gated where it's chosen.)
     private func launchPractice(restart: Bool) {
-        guard requireUnlocked() else { return }
         if restart {
             progressManager.clearPracticePosition(for: comic.id)
             progressManager.clearWordPosition(for: comic.id)
@@ -603,6 +644,14 @@ struct ComicDetailView: View {
 
 
 
+    /// What the preview's practice covers.
+    private var previewPracticeNote: some View {
+        Label("Practicing the first \(StoreService.previewPages) sample pages — Comigo Unlimited practices the whole story", systemImage: "book.pages")
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255))
+            .padding(.bottom, 4)
+    }
+
     // MARK: - Practice Options (floating panel)
     @ViewBuilder
     private var practiceOptionsOverlay: some View {
@@ -622,12 +671,16 @@ struct ComicDetailView: View {
                             .font(.system(size: 20, weight: .heavy, design: .rounded))
                             .foregroundStyle(.primary)
                             .padding(.bottom, 2)
+                        if isPreview { previewPracticeNote }
 
                         practiceOptionsContent
                     }
                     .padding(18)
                 }
-                .frame(maxWidth: 360, maxHeight: 560)
+                // Tall enough for the preview note plus the cards on a phone;
+                // the rest (Drill the key words) scrolls, and says so.
+                .frame(maxWidth: 360, maxHeight: 640)
+                .scrollIndicators(.visible)
                 .background(Color(.systemGroupedBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .overlay(alignment: .topTrailing) {
@@ -799,6 +852,11 @@ struct ComicDetailView: View {
                 Text("· \(comic.pages.count) pages")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                if isPreview {
+                    Text("· \(StoreService.previewPages) pages free")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255))
+                }
             }
             .padding(.top, 2)
         }
@@ -828,6 +886,7 @@ struct ComicDetailView: View {
                 .tracking(0.5)
                 .foregroundStyle(.secondary)
                 .padding(.leading, 4)
+            if isPreview { previewPracticeNote.padding(.leading, 4) }
 
             practiceOptionsContent
         }
@@ -849,9 +908,11 @@ struct ComicDetailView: View {
                              description: "Screen off, eyes free. Hear each line and speak — Spanish → English, or English → Spanish.",
                              action: { showingListenSpeakChooser = true })
             if !(comic.keyPhrases ?? []).isEmpty {
-                practiceModeCard(icon: "quote.bubble.fill",
-                                 title: "Key phrases", tag: "ON SCREEN",
-                                 description: "Everyday phrases from this story. See the English, say it in Spanish, then hear it in its scene.",
+                practiceModeCard(icon: isPreview ? "lock.fill" : "quote.bubble.fill",
+                                 title: "Key phrases", tag: isPreview ? "COMIGO UNLIMITED" : "ON SCREEN",
+                                 description: isPreview
+                                     ? "Everyday phrases drawn from the whole story — part of Comigo Unlimited."
+                                     : "Everyday phrases from this story. See the English, say it in Spanish, then hear it in its scene.",
                                  action: { practiceDestination = .keyPhrases })
             }
         } else {
@@ -986,8 +1047,12 @@ struct ComicDetailView: View {
     /// left off — same page AND same bubble (mirrors "Continue reading"). Restart
     /// routes through the `from:` variant with the cover and no bubble.
     private func startReadAndSpeak() {
-        if practiceFromEnd {
-            // Episode just finished → restart from the cover, no saved bubble.
+        // A run picked from the practice menu starts at the cover — unless a
+        // guided run is what they were last doing, which it picks up (the same
+        // rule as the Continue practicing button). The saved *reading* page is
+        // never a practice starting point: after the free preview it would open
+        // on the last free page, with nothing before it practised.
+        if practiceFromEnd || !lastWasPractice {
             progressManager.clearPracticePosition(for: comic.id)
             progressManager.clearWordPosition(for: comic.id)
             progressManager.clearPracticeBubble(for: comic.id)
@@ -1000,14 +1065,13 @@ struct ComicDetailView: View {
     /// On-screen "Read & speak": text stays visible, learner speaks each line.
     /// Mirrors the legacy On-Screen guided run. Opens at `page`, at `bubbleId` when set.
     private func startReadAndSpeak(from page: Page, bubbleId: String? = nil) {
-        guard requireUnlocked() else { return }
         settingsManager.speakingPracticeMode = true
         settingsManager.listeningPracticeMode = false
         guidedOnScreen = true
         pendingBubbleId = bubbleId
         showPracticeOptions = false
         progressManager.setPracticeMode(comic.id, mode: "readSpeak")
-        AnalyticsService.shared.track(.practiceStarted(comicId: comic.id, practiceType: .readSpeak))
+        AnalyticsService.shared.track(.practiceStarted(comicId: comic.id, practiceType: .readSpeak, access: StoreService.shared.accessKind(of: comic)))
         selectedPage = page
     }
 
@@ -1028,8 +1092,9 @@ struct ComicDetailView: View {
 
     /// Open a page for plain reading. Clears any leftover practice-mode flags so
     /// the reader shows the real (text) artwork, not the empty-bubble practice art.
+    /// Never gated: the reader opens no further than the preview allows and
+    /// offers the subscription there.
     private func startNormalReading(_ page: Page) {
-        guard requireUnlocked() else { return }
         settingsManager.speakingPracticeMode = false
         settingsManager.listeningPracticeMode = false
         guidedOnScreen = false
@@ -1046,8 +1111,11 @@ struct ComicDetailView: View {
     // MARK: - Pages Grid
     private var pagesGrid: some View {
         LazyVGrid(columns: columns, spacing: 12) {
-            ForEach(comic.pages) { page in
-                PageThumbnail(page: page, comic: comic, isCover: page.pageNumber <= 1)
+            ForEach(sortedPages) { page in
+                // Pages past the preview are shown locked; tapping one opens the
+                // reader on the last free page, where the paywall explains.
+                PageThumbnail(page: page, comic: comic, isCover: page.pageNumber <= 1,
+                              isLocked: isPreview && !StoreService.isPageReadable(pageNumber: page.pageNumber, access: .preview))
                     .contentShape(Rectangle())
                     .onTapGesture {
                         startNormalReading(page)
@@ -1068,6 +1136,8 @@ struct PageThumbnail: View {
     let page: Page
     let comic: Comic
     var isCover: Bool = false
+    /// Beyond the free preview: dimmed, with a lock, art unreadable.
+    var isLocked: Bool = false
     @EnvironmentObject var progressManager: ReadingProgressManager
     @EnvironmentObject var settingsManager: SettingsManager
 
@@ -1081,6 +1151,8 @@ struct PageThumbnail: View {
                 ComicImage(imageName: imageName, comicId: comic.id, requestsWhenMissing: false)
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: geo.size.height, alignment: isCover ? .top : .center)
+                    .blur(radius: isLocked ? 6 : 0)
+                    .opacity(isLocked ? 0.55 : 1)
             }
             // Portrait page aspect (2:3), matching the actual comic page art,
             // instead of the old fixed square-ish height.
@@ -1090,6 +1162,16 @@ struct PageThumbnail: View {
                     Rectangle()
                         .stroke(isCurrentPage ? .green : Color.clear, lineWidth: 3)
                 )
+                .overlay {
+                    if isLocked {
+                        Image(systemName: "lock.fill")
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(10)
+                            .background(.black.opacity(0.55), in: Circle())
+                            .accessibilityLabel("Locked — Comigo Unlimited")
+                    }
+                }
 
             HStack {
                 Text("Page \(page.pageNumber)")

@@ -45,13 +45,13 @@ struct AggregateEvent: Equatable {
     static let allowedProperties: [String: Set<String>] = [
         "aggregate_app_opened": [],
         "aggregate_collection_viewed": ["collection_id", "collection_name", "level"],
-        "aggregate_comic_started": ["comic_id", "comic_name", "collection_id", "level", "is_free"],
+        "aggregate_comic_started": ["comic_id", "comic_name", "collection_id", "level", "is_free", "access"],
         "aggregate_comic_page_viewed": ["comic_id", "page_number", "total_pages"],
         "aggregate_comic_completed": ["comic_id", "comic_name", "collection_id", "level"],
         "aggregate_audio_played": ["comic_id", "page_number", "audio_type"],
         "aggregate_translation_revealed": ["comic_id", "page_number"],
-        "aggregate_practice_started": ["comic_id", "practice_type"],
-        "aggregate_practice_completed": ["comic_id", "practice_type"],
+        "aggregate_practice_started": ["comic_id", "practice_type", "access"],
+        "aggregate_practice_completed": ["comic_id", "practice_type", "access"],
         "aggregate_locked_content_tapped": ["comic_id", "collection_id"],
         "aggregate_paywall_viewed": ["source"],
         "aggregate_trial_offer_viewed": ["source", "product_id"],
@@ -63,6 +63,7 @@ struct AggregateEvent: Equatable {
         "aggregate_purchase_result": ["source", "product_id", "result"],
         "aggregate_trial_started": ["product_id", "source"],
         "aggregate_onboarding_step": ["step"],
+        "aggregate_preview_limit_reached": ["comic_id", "collection_id", "level"],
     ]
     static let commonProperties: Set<String> = ["app_version", "build_number", "entitlement", "access_model"]
 
@@ -91,6 +92,7 @@ struct AggregateEvent: Equatable {
         case .purchaseAttempted: aggregateName = "aggregate_purchase_attempted"
         case .purchaseResult: aggregateName = "aggregate_purchase_result"
         case .onboardingStep: aggregateName = "aggregate_onboarding_step"
+        case .previewLimitReached: aggregateName = "aggregate_preview_limit_reached"
         case .subscriptionStarted, .purchaseCompleted, .spanishLevelSelected: return nil
         }
         let allowed = Self.allowedProperties[aggregateName] ?? []

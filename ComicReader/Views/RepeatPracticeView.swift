@@ -174,7 +174,7 @@ struct RepeatPracticeView: View {
         }
         .onChange(of: state) { old, new in
             if new == .completed && old != .completed {
-                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: reverse ? .translateSpeak : .repeatPractice))
+                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: reverse ? .translateSpeak : .repeatPractice, access: StoreService.shared.accessKind(of: comic)))
             }
         }
         .onDisappear {
@@ -516,7 +516,8 @@ struct RepeatPracticeView: View {
     // MARK: - Build Sentences
     private func buildSentences() {
         var result: [PracticeSentence] = []
-        let sortedPages = comic.pages.sorted { $0.pageNumber < $1.pageNumber }
+        // The free preview practises its own pages only (StoreService.readablePages).
+        let sortedPages = StoreService.shared.readablePages(of: comic)
 
         for page in sortedPages {
             let sortedPanels = page.panels.sorted { $0.panelOrder < $1.panelOrder }

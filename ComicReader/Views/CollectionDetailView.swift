@@ -296,6 +296,7 @@ struct CollectionDetailView: View {
 struct EpisodeCard: View {
     let comic: Comic
     let progress: ReadingProgress?
+    @ObservedObject private var store = StoreService.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -347,10 +348,16 @@ struct EpisodeCard: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(3)
 
-                    if progress != nil {
-                        Label("In Progress", systemImage: "book.fill")
+                    // Where they got to — not a download state (a comic that
+                    // is still arriving is the store card above, with its bar).
+                    if let progress {
+                        Label("Reading · page \(progress.pageNumber) of \(comic.pages.count)", systemImage: "book.fill")
                             .font(.caption2)
                             .foregroundStyle(.green)
+                    }
+
+                    if store.access(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle) == .preview {
+                        PreviewBadge()
                     }
                 }
 

@@ -516,6 +516,27 @@ struct PageView: View {
     @State private var readingSessionTracked = false
     @State private var completionTracked = false
     @State private var guidedCompletionTracked = false
+    // Free preview: a comic the reader isn't entitled to opens all the same,
+    // and the cover plus the first StoreService.previewPages story pages read
+    // normally; the way on to the next page meets the paywall instead. The
+    // paywall leaves them on the last free page; a purchase takes them on.
+    @ObservedObject private var store = StoreService.shared
+    /// The "End of the free preview" card: practise these pages, or unlock the rest.
+    @State private var showPreviewEnd = false
+    @State private var showPreviewPaywall = false
+    @State private var previewLimitTracked = false
+    /// The paywall opened because they wanted the next page: once they're
+    /// entitled, turn it for them rather than leave them on the page they left.
+    @State private var advanceAfterUnlock = false
+    /// Opened short of the page that was asked for (a saved position, a
+    /// thumbnail or a word's context beyond the preview): say why on appear.
+    private let openedShortOfRequest: Bool
+    @State private var shortfallExplained = false
+    /// The covers mosaic that plays once before the card (see CoverMosaic):
+    /// the covers are fetched as a preview opens, so they're in hand by then.
+    @State private var mosaicCovers: [UIImage] = []
+    @State private var showCoverMosaic = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // A visible tooltip owns the reader's attention — the pointing hand
     // stays off while any is up (checked at start AND at each pulse step,
@@ -757,10 +778,153 @@ struct PageView: View {
         self.initialHotspotId = initialHotspotId
         self.savesProgress = savesProgress
         self.presentedModally = presentedModally
-        // Initialize currentPageIndex to the correct page in sorted order
+        // Initialize currentPageIndex to the correct page in sorted order —
+        // no further than the free preview reaches when that's all they have.
         let sorted = comic.pages.sorted { $0.pageNumber < $1.pageNumber }
-        let index = sorted.firstIndex(where: { $0.id == page.id }) ?? 0
+        let requested = sorted.firstIndex(where: { $0.id == page.id }) ?? 0
+        let access = MainActor.assumeIsolated {
+            StoreService.shared.access(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle)
+        }
+        let index = Self.openingIndex(requested: requested, pages: sorted, access: access)
+        openedShortOfRequest = index != requested
         _currentPageIndex = State(initialValue: index)
+    }
+
+    // MARK: - Free preview
+
+    /// Where the reader opens: the page asked for, unless the preview stops
+    /// short of it — then the last free page, where the paywall explains.
+    static func openingIndex(requested: Int, pages: [Page], access: StoreService.ComicAccess) -> Int {
+        guard pages.indices.contains(requested) else { return 0 }
+        if StoreService.isPageReadable(pageNumber: pages[requested].pageNumber, access: access) { return requested }
+        return pages.lastIndex { StoreService.isPageReadable(pageNumber: $0.pageNumber, access: access) } ?? 0
+    }
+
+    /// Whether a page turn from `index` to `next` goes ahead, or meets the paywall.
+    static func mayTurn(to next: Int, pages: [Page], access: StoreService.ComicAccess) -> Bool {
+        guard pages.indices.contains(next) else { return false }
+        return StoreService.isPageReadable(pageNumber: pages[next].pageNumber, access: access)
+    }
+
+    private var comicAccess: StoreService.ComicAccess {
+        store.access(episodeNumber: comic.episodeNumber, collectionId: comic.collectionId ?? comic.collectionTitle)
+    }
+
+    /// The page turn they asked for isn't in the preview: clear the page of
+    /// anything the paywall would cover or be covered by, count it once, and
+    /// offer the subscription. The reader stays exactly where it is.
+    private func reachPreviewLimit(wantedNextPage: Bool) {
+        AudioManager.shared.stop()
+        selectedBubbleIndex = nil
+        CalloutOverWindow.shared.hide()
+        if help.isActive { help.isActive = false }
+        if showSwipeTip { dismissSwipeTip() }
+        if showHotspotTip { withAnimation { showHotspotTip = false } }
+        if tracksReading && !previewLimitTracked {
+            previewLimitTracked = true
+            AnalyticsService.shared.track(.previewLimitReached(comicId: comic.id, collectionId: comic.collectionId, level: comic.level.rawValue))
+        }
+        advanceAfterUnlock = wantedNextPage
+        // The first time a launch: the covers mosaic first, the card after it.
+        if CoverMosaic.isEnabled(), !CoverMosaic.playedThisLaunch, !reduceMotion,
+           mosaicCovers.count >= CoverMosaic.minimumCovers {
+            CoverMosaic.playedThisLaunch = true
+            Self.withoutPresentationAnimation { showCoverMosaic = true }   // it fades itself in
+        } else {
+            withAnimation { showPreviewEnd = true }
+        }
+    }
+
+    /// Present or dismiss a cover with no system slide (the content crossfades itself).
+    private static func withoutPresentationAnimation(_ change: () -> Void) {
+        var t = Transaction()
+        t.disablesAnimations = true
+        withTransaction(t, change)
+    }
+
+    /// The story pages still to come after this one.
+    private var pagesToGo: Int { max(0, sortedPages.count - 1 - currentPageIndex) }
+
+    /// The card's heading: with a trial on offer, the way on is free too.
+    private var previewEndHeading: String {
+        guard store.freeTrialAvailable else { return "End of the free preview" }
+        let days = StoreService.trialDays(store.monthlyProduct) ?? 7
+        return "End of the preview — but you can continue free for another \(days) days with full access"
+    }
+
+    // The end of the free preview: like the End of Episode card, but clear that
+    // the story goes on — practise the free pages, or unlock the whole comic.
+    @ViewBuilder
+    private var previewEndOverlay: some View {
+        if showPreviewEnd {
+            ZStack {
+                Color.black.opacity(0.55)
+                    .ignoresSafeArea()
+                    .onTapGesture { withAnimation { showPreviewEnd = false } }
+
+                VStack(spacing: 14) {
+                    Text(previewEndHeading)
+                        .font(.system(size: 20, weight: .heavy, design: .rounded))
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("The story goes on for \(pagesToGo) more pages. Practice the sample pages, or unlock the whole comic — and every practice mode — with Comigo Unlimited.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button {
+                        showPreviewEnd = false
+                        showPreviewPaywall = true
+                    } label: {
+                        VStack(spacing: 2) {
+                            Text(store.freeTrialAvailable ? "Start your \(StoreService.trialDays(store.monthlyProduct) ?? 7)-day free trial" : "Unlock with Comigo Unlimited")
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                            Text("Unlocks every page, every comic and every practice mode")
+                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                .opacity(0.85)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255), in: RoundedRectangle(cornerRadius: 14))
+                        .foregroundStyle(.white)
+                    }
+                    if onRequestPractice != nil {
+                        Button {
+                            showPreviewEnd = false
+                            onRequestPractice?()
+                            dismiss()
+                        } label: {
+                            Text("Practice sample pages")
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color(red: 91/255, green: 91/255, blue: 214/255).opacity(0.15), in: RoundedRectangle(cornerRadius: 14))
+                                .foregroundStyle(Color(red: 91/255, green: 91/255, blue: 214/255))
+                        }
+                    }
+                }
+                .padding(20)
+                .frame(maxWidth: 320)
+                .background(Color(.secondarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .overlay(alignment: .topTrailing) {
+                    Button {
+                        withAnimation { showPreviewEnd = false }
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.secondary)
+                            .padding(10)
+                    }
+                    .accessibilityLabel("Close")
+                }
+                .shadow(radius: 20)
+                .padding(.horizontal, 36)
+            }
+            .transition(.opacity)
+            .zIndex(3)
+        }
     }
 
     var currentPage: Page {
@@ -1215,6 +1379,12 @@ struct PageView: View {
             }
             return
         }
+        // Decided before the index moves: nothing of the next page is loaded,
+        // saved as progress, or tipped about until it may be read.
+        guard Self.mayTurn(to: currentPageIndex + 1, pages: sortedPages, access: comicAccess) else {
+            reachPreviewLimit(wantedNextPage: true)
+            return
+        }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
         navForward = true                       // PagedImageView slides the artwork
         currentPageIndex += 1
@@ -1229,7 +1399,7 @@ struct PageView: View {
         if settingsManager.speakingPracticeMode {
             if !guidedCompletionTracked {
                 guidedCompletionTracked = true
-                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .readSpeak))
+                AnalyticsService.shared.track(.practiceCompleted(comicId: comic.id, practiceType: .readSpeak, access: StoreService.shared.accessKind(of: comic)))
             }
             showSpeakingDonePrompt = true
         } else {
@@ -1345,9 +1515,38 @@ struct PageView: View {
             level: comic.level.rawValue))
     }
 
+    /// The preview paywall and what follows a purchase, hung on the backdrop
+    /// (the body's own modifier chain is already as long as the compiler takes).
+    private var backdrop: some View {
+        Color.black.ignoresSafeArea()
+            .sheet(isPresented: $showPreviewPaywall) {
+                PaywallView(source: .previewLimit, pagesToGo: pagesToGo)
+            }
+            // The covers mosaic, over everything — bars included — like the reel.
+            .fullScreenCover(isPresented: $showCoverMosaic, onDismiss: { withAnimation { showPreviewEnd = true } }) {
+                CoverMosaicView(covers: mosaicCovers) {
+                    Self.withoutPresentationAnimation { showCoverMosaic = false }
+                }
+                .presentationBackground(.clear)
+            }
+
+            .onChange(of: store.hasUnlimited) { _, unlocked in
+                // Subscribed (here, or in Settings underneath): the paywall closes
+                // itself; the page they were reaching for follows. A lapse mid-read
+                // changes nothing until the next page turn, which then asks.
+                if unlocked { showPreviewEnd = false }
+                guard unlocked, advanceAfterUnlock else { return }
+                advanceAfterUnlock = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    guard store.hasUnlimited else { return }
+                    goToNextPage()
+                }
+            }
+    }
+
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            backdrop
 
             GeometryReader { geometry in
                 // Page image. In practice modes show the empty-bubbles art (bubbles
@@ -1530,6 +1729,7 @@ struct PageView: View {
             }
 
             endOfEpisodeOverlay
+            previewEndOverlay
         }
         .sheet(item: $selectedHotspot, onDismiss: {
             // Opt-in per hotspot: closing its popup turns the page (never on
@@ -1563,6 +1763,7 @@ struct PageView: View {
                                 .foregroundStyle(.white)
                         }
                     }
+                    .accessibilityLabel(presentedModally ? "Done" : "Home")
                 }
                 ToolbarItem(placement: .principal) {
                     HStack(spacing: 14) {
@@ -1694,6 +1895,14 @@ struct PageView: View {
         }
         .onAppear {
             AudioManager.shared.activeComicId = comic.id   // fast, direct audio lookup
+            // A preview may end at the card: have the covers ready for its mosaic.
+            if comicAccess == .preview, CoverMosaic.isEnabled(), !CoverMosaic.playedThisLaunch, mosaicCovers.isEmpty {
+                Task {
+                    let store = ComicStoreService.shared
+                    if store.catalog.isEmpty { await store.fetchCatalog() }
+                    mosaicCovers = await CoverMosaic.loadCovers(catalog: store.catalog)
+                }
+            }
             availability.reader(comic.id, isOnPage: currentPageIndex)
             if tracksReading && !readingSessionTracked {
                 readingSessionTracked = true
@@ -1702,8 +1911,15 @@ struct PageView: View {
                     level: comic.level.rawValue,
                     isFree: StoreService.isFree(episodeNumber: comic.episodeNumber,
                                                 collectionId: comic.collectionId ?? comic.collectionTitle,
-                                                classification: AccessModelService.shared.classification)))
+                                                classification: AccessModelService.shared.classification),
+                    access: comicAccess == .full ? .full : .preview))
                 trackPageViewed()
+            }
+            // Asked for a page beyond the preview: they're on the last free
+            // page; once the push has settled, say what's past it.
+            if openedShortOfRequest && !shortfallExplained {
+                shortfallExplained = true   // once — not again when a sheet closes and the reader re-appears
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { reachPreviewLimit(wantedNextPage: false) }
             }
             loadPageAspect()
             maybeShowCoverTip()
@@ -1807,6 +2023,15 @@ struct PageView: View {
         }
         .onChange(of: navigateToPage) { _, newPageIndex in
             guard let newPageIndex = newPageIndex else { return }
+            // A cross-page move past the preview meets the paywall like any other.
+            guard newPageIndex <= currentPageIndex || Self.mayTurn(to: newPageIndex, pages: sortedPages, access: comicAccess) else {
+                navigateToPage = nil
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) { selectedPanel = nil }
+                reachPreviewLimit(wantedNextPage: true)
+                return
+            }
             // Cross-page navigation from the panel view: close the overlay and
             // swap the page in a single transaction with animations disabled.
             // Running the overlay's removal transition and the page change as

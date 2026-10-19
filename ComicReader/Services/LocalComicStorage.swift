@@ -231,6 +231,19 @@ class LocalComicStorage: ObservableObject {
         return existsOnDevice(comicId)   // bundled
     }
 
+    /// Every file of just these pages is here — what the free preview's
+    /// practice modes need of a comic still arriving (its early pages land
+    /// first, so this is usually true long before the whole comic is).
+    func arePagesAvailable(_ pageNumbers: Set<Int>, of comic: Comic) -> Bool {
+        if isWholeComicAvailable(comic.id) { return true }
+        let folder = comicsDirectory.appendingPathComponent(comic.id)
+        guard let data = try? Data(contentsOf: Self.partialMarkerURL(in: folder)),
+              let marker = try? JSONDecoder().decode(PartialDownloadMarker.self, from: data) else { return false }
+        let plan = ComicAssetPlan(comic: comic, entryNames: Set(marker.manifest.entries.map(\.name)))
+        let wanted = plan.pages.filter { pageNumbers.contains($0.pageNumber) }.flatMap(\.all)
+        return wanted.allSatisfy { fileManager.fileExists(atPath: folder.appendingPathComponent($0).path) }
+    }
+
     /// A comic from a folder whether or not it still carries the partial
     /// marker. The normal library path (`loadComic`, `loadDownloadedComics`,
     /// `existsOnDevice`) never does this; the instant-reading path does, via
