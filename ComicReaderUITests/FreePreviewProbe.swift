@@ -30,7 +30,6 @@ final class FreePreviewProbe: XCTestCase {
         // sandbox falls back to) episode 1 is free in full, so it never previews.
         let downloads = app.buttons.matching(NSPredicate(format: "label == 'Download'"))
         XCTAssertTrue(downloads.firstMatch.waitForExistence(timeout: 20), "Download buttons on the episode cards")
-        XCTAssertTrue(app.staticTexts["3 pages free"].firstMatch.waitForExistence(timeout: 5), "'3 pages free' on a card")
         let download = downloads.count > 1 ? downloads.element(boundBy: 1) : downloads.firstMatch
         download.tap()
 
@@ -43,7 +42,6 @@ final class FreePreviewProbe: XCTestCase {
         // The home screen hands over to the reader by itself a moment later;
         // whichever is up now, end in the reader.
         if !counter.waitForExistence(timeout: 5), start.waitForExistence(timeout: 5) {
-            XCTAssertTrue(app.staticTexts["· 3 pages free"].firstMatch.exists, "'3 pages free' on the comic home")
             if start.exists { start.tap() }
         }
 
@@ -96,7 +94,7 @@ final class FreePreviewProbe: XCTestCase {
         // 6. Comic home: a locked thumbnail opens the reader on the last free
         // page with the paywall; the saved position never passed page 4.
         app.buttons["Home"].firstMatch.tap()
-        XCTAssertTrue(app.staticTexts["· 3 pages free"].firstMatch.waitForExistence(timeout: 10), "'3 pages free' on the comic home")
+        XCTAssertTrue(app.staticTexts["Start reading"].firstMatch.waitForExistence(timeout: 10), "the comic home")
         let page7 = app.staticTexts["Page 7"].firstMatch
         for _ in 0..<8 where !page7.exists { app.swipeUp(); Thread.sleep(forTimeInterval: 0.6) }
         XCTAssertTrue(page7.waitForExistence(timeout: 5), "thumbnail grid")

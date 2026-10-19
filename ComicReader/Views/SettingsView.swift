@@ -315,8 +315,8 @@ struct SubscriptionSettingsView: View {
 
     private var footer: String {
         access.isNewModel
-            ? "The first \(StoreService.previewPages) pages of every comic are free. Comigo Unlimited unlocks every episode in full, with all practice modes — as a monthly subscription (with a free trial if you're eligible) or a one-time lifetime purchase."
-            : "The first episode of every series is free, and the first \(StoreService.previewPages) pages of every other episode. Comigo Unlimited unlocks every episode in full — as a monthly subscription or a one-time lifetime purchase."
+            ? "Comigo Unlimited unlocks every episode in full, with all practice modes — as a monthly subscription (with a free trial if you're eligible) or a one-time lifetime purchase."
+            : "The first episode of every series is free. Comigo Unlimited unlocks every episode in full — as a monthly subscription or a one-time lifetime purchase."
     }
 
     var body: some View {

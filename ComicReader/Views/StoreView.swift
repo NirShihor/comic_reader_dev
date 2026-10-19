@@ -426,14 +426,6 @@ struct StoreComicCard: View {
         .tint(.green)
     }
 
-    /// What a download gets them without Comigo Unlimited.
-    private var previewNote: some View {
-        Label("\(StoreService.previewPages) pages free", systemImage: "book.pages")
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255))
-            .padding(.top, 2)
-    }
-
     @ViewBuilder
     private var downloadButton: some View {
         switch downloadState {
@@ -458,7 +450,6 @@ struct StoreComicCard: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.green)
-                if isPreview { previewNote }
             }
 
         case .downloading(let progress):
