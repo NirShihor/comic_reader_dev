@@ -570,10 +570,13 @@ struct ComicDetailView: View {
                 }
             }
 
-            // Still arriving: one quiet line — reading is already on.
+            // Still arriving: a progress bar and one quiet line — reading is already on.
             if isStillDownloading {
-                Group {
+                VStack(alignment: .leading, spacing: 6) {
                     if case .downloading(let p) = storeService.downloadState(for: comic.id) {
+                        ProgressView(value: p)
+                            .progressViewStyle(.linear)
+                            .tint(.green)
                         Label("Downloading the rest in the background · \(Int(p * 100))%", systemImage: "arrow.down.circle")
                     } else {
                         Label("Download paused — it continues when you're back online", systemImage: "wifi.slash")
@@ -582,6 +585,7 @@ struct ComicDetailView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityIdentifier("Download progress")
             }
 
             // When the primary button is practice-focused, keep reading one tap away.

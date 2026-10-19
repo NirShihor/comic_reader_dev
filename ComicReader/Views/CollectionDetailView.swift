@@ -348,8 +348,10 @@ struct EpisodeCard: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(3)
 
-                    if progress != nil {
-                        Label("In Progress", systemImage: "book.fill")
+                    // Where they got to — not a download state (a comic that
+                    // is still arriving is the store card above, with its bar).
+                    if let progress {
+                        Label("Reading · page \(progress.pageNumber) of \(comic.pages.count)", systemImage: "book.fill")
                             .font(.caption2)
                             .foregroundStyle(.green)
                     }

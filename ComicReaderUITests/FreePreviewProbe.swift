@@ -352,4 +352,43 @@ final class FreePreviewProbe: XCTestCase {
         Thread.sleep(forTimeInterval: 2.5)
         try XCUIScreen.main.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: "/tmp/claude-501/mosaic-card.png"))
     }
+    /// Simulator only: the comic home while the rest of the comic is still
+    /// downloading (its progress bar), then the collection once it's in.
+    func testDownloadProgressScreenshots() throws {
+        let app = XCUIApplication()
+        var args = ["-demo.hideCues", "YES", "-creatorMessage.seen", "YES", "-spanishLevel", "beginner", "-preview.coverMosaic", "NO"]
+        for k in ["library-title", "choose-collection", "comic-cockpit", "cover-text", "page-swipe", "story-bubble",
+                  "hotspot-info", "bubble-panel", "word-detail", "story-arrows", "help-reminder",
+                  "collection-download", "collection-open-after-download"] {
+            args += ["-help.seen.\(k)", "YES"]
+        }
+        app.launchArguments = args
+        app.launch()
+        app.buttons["Get started"].tap()
+        let collection = app.staticTexts["EL REY NEGRO"].firstMatch
+        XCTAssertTrue(collection.waitForExistence(timeout: 20)); collection.tap()
+        let downloads = app.buttons.matching(NSPredicate(format: "label == 'Download'"))
+        XCTAssertTrue(downloads.firstMatch.waitForExistence(timeout: 20))
+        (downloads.count > 1 ? downloads.element(boundBy: 1) : downloads.firstMatch).tap()
+        let start = app.staticTexts["Start reading"].firstMatch
+        let counter = app.staticTexts.matching(NSPredicate(format: "label MATCHES '^[0-9]+/[0-9]+$'")).firstMatch
+        let deadline = Date().addingTimeInterval(180)
+        while Date() < deadline, !counter.exists, !start.exists { Thread.sleep(forTimeInterval: 0.2) }
+        if !counter.waitForExistence(timeout: 5), start.waitForExistence(timeout: 5), start.exists { start.tap() }
+        XCTAssertTrue(counter.waitForExistence(timeout: 20))
+        app.buttons["Home"].firstMatch.tap()
+        let bar = app.otherElements["Download progress"]
+        print("PROBE comic home: bar=\(bar.waitForExistence(timeout: 3)) texts=\(app.staticTexts.allElementsBoundByIndex.map(\.label).prefix(20))")
+        try XCUIScreen.main.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: "/tmp/claude-501/dl-home-0.png"))
+        Thread.sleep(forTimeInterval: 1.5)
+        try XCUIScreen.main.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: "/tmp/claude-501/dl-home-1.png"))
+        app.navigationBars.buttons.firstMatch.tap()
+        Thread.sleep(forTimeInterval: 1.0)
+        try XCUIScreen.main.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: "/tmp/claude-501/dl-collection-0.png"))
+        let reading = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Reading · page'")).firstMatch
+        _ = reading.waitForExistence(timeout: 120)
+        Thread.sleep(forTimeInterval: 1.0)
+        print("PROBE collection: texts=\(app.staticTexts.allElementsBoundByIndex.map(\.label).prefix(24))")
+        try XCUIScreen.main.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: "/tmp/claude-501/dl-collection-1.png"))
+    }
 }
