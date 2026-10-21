@@ -64,6 +64,8 @@
 		C3000001000000000000F41 /* CoverMosaicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000F40 /* CoverMosaicTests.swift */; };
 		C3000001000000000000A16 /* AnalyticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A06 /* AnalyticsTests.swift */; };
 		C3000001000000000000A17 /* PurchaseAttribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A07 /* PurchaseAttribution.swift */; };
+		S8000001000000000000A03 /* InstallAttribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = S8000001000000000000A01 /* InstallAttribution.swift */; };
+		S8000001000000000000A04 /* InstallAttributionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = S8000001000000000000A02 /* InstallAttributionTests.swift */; };
 		C3000001000000000000A18 /* AnalyticsConsentCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A08 /* AnalyticsConsentCard.swift */; };
 		C3000001000000000000A19 /* ComigoStore.storekit in Resources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000A09 /* ComigoStore.storekit */; };
 		C3000001000000000000D03 /* AggregateTelemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001000000000000D01 /* AggregateTelemetry.swift */; };
@@ -168,6 +170,8 @@
 		C3000001000000000000F40 /* CoverMosaicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverMosaicTests.swift; sourceTree = "<group>"; };
 		C3000001000000000000A06 /* AnalyticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsTests.swift; sourceTree = "<group>"; };
 		C3000001000000000000A07 /* PurchaseAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseAttribution.swift; sourceTree = "<group>"; };
+		S8000001000000000000A01 /* InstallAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallAttribution.swift; sourceTree = "<group>"; };
+		S8000001000000000000A02 /* InstallAttributionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallAttributionTests.swift; sourceTree = "<group>"; };
 		C3000001000000000000A08 /* AnalyticsConsentCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsConsentCard.swift; sourceTree = "<group>"; };
 		C3000001000000000000A09 /* ComigoStore.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = ComigoStore.storekit; sourceTree = "<group>"; };
 		C3000001000000000000D01 /* AggregateTelemetry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AggregateTelemetry.swift; sourceTree = "<group>"; };
@@ -357,6 +361,7 @@
 			children = (
 				C3000001000000000000F40 /* CoverMosaicTests.swift */,
 				C3000001000000000000A06 /* AnalyticsTests.swift */,
+				S8000001000000000000A02 /* InstallAttributionTests.swift */,
 				C3000001000000000000D02 /* AggregateTelemetryTests.swift */,
 				C3000001000000000000E02 /* AnalyticsConsentPromptTests.swift */,
 				C3000001000000000000F05 /* ProgressiveDownloadTests.swift */,
@@ -378,6 +383,7 @@
 				C3000001000000000000A02 /* AnalyticsService.swift */,
 				C3000001000000000000A03 /* PostHogAnalyticsBackend.swift */,
 				C3000001000000000000A07 /* PurchaseAttribution.swift */,
+				S8000001000000000000A01 /* InstallAttribution.swift */,
 				C3000001000000000000D01 /* AggregateTelemetry.swift */,
 				C3000001000000000000E01 /* AnalyticsConsentPrompt.swift */,
 			);
@@ -564,6 +570,7 @@
 				C3000001000000000000A12 /* AnalyticsService.swift in Sources */,
 				C3000001000000000000A13 /* PostHogAnalyticsBackend.swift in Sources */,
 				C3000001000000000000A17 /* PurchaseAttribution.swift in Sources */,
+				S8000001000000000000A03 /* InstallAttribution.swift in Sources */,
 				C3000001000000000000D03 /* AggregateTelemetry.swift in Sources */,
 				C3000001000000000000E03 /* AnalyticsConsentPrompt.swift in Sources */,
 				C3000001000000000000F03 /* BundleRangeReader.swift in Sources */,
@@ -597,6 +604,7 @@
 			files = (
 				C3000001000000000000F41 /* CoverMosaicTests.swift in Sources */,
 				C3000001000000000000A16 /* AnalyticsTests.swift in Sources */,
+				S8000001000000000000A04 /* InstallAttributionTests.swift in Sources */,
 				C3000001000000000000D04 /* AggregateTelemetryTests.swift in Sources */,
 				C3000001000000000000E04 /* AnalyticsConsentPromptTests.swift in Sources */,
 				C3000001000000000000F06 /* ProgressiveDownloadTests.swift in Sources */,
@@ -749,7 +757,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 210;
+				CURRENT_PROJECT_VERSION = 211;
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -765,7 +773,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.3;
+				MARKETING_VERSION = 1.2.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.comicreader.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -782,7 +790,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 210;
+				CURRENT_PROJECT_VERSION = 211;
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -798,7 +806,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.3;
+				MARKETING_VERSION = 1.2.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.comicreader.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -817,7 +825,7 @@
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.2.3;
+				MARKETING_VERSION = 1.2.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.comicreader.app.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -837,7 +845,7 @@
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.2.3;
+				MARKETING_VERSION = 1.2.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.comicreader.app.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -858,7 +866,7 @@
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.2.3;
+				MARKETING_VERSION = 1.2.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.comicreader.app.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -879,7 +887,7 @@
 				DEVELOPMENT_TEAM = M2YB4CVVQP;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.2.3;
+				MARKETING_VERSION = 1.2.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.comicreader.app.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;

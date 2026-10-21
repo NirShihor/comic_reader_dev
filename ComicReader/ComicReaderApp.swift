@@ -7,6 +7,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     ) -> Bool {
         AnalyticsService.shared.start()
         AggregateTelemetryService.shared.start()
+        // Apple's install attribution (SKAdNetwork): registers the first launch
+        // so the device can send ad networks their anonymous install postback.
+        // Independent of analytics consent; no identifier, no ATT prompt.
+        InstallAttribution.registerLaunch()
         // Classify the access model (AppTransaction) and read the StoreKit
         // entitlement in the background. Nothing waits on either: until they
         // answer, the app uses legacy (never-reduced) access rules.
