@@ -1612,10 +1612,10 @@ final class StoreService: ObservableObject {
 
 struct PaywallView: View {
     /// What opened the paywall, for analytics; nil for the debug screenshot preview.
+    /// `.previewLimit` gets the short invitation (`previewInvitation`), sized to
+    /// its content so the comic stays in view above it; every other source the
+    /// full paywall.
     let source: PaywallSource?
-    /// From the free preview's last page: how much of this comic is still to
-    /// come, so the offer reads as the way on, not the end of the story.
-    var pagesToGo: Int? = nil
     @Environment(\.dismiss) private var dismiss
     @StateObject private var store = StoreService.shared
     @ObservedObject private var access = AccessModelService.shared
@@ -1626,6 +1626,8 @@ struct PaywallView: View {
     @State private var viewTracked = false
     /// Set when this paywall's own purchase succeeded, so its closing isn't a dismissal.
     @State private var purchased = false
+    /// The preview invitation's measured content height: its sheet is exactly that tall.
+    @State private var invitationHeight: CGFloat = 0
 
     private let violet = Color(red: 0x6E/255, green: 0x40/255, blue: 0xF0/255)
     private let ink = Color(red: 0x15/255, green: 0x17/255, blue: 0x2A/255)
@@ -1646,6 +1648,194 @@ struct PaywallView: View {
     }
 
     var body: some View {
+        Group {
+            if source == .previewLimit {
+                previewInvitation
+            } else {
+                fullPaywall
+            }
+        }
+        .background(violet.ignoresSafeArea())
+        .task { await resolveMode() }
+        .onChange(of: store.hasUnlimited) { _, unlocked in
+            if unlocked { dismiss() }
+        }
+        .onDisappear {
+            // Closed without an entitlement (the X or "Not now", a swipe down,
+            // or after a cancelled/failed purchase): one dismissal per
+            // presentation. A paywall that was never resolved (no offer on
+            // screen) isn't counted.
+            guard let source, let offer, !purchased, !store.hasUnlimited else { return }
+            AnalyticsService.shared.track(.paywallDismissed(source: source, mode: offer))
+        }
+    }
+
+    // MARK: The preview invitation
+
+    /// At the end of the free preview: the one Comigo popup before Apple's
+    /// sheet. The question, one line, the button, the price, "Not now" — and
+    /// nothing promotional. Its sheet is sized to this content, so the page
+    /// they were reading stays in view above it.
+    private var previewInvitation: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                Image("comicgo_logo_yoni_1_alpha_layer_2")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 52)
+                    .padding(.top, 24)
+
+                Text(headline)
+                    .font(.system(size: 24, weight: .heavy, design: .rounded))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 12)
+                    .padding(.horizontal, 24)
+                Text(invitationLine)
+                    .font(.system(size: 15.5, weight: .medium, design: .rounded))
+                    .foregroundColor(.white.opacity(0.88))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 8)
+                    .padding(.horizontal, 28)
+
+                continueButton
+                    .padding(.top, 20)
+                    .padding(.horizontal, 28)
+                if let priceLine {
+                    Text(priceLine)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white.opacity(0.9))
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 10)
+                        .padding(.horizontal, 28)
+                }
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.footnote)
+                        .foregroundColor(.yellow)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 28)
+                        .padding(.top, 8)
+                }
+
+                Button("Not now") { dismiss() }
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundColor(.white.opacity(0.9))
+                    .padding(.top, 14)
+                    .padding(.bottom, 2)
+                    .disabled(purchasing)
+
+                if let note = renewalNote {
+                    Text(note)
+                        .font(.system(size: 12.5, weight: .medium, design: .rounded))
+                        .foregroundColor(.white.opacity(0.92))
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 14)
+                        .padding(.horizontal, 24)
+                }
+                invitationFooter
+                    .padding(.top, 10)
+                    .padding(.bottom, 16)
+            }
+            .background(GeometryReader { g in
+                Color.clear.preference(key: InvitationHeightKey.self, value: g.size.height)
+            })
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .onPreferenceChange(InvitationHeightKey.self) { invitationHeight = $0 }
+        // The sheet is as tall as its content (plus the home indicator's
+        // inset, which the content sits above) — up to the full height, past
+        // which the content scrolls.
+        .presentationDetents(invitationHeight > 0 ? [.height(invitationHeight + Self.bottomSafeInset)] : [.medium])
+        .presentationDragIndicator(.visible)
+    }
+
+    /// Privacy, terms and restore in one line of small links, dotted apart —
+    /// or, where the width (or text size) won't take the line whole, restore
+    /// on its own row above the two links, so nothing wraps mid-link.
+    private var invitationFooter: some View {
+        let privacy = Link("Privacy Policy", destination: URL(string: "https://comigo.net/privacy")!)
+        let terms = Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+        let restoreLink = Button(restoring ? "Restoring…" : "Restore purchases") { restore() }.disabled(restoring)
+        let dot = Text("·").opacity(0.6)
+        return ViewThatFits(in: .horizontal) {
+            HStack(spacing: 10) { privacy; dot; terms; dot; restoreLink }
+                .fixedSize()
+            VStack(spacing: 8) {
+                restoreLink
+                HStack(spacing: 10) { privacy; dot; terms }
+            }
+        }
+        .font(.system(size: 13, weight: .semibold, design: .rounded))
+        .foregroundColor(.white.opacity(0.85))
+        .lineLimit(1)
+        .padding(.horizontal, 24)
+    }
+
+    private struct InvitationHeightKey: PreferenceKey {
+        static let defaultValue: CGFloat = 0
+        static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+    }
+
+    /// The home indicator's inset, which a sheet's content is laid out above.
+    private static var bottomSafeInset: CGFloat {
+        UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.keyWindow }
+            .first?.safeAreaInsets.bottom ?? 0
+    }
+
+    /// Under the question: what the button does, by this customer's offer.
+    private var invitationLine: String {
+        switch mode {
+        case .freeTrial: return "Keep reading this story and unlock every comic with a \(trialDays)-day free trial."
+        case .trialExpired: return "Your free trial has ended. Subscribe to keep reading this story and every comic."
+        case .subscribe: return "Keep reading this story and unlock every comic with Comigo Unlimited."
+        case nil: return "Keep reading this story and unlock every comic."
+        }
+    }
+
+    /// "Continue reading — N days free" on the trial offer; just "Continue
+    /// reading" for anyone not eligible, whose price line says what it costs.
+    private var continueButton: some View {
+        Button {
+            purchase(monthly)
+        } label: {
+            Text(purchasing ? "One moment…" : (mode == .freeTrial ? "Continue reading — \(trialDays) days free" : "Continue reading"))
+                .font(.system(size: 18, weight: .heavy, design: .rounded))
+                .multilineTextAlignment(.center)
+                .foregroundColor(ink)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(Color.white, in: RoundedRectangle(cornerRadius: 16))
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(ink, lineWidth: 3))
+        }
+        .disabled(purchasing || mode == nil)
+    }
+
+    /// StoreKit's localised price, so the line is true for this storefront.
+    private var priceLine: String? {
+        guard let monthly, mode != nil else { return nil }
+        return mode == .freeTrial
+            ? "Then \(monthly.displayPrice)/\(period). Cancel anytime."
+            : "\(monthly.displayPrice)/\(period). Cancel anytime."
+    }
+
+    /// The auto-renewal disclosure, in one sentence.
+    private var renewalNote: String? {
+        guard let monthly, mode != nil else { return nil }
+        if mode == .freeTrial {
+            return "After the trial, the subscription renews automatically at \(monthly.displayPrice)/\(period) unless cancelled at least 24 hours before the trial ends, in Settings → Apple Account → Subscriptions."
+        }
+        return "The subscription renews automatically each \(period) unless cancelled at least 24 hours before the period ends, in Settings → Apple Account → Subscriptions."
+    }
+
+    // MARK: The full paywall
+
+    private var fullPaywall: some View {
         VStack(spacing: 0) {
             HStack {
                 Spacer()
@@ -1663,22 +1853,15 @@ struct PaywallView: View {
                     Image("comicgo_logo_yoni_1_alpha_layer_2")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: source == .previewLimit ? 120 : 170)
+                        .frame(width: 170)
 
                     Text(headline)
-                        .font(.system(size: source == .previewLimit ? 24 : 27, weight: .heavy, design: .rounded))
+                        .font(.system(size: 27, weight: .heavy, design: .rounded))
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .padding(.top, 16)
                         .padding(.horizontal, 24)
-                    if source == .previewLimit {
-                        Text(previewLine)
-                            .font(.system(size: 15, weight: .medium, design: .rounded))
-                            .foregroundColor(.white.opacity(0.85))
-                            .multilineTextAlignment(.center)
-                            .padding(.top, 8)
-                            .padding(.horizontal, 28)
-                    } else if mode == .trialExpired {
+                    if mode == .trialExpired {
                         Text("Subscribe to keep reading every comic.")
                             .font(.system(size: 15, weight: .medium, design: .rounded))
                             .foregroundColor(.white.opacity(0.85))
@@ -1689,9 +1872,6 @@ struct PaywallView: View {
                         if mode == .freeTrial {
                             paywallRow("sparkles", "Full access free for \(trialDays) days")
                         }
-                        if source == .previewLimit {
-                            paywallRow("book.pages", "The rest of this comic and all its practice modes")
-                        }
                         paywallRow("book.fill", "Every episode of every series — current and future")
                         paywallRow("waveform", "All audio, translations and practice modes")
                         paywallRow("plus.circle.fill", "New comics added regularly")
@@ -1700,7 +1880,7 @@ struct PaywallView: View {
                         }
                     }
                     .padding(.horizontal, 34)
-                    .padding(.top, source == .previewLimit ? 14 : 18)
+                    .padding(.top, 18)
                 }
                 .padding(.bottom, 16)
             }
@@ -1762,18 +1942,6 @@ struct PaywallView: View {
             .padding(.top, 8)
             .padding(.bottom, 22)
         }
-        .background(violet.ignoresSafeArea())
-        .task { await resolveMode() }
-        .onChange(of: store.hasUnlimited) { _, unlocked in
-            if unlocked { dismiss() }
-        }
-        .onDisappear {
-            // Closed without an entitlement (the X, a swipe down, or after a
-            // cancelled/failed purchase): one dismissal per presentation. A
-            // paywall that was never resolved (no offer on screen) isn't counted.
-            guard let source, let offer, !purchased, !store.hasUnlimited else { return }
-            AnalyticsService.shared.track(.paywallDismissed(source: source, mode: offer))
-        }
     }
 
     @ViewBuilder
@@ -1799,18 +1967,6 @@ struct PaywallView: View {
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(ink, lineWidth: 3))
         }
         .disabled(purchasing || mode == nil)
-    }
-
-    /// Under the preview heading: this is the end of the free pages, not of
-    /// the story, and what the offer opens.
-    private var previewLine: String {
-        let story = pagesToGo.map { "That's the end of the free preview — the story goes on for \($0) more pages." }
-            ?? "That's the end of the free preview — the story goes on."
-        switch mode {
-        case .freeTrial: return story + " Your free trial unlocks all of it."
-        case .trialExpired: return story + " Subscribe to unlock all of it."
-        default: return story + " Comigo Unlimited unlocks all of it."
-        }
     }
 
     /// Apple's required auto-renewal disclosure, with StoreKit's localised price.
